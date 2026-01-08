@@ -38,7 +38,7 @@
                                                 <td>${user.fullName}</td>
                                                 <td>${user.phone}</td>
                                                 <td>
-                                                    <a href="/admin/user/edit/${user.id}"
+                                                    <a href="/admin/user/update/${user.id}"
                                                         class="btn btn-sm btn-warning">Edit</a>
                                                     <a href="/admin/user/delete/${user.id}"
                                                         class="btn btn-sm btn-danger"

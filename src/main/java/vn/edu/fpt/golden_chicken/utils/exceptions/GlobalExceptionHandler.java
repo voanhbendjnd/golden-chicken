@@ -1,0 +1,21 @@
+package vn.edu.fpt.golden_chicken.utils.exceptions;
+
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public String handleResourceNotFound(ResourceNotFoundException ex, Model model) {
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error/404"; // Trỏ đến file WEB-INF/views/error/404.jsp
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public String handEmailAlreadyExists(EmailAlreadyExistsException ex, Model model) {
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error/400";
+    }
+}

@@ -7,5 +7,5 @@ import vn.edu.fpt.golden_chicken.domain.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
+    boolean existsByEmail(String email);
 }

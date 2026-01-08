@@ -8,7 +8,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
+import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
 
 @Service
 @RequiredArgsConstructor
@@ -16,11 +18,12 @@ import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 public class UserService {
     UserRepository userRepository;
 
-    public User create(User user) {
-        return this.userRepository.save(user);
+    public void create(UserRequest request) {
+        this.userRepository.save(UserConvert.toUser(request));
     }
 
     public List<User> getAll() {
         return this.userRepository.findAll();
     }
+
 }

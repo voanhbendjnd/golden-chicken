@@ -20,12 +20,11 @@
                                     <h3 class="text-center">Create New User</h3>
                                 </div>
                                 <div class="card-body">
-                                    <form:form method="post" action="/admin/user/create" modelAttribute="newUser">
+                                    <form:form method="post" action="/admin/user/update" modelAttribute="updateUser">
                                         <div class="mb-3">
                                             <label class="form-label">Email:</label>
                                             <form:input type="email" class="form-control" path="email"
                                                 required="true" />
-                                            <form:errors path="email" style="color: red;" />
                                         </div>
 
                                         <div class="mb-3">
