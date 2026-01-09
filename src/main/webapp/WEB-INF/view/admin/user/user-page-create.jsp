@@ -7,7 +7,7 @@
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Create User</title>
+                <title>Create User Page</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
             </head>
 
@@ -28,26 +28,44 @@
                                             <form:errors path="email" style="color: red;" />
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Password:</label>
-                                            <form:input type="password" class="form-control" path="password"
-                                                required="true" />
-                                        </div>
+
 
                                         <div class="mb-3">
                                             <label class="form-label">Full Name:</label>
                                             <form:input type="text" class="form-control" path="fullName"
                                                 required="true" />
+                                            <form:errors path="fullName" style="color: red;" />
+
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Phone Number:</label>
                                             <form:input type="text" class="form-control" path="phone" />
+                                            <form:errors path="phone" style="color: red;" />
+
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Address:</label>
                                             <form:input type="text" class="form-control" path="address" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Password:</label>
+                                            <form:input type="password" class="form-control" path="password"
+                                                required="true" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Confirm Password:</label>
+                                            <form:input type="password" class="form-control" path="confirmPassword"
+                                                required="true" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Status:</label>
+                                            <form:select path="status" class="form-select">
+                                                <form:option value="true">Active</form:option>
+                                                <form:option value="false">Non-active</form:option>
+                                            </form:select>
+                                            <form:errors path="status" cssClass="text-danger" />
                                         </div>
 
 

@@ -20,4 +20,6 @@ public class UserRequest {
     String phone;
     String address;
     String password;
+    String confirmPassword;
+    Boolean status;
 }

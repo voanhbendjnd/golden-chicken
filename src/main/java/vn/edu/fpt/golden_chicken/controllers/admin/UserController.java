@@ -12,11 +12,10 @@ import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.UserService;
-import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 
 @Controller
 @RequestMapping("/admin/user")
@@ -32,35 +31,60 @@ public class UserController {
     @GetMapping("")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.getAll());
-        return "admin/user/list";
+        return "admin/user/user-page-list";
     }
 
     @GetMapping("/create")
     public String createUserPage(Model model) {
         model.addAttribute("newUser", new UserRequest());
-        return "admin/user/create"; // dẫn chính xác tới folder + file create.jsp
+        return "admin/user/user-page-create"; // dẫn chính xác tới folder + file create.jsp
     }
 
     @PostMapping("/create")
-    public String create(Model model, @ModelAttribute("newUser") @Valid UserRequest user, BindingResult bindingResult) {
-        if (this.userRepository.existsByEmail(user.getEmail())) {
+    public String create(Model model, @ModelAttribute("newUser") @Valid UserRequest request,
+            BindingResult bindingResult) {
+        if (this.userRepository.existsByEmail(request.getEmail())) {
             bindingResult.rejectValue("email", "error.user", "Email already exists");
         }
         if (bindingResult.hasErrors()) {
-            return "admin/user/create";
+            return "admin/user/user-page-create";
         }
 
-        this.userService.create(user);
+        this.userService.create(request);
         return "redirect:/admin/user"; // redirect tới mapping
     }
 
     @GetMapping("/update/{id:[0-9]+}")
     public String updateUserPage(Model model, @PathVariable("id") Long id) {
-        User userUpdate = this.userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", id + ""));
+        var userUpdate = this.userService.findById(id);
         model.addAttribute("updateUser", userUpdate);
+        return "admin/user/user-page-update";
+    }
 
-        return "admin/user/update";
+    @PostMapping("/update")
+    public String updateUser(@ModelAttribute("updateUser") @Valid UserRequest request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "admin/user/user-page-update";
+        }
+        try {
+            this.userService.update(request);
+        } catch (EmailAlreadyExistsException ex) {
+            bindingResult.rejectValue("email", "error.user", ex.getMessage());
+            return "admin/user/user-page-update";
+        }
+        return "redirect:/admin/user";
+    }
+
+    @GetMapping("/{id:[0-9]+}")
+    public String fetchUser(Model model, @PathVariable("id") long id) {
+        model.addAttribute("userData", this.userService.findById(id));
+        return "admin/user/user-detail";
+    }
+
+    @PostMapping("/{id:[0-9]+}")
+    public String delete(@PathVariable("id") long id) {
+        this.userService.deleteById(id);
+        return "redirect:/admin/user";
     }
 
 }

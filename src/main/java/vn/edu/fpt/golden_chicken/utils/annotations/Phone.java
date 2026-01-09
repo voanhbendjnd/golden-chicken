@@ -13,7 +13,7 @@ import vn.edu.fpt.golden_chicken.utils.annotations.handle.PhoneValidator;
 @Target({ ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Phone {
-    String message() default "Số điện thoại không hợp lệ";
+    String message() default "Number phone invalid format";
 
     Class<?>[] groups() default {};
 

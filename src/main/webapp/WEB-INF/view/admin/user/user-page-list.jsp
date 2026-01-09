@@ -27,16 +27,30 @@
                                             <th>Email</th>
                                             <th>Full Name</th>
                                             <th>Phone</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <c:forEach var="user" items="${users}">
                                             <tr>
-                                                <td>${user.id}</td>
+                                                <td>
+                                                    <a href="/admin/user/${user.id}">${user.id}</a>
+
+                                                </td>
                                                 <td>${user.email}</td>
                                                 <td>${user.fullName}</td>
                                                 <td>${user.phone}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${user.status}">
+                                                            <span class="badge bg-success">Active</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge bg-danger">Non-Active</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
                                                 <td>
                                                     <a href="/admin/user/update/${user.id}"
                                                         class="btn btn-sm btn-warning">Edit</a>
