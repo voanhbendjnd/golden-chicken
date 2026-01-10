@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
@@ -27,7 +28,7 @@ public class UserService {
     }
 
     public List<User> getAll() {
-        return this.userRepository.findAll();
+        return this.userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
     public User update(UserRequest request) {

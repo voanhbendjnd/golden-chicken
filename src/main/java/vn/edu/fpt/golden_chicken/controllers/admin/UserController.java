@@ -81,7 +81,7 @@ public class UserController {
         return "admin/user/user-detail";
     }
 
-    @PostMapping("/{id:[0-9]+}")
+    @GetMapping("/delete/{id:[0-9]+}")
     public String delete(@PathVariable("id") long id) {
         this.userService.deleteById(id);
         return "redirect:/admin/user";
