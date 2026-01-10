@@ -12,16 +12,12 @@ import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 
-import java.util.Optional;
-
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 
-import vn.edu.fpt.golden_chicken.common.ConfigPage;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;

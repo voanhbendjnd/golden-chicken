@@ -1,2 +1,5 @@
 return "user-form";	Tìm file user-form.jsp	Mở file để đọc
 return "redirect:/user-form";	Tìm hàm @GetMapping("/user-form")	Gõ link hộ người dùng
+
+
+run spring : ./mvnw spring-boot:run
