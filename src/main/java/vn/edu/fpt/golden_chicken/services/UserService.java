@@ -42,29 +42,27 @@ public class UserService {
         return res;
     }
 
-    public User update(UserRequest request) {
+    public UserRes update(UserRequest request) {
         var id = request.getId();
         var user = this.userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User ID", id + ""));
+                .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
-        user.setAddress(request.getAddress());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
-        user.setPhone(request.getPhone());
-        return this.userRepository.save(user);
+        return UserConvert.toUserRes(this.userRepository.save(user));
     }
 
     public UserRes findById(long id) {
         var user = this.userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User ID", id + ""));
+                .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         return UserConvert.toUserRes(user);
     }
 
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User ID", id + ""));
+                .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         user.setStatus(false);
 
     }

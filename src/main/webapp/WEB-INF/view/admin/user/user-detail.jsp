@@ -24,10 +24,9 @@
                                     <div>${userData.fullName}</div>
                                     <div>${userData.phone}</div>
                                     <div>${userData.email}</div>
-                                    <div>${userData.address}</div>
                                     <div>
                                         <c:choose>
-                                            <c:when test="${userData.status == 1}">
+                                            <c:when test="${userData.status == true}">
                                                 <span class="badge bg-success">Active</span>
                                             </c:when>
                                             <c:otherwise>

@@ -18,7 +18,6 @@ public class UserRequest {
     String fullName;
     @Phone
     String phone;
-    String address;
     String password;
     String confirmPassword;
     Boolean status;

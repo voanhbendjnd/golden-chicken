@@ -5,11 +5,9 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRes {
+@FieldDefaults(level = AccessLevel.PACKAGE)
+public class RoleRes {
     Long id;
-    String fullName;
-    String email;
-    String phone;
-    Boolean status;
+    String name;
+    String description;
 }

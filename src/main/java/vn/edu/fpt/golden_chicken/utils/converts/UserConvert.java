@@ -10,17 +10,14 @@ public class UserConvert {
         user.setId(request.getId());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        user.setAddress(request.getAddress());
         user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone());
         user.setStatus(request.getStatus());
+        user.setPhone(request.getPhone());
         return user;
     }
 
     public static UserRes toUserRes(User user) {
         var res = new UserRes();
-        res.setAddress(user.getAddress());
-        res.setCurrentPoints(user.getCurrentPoints());
         res.setStatus(user.getStatus());
         res.setEmail(user.getEmail());
         res.setFullName(user.getFullName());

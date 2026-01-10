@@ -46,10 +46,6 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label">Address:</label>
-                                            <form:input type="text" class="form-control" path="address" />
-                                        </div>
-                                        <div class="mb-3">
                                             <label class="form-label">Password:</label>
                                             <form:input type="password" class="form-control" path="password"
                                                 required="true" />

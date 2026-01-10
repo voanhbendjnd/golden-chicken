@@ -145,6 +145,7 @@
                         handleSearch();
                     }
                 });
+
             </script>
         </body>
 
