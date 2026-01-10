@@ -1,8 +1,9 @@
 package vn.edu.fpt.golden_chicken.services;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
+import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.UserRes;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
@@ -27,8 +29,17 @@ public class UserService {
 
     }
 
-    public List<User> getAll() {
-        return this.userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<User> spec) {
+        var page = this.userRepository.findAll(spec, pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(UserConvert::toUserRes).collect(Collectors.toList()));
+        return res;
     }
 
     public User update(UserRequest request) {

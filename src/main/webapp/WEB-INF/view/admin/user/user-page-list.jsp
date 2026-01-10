@@ -62,6 +62,25 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
+                                <div class="d-flex justify-content-center mt-3">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination">
+                                            <li class="page-item ${meta.page == 1 ? 'disabled' : ''}">
+                                                <a class="page-link" href="?page=${meta.page - 1}">Previous</a>
+                                            </li>
+                                            <c:forEach begin="1" end="${meta.pages}" var="p">
+                                                <li class="page-item ${meta.page == p ? 'active' : ''}">
+                                                    <a class="page-link"
+                                                        href="?page=${p}&size=${meta.pageSize}">${p}</a>
+                                                </li>
+                                            </c:forEach>
+
+                                            <li class="page-item ${meta.page == meta.pages ? 'disabled' : ''}">
+                                                <a class="page-link" href="?page=${meta.page + 1}">Next</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
                     </div>

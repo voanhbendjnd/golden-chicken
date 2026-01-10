@@ -8,10 +8,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.turkraft.springfilter.boot.Filter;
+
 import jakarta.validation.Valid;
 
+import java.util.Optional;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 
+import vn.edu.fpt.golden_chicken.common.ConfigPage;
+import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.UserService;
@@ -29,8 +40,17 @@ public class UserController {
     }
 
     @GetMapping("")
-    public String listUsers(Model model) {
-        model.addAttribute("users", userService.getAll());
+    public String listUsers(Model model, @Filter Specification<User> spec,
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    // ,
+    // Optional<String> pageParam
+    ) {
+        // var lastPage = ConfigPage.getLastPage(pageParam);
+        // var lastPageable = PageRequest.of(lastPage - 1, pageable.getPageSize(),
+        // pageable.getSort());
+        var data = userService.fetchAllWithPagination(pageable, spec);
+        model.addAttribute("users", data.getResult());
+        model.addAttribute("meta", data.getMeta());
         return "admin/user/user-page-list";
     }
 
