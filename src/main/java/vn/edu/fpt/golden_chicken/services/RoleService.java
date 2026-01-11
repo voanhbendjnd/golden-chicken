@@ -51,15 +51,10 @@ public class RoleService {
         return RoleConvert.toRoleRes(role);
     }
 
-    // public void deleteById(long id) {
-    // var role = this.roleRepository.findById(id).orElseThrow(() -> new
-    // ResourceNotFoundException("Role ID", id));
-    // if (this.userRepository.existsByRoleId(id)) {
-    // throw new RuntimeException("Cannot Delete Role: Users Are Still Assigned To
-    // It!");
-    // }
-    // this.roleRepository.delete(role);
-    // }
+    public void deleteById(long id) {
+        var role = this.roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role ID", id));
+        this.roleRepository.delete(role);
+    }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Role> spec, Pageable pageable) {
         var page = this.roleRepository.findAll(spec, pageable);

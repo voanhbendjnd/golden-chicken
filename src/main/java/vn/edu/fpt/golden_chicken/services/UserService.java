@@ -64,6 +64,7 @@ public class UserService {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         user.setStatus(false);
+        this.userRepository.save(user);
 
     }
 

@@ -2,11 +2,13 @@ package vn.edu.fpt.golden_chicken.controllers.admin;
 
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -16,23 +18,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 
 @Controller
 @RequestMapping("/admin/user")
 public class UserController {
+
+    private final RoleService roleService;
     private final UserService userService;
     private final UserRepository userRepository;
 
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService, UserRepository userRepository, RoleService roleService) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping("")
@@ -97,10 +105,21 @@ public class UserController {
         return "admin/user/user-detail";
     }
 
-    @GetMapping("/delete/{id:[0-9]+}")
+    @PostMapping("/delete/{id:[0-9]+}")
     public String delete(@PathVariable("id") long id) {
         this.userService.deleteById(id);
         return "redirect:/admin/user";
+    }
+
+    @DeleteMapping("/{id:[0-9]+}")
+    @ResponseBody
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        try {
+            this.userService.deleteById(id);
+            return ResponseEntity.ok("Delete User Success!");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
     }
 
 }

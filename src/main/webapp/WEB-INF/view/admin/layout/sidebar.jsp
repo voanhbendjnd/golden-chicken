@@ -44,7 +44,15 @@
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#people-circle"></use>
                 </svg>
-                Customers
+                Users
+            </a>
+        </li>
+        <li>
+            <a href="/admin/role" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#people-circle"></use>
+                </svg>
+                Roles
             </a>
         </li>
     </ul>
