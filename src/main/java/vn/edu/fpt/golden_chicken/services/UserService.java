@@ -5,15 +5,22 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.domain.entity.Customer;
+import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.UserRes;
+import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
+import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
+import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
@@ -23,9 +30,30 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
+    StaffRepository staffRepository;
+    CustomerRepository customerRepository;
 
+    @Transactional
     public void create(UserRequest request) {
-        this.userRepository.save(UserConvert.toUser(request));
+        var role = this.roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new ResourceNotFoundException("Role ID", request.getRoleId()));
+        var user = UserConvert.toUser(request);
+        user.setRole(role);
+        this.userRepository.save(user);
+        if (role.getName().equals("STAFF")) {
+            var staff = new Staff();
+            staff.setUser(user);
+            staff.setStatus(StaffStatus.AVAILABLE);
+            staff.setStaffType(request.getStaffType());
+            this.staffRepository.save(staff);
+        } else if (role.getName().equals("CUSTOMER")) {
+            var customer = new Customer();
+            customer.setUser(user);
+            customer.setAddress(request.getAddress() + ", " + request.getWard() + ", " + request.getDistrict()
+                    + ", Thành Phố Cần Thơ");
+            this.customerRepository.save(customer);
+        }
 
     }
 

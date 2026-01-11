@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.services;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
@@ -67,5 +68,9 @@ public class RoleService {
         res.setMeta(meta);
         res.setResult(page.getContent().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList()));
         return res;
+    }
+
+    public List<RoleRes> fetchAll() {
+        return this.roleRepository.findAll().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList());
     }
 }

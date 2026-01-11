@@ -45,13 +45,8 @@ public class UserController {
 
     @GetMapping("")
     public String listUsers(Model model, @Filter Specification<User> spec,
-            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
-    // ,
-    // Optional<String> pageParam
-    ) {
-        // var lastPage = ConfigPage.getLastPage(pageParam);
-        // var lastPageable = PageRequest.of(lastPage - 1, pageable.getPageSize(),
-        // pageable.getSort());
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
         var data = userService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("users", data.getResult());
         model.addAttribute("meta", data.getMeta());
@@ -61,6 +56,7 @@ public class UserController {
     @GetMapping("/create")
     public String createUserPage(Model model) {
         model.addAttribute("newUser", new UserRequest());
+        model.addAttribute("roles", this.roleService.fetchAll());
         return "admin/user/user-page-create"; // dẫn chính xác tới folder + file create.jsp
     }
 
