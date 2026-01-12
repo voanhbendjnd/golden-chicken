@@ -20,7 +20,6 @@
                                     <h3 class="text-center">User Detail</h3>
                                 </div>
                                 <div class="card-body">
-                                    <div>${userData.id}</div>
                                     <div>${userData.fullName}</div>
                                     <div>${userData.phone}</div>
                                     <div>${userData.email}</div>
@@ -34,11 +33,13 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
-                                    <a href="/admin/user" class="btn btn-secondary me-md-2">Back</a>
+
 
                                 </div>
 
                             </div>
+                            <a href="/admin/user" class="btn btn-secondary me-md-2" style="margin-top: 10px;">Back</a>
+
                         </div>
                     </div>
                 </div>

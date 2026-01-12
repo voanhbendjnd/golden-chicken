@@ -23,6 +23,10 @@ public class UserConvert {
         res.setFullName(user.getFullName());
         res.setId(user.getId());
         res.setPhone(user.getPhone());
+        res.setRoleId(user.getRole().getId());
+        if (user.getStaff() != null) {
+            res.setStaffType(user.getStaff().getStaffType());
+        }
         return res;
     }
 }

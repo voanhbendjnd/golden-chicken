@@ -81,6 +81,11 @@ public class UserService {
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
+        var role = this.roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new ResourceNotFoundException("User ID", request.getRoleId()));
+        if (role.getName().equalsIgnoreCase("STAFF")) {
+            user.getStaff().setStaffType(request.getStaffType());
+        }
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
         return UserConvert.toUserRes(this.userRepository.save(user));

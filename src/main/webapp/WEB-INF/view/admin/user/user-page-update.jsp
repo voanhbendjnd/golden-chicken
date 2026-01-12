@@ -48,7 +48,33 @@
                                             <form:errors path="phone" style="color: red;" />
 
                                         </div>
+                                        <div class="mb-3">
+                                            <labal class="form-label">Role</labal>
+                                            <select id="roleSelect" name="roleId" class="form-select" required>
+                                                <option value="">Select Role</option>
+                                                <c:forEach var="role" items="${roles}">
+                                                    <option value="${role.id}" ${role.id==updateUser.roleId ? 'selected'
+                                                        : '' }>${role.name}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
 
+                                        <div id="staffTypeGroup" class="mb-3" style="display: none;">
+                                            <label class="form-label">Staff Type:</label>
+                                            <form:select path="staffType" class="form-select">
+                                                <form:option value="RECEPTIONIST">Receptionist</form:option>
+                                                <form:option value="SHIPPER">Shipper</form:option>
+                                                <form:option value="MANAGER">Manager</form:option>
+                                            </form:select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Status:</label>
+                                            <form:select path="status" class="form-select">
+                                                <form:option value="true">Active</form:option>
+                                                <form:option value="false">Non-active</form:option>
+                                            </form:select>
+                                            <form:errors path="status" cssClass="text-danger" />
+                                        </div>
 
 
 
@@ -65,5 +91,23 @@
 
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             </body>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const roleSelect = document.getElementById("roleSelect");
+                    const staffTypeGroup = document.getElementById("staffTypeGroup");
+                    function toggleFieldsByRole() {
+                        if (!roleSelect) return;
+                        const selectedText = roleSelect.options[roleSelect.selectedIndex].text.toUpperCase();
+
+                        if (selectedText === "STAFF" || selectedText === "ADMIN") {
+                            staffTypeGroup.style.display = "block";
+                        } else {
+                            staffTypeGroup.style.display = "none";
+                        }
+                    }
+                    roleSelect.addEventListener("change", toggleFieldsByRole);
+                    toggleFieldsByRole();
+                });
+            </script>
 
             </html>
