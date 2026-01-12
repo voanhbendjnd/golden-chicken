@@ -29,6 +29,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
+    private final static String city_constant = "Thành Phố Cần Thơ";
     UserRepository userRepository;
     RoleRepository roleRepository;
     StaffRepository staffRepository;
@@ -50,8 +51,11 @@ public class UserService {
         } else if (role.getName().equals("CUSTOMER")) {
             var customer = new Customer();
             customer.setUser(user);
-            customer.setAddress(request.getAddress() + ", " + request.getWard() + ", " + request.getDistrict()
-                    + ", Thành Phố Cần Thơ");
+            if (request.getAddress() != null && !request.getAddress().isEmpty()) {
+                customer.setAddress(request.getAddress() + ", " + request.getWard() + ", " + request.getDistrict()
+                        + ", " + city_constant);
+            }
+
             this.customerRepository.save(customer);
         }
 

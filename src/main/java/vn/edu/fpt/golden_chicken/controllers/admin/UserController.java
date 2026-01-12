@@ -14,6 +14,8 @@ import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Controller;
 
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
+import vn.edu.fpt.golden_chicken.domain.response.RoleRes;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.services.UserService;
@@ -43,6 +46,11 @@ public class UserController {
         this.roleService = roleService;
     }
 
+    @ModelAttribute("roles")
+    public List<RoleRes> getAllRoles() {
+        return this.roleService.fetchAll();
+    }
+
     @GetMapping("")
     public String listUsers(Model model, @Filter Specification<User> spec,
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -56,7 +64,7 @@ public class UserController {
     @GetMapping("/create")
     public String createUserPage(Model model) {
         model.addAttribute("newUser", new UserRequest());
-        model.addAttribute("roles", this.roleService.fetchAll());
+        // model.addAttribute("roles", this.roleService.fetchAll());
         return "admin/user/user-page-create"; // dẫn chính xác tới folder + file create.jsp
     }
 
