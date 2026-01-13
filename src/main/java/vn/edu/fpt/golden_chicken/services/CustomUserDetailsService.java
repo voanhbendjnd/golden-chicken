@@ -24,9 +24,8 @@ public class CustomUserDetailsService implements UserDetailsService { // Sửa t
         // username ở đây chính là Email từ form login gửi lên
         vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository.findByEmail(username);
 
-        // Sửa lại: Nếu KHÔNG tìm thấy thì mới báo lỗi
         if (user == null) {
-            throw new UsernameNotFoundException("Không tìm thấy người dùng với email: " + username);
+            throw new UsernameNotFoundException("Not Found User With email: " + username);
         }
 
         // Trả về đối tượng User của Spring Security
