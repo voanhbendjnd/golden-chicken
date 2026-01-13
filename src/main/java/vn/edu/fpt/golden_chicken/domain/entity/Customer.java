@@ -1,5 +1,9 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -14,7 +18,8 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "customers")
-public class Customer {
+public class Customer implements Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     Long id;
     @OneToOne

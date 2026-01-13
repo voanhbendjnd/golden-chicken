@@ -10,6 +10,8 @@ import vn.edu.fpt.golden_chicken.domain.entity.Role;
 public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificationExecutor<Role> {
     boolean existsByNameAndIdNot(String name, long id);
 
+    Role findByName(String name);
+
     boolean existsByName(String name);
 
 }

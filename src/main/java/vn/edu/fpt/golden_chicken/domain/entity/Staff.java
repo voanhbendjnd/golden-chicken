@@ -1,11 +1,14 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -19,7 +22,9 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 @Table(name = "staffs")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Staff {
+public class Staff implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     Long id;
     @OneToOne

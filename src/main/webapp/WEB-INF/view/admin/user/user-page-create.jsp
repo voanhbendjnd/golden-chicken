@@ -22,7 +22,7 @@
                                 <div class="card-body">
                                     <form:form method="post" action="/admin/user/create" modelAttribute="newUser">
                                         <div class="mb-3">
-                                            <label class="form-label">Email:</label>
+                                            <label class="form-label">Email</label>
                                             <form:input type="email" class="form-control" path="email"
                                                 required="true" />
                                             <form:errors path="email" style="color: red;" />
@@ -31,7 +31,7 @@
 
 
                                         <div class="mb-3">
-                                            <label class="form-label">Full Name:</label>
+                                            <label class="form-label">Full Name</label>
                                             <form:input type="text" class="form-control" path="fullName"
                                                 required="true" />
                                             <form:errors path="fullName" style="color: red;" />
@@ -39,19 +39,19 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label">Phone Number:</label>
+                                            <label class="form-label">Phone Number</label>
                                             <form:input type="text" class="form-control" path="phone" />
                                             <form:errors path="phone" style="color: red;" />
 
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label">Password:</label>
+                                            <label class="form-label">Password</label>
                                             <form:input type="password" class="form-control" path="password"
                                                 required="true" />
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Confirm Password:</label>
+                                            <label class="form-label">Confirm Password</label>
                                             <form:input type="password" class="form-control" path="confirmPassword"
                                                 required="true" />
                                         </div>
@@ -66,7 +66,7 @@
                                         </div>
 
                                         <div id="staffTypeGroup" class="mb-3" style="display: none;">
-                                            <label class="form-label">Staff Type:</label>
+                                            <label class="form-label">Staff Type</label>
                                             <form:select path="staffType" class="form-select">
                                                 <form:option value="RECEPTIONIST">Receptionist</form:option>
                                                 <form:option value="SHIPPER">Shipper</form:option>
@@ -74,7 +74,7 @@
                                             </form:select>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Status:</label>
+                                            <label class="form-label">Status</label>
                                             <form:select path="status" class="form-select">
                                                 <form:option value="true">Active</form:option>
                                                 <form:option value="false">Non-active</form:option>

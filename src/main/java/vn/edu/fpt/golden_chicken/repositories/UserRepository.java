@@ -10,6 +10,8 @@ import vn.edu.fpt.golden_chicken.domain.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     boolean existsByEmail(String email);
 
+    User findByEmail(String email);
+
     boolean existsByEmailAndIdNot(String email, Long id);
 
 }

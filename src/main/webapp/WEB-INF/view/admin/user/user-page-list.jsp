@@ -93,28 +93,41 @@
                                                 <nav aria-label="Page navigation">
                                                     <ul class="pagination">
                                                         <li class="page-item ${meta.page == 1 ? 'disabled' : ''}">
-                                                            <a class="page-link"
-                                                                href="?page=${meta.page - 1}">Previous</a>
+                                                            <c:url var="prevUrl" value="/admin/user">
+                                                                <c:param name="page" value="${meta.page - 1}" />
+                                                                <c:param name="size" value="${meta.pageSize}" />
+                                                                <c:if test="${not empty param.fullName}">
+                                                                    <c:param name="fullName"
+                                                                        value="${param.fullName}" />
+                                                                </c:if>
+                                                            </c:url>
+                                                            <a class="page-link" href="${prevUrl}">Previous</a>
                                                         </li>
                                                         <c:forEach begin="1" end="${meta.pages}" var="p">
                                                             <li class="page-item ${meta.page == p ? 'active' : ''}">
                                                                 <c:url var="pageUrl" value="/admin/user">
                                                                     <c:param name="page" value="${p}" />
                                                                     <c:param name="size" value="${meta.pageSize}" />
-                                                                    <c:if test="${not empty param.filter}">
-                                                                        <c:param name="filter"
-                                                                            value="${param.filter}" />
+                                                                    <c:if test="${not empty param.fullName}">
+                                                                        <c:param name="fullName"
+                                                                            value="${param.fullName}" />
                                                                     </c:if>
                                                                 </c:url>
                                                                 <a class="page-link" href="${pageUrl}">${p}</a>
-                                                                <!-- <a class="page-link"
-                                                                    href="?page=${p}&size=${meta.pageSize}${not empty param.filter ? '&filter='.concat(param.filter): ''}">${p}</a> -->
                                                             </li>
                                                         </c:forEach>
 
                                                         <li
                                                             class="page-item ${meta.page == meta.pages ? 'disabled' : ''}">
-                                                            <a class="page-link" href="?page=${meta.page + 1}">Next</a>
+                                                        </li>
+                                                        <c:url var="nextUrl" value="/admin/user">
+                                                            <c:param name="page" value="${meta.page + 1}" />
+                                                            <c:param name="size" value="${meta.pageSize}" />
+                                                            <c:if test="${not empty param.fullName}">
+                                                                <c:param name="fullName" value="${param.fullName}" />
+                                                            </c:if>
+                                                        </c:url>
+                                                        <a class="page-link" href="${nextUrl}">Next</a>
                                                         </li>
                                                     </ul>
                                                 </nav>
@@ -133,28 +146,62 @@
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             <script>
+                console.log("Search script loaded");
+
                 function handleSearch() {
-                    const name = document.getElementById("searchFullName").value;
-                    const urlParams = new URLSearchParams(window.location.search);
+                    try {
+                        const searchInput = document.getElementById("searchFullName");
+                        if (!searchInput) {
+                            console.error("Search input not found!");
+                            return;
+                        }
 
-                    if (name && name.trim() !== "") {
-                        urlParams.set('filter', "fullName ~~ '" + name.trim() + "'");
-                    } else {
-                        urlParams.delete('filter');
+                        const searchTerm = searchInput.value.trim();
+                        console.log("Searching for:", searchTerm);
+
+                        const currentUrl = new URL(window.location);
+                        const params = new URLSearchParams(currentUrl.search);
+
+                        // Use simple fullName parameter instead of filter for now
+                        if (searchTerm) {
+                            params.set('fullName', searchTerm);
+                        } else {
+                            params.delete('fullName');
+                        }
+
+                        // Reset to first page when searching
+                        params.set('page', '1');
+
+                        // Keep other parameters like size
+                        if (!params.has('size')) {
+                            params.set('size', '5');
+                        }
+
+                        const newUrl = `${currentUrl.pathname}?${params.toString()}`;
+                        console.log("Navigating to:", newUrl);
+
+                        window.location.href = newUrl;
+
+                    } catch (error) {
+                        console.error("Error in handleSearch:", error);
+                        alert("An error occurred while searching. Please try again.");
                     }
-
-                    urlParams.set('page', '1');
-
-                    window.location.href = window.location.pathname + "?" + urlParams.toString();
                 }
-                document.getElementById("searchFullName").addEventListener("keypress", function (event) {
-                    if (event.key === "Enter") {
-                        handleSearch();
+
+
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    console.log("DOM loaded, setting up search");
+                    const searchInput = document.getElementById("searchFullName");
+                    if (searchInput) {
+                        searchInput.addEventListener("keypress", function (event) {
+                            if (event.key === "Enter") {
+                                event.preventDefault();
+                                handleSearch();
+                            }
+                        });
                     }
                 });
-
-
-
             </script>
         </body>
 

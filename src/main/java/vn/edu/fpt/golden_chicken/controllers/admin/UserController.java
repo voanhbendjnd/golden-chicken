@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.turkraft.springfilter.boot.Filter;
@@ -52,8 +53,17 @@ public class UserController {
     }
 
     @GetMapping("")
-    public String listUsers(Model model, @Filter Specification<User> spec,
+    public String listUsers(Model model,
+            @RequestParam(required = false) String fullName,
+            @Filter Specification<User> spec,
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        // If fullName parameter is provided, create a filter specification
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
+                    criteriaBuilder.lower(root.get("fullName")),
+                    "%" + fullName.toLowerCase().trim() + "%");
+        }
 
         var data = userService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("users", data.getResult());

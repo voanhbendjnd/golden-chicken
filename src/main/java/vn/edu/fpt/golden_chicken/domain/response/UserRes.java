@@ -15,4 +15,5 @@ public class UserRes {
     Boolean status;
     Long roleId;
     StaffType staffType;
+
 }
