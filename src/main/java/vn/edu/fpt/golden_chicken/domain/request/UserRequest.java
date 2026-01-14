@@ -23,7 +23,7 @@ public class UserRequest {
     String password;
     String confirmPassword;
     Boolean status;
-    @NotNull(message = "Role Cannot Be Empty!")
+    // @NotNull(message = "Role Cannot Be Empty!")
     Long roleId;
     StaffType staffType;
     String address;

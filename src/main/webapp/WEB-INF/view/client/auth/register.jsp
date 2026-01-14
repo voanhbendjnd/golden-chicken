@@ -35,7 +35,7 @@
                                                     <h3 class="text-center font-weight-light my-4">Register</h3>
                                                 </div>
                                                 <div class="card-body">
-                                                    <form:form action="/registerPost" method="post"
+                                                    <form:form action="/register" method="post"
                                                         modelAttribute="registerUser">
                                                         <c:set var="errorPassword">
                                                             <form:errors cssClass="invalid-feedback"

@@ -35,47 +35,46 @@ public class RoleController {
         var data = this.roleService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("roles", data.getResult());
         model.addAttribute("meta", data.getMeta());
-        return "admin/role/role-page-list";
+        return "admin/role/table";
     }
 
     @GetMapping("/create")
     public String getCreatePage(Model model) {
         model.addAttribute("newRole", new Role());
-        return "admin/role/role-page-create";
+        return "admin/role/create";
     }
 
     @PostMapping("/create")
     public String createRole(@ModelAttribute("newRole") @Valid RoleRequest request, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            return "admin/role/role-page-create";
+            return "admin/role/create";
         }
         try {
             this.roleService.create(request);
         } catch (RuntimeException ex) {
             bindingResult.rejectValue("name", "CONFLICT", ex.getMessage());
-            return "admin/role/role-page-create";
+            return "admin/role/create";
         }
         return "redirect:/admin/role";
     }
 
-    @GetMapping("/update/{id:[0-9]+}")
     public String getUpdataPage(Model model, @PathVariable("id") long id) {
         var role = this.roleService.findById(id);
         model.addAttribute("updateRole", role);
-        return "admin/role/role-page-update";
+        return "admin/role/update";
     }
 
     @PostMapping("/update")
     public String updateRole(@ModelAttribute("updateRole") @Valid RoleRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "admin/role/role-page-update";
+            return "admin/role/update";
         }
         try {
             this.roleService.update(request);
         } catch (RuntimeException ex) {
             bindingResult.rejectValue("name", "CONFLICT", ex.getMessage());
-            return "admin/role/role-page-update";
+            return "admin/role/update";
         }
         return "redirect:/admin/role";
 

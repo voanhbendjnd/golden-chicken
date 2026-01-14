@@ -71,6 +71,14 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/favicon.ico").permitAll()
                         // chuyển sang trang jsp không bị chặn

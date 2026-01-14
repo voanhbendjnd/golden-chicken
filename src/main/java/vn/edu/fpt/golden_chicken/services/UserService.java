@@ -4,12 +4,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
@@ -34,6 +36,7 @@ public class UserService {
     RoleRepository roleRepository;
     StaffRepository staffRepository;
     CustomerRepository customerRepository;
+    PasswordEncoder passwordEncoder;
 
     @Transactional
     public void create(UserRequest request) {
@@ -57,6 +60,31 @@ public class UserService {
             }
 
             this.customerRepository.save(customer);
+        }
+
+    }
+
+    public void register(UserRequest request) {
+        var email = request.getEmail();
+        if (this.userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException(email);
+        }
+        var roleCustomer = this.roleRepository.findByName(DefineVariable.roleNameCustomer);
+
+        if (roleCustomer != null) {
+            var user = new User();
+            user.setEmail(request.getEmail());
+            user.setFullName(request.getFullName());
+            user.setStatus(true);
+            user.setPhone(user.getPhone());
+            user.setRole(roleCustomer);
+            user.setPassword(this.passwordEncoder.encode(request.getPassword()));
+            var customer = new Customer();
+            customer.setUser(user);
+            user.setCustomer(customer);
+            this.userRepository.save(user);
+        } else {
+            throw new ResourceNotFoundException("ROLE", DefineVariable.roleNameCustomer);
         }
 
     }

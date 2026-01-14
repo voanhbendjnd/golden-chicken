@@ -68,14 +68,14 @@ public class UserController {
         var data = userService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("users", data.getResult());
         model.addAttribute("meta", data.getMeta());
-        return "admin/user/user-page-list";
+        return "admin/user/table";
     }
 
     @GetMapping("/create")
     public String createUserPage(Model model) {
         model.addAttribute("newUser", new UserRequest());
         // model.addAttribute("roles", this.roleService.fetchAll());
-        return "admin/user/user-page-create"; // dẫn chính xác tới folder + file create.jsp
+        return "admin/user/create"; // dẫn chính xác tới folder + file create.jsp
     }
 
     @PostMapping("/create")
@@ -85,7 +85,7 @@ public class UserController {
             bindingResult.rejectValue("email", "error.user", "Email already exists");
         }
         if (bindingResult.hasErrors()) {
-            return "admin/user/user-page-create";
+            return "admin/user/create";
         }
 
         this.userService.create(request);
@@ -96,19 +96,19 @@ public class UserController {
     public String updateUserPage(Model model, @PathVariable("id") Long id) {
         var userUpdate = this.userService.findById(id);
         model.addAttribute("updateUser", userUpdate);
-        return "admin/user/user-page-update";
+        return "admin/user/update";
     }
 
     @PostMapping("/update")
     public String updateUser(@ModelAttribute("updateUser") @Valid UserRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "admin/user/user-page-update";
+            return "admin/user/update";
         }
         try {
             this.userService.update(request);
         } catch (EmailAlreadyExistsException ex) {
             bindingResult.rejectValue("email", "error.user", ex.getMessage());
-            return "admin/user/user-page-update";
+            return "admin/user/update";
         }
         return "redirect:/admin/user";
     }
@@ -116,7 +116,7 @@ public class UserController {
     @GetMapping("/{id:[0-9]+}")
     public String fetchUser(Model model, @PathVariable("id") long id) {
         model.addAttribute("userData", this.userService.findById(id));
-        return "admin/user/user-detail";
+        return "admin/user/detail";
     }
 
     @PostMapping("/delete/{id:[0-9]+}")

@@ -20,10 +20,7 @@
 
 
                         <div class="text-end">
-                            <form action="/logout" method="post">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                <button type="submit" class="btn btn-outline-light me-2">Logout</button>
-                            </form>
+                            <button type="button" class="btn btn-outline-light me-2">Logout</button>
                             <!-- <sec:authorize access="isAuthenticated()">
                                 Xin chào,
                                 <sec:authentication property="principal.username" />
