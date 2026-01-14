@@ -36,7 +36,7 @@
                                                 </div>
                                                 <div class="card-body">
                                                     <form:form action="/register" method="post"
-                                                        modelAttribute="registerUser">
+                                                        onsubmit="return validPassword()" modelAttribute="registerUser">
                                                         <c:set var="errorPassword">
                                                             <form:errors cssClass="invalid-feedback"
                                                                 path="confirmPassword" />
@@ -60,17 +60,18 @@
                                                                 class="form-control ${not empty errorEmail ? 'is-invalid' : ''}"
                                                                 path="email" type="email"
                                                                 placeholder="name@example.com" />
-                                                            <label for="inputEmail">Email address</label>
+                                                            <label for="inputEmail">Email</label>
                                                             ${errorEmail}
                                                         </div>
                                                         <div class="form-floating mb-3">
 
                                                             <form:input class="form-control" path="password"
-                                                                type="password" placeholder="Create a password" />
+                                                                id="password" type="password"
+                                                                placeholder="Create a password" />
                                                             <label for="inputPassword">Password</label>
                                                         </div>
                                                         <div class="form-floating mb-3">
-                                                            <form:input
+                                                            <form:input id="confirmPassword"
                                                                 class="form-control ${not empty errorPassword ? 'is-invalid' : ''}"
                                                                 path="confirmPassword" type="password"
                                                                 placeholder="Confirm password" />
@@ -79,8 +80,10 @@
                                                             ${errorPassword}
                                                             <form:errors path="confirmPassword" />
                                                         </div>
+                                                        <div id="error-msg"></div>
                                                         <div class="mt-4 mb-0">
-                                                            <div class="d-grid"><button
+                                                            <div class="d-grid">
+                                                                <button type="submit"
                                                                     class="btn btn-primary btn-block">Create
                                                                     Account</button>
                                                             </div>
@@ -102,7 +105,20 @@
                     </div>
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
                         crossorigin="anonymous"></script>
-                    <script src="/js/scripts.js"></script>
+                    <script>
+                        function validPassword() {
+                            var password = document.getElementById("password").value;
+                            var confirm = document.getElementById("confirmPassword").value;
+                            var errorElement = document.getElementById("error-msg");
+
+                            if (password !== confirm) {
+                                errorElement.innerHTML = "Password And Confirm password Not The Same!";
+                                errorElement.style.color = "red";
+                                return false; // Ngăn không cho submit
+                            }
+                            return true; // Cho phép submit
+                        }
+                    </script>
                 </body>
 
                 </html>
