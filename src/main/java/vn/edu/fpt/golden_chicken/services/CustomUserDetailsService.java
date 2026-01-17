@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService { // Sửa tên class cho chuẩn
+public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService { // Sửa t
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // username ở đây chính là Email từ form login gửi lên
-        vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository.findByEmail(username);
+        vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository.findByEmail(username.toLowerCase());
 
         if (user == null) {
             throw new UsernameNotFoundException("Not Found User With email: " + username);

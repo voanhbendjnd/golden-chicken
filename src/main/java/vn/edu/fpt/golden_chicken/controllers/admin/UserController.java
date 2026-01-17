@@ -1,5 +1,11 @@
 package vn.edu.fpt.golden_chicken.controllers.admin;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,11 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -25,9 +33,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
+import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
-import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
-import vn.edu.fpt.golden_chicken.domain.response.RoleRes;
+import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResRole;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.services.UserService;
@@ -36,7 +45,6 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 @Controller
 @RequestMapping("/admin/user")
 public class UserController {
-
     private final RoleService roleService;
     private final UserService userService;
     private final UserRepository userRepository;
@@ -48,7 +56,7 @@ public class UserController {
     }
 
     @ModelAttribute("roles")
-    public List<RoleRes> getAllRoles() {
+    public List<ResRole> getAllRoles() {
         return this.roleService.fetchAll();
     }
 
@@ -56,7 +64,7 @@ public class UserController {
     public String listUsers(Model model,
             @RequestParam(required = false) String fullName,
             @Filter Specification<User> spec,
-            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // If fullName parameter is provided, create a filter specification
         if (fullName != null && !fullName.trim().isEmpty()) {
@@ -73,13 +81,13 @@ public class UserController {
 
     @GetMapping("/create")
     public String createUserPage(Model model) {
-        model.addAttribute("newUser", new UserRequest());
+        model.addAttribute("newUser", new UserDTO());
         // model.addAttribute("roles", this.roleService.fetchAll());
         return "admin/user/create"; // dẫn chính xác tới folder + file create.jsp
     }
 
     @PostMapping("/create")
-    public String create(Model model, @ModelAttribute("newUser") @Valid UserRequest request,
+    public String create(Model model, @ModelAttribute("newUser") @Valid UserDTO request,
             BindingResult bindingResult) {
         if (this.userRepository.existsByEmail(request.getEmail())) {
             bindingResult.rejectValue("email", "error.user", "Email already exists");
@@ -100,7 +108,7 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public String updateUser(@ModelAttribute("updateUser") @Valid UserRequest request, BindingResult bindingResult) {
+    public String updateUser(@ModelAttribute("updateUser") @Valid UserDTO request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "admin/user/update";
         }
@@ -133,6 +141,22 @@ public class UserController {
             return ResponseEntity.ok("Delete User Success!");
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/import")
+    public String importUser(@RequestParam("file") MultipartFile file, Model model,
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
+            throws IOException, EmailAlreadyExistsException {
+        try {
+            this.userService.importUsers(file);
+            return "redirect:/admin/user";
+        } catch (EmailAlreadyExistsException ee) {
+            model.addAttribute("errorMessage", ee.getMessage());
+            var data = userService.fetchAllWithPagination(pageable, Specification.where(null));
+            model.addAttribute("users", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/user/table";
         }
     }
 

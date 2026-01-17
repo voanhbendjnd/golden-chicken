@@ -27,7 +27,8 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String password;
-    @Column(name = "full_name")
+    @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
+    
     String fullName;
     String email;
     Boolean status;

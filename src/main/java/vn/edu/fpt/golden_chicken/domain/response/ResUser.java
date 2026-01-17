@@ -7,7 +7,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRes {
+public class ResUser {
     Long id;
     String fullName;
     String email;

@@ -1,44 +1,41 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
-import java.io.Serializable;
-import java.util.List;
+import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 
 @Entity
-@Table(name = "roles")
 @Data
+@Table(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
-public class Role implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(columnDefinition = "NVARCHAR(255)")
     String name;
+    BigDecimal price;
+    // @Column(columnDefinition = "MEDIUMTEXT")
     @Column(columnDefinition = "NVARCHAR(255)")
     String description;
-    @OneToMany(mappedBy = "role")
-    List<User> users;
-    @ManyToMany
-    @JoinTable(name = "permission_roles", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    List<Permission> permissions;
-
-    public Role(String name, String description) {
-    }
+    Boolean active;
+    String image_url;
+    @Enumerated(EnumType.STRING)
+    ProductType type;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    Category category;
 }

@@ -23,7 +23,22 @@
                 Dashboard
             </a>
         </li>
-
+        <li>
+            <a href="/admin/order" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#table"></use>
+                </svg>
+                Orders
+            </a>
+        </li>
+        <li>
+            <a href="/admin/product" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#grid"></use>
+                </svg>
+                Products
+            </a>
+        </li>
         <li>
             <a href="/admin/user" class="nav-link text-white">
                 <svg class="bi me-2" width="16" height="16">

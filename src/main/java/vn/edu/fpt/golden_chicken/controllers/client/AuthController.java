@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import vn.edu.fpt.golden_chicken.domain.request.UserRequest;
+import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 
@@ -26,12 +26,12 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        model.addAttribute("registerUser", new UserRequest());
+        model.addAttribute("registerUser", new UserDTO());
         return "client/auth/register";
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute("registerUser") UserRequest userRequest, BindingResult bindingResult) {
+    public String register(@ModelAttribute("registerUser") UserDTO userRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "client/admin/register";
         }

@@ -1,43 +1,142 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <!DOCTYPE html>
-        <html lang="en">
+<!DOCTYPE html>
+<html lang="vi">
 
-        <head>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<head>
+    <meta charset="utf-8" />
+    <title>403 - Forbidden</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-            <title>404 Error - SB Admin</title>
-        </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
 
-        <body>
-            <div id="layoutError">
-                <div id="layoutError_content">
-                    <main>
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-lg-6">
-                                    <div class="text-center mt-4">
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+        }
 
-                                        <img class="mb-4 img-error" src="/images/404page.jpg" style="width: 50vh;" />
-                                        <p class="lead">This requested URL was not found on this server.</p>
-                                        <button class="btn btn-primary">
-                                            <a href="/login" style="text-decoration: none; color: yellow;">
-                                                <i class="fas fa-arrow-left me-1"></i>
-                                                Return to Dashboard
-                                            </a>
-                                        </button>
+        .container {
+            text-align: center;
+            animation: fadeIn 1.2s ease-in-out;
+        }
 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </main>
-                </div>
+        h1 {
+            font-size: 10rem;
+            letter-spacing: 10px;
+            color: #ff6b6b;
+            animation: float 3s ease-in-out infinite;
+        }
 
-            </div>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-                crossorigin="anonymous"></script>
-            <script src="js/scripts.js"></script>
-        </body>
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
 
-        </html>
+        p {
+            color: #cfcfe8;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        button {
+            padding: 12px 28px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 30px;
+            background: #ff6b6b;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff8787;
+            transform: scale(1.05);
+        }
+
+        .stars span {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            animation: blink 3s infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <h1>403</h1>
+        <h2>Forbidden</h2>
+        <p>You do not has permission</p>
+        <button onclick="goHome()">Back Home</button>
+    </div>
+
+    <script>
+        const starsContainer = document.getElementById("stars");
+
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement("span");
+            star.style.top = Math.random() * 100 + "vh";
+            star.style.left = Math.random() * 100 + "vw";
+            star.style.animationDelay = Math.random() * 3 + "s";
+            starsContainer.appendChild(star);
+        }
+
+        function goHome() {
+            window.location.href = "/";
+        }
+    </script>
+
+</body>
+
+</html>

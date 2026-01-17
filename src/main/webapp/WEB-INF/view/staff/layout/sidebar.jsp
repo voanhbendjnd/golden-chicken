@@ -16,28 +16,43 @@
             </a>
         </li>
         <li>
-            <a href="/admin" class="nav-link text-white">
+            <a href="/staff" class="nav-link text-white">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#speedometer2"></use>
                 </svg>
                 Dashboard
             </a>
         </li>
-
         <li>
-            <a href="/admin/user" class="nav-link text-white">
+            <a href="/staff/order" class="nav-link text-white">
                 <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#people-circle"></use>
+                    <use xlink:href="#table"></use>
                 </svg>
-                Users
+                Orders
             </a>
         </li>
         <li>
-            <a href="/admin/role" class="nav-link text-white">
+            <a href="/staff/product" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#grid"></use>
+                </svg>
+                Products
+            </a>
+        </li>
+        <li>
+            <a href="/staff/category" class="nav-link text-white">
                 <svg class="bi me-2" width="16" height="16">
                     <use xlink:href="#people-circle"></use>
                 </svg>
-                Roles
+                Categories
+            </a>
+        </li>
+        <li>
+            <a href="/staff/combo-detail" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#people-circle"></use>
+                </svg>
+                Combo
             </a>
         </li>
 

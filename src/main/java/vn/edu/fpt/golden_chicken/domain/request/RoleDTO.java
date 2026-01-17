@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@FieldDefaults(level =  AccessLevel.PRIVATE)
-public class RoleRequest {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class RoleDTO {
     Long id;
     @NotBlank(message = "Role Name Cannot Be Empty!")
     String name;

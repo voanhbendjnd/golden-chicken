@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -24,6 +25,7 @@ public class Customer implements Serializable {
     @MapsId
     @JoinColumn(name = "user_id")
     User user;
+    @Column(columnDefinition = "NVARCHAR(255)")
     String address;
     Long point;
 }

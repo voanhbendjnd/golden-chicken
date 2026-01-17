@@ -6,16 +6,16 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>User List</title>
+            <title>Category Table</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         </head>
 
         <body>
-            <jsp:include page="..//layout/header.jsp" />
+            <jsp:include page="../../component/header.jsp" />
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-3 col-lg-2 p-0">
-                        <jsp:include page="..//layout/sidebar.jsp" />
+                        <jsp:include page="../layout/sidebar.jsp" />
                     </div>
                     <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
                         <div class="container mt-5">
@@ -23,15 +23,16 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h3>User Management</h3>
-                                            <a href="/admin/user/create" class="btn btn-primary">Create New User</a>
+                                            <h3>Category Management</h3>
+                                            <a href="/staff/category/create" class="btn btn-primary">Create New
+                                                Category</a>
                                         </div>
                                         <div class="card-body">
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <div class="input-group">
-                                                        <input type="text" id="searchFullName" class="form-control"
-                                                            placeholder="Search by full name..."
+                                                        <input type="text" id="searchName" class="form-control"
+                                                            placeholder="Search by name..."
                                                             value="${param.filter != null ? param.filter.split('\'')[1] : ''}">
                                                         <button class="btn btn-outline-primary" type="button"
                                                             onclick="handleSearch()">
@@ -40,7 +41,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <form action="/admin/user/import" method="post"
+                                            <form action="/staff/category/import" method="post"
                                                 enctype="multipart/form-data">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
@@ -50,38 +51,30 @@
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>
-
                                                 <button type="submit" class="btn btn-success">Upload And Save</button>
                                             </form>
-                                            <c:if test="${not empty errorMessage}">
-                                                <div class="alert alert-danger" role="alert">
-                                                    ${errorMessage}
-                                                </div>
-                                            </c:if>
-                                            <c:if test="${not empty users}">
+                                            <c:if test="${not empty categories}">
                                                 <table class="table table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th>ID</th>
-                                                            <th>Email</th>
-                                                            <th>Full Name</th>
+                                                            <th>Name</th>
+                                                            <th>Description</th>
                                                             <th>Status</th>
                                                             <th>Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <c:forEach var="user" items="${users}">
+                                                        <c:forEach var="category" items="${categories}">
                                                             <tr>
                                                                 <td>
-                                                                    <a href="/admin/user/${user.id}"
-                                                                        style="text-decoration: none;">${user.id}</a>
-
+                                                                    ${category.id}
                                                                 </td>
-                                                                <td>${user.email}</td>
-                                                                <td>${user.fullName}</td>
+                                                                <td>${category.name}</td>
+                                                                <td>${category.description}</td>
                                                                 <td>
                                                                     <c:choose>
-                                                                        <c:when test="${user.status}">
+                                                                        <c:when test="${category.status}">
                                                                             <span class="badge bg-success">Active</span>
                                                                         </c:when>
                                                                         <c:otherwise>
@@ -92,9 +85,21 @@
                                                                 </td>
                                                                 <td>
                                                                     <div style="display: flex; gap:6px">
-                                                                        <a href="/admin/user/update/${user.id}"
+                                                                        <!-- <form:form action="/staff/category/update"
+                                                                        method="GET" modelAttribute="${category}">
+                                                                        <button class="btn btn-sm btn-warning"
+                                                                            type="submit">
+                                                                            Edit
+
+                                                                        </button>
+                                                                        <input type="hidden"
+                                                                            name="${_csrf.parameterName}"
+                                                                            value="${_csrf.token}" />
+                                                                    </form:form> -->
+                                                                        <a href="/staff/category/update/${category.id}"
                                                                             class="btn btn-sm btn-warning">Edit</a>
-                                                                        <form action="/admin/user/delete/${user.id}"
+                                                                        <form
+                                                                            action="/staff/category/delete/${category.id}"
                                                                             method="POST">
                                                                             <button type="submit"
                                                                                 class="btn btn-sm btn-danger">Delete</button>
@@ -102,7 +107,6 @@
                                                                                 name="${_csrf.parameterName}"
                                                                                 value="${_csrf.token}" />
                                                                         </form>
-
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -118,7 +122,7 @@
                                                             </li>
                                                             <c:forEach begin="1" end="${meta.pages}" var="p">
                                                                 <li class="page-item ${meta.page == p ? 'active' : ''}">
-                                                                    <c:url var="pageUrl" value="/admin/user">
+                                                                    <c:url var="pageUrl" value="/admin/role">
                                                                         <c:param name="page" value="${p}" />
                                                                         <c:param name="size" value="${meta.pageSize}" />
                                                                         <c:if test="${not empty param.filter}">
@@ -128,7 +132,7 @@
                                                                     </c:url>
                                                                     <a class="page-link" href="${pageUrl}">${p}</a>
                                                                     <!-- <a class="page-link"
-                                                                    href="?page=${p}&size=${meta.pageSize}${not empty param.filter ? '&filter='.concat(param.filter): ''}">${p}</a> -->
+                                                                                                                                                                href="?page=${p}&size=${meta.pageSize}${not empty param.filter ? '&filter='.concat(param.filter): ''}">${p}</a> -->
                                                                 </li>
                                                             </c:forEach>
 
@@ -141,11 +145,12 @@
                                                     </nav>
                                                 </div>
                                             </c:if>
-                                            <c:if test="${empty users}">
+                                            <c:if test="${empty categories}">
                                                 <div style="text-align: center;">
-                                                    Not Found User!
+                                                    Not Found Category!
                                                 </div>
                                             </c:if>
+
 
                                         </div>
                                     </div>
@@ -162,11 +167,11 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             <script>
                 function handleSearch() {
-                    const name = document.getElementById("searchFullName").value;
+                    const name = document.getElementById("searchName").value;
                     const urlParams = new URLSearchParams(window.location.search);
 
                     if (name && name.trim() !== "") {
-                        urlParams.set('filter', "fullName ~~ '" + name.trim() + "'");
+                        urlParams.set('filter', "name ~~ '" + name.trim() + "'");
                     } else {
                         urlParams.delete('filter');
                     }
@@ -175,7 +180,7 @@
 
                     window.location.href = window.location.pathname + "?" + urlParams.toString();
                 }
-                document.getElementById("searchFullName").addEventListener("keypress", function (event) {
+                document.getElementById("searchName").addEventListener("keypress", function (event) {
                     if (event.key === "Enter") {
                         handleSearch();
                     }

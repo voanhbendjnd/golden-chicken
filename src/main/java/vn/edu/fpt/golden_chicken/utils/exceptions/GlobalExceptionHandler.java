@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public String handEmailAlreadyExists(EmailAlreadyExistsException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
-        return "error/400";
+        return "admin/user/table";
     }
 
     @ExceptionHandler(DataInvalidException.class)
@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         ra.addAttribute("errorMessage", ex.getMessage());
         var referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/admin/role");
+        return "redirect:" + (referer != null ? referer : "/");
+    }
+
+    @ExceptionHandler(value = { PermissionException.class })
+    public String handlePermissionException(PermissionException ex) {
+        return "client/auth/access-deny";
     }
 }

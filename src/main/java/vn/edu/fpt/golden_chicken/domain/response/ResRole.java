@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PACKAGE)
-public class RoleRes {
+public class ResRole {
     Long id;
     String name;
     String description;

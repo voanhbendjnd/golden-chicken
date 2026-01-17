@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
+import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
-import vn.edu.fpt.golden_chicken.domain.request.RoleRequest;
+import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.services.RoleService;
 
 @Controller
@@ -31,7 +32,7 @@ public class RoleController {
 
     @GetMapping
     public String listRole(Model model, @Filter Specification<Role> spec,
-            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.roleService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("roles", data.getResult());
         model.addAttribute("meta", data.getMeta());
@@ -45,7 +46,7 @@ public class RoleController {
     }
 
     @PostMapping("/create")
-    public String createRole(@ModelAttribute("newRole") @Valid RoleRequest request, BindingResult bindingResult) {
+    public String createRole(@ModelAttribute("newRole") @Valid RoleDTO request, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return "admin/role/create";
@@ -66,7 +67,7 @@ public class RoleController {
     }
 
     @PostMapping("/update")
-    public String updateRole(@ModelAttribute("updateRole") @Valid RoleRequest request, BindingResult bindingResult) {
+    public String updateRole(@ModelAttribute("updateRole") @Valid RoleDTO request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "admin/role/update";
         }

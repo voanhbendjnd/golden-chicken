@@ -31,7 +31,8 @@
                                                 <div class="col-md-6">
                                                     <div class="input-group">
                                                         <input type="text" id="searchName" class="form-control"
-                                                            placeholder="Search by name..." value="${param.name}">
+                                                            placeholder="Search by name..."
+                                                            value="${param.filter != null ? param.filter.split('\'')[1] : ''}">
                                                         <button class="btn btn-outline-primary" type="button"
                                                             onclick="handleSearch()">
                                                             Search
@@ -39,75 +40,96 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <table class="table table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Name</th>
-                                                        <th>Description</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <c:forEach var="role" items="${roles}">
-                                                        <tr>
-                                                            <td>
-                                                                ${role.id}
-                                                            </td>
-                                                            <td>${role.name}</td>
-                                                            <td>${role.description}</td>
-                                                            <td>
-                                                                <div style="display: flex; gap:6px">
-                                                                    <a href="/admin/role/update/${role.id}"
-                                                                        class="btn btn-sm btn-warning">Edit</a>
-                                                                    <form action="/admin/role/delete/${role.id}"
-                                                                        method="POST">
-                                                                        <button type="submit"
-                                                                            class="btn btn-sm btn-danger">Delete</button>
-                                                                        <input type="hidden"
-                                                                            name="${_csrf.parameterName}" 
-                                                                            value="${_csrf.token}" />
-                                                                    </form>
-                                                                </div>
+                                            <form action="/admin/role/import" method="post"
+                                                enctype="multipart/form-data">
+                                                <input type="hidden" name="${_csrf.parameterName}"
+                                                    value="${_csrf.token}" />
 
-                                                                <!-- <a href="/admin/role/delete/${role.id}"
+                                                <div class="mb-3">
+                                                    <label class="form-label">Choose file Excel (.xlsx):</label>
+                                                    <input type="file" name="file" class="form-control"
+                                                        accept=".xlsx, .xls" required />
+                                                </div>
+                                                <button type="submit" class="btn btn-success">Upload And Save</button>
+                                            </form>
+                                            <c:if test="${not empty roles}">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ID</th>
+                                                            <th>Name</th>
+                                                            <th>Description</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="role" items="${roles}">
+                                                            <tr>
+                                                                <td>
+                                                                    ${role.id}
+                                                                </td>
+                                                                <td>${role.name}</td>
+                                                                <td>${role.description}</td>
+                                                                <td>
+                                                                    <div style="display: flex; gap:6px">
+                                                                        <a href="/admin/role/update/${role.id}"
+                                                                            class="btn btn-sm btn-warning">Edit</a>
+                                                                        <form action="/admin/role/delete/${role.id}"
+                                                                            method="POST">
+                                                                            <button type="submit"
+                                                                                class="btn btn-sm btn-danger">Delete</button>
+                                                                            <input type="hidden"
+                                                                                name="${_csrf.parameterName}"
+                                                                                value="${_csrf.token}" />
+                                                                        </form>
+                                                                    </div>
+
+                                                                    <!-- <a href="/admin/role/delete/${role.id}"
                                                                     class="btn btn-sm btn-danger"
                                                                     onclick="return confirm('Are you sure?')">Delete</a> -->
-                                                            </td>
-                                                        </tr>
-                                                    </c:forEach>
-                                                </tbody>
-                                            </table>
-                                            <div class="d-flex justify-content-center mt-3">
-                                                <nav aria-label="Page navigation">
-                                                    <ul class="pagination">
-                                                        <li class="page-item ${meta.page == 1 ? 'disabled' : ''}">
-                                                            <a class="page-link"
-                                                                href="?page=${meta.page - 1}">Previous</a>
-                                                        </li>
-                                                        <c:forEach begin="1" end="${meta.pages}" var="p">
-                                                            <li class="page-item ${meta.page == p ? 'active' : ''}">
-                                                                <c:url var="pageUrl" value="/admin/role">
-                                                                    <c:param name="page" value="${p}" />
-                                                                    <c:param name="size" value="${meta.pageSize}" />
-                                                                    <c:if test="${not empty param.filter}">
-                                                                        <c:param name="filter"
-                                                                            value="${param.filter}" />
-                                                                    </c:if>
-                                                                </c:url>
-                                                                <a class="page-link" href="${pageUrl}">${p}</a>
-                                                                <!-- <a class="page-link"
-                                                                    href="?page=${p}&size=${meta.pageSize}${not empty param.filter ? '&filter='.concat(param.filter): ''}">${p}</a> -->
-                                                            </li>
+                                                                </td>
+                                                            </tr>
                                                         </c:forEach>
+                                                    </tbody>
+                                                </table>
+                                                <div class="d-flex justify-content-center mt-3">
+                                                    <nav aria-label="Page navigation">
+                                                        <ul class="pagination">
+                                                            <li class="page-item ${meta.page == 1 ? 'disabled' : ''}">
+                                                                <a class="page-link"
+                                                                    href="?page=${meta.page - 1}">Previous</a>
+                                                            </li>
+                                                            <c:forEach begin="1" end="${meta.pages}" var="p">
+                                                                <li class="page-item ${meta.page == p ? 'active' : ''}">
+                                                                    <c:url var="pageUrl" value="/admin/role">
+                                                                        <c:param name="page" value="${p}" />
+                                                                        <c:param name="size" value="${meta.pageSize}" />
+                                                                        <c:if test="${not empty param.filter}">
+                                                                            <c:param name="filter"
+                                                                                value="${param.filter}" />
+                                                                        </c:if>
+                                                                    </c:url>
+                                                                    <a class="page-link" href="${pageUrl}">${p}</a>
+                                                                    <!-- <a class="page-link"
+                                                                    href="?page=${p}&size=${meta.pageSize}${not empty param.filter ? '&filter='.concat(param.filter): ''}">${p}</a> -->
+                                                                </li>
+                                                            </c:forEach>
 
-                                                        <li
-                                                            class="page-item ${meta.page == meta.pages ? 'disabled' : ''}">
-                                                            <a class="page-link" href="?page=${meta.page + 1}">Next</a>
-                                                        </li>
-                                                    </ul>
-                                                </nav>
-                                            </div>
+                                                            <li
+                                                                class="page-item ${meta.page == meta.pages ? 'disabled' : ''}">
+                                                                <a class="page-link"
+                                                                    href="?page=${meta.page + 1}">Next</a>
+                                                            </li>
+                                                        </ul>
+                                                    </nav>
+                                                </div>
+                                            </c:if>
+                                            <c:if test="${empty roles}">
+                                                <div style="text-align: center;">
+                                                    Not Found Role!
+                                                </div>
+                                            </c:if>
+
                                         </div>
                                     </div>
                                 </div>

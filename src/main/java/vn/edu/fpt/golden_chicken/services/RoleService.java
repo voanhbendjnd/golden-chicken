@@ -11,9 +11,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
-import vn.edu.fpt.golden_chicken.domain.request.RoleRequest;
+import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.domain.response.RoleRes;
+import vn.edu.fpt.golden_chicken.domain.response.ResRole;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.RoleConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
@@ -24,7 +24,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 public class RoleService {
     RoleRepository roleRepository;
 
-    public void create(RoleRequest request) {
+    public void create(RoleDTO request) {
         if (this.roleRepository.existsByName(request.getName())) {
             throw new RuntimeException("Role Name " + request.getName() + " already exists!");
         }
@@ -32,7 +32,7 @@ public class RoleService {
 
     }
 
-    public RoleRes update(RoleRequest request) {
+    public ResRole update(RoleDTO request) {
         var id = request.getId();
         Role role = this.roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID", id));
@@ -46,7 +46,7 @@ public class RoleService {
         return RoleConvert.toRoleRes(this.roleRepository.save(role));
     }
 
-    public RoleRes findById(long id) {
+    public ResRole findById(long id) {
         var role = this.roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID", id));
         return RoleConvert.toRoleRes(role);
@@ -70,7 +70,7 @@ public class RoleService {
         return res;
     }
 
-    public List<RoleRes> fetchAll() {
+    public List<ResRole> fetchAll() {
         return this.roleRepository.findAll().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList());
     }
 }

@@ -1,6 +1,5 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
-import java.io.Serializable;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -8,37 +7,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "categories")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
-public class Role implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(columnDefinition = "NVARCHAR(255)")
     String name;
+    // @Column(columnDefinition = "MEDIUMTEXT")
     @Column(columnDefinition = "NVARCHAR(255)")
     String description;
-    @OneToMany(mappedBy = "role")
-    List<User> users;
-    @ManyToMany
-    @JoinTable(name = "permission_roles", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    List<Permission> permissions;
-
-    public Role(String name, String description) {
-    }
+    @OneToMany(mappedBy = "category")
+    List<Product> products;
+    Boolean status;
 }
