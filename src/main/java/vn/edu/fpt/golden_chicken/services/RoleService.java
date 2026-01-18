@@ -1,11 +1,16 @@
 package vn.edu.fpt.golden_chicken.services;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +21,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResRole;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.RoleConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @RequiredArgsConstructor
@@ -72,5 +78,27 @@ public class RoleService {
 
     public List<ResRole> fetchAll() {
         return this.roleRepository.findAll().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList());
+    }
+
+    public void importRoles(MultipartFile file) throws IOException {
+        var is = file.getInputStream();
+        Workbook workbook = new XSSFWorkbook(is);
+        var sheet = workbook.getSheetAt(0);
+        var roles = new ArrayList<Role>();
+        for (var row : sheet) {
+            if (row.getRowNum() == 0) {
+                continue;
+            }
+            var role = new Role();
+            var name = row.getCell(0).getStringCellValue();
+            if (this.roleRepository.existsByName(name)) {
+                throw new DataInvalidException("Role Name With (" + name + ") Already Exists!");
+            }
+            role.setName(name);
+            role.setDescription(row.getCell(1).getStringCellValue());
+            roles.add(role);
+        }
+        this.roleRepository.saveAll(roles);
+
     }
 }

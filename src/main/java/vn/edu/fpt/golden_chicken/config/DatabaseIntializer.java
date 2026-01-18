@@ -38,7 +38,7 @@ public class DatabaseIntializer implements CommandLineRunner {
         if (permissionCnt == 0) {
             var permissions = new ArrayList<Permission>();
             permissions.add(new Permission("ADMIN DASHBOARD", "/admin", "GET", "DASHBOARD ADMIN"));
-            permissions.add(new Permission("IMPORT USER", "/admin/user/import", "POST", "USERS"));
+            permissions.add(new Permission("IMPORT USERS", "/admin/user/import", "POST", "USERS"));
             permissions.add(new Permission("USER TABLE PAGE", "/admin/user", "GET", "USERS"));
             permissions.add(new Permission("CREATE USER", "/admin/user/create", "POST", "USERS"));
             permissions.add(new Permission("CREATE USER", "/admin/user/create", "GET", "USERS"));
@@ -48,7 +48,8 @@ public class DatabaseIntializer implements CommandLineRunner {
             permissions.add(new Permission("FIND USER BY ID", "/admin/user/{id}", "GET", "USERS"));
             permissions.add(new Permission("DELETE USER POST", "/admin/user/delete/{id}", "GET", "USERS"));
 
-            permissions.add(new Permission("CREATE ROLE", "/admin/role", "POST", "ROLES"));
+            permissions.add(new Permission("IMPORT ROLES", "/admin/role/import", "POST", "ROLES"));
+            permissions.add(new Permission("CREATE ROLE", "/admin/role", "GET", "ROLES"));
             permissions.add(new Permission("CREATE ROLE", "/admin/role/create", "GET", "ROLES"));
             permissions.add(new Permission("UPDATE ROLE", "/admin/role/update", "POST", "ROLES"));
             permissions.add(new Permission("UPDATE ROLE", "/admin/role/update/{id}", "GET", "ROLES"));

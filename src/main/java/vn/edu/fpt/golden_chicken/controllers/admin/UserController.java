@@ -25,12 +25,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
@@ -147,7 +141,7 @@ public class UserController {
     @PostMapping("/import")
     public String importUser(@RequestParam("file") MultipartFile file, Model model,
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
-            throws IOException, EmailAlreadyExistsException {
+            throws IOException {
         try {
             this.userService.importUsers(file);
             return "redirect:/admin/user";

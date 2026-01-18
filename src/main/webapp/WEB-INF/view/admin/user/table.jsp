@@ -46,7 +46,9 @@
                                                     value="${_csrf.token}" />
 
                                                 <div class="mb-3">
-                                                    <label class="form-label">Choose file Excel (.xlsx):</label>
+                                                    <label class="form-label">Choose file Excel (.xlsx): Ex: Email,
+                                                        Password, Full Name, Role, Customer/Staff, Staff Type (Staff),
+                                                        Staff Status (Staff), Active</label>
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>

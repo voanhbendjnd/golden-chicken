@@ -145,7 +145,7 @@ public class UserService {
         return this.userRepository.findByEmail(email);
     }
 
-    public void importUsers(MultipartFile file) throws IOException, EmailAlreadyExistsException {
+    public void importUsers(MultipartFile file) throws IOException {
         var is = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(is);
 

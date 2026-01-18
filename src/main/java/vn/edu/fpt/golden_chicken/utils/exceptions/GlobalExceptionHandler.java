@@ -3,9 +3,6 @@ package vn.edu.fpt.golden_chicken.utils.exceptions;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,11 +20,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataInvalidException.class)
-    public String handleDataInvalidException(DataInvalidException ex, RedirectAttributes ra,
-            HttpServletRequest request) {
-        ra.addAttribute("errorMessage", ex.getMessage());
-        var referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/");
+    public String handleDataInvalidException(DataInvalidException ex, Model model) {
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "admin/role/table";
     }
 
     @ExceptionHandler(value = { PermissionException.class })

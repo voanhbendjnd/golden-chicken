@@ -1,5 +1,7 @@
 package vn.edu.fpt.golden_chicken.controllers.admin;
 
+import java.io.IOException;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -20,6 +24,7 @@ import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.services.RoleService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Controller
 @RequestMapping("/admin/role")
@@ -85,5 +90,22 @@ public class RoleController {
     public String deleteRole(@PathVariable("id") long id) {
         this.roleService.deleteById(id);
         return "redirect:/admin/role";
+    }
+
+    @PostMapping("/import")
+    public String importRoles(@RequestParam("file") MultipartFile file, Model model,
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
+            throws IOException {
+        try {
+            this.roleService.importRoles(file);
+            return "redirect:/admin/role";
+        } catch (DataInvalidException de) {
+            model.addAttribute("errorMessage", de.getMessage());
+            var data = this.roleService.fetchAllWithPagination(Specification.where(null), pageable);
+            model.addAttribute("roles", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/role/table";
+
+        }
     }
 }

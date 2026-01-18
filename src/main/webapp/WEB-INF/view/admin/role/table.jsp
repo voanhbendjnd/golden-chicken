@@ -47,11 +47,17 @@
 
                                                 <div class="mb-3">
                                                     <label class="form-label">Choose file Excel (.xlsx):</label>
+                                                    <label class="form-label">Ex: Name, Description</label>
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>
                                                 <button type="submit" class="btn btn-success">Upload And Save</button>
                                             </form>
+                                            <c:if test="${not empty errorMessage}">
+                                                <div class="alert alert-danger" role="alert">
+                                                    ${errorMessage}
+                                                </div>
+                                            </c:if>
                                             <c:if test="${not empty roles}">
                                                 <table class="table table-striped">
                                                     <thead>
