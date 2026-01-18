@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
@@ -151,13 +150,13 @@ public class UserService {
 
         var sheet = workbook.getSheetAt(0);
         var users = new ArrayList<User>();
-
+        var set = this.userRepository.findAll().stream().map(User::getEmail).collect(Collectors.toSet());
         for (var row : sheet) {
             if (row.getRowNum() == 0)
                 continue;
             var user = new User();
             var email = row.getCell(0).getStringCellValue();
-            if (this.userRepository.existsByEmail(email)) {
+            if (set.contains(email)) {
                 throw new EmailAlreadyExistsException(email);
             }
             user.setEmail(email);

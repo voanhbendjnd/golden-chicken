@@ -6,7 +6,7 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>User List</title>
+            <title>Permission Table</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         </head>
 
@@ -23,15 +23,16 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h3>User Management</h3>
-                                            <a href="/admin/user/create" class="btn btn-primary">Create New User</a>
+                                            <h3>Permission Management</h3>
+                                            <a href="/admin/role/create" class="btn btn-primary">Create New
+                                                Permission</a>
                                         </div>
                                         <div class="card-body">
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <div class="input-group">
-                                                        <input type="text" id="searchFullName" class="form-control"
-                                                            placeholder="Search by full name..."
+                                                        <input type="text" id="searchName" class="form-control"
+                                                            placeholder="Search by name..."
                                                             value="${param.filter != null ? param.filter.split('\'')[1] : ''}">
                                                         <button class="btn btn-outline-primary" type="button"
                                                             onclick="handleSearch()">
@@ -40,20 +41,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <form action="/admin/user/import" method="post"
+                                            <form action="/admin/role/import" method="post"
                                                 enctype="multipart/form-data">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
 
                                                 <div class="mb-3">
-                                                    <label class="form-label">Choose file Excel (.xlsx)</label>
-                                                    <div>Ex: Email,
-                                                        Password, Full Name, Role, Customer/Staff, Staff Type (Staff),
-                                                        Staff Status (Staff), Active</div>
+                                                    <label class="form-label">Choose file Excel (.xlsx):</label>
+                                                    <div>Ex: Name, API Path, Method, Module</div>
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>
-
                                                 <button type="submit" class="btn btn-success">Upload And Save</button>
                                             </form>
                                             <c:if test="${not empty errorMessage}">
@@ -61,43 +59,33 @@
                                                     ${errorMessage}
                                                 </div>
                                             </c:if>
-                                            <c:if test="${not empty users}">
+                                            <c:if test="${not empty roles}">
                                                 <table class="table table-striped">
                                                     <thead>
                                                         <tr>
                                                             <th>ID</th>
-                                                            <th>Email</th>
-                                                            <th>Full Name</th>
-                                                            <th>Status</th>
-                                                            <th>Actions</th>
+                                                            <th>Name</th>
+                                                            <th>API Path</th>
+                                                            <th>Method</th>
+                                                            <th>Module</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <c:forEach var="user" items="${users}">
+                                                        <c:forEach var="permission" items="${permissions}">
                                                             <tr>
                                                                 <td>
-                                                                    <a href="/admin/user/${user.id}"
-                                                                        style="text-decoration: none;">${user.id}</a>
-
+                                                                    ${permission.id}
                                                                 </td>
-                                                                <td>${user.email}</td>
-                                                                <td>${user.fullName}</td>
-                                                                <td>
-                                                                    <c:choose>
-                                                                        <c:when test="${user.status}">
-                                                                            <span class="badge bg-success">Active</span>
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            <span
-                                                                                class="badge bg-danger">Non-Active</span>
-                                                                        </c:otherwise>
-                                                                    </c:choose>
-                                                                </td>
+                                                                <td>${permission.name}</td>
+                                                                <td>${permission.apiPath}</td>
+                                                                <td>${permission.method}</td>
+                                                                <td>${permission.module}</td>
                                                                 <td>
                                                                     <div style="display: flex; gap:6px">
-                                                                        <a href="/admin/user/update/${user.id}"
+                                                                        <a href="/admin/permission/update/${permission.id}"
                                                                             class="btn btn-sm btn-warning">Edit</a>
-                                                                        <form action="/admin/user/delete/${user.id}"
+                                                                        <form
+                                                                            action="/admin/permission/delete/${permission.id}"
                                                                             method="POST">
                                                                             <button type="submit"
                                                                                 class="btn btn-sm btn-danger">Delete</button>
@@ -105,8 +93,11 @@
                                                                                 name="${_csrf.parameterName}"
                                                                                 value="${_csrf.token}" />
                                                                         </form>
-
                                                                     </div>
+
+                                                                    <!-- <a href="/admin/role/delete/${role.id}"
+                                                                    class="btn btn-sm btn-danger"
+                                                                    onclick="return confirm('Are you sure?')">Delete</a> -->
                                                                 </td>
                                                             </tr>
                                                         </c:forEach>
@@ -121,7 +112,7 @@
                                                             </li>
                                                             <c:forEach begin="1" end="${meta.pages}" var="p">
                                                                 <li class="page-item ${meta.page == p ? 'active' : ''}">
-                                                                    <c:url var="pageUrl" value="/admin/user">
+                                                                    <c:url var="pageUrl" value="/admin/role">
                                                                         <c:param name="page" value="${p}" />
                                                                         <c:param name="size" value="${meta.pageSize}" />
                                                                         <c:if test="${not empty param.filter}">
@@ -144,9 +135,9 @@
                                                     </nav>
                                                 </div>
                                             </c:if>
-                                            <c:if test="${empty users}">
+                                            <c:if test="${empty permissions}">
                                                 <div style="text-align: center;">
-                                                    Not Found User!
+                                                    Not Found Permission!
                                                 </div>
                                             </c:if>
 
@@ -165,11 +156,11 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             <script>
                 function handleSearch() {
-                    const name = document.getElementById("searchFullName").value;
+                    const name = document.getElementById("searchName").value;
                     const urlParams = new URLSearchParams(window.location.search);
 
                     if (name && name.trim() !== "") {
-                        urlParams.set('filter', "fullName ~~ '" + name.trim() + "'");
+                        urlParams.set('filter', "name ~~ '" + name.trim() + "'");
                     } else {
                         urlParams.delete('filter');
                     }
@@ -178,11 +169,12 @@
 
                     window.location.href = window.location.pathname + "?" + urlParams.toString();
                 }
-                document.getElementById("searchFullName").addEventListener("keypress", function (event) {
+                document.getElementById("searchName").addEventListener("keypress", function (event) {
                     if (event.key === "Enter") {
                         handleSearch();
                     }
                 });
+
             </script>
         </body>
 

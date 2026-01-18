@@ -65,6 +65,7 @@ public class RoleController {
         return "redirect:/admin/role";
     }
 
+    @GetMapping("/update/{id:[0-9]+}")
     public String getUpdataPage(Model model, @PathVariable("id") long id) {
         var role = this.roleService.findById(id);
         model.addAttribute("updateRole", role);

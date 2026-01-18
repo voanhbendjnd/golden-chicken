@@ -1,4 +1,4 @@
-package vn.edu.fpt.golden_chicken.controllers.admin;
+package vn.edu.fpt.golden_chicken.controllers.staff;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

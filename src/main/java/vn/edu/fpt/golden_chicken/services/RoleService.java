@@ -85,13 +85,14 @@ public class RoleService {
         Workbook workbook = new XSSFWorkbook(is);
         var sheet = workbook.getSheetAt(0);
         var roles = new ArrayList<Role>();
+        var set = this.roleRepository.findAll().stream().map(Role::getName).collect(Collectors.toSet());
         for (var row : sheet) {
             if (row.getRowNum() == 0) {
                 continue;
             }
             var role = new Role();
             var name = row.getCell(0).getStringCellValue();
-            if (this.roleRepository.existsByName(name)) {
+            if (set.contains(name)) {
                 throw new DataInvalidException("Role Name With (" + name + ") Already Exists!");
             }
             role.setName(name);
