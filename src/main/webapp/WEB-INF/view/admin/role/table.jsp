@@ -47,7 +47,7 @@
 
                                                 <div class="mb-3">
                                                     <label class="form-label">Choose file Excel (.xlsx):</label>
-                                                    <div>Ex: Name, Description</div>
+                                                    <div style="font-style: italic;">Ex: Name, Description</div>
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>

@@ -55,8 +55,13 @@
                                                     </div>
                                                 </form>
                                             </div>
+
                                             <div class="card-footer text-center py-3">
-                                                <div class="small"><a href="/register">Need an account? Sign up!</a>
+                                                <div class="small"><a style="text-decoration-line: none;"
+                                                        href="/register">Forgot password?</a>
+                                                </div>
+                                                <div class="small"><a style="text-decoration: none;"
+                                                        href="/register">Need an account? Sign up!</a>
                                                 </div>
                                             </div>
                                         </div>

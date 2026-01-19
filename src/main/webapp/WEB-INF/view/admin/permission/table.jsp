@@ -24,7 +24,7 @@
                                     <div class="card">
                                         <div class="card-header d-flex justify-content-between align-items-center">
                                             <h3>Permission Management</h3>
-                                            <a href="/admin/role/create" class="btn btn-primary">Create New
+                                            <a href="/admin/permission/create" class="btn btn-primary">Create New
                                                 Permission</a>
                                         </div>
                                         <div class="card-body">
@@ -41,14 +41,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <form action="/admin/role/import" method="post"
+                                            <form action="/admin/permission/import" method="post"
                                                 enctype="multipart/form-data">
                                                 <input type="hidden" name="${_csrf.parameterName}"
                                                     value="${_csrf.token}" />
 
                                                 <div class="mb-3">
-                                                    <label class="form-label">Choose file Excel (.xlsx):</label>
-                                                    <div>Ex: Name, API Path, Method, Module</div>
+                                                    <label class="form-label">Choose file Excel (.xlsx)</label>
+                                                    <div style="font-style: italic;">Ex: Name, API Path, Method, Module
+                                                    </div>
                                                     <input type="file" name="file" class="form-control"
                                                         accept=".xlsx, .xls" required />
                                                 </div>
@@ -112,7 +113,7 @@
                                                             </li>
                                                             <c:forEach begin="1" end="${meta.pages}" var="p">
                                                                 <li class="page-item ${meta.page == p ? 'active' : ''}">
-                                                                    <c:url var="pageUrl" value="/admin/role">
+                                                                    <c:url var="pageUrl" value="/admin/permission">
                                                                         <c:param name="page" value="${p}" />
                                                                         <c:param name="size" value="${meta.pageSize}" />
                                                                         <c:if test="${not empty param.filter}">

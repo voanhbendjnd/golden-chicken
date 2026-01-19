@@ -49,8 +49,8 @@ public class PermissionController {
 
     @GetMapping("/create")
     public String getCreatePage(Model model) {
-        model.addAttribute("role", new RoleDTO());
-        return "admin/permission";
+        model.addAttribute("permission", new PermissionDTO());
+        return "admin/permission/create";
     }
 
     @PostMapping("/create")
