@@ -23,7 +23,6 @@ import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Permission;
 import vn.edu.fpt.golden_chicken.domain.request.PermissionDTO;
-import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.services.PermissionService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 

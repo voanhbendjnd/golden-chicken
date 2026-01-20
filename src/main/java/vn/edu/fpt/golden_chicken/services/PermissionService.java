@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Workbook;
@@ -100,12 +101,21 @@ public class PermissionService {
             if (set.contains(key)) {
                 throw new DataInvalidException("This Permission (" + name + ") Already Exists!");
             }
+            permission.setName(name);
+            permission.setApiPath(apiPath);
+            permission.setModule(module);
+            permission.setMethod(method);
             permissions.add(permission);
         }
         if (!permissions.isEmpty()) {
             this.permissionRepository.saveAll(permissions);
 
         }
+    }
+
+    public List<ResPermission> fetchAll() {
+        return this.permissionRepository.findAll().stream().map(PermissionConvert::toResPermissinon)
+                .collect(Collectors.toList());
     }
 
 }

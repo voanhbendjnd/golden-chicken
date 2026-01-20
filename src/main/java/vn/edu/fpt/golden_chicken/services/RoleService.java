@@ -19,6 +19,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResRole;
+import vn.edu.fpt.golden_chicken.repositories.PermissionRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.RoleConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
@@ -29,12 +30,18 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleService {
     RoleRepository roleRepository;
+    PermissionRepository permissionRepository;
 
     public void create(RoleDTO request) {
         if (this.roleRepository.existsByName(request.getName())) {
             throw new RuntimeException("Role Name " + request.getName() + " already exists!");
         }
-        this.roleRepository.save(RoleConvert.toRole(request));
+        var permissions = this.permissionRepository.findByIdIn(request.getPermissionIds());
+        var role = new Role();
+        role.setDescription(request.getDescription());
+        role.setName(request.getName());
+        role.setPermissions(permissions);
+        this.roleRepository.save(role);
 
     }
 

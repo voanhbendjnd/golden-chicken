@@ -60,7 +60,7 @@
                                                     ${errorMessage}
                                                 </div>
                                             </c:if>
-                                            <c:if test="${not empty roles}">
+                                            <c:if test="${not empty permissions}">
                                                 <table class="table table-striped">
                                                     <thead>
                                                         <tr>

@@ -49,8 +49,10 @@ public class DatabaseIntializer implements CommandLineRunner {
             permissions.add(new Permission("DELETE USER POST", "/admin/user/delete/{id:[0-9]+}", "GET", "USERS"));
 
             permissions.add(new Permission("IMPORT ROLES", "/admin/role/import", "POST", "ROLES"));
-            permissions.add(new Permission("CREATE ROLE", "/admin/role", "GET", "ROLES"));
-            permissions.add(new Permission("CREATE ROLE", "/admin/role/create", "GET", "ROLES"));
+            permissions.add(new Permission("TABLE ROLES", "/admin/role", "GET", "ROLES"));
+            permissions.add(new Permission("CREATE ROLE PAGE", "/admin/role/create", "GET", "ROLES"));
+            permissions.add(new Permission("CREATE ROLE", "/admin/role/create", "POST", "ROLES"));
+
             permissions.add(new Permission("UPDATE ROLE", "/admin/role/update", "POST", "ROLES"));
             permissions.add(new Permission("UPDATE ROLE", "/admin/role/update/{id:[0-9]+}", "GET", "ROLES"));
             permissions.add(new Permission("DELETE ROLE", "/admin/role/{id:[0-9]+}", "POST", "ROLES"));

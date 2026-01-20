@@ -1,5 +1,7 @@
 package vn.edu.fpt.golden_chicken.utils.converts;
 
+import java.util.stream.Collectors;
+
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResRole;
@@ -17,6 +19,8 @@ public class RoleConvert {
         res.setId(role.getId());
         res.setName(role.getName());
         res.setDescription(role.getDescription());
+        res.setPermissions(role.getPermissions().stream().map(x -> new ResRole.Permission(x.getId(), x.getName()))
+                .collect(Collectors.toList()));
         return res;
     }
 }

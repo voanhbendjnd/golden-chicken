@@ -43,12 +43,6 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label">Phone Number:</label>
-                                            <form:input type="text" class="form-control" path="phone" />
-                                            <form:errors path="phone" style="color: red;" />
-
-                                        </div>
-                                        <div class="mb-3">
                                             <labal class="form-label">Role</labal>
                                             <select id="roleSelect" name="roleId" class="form-select" required>
                                                 <option value="">Select Role</option>

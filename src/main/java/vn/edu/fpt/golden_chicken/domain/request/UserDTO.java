@@ -12,7 +12,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@StrongPassword
+// @StrongPassword
 public class UserDTO {
     Long id;
     @Email(message = "Email Incorrect Format!")

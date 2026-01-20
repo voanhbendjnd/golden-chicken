@@ -23,16 +23,19 @@ import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
+import vn.edu.fpt.golden_chicken.services.PermissionService;
 import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Controller
 @RequestMapping("/admin/role")
 public class RoleController {
+    private final PermissionService permissionService;
     private final RoleService roleService;
 
-    public RoleController(RoleService roleService) {
+    public RoleController(RoleService roleService, PermissionService permissionService) {
         this.roleService = roleService;
+        this.permissionService = permissionService;
     }
 
     @GetMapping
@@ -46,6 +49,7 @@ public class RoleController {
 
     @GetMapping("/create")
     public String getCreatePage(Model model) {
+        model.addAttribute("permissions", this.permissionService.fetchAll());
         model.addAttribute("newRole", new Role());
         return "admin/role/create";
     }
@@ -68,6 +72,7 @@ public class RoleController {
     @GetMapping("/update/{id:[0-9]+}")
     public String getUpdataPage(Model model, @PathVariable("id") long id) {
         var role = this.roleService.findById(id);
+        model.addAttribute("permissions", this.permissionService.fetchAll());
         model.addAttribute("updateRole", role);
         return "admin/role/update";
     }

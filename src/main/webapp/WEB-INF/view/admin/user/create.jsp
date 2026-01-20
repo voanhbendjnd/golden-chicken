@@ -38,12 +38,6 @@
 
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Phone Number</label>
-                                            <form:input type="text" class="form-control" path="phone" />
-                                            <form:errors path="phone" style="color: red;" />
-
-                                        </div>
 
                                         <div class="mb-3">
                                             <label class="form-label">Password</label>

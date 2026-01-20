@@ -1,5 +1,8 @@
 package vn.edu.fpt.golden_chicken.domain.response;
 
+import java.time.Instant;
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -15,5 +18,7 @@ public class ResUser {
     Boolean status;
     Long roleId;
     StaffType staffType;
+    String createdBy, updatedBy;
+    Date createdAt, updatedAt;
 
 }

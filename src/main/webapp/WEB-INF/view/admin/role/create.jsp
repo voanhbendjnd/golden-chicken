@@ -37,6 +37,16 @@
 
                                         </div>
 
+                                        <div class="mb-3">
+                                            <label class="form-label">Permissions</label>
+                                            <select name="permissionIds" class="form-select" multiple required size="5">
+                                                <c:forEach var="permission" items="${permissions}">
+                                                    <option value="${permission.id}">${permission.name}</option>
+                                                </c:forEach>
+                                            </select>
+                                            <small class="text-muted">Hold Ctrl (or Command on Mac) to select multiple
+                                                options.</small>
+                                        </div>
 
 
                                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">

@@ -37,6 +37,26 @@
                                             <form:errors path="description" style="color: red;" />
 
                                         </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Permissions</label>
+                                            <select name="permissionIds" class="form-select" multiple required size="5">
+                                                <c:forEach var="permission" items="${permissions}">
+                                                    <c:set var="isSelected" value="false" />
+
+                                                    <c:forEach var="currentPerm" items="${updateRole.permissions}">
+                                                        <c:if test="${permission.id == currentPerm.id}">
+                                                            <c:set var="isSelected" value="true" />
+                                                        </c:if>
+                                                    </c:forEach>
+
+                                                    <option value="${permission.id}" ${isSelected ? 'selected' : '' }>
+                                                        ${permission.name}
+                                                    </option>
+                                                </c:forEach>
+                                            </select>
+                                            <small class="text-muted">Hold Ctrl (or Command on Mac) to select multiple
+                                                options.</small>
+                                        </div>
 
                                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                             <a href="/admin/role" class="btn btn-secondary me-md-2">Cancel</a>

@@ -1,6 +1,11 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.Date;
+
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -11,7 +16,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.ToString;
@@ -28,10 +36,12 @@ public class User implements Serializable {
     Long id;
     String password;
     @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
-    
+
     String fullName;
     String email;
     Boolean status;
+    Date createdAt, updatedAt;
+    String createdBy, updatedBy;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude
     Customer customer;
@@ -42,4 +52,26 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
+
+    @PrePersist
+    public void handleBeforeCreateAt() {
+        this.createdAt = Date.from(Instant.now());
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            this.createdBy = authentication.getName();
+        } else {
+            this.createdBy = "Anonymous";
+        }
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdateBy() {
+        this.updatedAt = Date.from(Instant.now());
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            this.updatedBy = authentication.getName();
+        } else {
+            this.updatedBy = "Anonymous";
+        }
+    }
 }
