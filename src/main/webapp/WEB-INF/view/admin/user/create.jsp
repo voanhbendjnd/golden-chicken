@@ -43,11 +43,15 @@
                                             <label class="form-label">Password</label>
                                             <form:input type="password" class="form-control" path="password"
                                                 required="true" />
+                                            <form:errors path="password" style="color: red;" />
+
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Confirm Password</label>
                                             <form:input type="password" class="form-control" path="confirmPassword"
                                                 required="true" />
+                                            <form:errors path="confirmPassword" style="color: red;" />
+
                                         </div>
                                         <div class="mb-3">
                                             <labal class="form-label">Role</labal>

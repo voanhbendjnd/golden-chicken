@@ -58,7 +58,7 @@ public class UserController {
     public String listUsers(Model model,
             @RequestParam(required = false) String fullName,
             @Filter Specification<User> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DefineVariable.pageSize, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // If fullName parameter is provided, create a filter specification
         if (fullName != null && !fullName.trim().isEmpty()) {

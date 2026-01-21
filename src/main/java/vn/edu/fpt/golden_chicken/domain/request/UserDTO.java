@@ -20,7 +20,7 @@ public class UserDTO {
     String email;
     @NotBlank(message = "Full Name Cannot Be Empty!")
     String fullName;
-    @Phone
+    // @Phone
     String phone;
     @Size(min = 6, message = "Password Must Be At Least 6 Characters")
     String password;
