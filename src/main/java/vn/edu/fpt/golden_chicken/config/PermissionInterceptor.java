@@ -1,8 +1,11 @@
 package vn.edu.fpt.golden_chicken.config;
 
+import java.util.Arrays;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -15,6 +18,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 @Component
 public class PermissionInterceptor implements HandlerInterceptor {
     private final UserRepository userRepository;
+    AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public PermissionInterceptor(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -34,7 +38,8 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 if (role != null) {
                     var permissions = role.getPermissions();
                     var isAllow = permissions.stream()
-                            .anyMatch(p -> p.getApiPath().equals(apiPath) && p.getMethod().endsWith(httpMethod));
+                            .anyMatch(p -> pathMatcher.match(p.getApiPath(), apiPath)
+                                    && Arrays.asList(p.getMethod().split(",")).contains(httpMethod));
                     if (!isAllow) {
                         throw new PermissionException("You do not have permission!");
                     }

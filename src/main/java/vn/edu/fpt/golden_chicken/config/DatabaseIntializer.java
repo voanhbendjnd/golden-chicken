@@ -37,46 +37,52 @@ public class DatabaseIntializer implements CommandLineRunner {
         long permissionCnt = this.permissionRepository.count();
         if (permissionCnt == 0) {
             var permissions = new ArrayList<Permission>();
-            permissions.add(new Permission("ADMIN DASHBOARD", "/admin", "GET", "DASHBOARD ADMIN"));
-            permissions.add(new Permission("IMPORT USERS", "/admin/user/import", "POST", "USERS"));
-            permissions.add(new Permission("USER TABLE PAGE", "/admin/user", "GET", "USERS"));
-            permissions.add(new Permission("CREATE USER", "/admin/user/create", "POST", "USERS"));
-            permissions.add(new Permission("CREATE USER", "/admin/user/create", "GET", "USERS"));
-            permissions.add(new Permission("UPDATE USER", "/admin/user/update", "POST", "USERS"));
-            permissions.add(new Permission("UPDATE USER", "/admin/user/update/{id:[0-9]+}", "GET", "USERS"));
-            permissions.add(new Permission("DELETE USER", "/admin/user/{id:[0-9]+}", "POST", "USERS"));
-            permissions.add(new Permission("FIND USER BY ID", "/admin/user/{id:[0-9]+}", "GET", "USERS"));
-            permissions.add(new Permission("DELETE USER POST", "/admin/user/delete/{id:[0-9]+}", "GET", "USERS"));
+            permissions.add(new Permission("VIEW_ADMIN_DASHBOARD", "/admin", "GET", "DASHBOARD ADMIN"));
+            permissions.add(new Permission("IMPORT_USERS", "/admin/user/import", "POST", "USERS"));
+            permissions.add(new Permission("VIEW_USER", "/admin/user", "GET", "USERS"));
+            permissions.add(new Permission("CREATE_USER", "/admin/user/create", "POST,GET", "USERS"));
+            permissions.add(new Permission("UPDATE_USER", "/admin/user/update/**", "POST,GET", "USERS"));
+            permissions.add(new Permission("DELETE_USER", "/admin/user/delete/**", "POST", "USERS"));
 
-            permissions.add(new Permission("IMPORT ROLES", "/admin/role/import", "POST", "ROLES"));
-            permissions.add(new Permission("TABLE ROLES", "/admin/role", "GET", "ROLES"));
-            permissions.add(new Permission("CREATE ROLE PAGE", "/admin/role/create", "GET", "ROLES"));
-            permissions.add(new Permission("CREATE ROLE", "/admin/role/create", "POST", "ROLES"));
+            permissions.add(new Permission("IMPORT_ROLES", "/admin/role/import", "POST", "ROLES"));
+            permissions.add(new Permission("VIEW_ROLES", "/admin/role", "GET", "ROLES"));
+            permissions.add(new Permission("CREATE_ROLE", "/admin/role/create", "POST,GET", "ROLES"));
+            permissions.add(new Permission("UPDATE_ROLE", "/admin/role/update/**", "POST,GET", "ROLES"));
+            permissions.add(new Permission("DELETE_ROLE", "/admin/role/delete/**", "POST", "ROLES"));
 
-            permissions.add(new Permission("UPDATE ROLE", "/admin/role/update", "POST", "ROLES"));
-            permissions.add(new Permission("UPDATE ROLE", "/admin/role/update/{id:[0-9]+}", "GET", "ROLES"));
-            permissions.add(new Permission("DELETE ROLE", "/admin/role/{id:[0-9]+}", "POST", "ROLES"));
-            permissions.add(new Permission("FIND ROLE BY ID", "/admin/role/{id:[0-9]+}", "GET", "ROLES"));
-
-            permissions.add(new Permission("IMPORT PERMISSIONS", "/admin/permission/import", "POST", "PERMISSIONS"));
-            permissions.add(new Permission("CREATE PERMISSION", "/admin/permission", "GET", "PERMISSIONS"));
-            permissions.add(new Permission("CREATE PERMISSION", "/admin/permission/create", "GET", "PERMISSIONS"));
-            permissions.add(new Permission("UPDATE PERMISSION", "/admin/permission/update", "POST", "PERMISSIONS"));
-            permissions.add(
-                    new Permission("UPDATE PERMISSION", "/admin/permission/update/{id:[0-9]+}", "GET", "PERMISSIONS"));
+            permissions.add(new Permission("IMPORT_PERMISSIONS", "/admin/permission/import", "POST", "PERMISSIONS"));
+            permissions.add(new Permission("VIEW_PERMISSIONS", "/admin/permission", "GET", "PERMISSIONS"));
             permissions
-                    .add(new Permission("DELETE PERMISSION", "/admin/permission/{id:[0-9]+}", "POST", "PERMISSIONS"));
+                    .add(new Permission("CREATE_PERMISSION", "/admin/permission/create", "GET,POST", "PERMISSIONS"));
             permissions.add(
-                    new Permission("FIND PERMISSION BY ID", "/admin/permission/{id:[0-9]+}", "GET", "PERMISSIONS"));
-
-            permissions.add(new Permission("CATEGORY TABLE", "/staff/category", "GET", "CATEGORIES"));
-            permissions.add(new Permission("CREATE CATEGORY PAGE", "/staff/category/create", "GET", "CATEGORIES"));
-            permissions.add(new Permission("CREATE CATEGORY", "/staff/category/create", "GET", "CATEGORIES"));
-            permissions.add(new Permission("UPDATE CATEGORY", "/staff/category/update", "POST", "CATEGORIES"));
+                    new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
             permissions
-                    .add(new Permission("UPDATE CATEGORY", "/staff/category/update/{id:[0-9]+}", "GET", "CATEGORIES"));
-            permissions.add(new Permission("DELETE CATEGORY", "/staff/category/{id:[0-9]+}", "POST", "CATEGORIES"));
-            permissions.add(new Permission("FIND ROLE BY ID", "/staff/category/{id:[0-9]+}", "GET", "CATEGORIES"));
+                    .add(new Permission("DELETE_PERMISSION", "/admin/permission/delete/**", "POST", "PERMISSIONS"));
+            // permissions.add(new Permission("FIND USER BY ID", "/admin/user/**", "GET",
+            // "USERS"));
+
+            // permissions.add(new Permission("FIND ROLE BY ID", "/admin/role/{id:[0-9]+}",
+            // "GET", "ROLES"));
+
+            // permissions.add(
+            // new Permission("FIND PERMISSION BY ID", "/admin/permission/{id:[0-9]+}",
+            // "GET", "PERMISSIONS"));
+
+            // permissions.add(new Permission("CATEGORY TABLE", "/staff/category", "GET",
+            // "CATEGORIES"));
+            // permissions.add(new Permission("CREATE CATEGORY PAGE",
+            // "/staff/category/create", "GET", "CATEGORIES"));
+            // permissions.add(new Permission("CREATE CATEGORY", "/staff/category/create",
+            // "GET", "CATEGORIES"));
+            // permissions.add(new Permission("UPDATE CATEGORY", "/staff/category/update",
+            // "POST", "CATEGORIES"));
+            // permissions
+            // .add(new Permission("UPDATE CATEGORY", "/staff/category/update/{id:[0-9]+}",
+            // "GET", "CATEGORIES"));
+            // permissions.add(new Permission("DELETE CATEGORY",
+            // "/staff/category/{id:[0-9]+}", "POST", "CATEGORIES"));
+            // permissions.add(new Permission("FIND ROLE BY ID",
+            // "/staff/category/{id:[0-9]+}", "GET", "CATEGORIES"));
             this.permissionRepository.saveAll(permissions);
         }
         if (roleCnt == 0) {
