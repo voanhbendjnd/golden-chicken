@@ -2,7 +2,9 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,12 +19,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.MyLibrary;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
-import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
+import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
@@ -144,65 +147,94 @@ public class UserService {
         return this.userRepository.findByEmail(email);
     }
 
-    public void importUsers(MultipartFile file) throws IOException {
-        var is = file.getInputStream();
-        Workbook workbook = new XSSFWorkbook(is);
+    @Transactional(rollbackFor = Exception.class)
+    public void importUsers(MultipartFile file) throws IOException, DataFormatException {
+        if (!file.getOriginalFilename().endsWith(".xlsx")) {
+            throw new IllegalArgumentException("Invalid file format. Please upload file excel(.xlsx)");
+        }
 
-        var sheet = workbook.getSheetAt(0);
-        var users = new ArrayList<User>();
-        var set = this.userRepository.findAll().stream().map(User::getEmail).collect(Collectors.toSet());
-        for (var row : sheet) {
-            if (row.getRowNum() == 0)
-                continue;
-            var user = new User();
-            var email = row.getCell(0).getStringCellValue();
-            if (set.contains(email)) {
-                throw new EmailAlreadyExistsException(email);
-            }
-            user.setEmail(email);
-            user.setPassword(this.passwordEncoder.encode(row.getCell(1).getStringCellValue()));
-            user.setFullName(row.getCell(2).getStringCellValue());
+        try (var is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+            var sheet = workbook.getSheetAt(0);
+            var users = new ArrayList<User>();
+            var existingEmails = this.userRepository.findAll().stream()
+                    .map(User::getEmail)
+                    .collect(Collectors.toSet());
 
-            String roleType = row.getCell(3).getStringCellValue();
+            var pattern = Pattern.compile(MyLibrary.EMAIL_PATTERN);
 
-            if ("STAFF".equalsIgnoreCase(roleType)) {
-                var staff = new Staff();
+            for (var row : sheet) {
+                int rowNum = row.getRowNum();
 
-                try {
-                    String typeStr = row.getCell(4).getStringCellValue();
-                    staff.setStaffType(StaffType.valueOf(typeStr.toUpperCase()));
-
-                    String statusStr = row.getCell(5).getStringCellValue();
-                    staff.setStatus(StaffStatus.valueOf(statusStr.toUpperCase()));
-                } catch (IllegalArgumentException | NullPointerException e) {
-                    staff.setStaffType(StaffType.SHIPPER);
+                if (rowNum == 0) {
+                    if (row.getCell(0) == null || !"Email".equalsIgnoreCase(row.getCell(0).getStringCellValue())) {
+                        throw new DataFormatException("Invalid Header: Column 1 must be 'Email'");
+                    }
+                    continue;
                 }
 
-                staff.setUser(user);
-                user.setRole(this.roleRepository.findByName("STAFF"));
-                user.setStaff(staff);
-            } else {
-                user.setRole(this.roleRepository.findByName("CUSTOMER"));
-                var customer = new Customer();
-                customer.setUser(user);
-                user.setCustomer(customer);
+                if (row.getCell(0) == null || row.getCell(0).getStringCellValue().isBlank()) {
+                    continue;
+                }
+
+                if (row.getCell(1) == null || row.getCell(2) == null ||
+                        row.getCell(3) == null || row.getCell(6) == null) {
+                    throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
+                }
+
+                var email = row.getCell(0).getStringCellValue().trim();
+
+                if (!pattern.matcher(email).matches()) {
+                    throw new DataFormatException(
+                            "Error at row " + (rowNum + 1) + ": Invalid Email format (" + email + ")");
+                }
+
+                if (existingEmails.contains(email)) {
+                    throw new EmailAlreadyExistsException(
+                            "Error at row " + (rowNum + 1) + ": Email " + email);
+                }
+
+                var user = new User();
+                user.setEmail(email);
+                user.setPassword(this.passwordEncoder.encode(row.getCell(1).getStringCellValue()));
+                user.setFullName(row.getCell(2).getStringCellValue());
+
+                String roleType = row.getCell(3).getStringCellValue().toUpperCase();
+
+                if ("STAFF".equals(roleType)) {
+                    var staff = new Staff();
+                    try {
+                        String typeStr = row.getCell(4).getStringCellValue();
+                        staff.setStaffType(StaffType.valueOf(typeStr.toUpperCase()));
+
+                        String statusStr = row.getCell(5).getStringCellValue();
+                        staff.setStatus(StaffStatus.valueOf(statusStr.toUpperCase()));
+                    } catch (Exception e) {
+                        throw new DataFormatException(
+                                "Error at row " + (rowNum + 1) + ": Invalid Staff Type or Staff Status.");
+                    }
+                    staff.setUser(user);
+                    user.setRole(this.roleRepository.findByName("STAFF"));
+                    user.setStaff(staff);
+                } else if ("CUSTOMER".equals(roleType)) {
+                    user.setRole(this.roleRepository.findByName("CUSTOMER"));
+                    var customer = new Customer();
+                    customer.setUser(user);
+                    user.setCustomer(customer);
+                } else {
+                    throw new DataFormatException(
+                            "Error at row " + (rowNum + 1) + ": Unknown Role Type '" + roleType + "'");
+                }
+
+                user.setStatus("TRUE".equalsIgnoreCase(row.getCell(6).getStringCellValue()));
+                users.add(user);
             }
 
-            user.setStatus("TRUE".equalsIgnoreCase(row.getCell(6).getStringCellValue()) ? true : false);
-            // var active = row.getCell(6);
-            // if (active != null) {
-            // if (active.getCellType() == CellType.BOOLEAN) {
-            // user.setStatus(active.getBooleanCellValue());
-            // } else if (active.getCellType() == CellType.STRING) {
-            // user.setStatus("TRUE".equalsIgnoreCase(active.getStringCellValue()));
-            // }
-            // } else {
-            // user.setStatus(false);
-            // }
+            if (!users.isEmpty()) {
+                this.userRepository.saveAll(users);
+            }
 
-            users.add(user);
+        } catch (Exception ex) {
+            throw ex;
         }
-        this.userRepository.saveAll(users);
     }
-
 }

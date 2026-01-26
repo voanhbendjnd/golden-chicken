@@ -1,7 +1,6 @@
 package vn.edu.fpt.golden_chicken.domain.response;
 
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -19,6 +18,6 @@ public class ResUser {
     Long roleId;
     StaffType staffType;
     String createdBy, updatedBy;
-    Date createdAt, updatedAt;
+    LocalDateTime createdAt, updatedAt;
 
 }

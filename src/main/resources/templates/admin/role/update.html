@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update Role</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/role}">Roles</a></li>
+                <li class="breadcrumb-item active">Update</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Update Role</h5>
+            </div>
+
+            <div class="card-body">
+                <form th:action="@{/admin/role/update}" method="post" th:object="${updateRole}">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3 text-secondary">Role Information</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Role Name</label>
+                                <input th:field="*{name}" class="form-control" />
+                                <div th:if="${#fields.hasErrors('name')}" class="text-danger small"
+                                    th:errors="*{name}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+                                <div th:if="${#fields.hasErrors('description')}" class="text-danger small"
+                                    th:errors="*{description}"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="mb-3 text-secondary">Permissions</h6>
+
+                            <div class="border rounded p-3" style="max-height: 260px; overflow-y: auto;">
+                                <div class="row">
+                                    <div th:each="permission : ${permissions}" class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="permissionIds"
+                                                th:value="${permission.id}" th:id="'perm_' + ${permission.id}"
+                                                th:checked="${#lists.contains(updateRole.permissions, permission)}">
+                                            <label class="form-check-label" th:for="'perm_' + ${permission.id}"
+                                                th:text="${permission.name}">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <small class="text-muted">
+                                Update permissions assigned to this role
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a th:href="@{/admin/role}" class="btn btn-outline-secondary me-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                Update Role
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

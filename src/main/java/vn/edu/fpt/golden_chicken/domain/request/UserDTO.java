@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.utils.annotations.Phone;
-import vn.edu.fpt.golden_chicken.utils.annotations.StrongPassword;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @Data

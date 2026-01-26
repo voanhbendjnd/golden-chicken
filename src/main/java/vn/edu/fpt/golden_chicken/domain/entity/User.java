@@ -1,10 +1,8 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.persistence.CascadeType;
@@ -19,7 +17,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.ToString;
@@ -40,7 +37,7 @@ public class User implements Serializable {
     String fullName;
     String email;
     Boolean status;
-    Date createdAt, updatedAt;
+    LocalDateTime createdAt, updatedAt;
     String createdBy, updatedBy;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude
@@ -55,7 +52,7 @@ public class User implements Serializable {
 
     @PrePersist
     public void handleBeforeCreateAt() {
-        this.createdAt = Date.from(Instant.now());
+        this.createdAt = LocalDateTime.now();
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             this.createdBy = authentication.getName();
@@ -66,7 +63,7 @@ public class User implements Serializable {
 
     @PreUpdate
     public void handleBeforeUpdateBy() {
-        this.updatedAt = Date.from(Instant.now());
+        this.updatedAt = LocalDateTime.now();
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             this.updatedBy = authentication.getName();

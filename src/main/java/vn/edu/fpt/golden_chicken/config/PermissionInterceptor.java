@@ -15,7 +15,7 @@ import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Transactional
-@Component
+// @Component
 public class PermissionInterceptor implements HandlerInterceptor {
     private final UserRepository userRepository;
     AntPathMatcher pathMatcher = new AntPathMatcher();

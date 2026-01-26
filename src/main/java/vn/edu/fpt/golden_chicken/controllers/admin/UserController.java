@@ -34,6 +34,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResRole;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.services.UserService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 
 @Controller
@@ -147,6 +148,24 @@ public class UserController {
             return "redirect:/admin/user";
         } catch (EmailAlreadyExistsException ee) {
             model.addAttribute("errorMessage", ee.getMessage());
+            var data = userService.fetchAllWithPagination(pageable, Specification.where(null));
+            model.addAttribute("users", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/user/table";
+        } catch (IllegalArgumentException ia) {
+            model.addAttribute("errorMessage", ia.getMessage());
+            var data = userService.fetchAllWithPagination(pageable, Specification.where(null));
+            model.addAttribute("users", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/user/table";
+        } catch (DataInvalidException de) {
+            model.addAttribute("errorMessage", de.getMessage());
+            var data = userService.fetchAllWithPagination(pageable, Specification.where(null));
+            model.addAttribute("users", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/user/table";
+        } catch (Exception ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
             var data = userService.fetchAllWithPagination(pageable, Specification.where(null));
             model.addAttribute("users", data.getResult());
             model.addAttribute("meta", data.getMeta());
