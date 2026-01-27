@@ -1,0 +1,88 @@
+// Debug: Kiểm tra DOM đã sẵn sàng chưa
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+    
+    // Kiểm tra Swiper có tồn tại không
+    if (typeof Swiper !== 'undefined') {
+        console.log('Swiper is loaded');
+        
+        // Kiểm tra element .swiper có tồn tại không
+        const swiperElement = document.querySelector('.swiper');
+        if (swiperElement) {
+            console.log('Swiper element found');
+            
+            const swiper = new Swiper('.swiper', {
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                loop: true,
+              
+                pagination: {
+                  el: '.swiper-pagination',
+                  clickable: true, 
+                },
+              });
+              
+            console.log('Swiper initialized:', swiper);
+        } else {
+            console.error('Swiper element not found');
+        }
+    } else {
+        console.error('Swiper is not loaded');
+    }
+});
+
+var user = document.getElementsByClassName('show-modal');
+
+var modalClose = document.querySelector('.modal-login__body');
+
+var modalLogin = document.querySelector('.modal-login');
+    for(var i=0; i < user.length; ++i) {
+        user[i].onclick = function (e) {
+            e.preventDefault();
+            modalLogin.style = 'display: flex';
+        }
+    };
+
+var closeBtn = document.querySelector('.modal__close');
+
+closeBtn.onclick = function(e) {
+    e.preventDefault();
+    modalLogin.style = 'display: none';
+}
+
+const $ = document.querySelector.bind(document);
+const $$ = document.querySelectorAll.bind(document);
+
+const tabs = $$(".tab-item");
+const panes = $$(".tab-pane");
+
+
+tabs.forEach((tab, index) => {
+    const pane = panes[index];
+  
+    tab.onclick = function () {
+      $(".tab-item.active").classList.remove("active");
+      $(".tab-pane.active").classList.remove("active");
+
+  
+      this.classList.add("active");
+      pane.classList.add("active");
+    };
+  });
+
+const swiper = new Swiper('.swiper', {
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+    },
+    loop: true,
+  
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true, 
+    },
+  });
+
+    

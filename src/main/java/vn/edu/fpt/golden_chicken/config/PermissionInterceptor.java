@@ -28,29 +28,31 @@ public class PermissionInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object hanlder)
             throws Exception {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            var email = authentication.getName();
-            String apiPath = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-            var httpMethod = request.getMethod();
-            var user = this.userRepository.findByEmail(email);
-            if (user != null) {
-                var role = user.getRole();
-                if (role != null) {
-                    var permissions = role.getPermissions();
-                    var isAllow = permissions.stream()
-                            .anyMatch(p -> pathMatcher.match(p.getApiPath(), apiPath)
-                                    && Arrays.asList(p.getMethod().split(",")).contains(httpMethod));
-                    if (!isAllow) {
-                        throw new PermissionException("You do not have permission!");
-                    }
-                } else {
-                    throw new PermissionException("You do not have permission!");
-
-                }
-            }
+        // Nếu chưa authenticated, để Spring Security xử lý (sẽ redirect về login)
+        if (authentication == null || !authentication.isAuthenticated() 
+                || "anonymousUser".equals(authentication.getPrincipal().toString())) {
             return true;
         }
-        return false;
-
+        
+        var email = authentication.getName();
+        String apiPath = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        var httpMethod = request.getMethod();
+        var user = this.userRepository.findByEmail(email);
+        
+        if (user != null) {
+            var role = user.getRole();
+            if (role != null) {
+                var permissions = role.getPermissions();
+                var isAllow = permissions.stream()
+                        .anyMatch(p -> pathMatcher.match(p.getApiPath(), apiPath)
+                                && Arrays.asList(p.getMethod().split(",")).contains(httpMethod));
+                if (!isAllow) {
+                    throw new PermissionException("You do not have permission!");
+                }
+            } else {
+                throw new PermissionException("You do not have permission!");
+            }
+        }
+        return true;
     }
 }

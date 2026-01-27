@@ -20,12 +20,23 @@ public class PermissionInterceptorConfig implements WebMvcConfigurer {
         return new PermissionInterceptor(userRepository);
     }
 
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         String[] whiteList = {
+                "/",
                 "/login",
                 "/register",
-                "/"
+                "/css/**",
+                "/js/**",
+                "/images/**",
+                "/img/**",
+                "/icon/**",
+                "/client/**",
+                "/access-deny",
+                "/favicon.ico"
         };
-        registry.addInterceptor(getPermissionInterceptor()).excludePathPatterns(whiteList);
+        registry.addInterceptor(getPermissionInterceptor())
+                .addPathPatterns("/admin/**", "/staff/**")
+                .excludePathPatterns(whiteList);
     }
 }

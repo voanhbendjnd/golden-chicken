@@ -3,14 +3,101 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Golden Chicken</title>
+
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/icon/fontawesome-free-6.0.0-beta3-web/css/all.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div>
-        Home Page
+    <div th:replace="~{client/layout/header}"></div>
+
+
+    <div class="section">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <!-- <div class="swiper-slide">
+                    <a th:href="@{/menu}"><img th:src="@{/img/mì ý.jpg}" alt="Mì ý"></a>
+                </div> -->
+                <div class="swiper-slide">
+                    <a th:href="@{/menu}">
+                        <img th:src="@{/img/cặp đôi.jpg}" alt="Cặp đôi"></a>
+                    <!-- <img th:src="/img/cặp dôi.jpg" alt="Cặp đôi"></a> -->
+                </div>
+                <div class="swiper-slide">
+                    <a th:href="@{/menu}" img th:src="@{/img/tải app.jpg}"></a>
+                </div>
+                <div class="swiper-slide">
+                    <a th:href="@{/menu}" img th:src="@{/img/măm gà giòn.jpg}"></a>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+
+        <div class="today-list row">
+            <div class="today-text col-sm-3 text-center">
+                <div class="today-logo">
+                    <img src="./img/logo.png" alt="">
+                </div>
+                <h3>ĂN GÌ <br> HÔM NAY</h3>
+                <p>Thực đơn Jollibee đa dạng và phong phú, có rất nhiều sự lựa chọn cho bạn, gia đình và bạn bè.</p>
+            </div>
+
+            <div class="today-menu col-sm-9">
+                <div class="menu-slider">
+                    <a href="" class="menu-slider__item ">
+                        <img src="./img/menugagionvuive.png" alt="">
+                        <div class="menu-item__title">
+                            <img src="./img/titlegagionvuive.png" alt="">
+                            <button class="btn-default btn-yellow">ĐẶT HÀNG</button>
+                        </div>
+                    </a>
+                    <a href="" class="menu-slider__item ">
+                        <img src="./img/menugasotcay.png" alt="">
+                        <div class="menu-item__title">
+                            <img src="./img/titlegasotcay.png" alt="">
+                            <button class="btn-default btn-yellow">ĐẶT HÀNG</button>
+                        </div>
+                    </a>
+                    <a href="" class="menu-slider__item ">
+                        <img src="./img/menumiysotbobam.png" alt="">
+                        <div class="menu-item__title">
+                            <img src="./img/titlemiysotbobam.png" alt="">
+                            <button class="btn-default btn-yellow">ĐẶT HÀNG</button>
+                        </div>
+                    </a>
+                    <a href="" class="menu-slider__item ">
+                        <img src="./img/exporttradao.png" alt="">
+                        <div class="menu-item__title">
+                            <img src="./img/montrangmieng01.png" alt="">
+                            <button class="btn-default btn-yellow">ĐẶT HÀNG</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+    <div th:replace="~{client/layout/footer}">
+
+    </div>
+    <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
 </body>
 
 </html>
