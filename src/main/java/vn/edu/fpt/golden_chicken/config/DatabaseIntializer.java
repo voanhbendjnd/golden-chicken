@@ -58,6 +58,8 @@ public class DatabaseIntializer implements CommandLineRunner {
                     new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
             permissions
                     .add(new Permission("DELETE_PERMISSION", "/admin/permission/delete/**", "POST", "PERMISSIONS"));
+            permissions
+                    .add(new Permission("STAFF_PAGE", "/staff/**", "GET,POST", "STAFFS"));
             // permissions.add(new Permission("FIND USER BY ID", "/admin/user/**", "GET",
             // "USERS"));
 

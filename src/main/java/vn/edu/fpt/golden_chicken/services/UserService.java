@@ -124,6 +124,7 @@ public class UserService {
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
         }
+        user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
         return UserConvert.toUserRes(this.userRepository.save(user));
@@ -138,8 +139,7 @@ public class UserService {
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
-        user.setStatus(false);
-        this.userRepository.save(user);
+        this.userRepository.delete(user);
 
     }
 

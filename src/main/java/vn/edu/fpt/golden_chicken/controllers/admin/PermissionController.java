@@ -67,7 +67,7 @@ public class PermissionController {
         }
     }
 
-    @GetMapping("/update")
+    @GetMapping("/update/{id:[0-9]+}")
     public String getUpdatePage(Model model, @PathVariable("id") long id) {
         model.addAttribute("permission", this.permissionService.findById(id));
         return "admin/permission/update";
