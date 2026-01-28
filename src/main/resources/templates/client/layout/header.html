@@ -1,3 +1,5 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <header class="header navbar navbar-expand-lg " aria-label="Offcanvas navbar large">
     <div class="container-fluid ">
         <button class="navbar-toggler col-4 col-lg-2  " type="button" data-bs-toggle="offcanvas"
@@ -14,8 +16,9 @@
                 <a href="#" class="user-login btn-icon show-modal">
                     <i class="fa-solid fa-user "></i>
                 </a>
-                <span class="login show-modal">
-                    <a href="" class="login-item">Đăng ký / Đăng nhập</a>
+                <span>
+                    <a th:href="@{/register}" class="login-item">Đăng ký/</a>
+                    <a th:href="@{/login}" class="login-item">Đăng nhập</a>
                 </span>
                 <Span class="lang ">
                     <a href="" class="lang-item active-lang">VN</a>

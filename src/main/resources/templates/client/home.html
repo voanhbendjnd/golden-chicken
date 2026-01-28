@@ -6,22 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Chicken</title>
-
     <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
-
-    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/home.css}" rel="stylesheet">
     <link th:href="@{/css/base.css}" rel="stylesheet">
-    <link th:href="@{/icon/fontawesome-free-6.0.0-beta3-web/css/all.css}" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <head th:replace="~{common/head}"></head>
 </head>
 
 <body>
@@ -37,13 +27,16 @@
                 <div class="swiper-slide">
                     <a th:href="@{/menu}">
                         <img th:src="@{/img/cặp đôi.jpg}" alt="Cặp đôi"></a>
-                    <!-- <img th:src="/img/cặp dôi.jpg" alt="Cặp đôi"></a> -->
                 </div>
                 <div class="swiper-slide">
-                    <a th:href="@{/menu}" img th:src="@{/img/tải app.jpg}"></a>
+                    <a th:href="@{/menu}">
+                        <img th:src="@{/img/tải app.jpg}">
+                    </a>
                 </div>
                 <div class="swiper-slide">
-                    <a th:href="@{/menu}" img th:src="@{/img/măm gà giòn.jpg}"></a>
+                    <a th:href="@{/menu}">
+                        <img th:src="@{/img/mamgagion.jpg}">
+                    </a>
                 </div>
             </div>
             <div class="swiper-pagination"></div>

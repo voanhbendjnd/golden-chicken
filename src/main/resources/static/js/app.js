@@ -1,12 +1,9 @@
-// Debug: Kiểm tra DOM đã sẵn sàng chưa
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded');
     
-    // Kiểm tra Swiper có tồn tại không
     if (typeof Swiper !== 'undefined') {
         console.log('Swiper is loaded');
         
-        // Kiểm tra element .swiper có tồn tại không
         const swiperElement = document.querySelector('.swiper');
         if (swiperElement) {
             console.log('Swiper element found');
@@ -37,13 +34,13 @@ var user = document.getElementsByClassName('show-modal');
 
 var modalClose = document.querySelector('.modal-login__body');
 
-var modalLogin = document.querySelector('.modal-login');
-    for(var i=0; i < user.length; ++i) {
-        user[i].onclick = function (e) {
-            e.preventDefault();
-            modalLogin.style = 'display: flex';
-        }
-    };
+// var modalLogin = document.querySelector('.modal-login');
+//     for(var i=0; i < user.length; ++i) {
+//         user[i].onclick = function (e) {
+//             e.preventDefault();
+//             modalLogin.style = 'display: flex';
+//         }
+//     };
 
 var closeBtn = document.querySelector('.modal__close');
 
