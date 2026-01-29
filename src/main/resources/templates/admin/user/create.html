@@ -9,70 +9,77 @@
 </head>
 
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-center">Create New User</h3>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">Create New User</h3>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/user/create}" method="post" th:object="${newUser}">
+
                             <div class="mb-3">
-                                <label class="form-label">Email</label>
+                                <label class="form-label ">Email</label>
                                 <input type="email" class="form-control" th:field="*{email}" required />
-                                <div th:if="${#fields.hasErrors('email')}" style="color: red;"
+                                <div th:if="${#fields.hasErrors('email')}" class="text-danger small"
                                     th:errors="*{email}"></div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Full Name</label>
+                                <label class="form-label ">Full Name</label>
                                 <input type="text" class="form-control" th:field="*{fullName}" required />
-                                <div th:if="${#fields.hasErrors('fullName')}" style="color: red;"
+                                <div th:if="${#fields.hasErrors('fullName')}" class="text-danger small"
                                     th:errors="*{fullName}"></div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" class="form-control" th:field="*{password}" required />
-                                <div th:if="${#fields.hasErrors('password')}" style="color: red;"
-                                    th:errors="*{password}"></div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label ">Password</label>
+                                    <input type="password" class="form-control" th:field="*{password}" required />
+                                    <div th:if="${#fields.hasErrors('password')}" class="text-danger small"
+                                        th:errors="*{password}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label ">Confirm Password</label>
+                                    <input type="password" class="form-control" th:field="*{confirmPassword}"
+                                        required />
+                                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="text-danger small"
+                                        th:errors="*{confirmPassword}"></div>
+                                </div>
                             </div>
+
                             <div class="mb-3">
-                                <label class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" th:field="*{confirmPassword}" required />
-                                <div th:if="${#fields.hasErrors('confirmPassword')}" style="color: red;"
-                                    th:errors="*{confirmPassword}"></div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Role</label>
+                                <label class="form-label ">Role</label>
                                 <select id="roleSelect" name="roleId" class="form-select" required>
                                     <option value="">Select Role</option>
-                                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}">
+                                    </option>
                                 </select>
                             </div>
 
                             <div id="staffTypeGroup" class="mb-3" style="display: none;">
-                                <label class="form-label">Staff Type</label>
+                                <label class="form-label ">Staff Type</label>
                                 <select th:field="*{staffType}" class="form-select">
                                     <option value="RECEPTIONIST">Receptionist</option>
                                     <option value="SHIPPER">Shipper</option>
                                     <option value="MANAGER">Manager</option>
                                 </select>
                             </div>
+
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
+                                <label class="form-label ">Status</label>
                                 <select th:field="*{status}" class="form-select">
                                     <option value="true">Active</option>
-                                    <option value="false">Non-active</option>
+                                    <option value="false">Inactive</option>
                                 </select>
-                                <div th:if="${#fields.hasErrors('status')}" class="text-danger"
-                                    th:errors="*{status}"></div>
                             </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a th:href="@{/admin/user}" class="btn btn-secondary me-md-2">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Create User</button>
+                            <hr>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a th:href="@{/admin/user}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4">Create User</button>
                             </div>
                         </form>
                     </div>
@@ -86,11 +93,14 @@
         document.addEventListener("DOMContentLoaded", function () {
             const roleSelect = document.getElementById("roleSelect");
             const staffTypeGroup = document.getElementById("staffTypeGroup");
+
             function toggleFieldsByRole() {
                 if (!roleSelect) return;
-                const selectedText = roleSelect.options[roleSelect.selectedIndex].text.toUpperCase();
+                const selectedOption = roleSelect.options[roleSelect.selectedIndex];
+                const selectedText = selectedOption ? selectedOption.text.toUpperCase() : "";
 
-                if (selectedText === "STAFF" || selectedText === "ADMIN") {
+                // Hiện staffType nếu chọn Staff hoặc Admin
+                if (selectedText.includes("STAFF") || selectedText.includes("ADMIN")) {
                     staffTypeGroup.style.display = "block";
                 } else {
                     staffTypeGroup.style.display = "none";

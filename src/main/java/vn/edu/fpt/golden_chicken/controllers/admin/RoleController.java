@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.controllers.admin;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -72,6 +73,8 @@ public class RoleController {
     @GetMapping("/update/{id:[0-9]+}")
     public String getUpdataPage(Model model, @PathVariable("id") long id) {
         var role = this.roleService.findById(id);
+        model.addAttribute("currentPermissionIds",
+                role.getPermissions().stream().map(x -> x.getId()).collect(Collectors.toList()));
         model.addAttribute("permissions", this.permissionService.fetchAll());
         model.addAttribute("updateRole", role);
         return "admin/role/update";

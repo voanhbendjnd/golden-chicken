@@ -2,6 +2,8 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
@@ -46,6 +48,7 @@ public class UserService {
     StaffRepository staffRepository;
     CustomerRepository customerRepository;
     PasswordEncoder passwordEncoder;
+    MailService mailService;
 
     @Transactional
     public void create(UserDTO request) {
@@ -71,6 +74,7 @@ public class UserService {
 
             this.customerRepository.save(customer);
         }
+        this.mailService.configBeforeSendForStaff(request.getFullName(), request.getEmail(), request.getPassword());
 
     }
 
@@ -124,6 +128,7 @@ public class UserService {
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
         }
+        user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
         return UserConvert.toUserRes(this.userRepository.save(user));
@@ -138,8 +143,7 @@ public class UserService {
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
-        user.setStatus(false);
-        this.userRepository.save(user);
+        this.userRepository.delete(user);
 
     }
 
@@ -156,6 +160,7 @@ public class UserService {
         try (var is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
             var sheet = workbook.getSheetAt(0);
             var users = new ArrayList<User>();
+            var mpAcc = new HashMap<ResUser, String>();
             var existingEmails = this.userRepository.findAll().stream()
                     .map(User::getEmail)
                     .collect(Collectors.toSet());
@@ -195,9 +200,14 @@ public class UserService {
 
                 var user = new User();
                 user.setEmail(email);
-                user.setPassword(this.passwordEncoder.encode(row.getCell(1).getStringCellValue()));
-                user.setFullName(row.getCell(2).getStringCellValue());
-
+                var password = row.getCell(1).getStringCellValue();
+                var name = row.getCell(2).getStringCellValue();
+                user.setPassword(this.passwordEncoder.encode(password));
+                user.setFullName(name);
+                var resUser = new ResUser();
+                resUser.setEmail(email);
+                resUser.setFullName(name);
+                mpAcc.put(resUser, password);
                 String roleType = row.getCell(3).getStringCellValue().toUpperCase();
 
                 if ("STAFF".equals(roleType)) {
@@ -231,6 +241,11 @@ public class UserService {
 
             if (!users.isEmpty()) {
                 this.userRepository.saveAll(users);
+                mpAcc.forEach((user, password) -> {
+                    CompletableFuture.runAsync(() -> {
+                        this.mailService.configBeforeSendForStaff(user.getFullName(), user.getEmail(), password);
+                    });
+                });
             }
 
         } catch (Exception ex) {

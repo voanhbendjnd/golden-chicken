@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div th:replace="~{admin/layout/header}"></div>
+    <div th:replace="~{component/header}"></div>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-3 col-lg-2 p-0">
@@ -98,7 +98,7 @@
                                                         <span th:if="${user.status}"
                                                             class="badge bg-success">Active</span>
                                                         <span th:unless="${user.status}"
-                                                            class="badge bg-danger">InActive</span>
+                                                            class="badge bg-danger">Inactive</span>
                                                     </td>
                                                     <td>
                                                         <div style="display: flex; gap:6px">
