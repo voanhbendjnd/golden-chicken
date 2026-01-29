@@ -42,6 +42,16 @@ a {
     color: inherit;
 }
 
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+
 input:focus {
     outline: none;
 }
