@@ -76,13 +76,13 @@
   
   .nav a {
     display: block;
-    padding: 12px;
-    margin-bottom: 6px;
+    /* padding: 12px; */
+    margin-bottom: 17px;
     text-decoration: none;
     font-weight: 600;
     color: #000;
     text-transform: uppercase;
-  }
+}
   
   .nav a.active {
     background: #fff;
