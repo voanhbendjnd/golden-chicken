@@ -128,6 +128,10 @@ public class UserService {
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
         }
+        if (role.getName().equalsIgnoreCase("ADMIN")) {
+            user.setRole(role);
+        }
+
         user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());

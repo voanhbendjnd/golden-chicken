@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.services;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
@@ -89,6 +90,17 @@ public class CategoryService {
             return resCate;
         }).collect(Collectors.toList()));
         return res;
+    }
+
+    public List<ResCategory> fectchAll() {
+        return this.categoryRepository.findAll().stream().map(x -> {
+            var res = new ResCategory();
+            res.setDescription(x.getDescription());
+            res.setId(x.getId());
+            res.setStatus(x.getStatus());
+            res.setName(x.getName());
+            return res;
+        }).collect(Collectors.toList());
     }
 
 }
