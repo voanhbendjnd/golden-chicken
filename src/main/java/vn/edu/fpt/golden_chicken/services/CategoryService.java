@@ -92,7 +92,7 @@ public class CategoryService {
         return res;
     }
 
-    public List<ResCategory> fectchAll() {
+    public List<ResCategory> fetchAll() {
         return this.categoryRepository.findAll().stream().map(x -> {
             var res = new ResCategory();
             res.setDescription(x.getDescription());
@@ -101,6 +101,12 @@ public class CategoryService {
             res.setName(x.getName());
             return res;
         }).collect(Collectors.toList());
+    }
+
+    public void delete(Long id) {
+        var cate = this.categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category ID", id));
+        this.categoryRepository.delete(cate);
     }
 
 }

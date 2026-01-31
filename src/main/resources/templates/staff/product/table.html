@@ -64,7 +64,11 @@
                                             </thead>
                                             <tbody>
                                                 <tr th:each="product : ${products}">
-                                                    <td th:text="${product.id}"></td>
+                                                    <td>
+                                                        <a th:href="@{/staff/product/{id}(id=${product.id})}"
+                                                            th:text="${product.id}"
+                                                            style="text-decoration-line: none;"></a>
+                                                    </td>
                                                     <td th:text="${product.name}"></td>
                                                     <td th:text="${product.description}"></td>
                                                     <td th:text="${product.price}"></td>

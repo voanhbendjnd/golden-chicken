@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,7 +49,7 @@ public class ProductController {
 
     @GetMapping("/create")
     public String getCreatePage(Model model) {
-        model.addAttribute("categories", this.categoryService.fectchAll());
+        model.addAttribute("categories", this.categoryService.fetchAll());
         model.addAttribute("product", new ProductDTO());
         return "staff/product/create";
     }
@@ -57,8 +58,15 @@ public class ProductController {
     public String create(@ModelAttribute("product") ProductDTO productDTO,
             @RequestParam("thumbnailFile") MultipartFile thumbnailFile,
             @RequestParam("galleryFiles") List<MultipartFile> galleryFiles) throws IOException, URISyntaxException {
+
         this.productService.create(productDTO, galleryFiles, thumbnailFile);
         return "redirect:/staff/product";
+    }
+
+    @GetMapping("/{id:[0-9]+}")
+    public String detailPage(Model model, @PathVariable("id") Long id) {
+        model.addAttribute("product", this.productService.findById(id));
+        return "staff/product/detail";
     }
 
 }
