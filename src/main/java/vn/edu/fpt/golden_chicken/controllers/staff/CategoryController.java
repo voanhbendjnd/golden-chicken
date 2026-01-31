@@ -20,6 +20,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.request.CategoryDTO;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Controller
 @RequestMapping("/staff/category")
@@ -80,6 +81,12 @@ public class CategoryController {
             // bindingResult.rejectValue("error", de.getMessage());
             return "staff/category/update";
         }
+        return "redirect:/staff/category";
+    }
+
+    @PostMapping("/delete/{id:[0-9]+}")
+    public String delete(@PathVariable("id") Long id) {
+        this.categoryService.delete(id);
         return "redirect:/staff/category";
     }
 }
