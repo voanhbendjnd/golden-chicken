@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Book</title>
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <th:block th:replace="~{common/head}"></th:block>
+</head>
+
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+
+    <div class="page" style="padding: 16px;">
+        <h1>Address Book</h1>
+
+        <div style="margin: 12px 0;">
+            <a th:href="@{/profile}">Back to Profile</a>
+        </div>
+
+        <div th:if="${defaultAddress != null}" style="margin: 12px 0; padding: 12px; border: 1px solid #eee;">
+            <h3>Default Address</h3>
+            <div>
+                <strong th:text="${defaultAddress.recipientName}">Name</strong>
+            </div>
+            <div th:text="${defaultAddress.recipientPhone}">Phone</div>
+            <div>
+                <span th:text="${defaultAddress.specificAddress}">Specific</span>,
+                <span th:text="${defaultAddress.ward}">Ward</span>,
+                <span th:text="${defaultAddress.district}">District</span>,
+                <span th:text="${defaultAddress.city}">City</span>
+            </div>
+        </div>
+
+        <div style="margin: 12px 0;">
+            <h3>All Addresses</h3>
+            <div th:if="${#lists.isEmpty(addresses)}">No addresses.</div>
+            <table th:if="${!#lists.isEmpty(addresses)}" border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Recipient</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${addresses}">
+                        <td th:text="${a.id}">1</td>
+                        <td th:text="${a.recipientName}">Name</td>
+                        <td th:text="${a.recipientPhone}">Phone</td>
+                        <td>
+                            <span th:text="${a.specificAddress}">Specific</span>,
+                            <span th:text="${a.ward}">Ward</span>,
+                            <span th:text="${a.district}">District</span>,
+                            <span th:text="${a.city}">City</span>
+                        </td>
+                        <td th:text="${a.isDefault}">false</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+    <div th:replace="~{client/layout/footer}"></div>
+</body>
+
+</html>

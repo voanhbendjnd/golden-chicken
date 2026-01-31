@@ -19,8 +19,7 @@
         <aside class="sidebar">
             <h3>My Account</h3>
             <nav class="nav">
-                <a class="active" href="#">Avatar</a>
-                <a href="#">Account Management</a>
+                <a class="active" href="#">Account Management</a>
                 <a href="#">My Orders</a>
                 <a href="#">Address Book</a>
                 <a href="#">Account Information</a>
@@ -33,7 +32,8 @@
             <h1 class="title">Account Management</h1>
 
             <p class="subtitle">
-                Hi Duy ho. With this page, you will be able to manage all your account information.
+                Hi <span th:text="${profile.fullName}">User</span>. With this page, you will be able to manage all your
+                account information.
             </p>
             <!-- AVATAR -->
             <section class="section">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </section>
-            
+
 
             <!-- ACCOUNT INFORMATION -->
             <section class="section">
@@ -63,21 +63,43 @@
                 <div class="section__body grid-2">
                     <div class="col">
                         <h4 class="block-title">Contact Information</h4>
-                        <p><strong>Duy ho</strong></p>
-                        <p>hominhduy2020cth@gmail.com</p>
+                        <p><strong th:text="${profile.fullName}">User</strong></p>
+                        <p th:text="${profile.email}">email@example.com</p>
+                        <p th:text="${profile.phone}">0123456789</p>
                         <div class="actions">
-                            <a href="#">Edit</a>
-                            <a href="#">Change Password</a>
+                            <a th:if="${!isEdit}" th:href="@{/profile(edit=true)}" class="btn btn-warning">Edit</a>
                         </div>
                     </div>
 
-                    <div>
-                        <h4 class="block-title">Newsletters</h4>
-                        <p>You are subscribed to <strong>General Subscription</strong>.</p>
-                        <div class="actions">
-                            <a href="#">Edit</a>
-                        </div>
+                    <div id="updateProfileBox">
+                        <h4 class="block-title">Update Profile</h4>
+                        <form th:action="@{/profile}" th:object="${profileForm}" method="post" class="mt-2">
+
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" th:field="*{fullName}" class="form-control"
+                                    th:disabled="${!isEdit}" />
+                                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fullName')}"
+                                    th:errors="*{fullName}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" th:field="*{phone}" class="form-control" placeholder="10-15 digits"
+                                    th:disabled="${!isEdit}" />
+                                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('phone')}"
+                                    th:errors="*{phone}"></div>
+                            </div>
+
+                            <div class="actions d-flex gap-2">
+                                <button th:if="${isEdit}" class="btn btn-success" type="submit"
+                                    style="width: 12%; margin-right: 10px;">Save</button>
+                                <a th:if="${isEdit}" th:href="@{/profile}" class="btn btn-outline-danger">Cancel</a>
+                            </div>
+                        </form>
                     </div>
+
+
                 </div>
             </section>
 
@@ -85,7 +107,7 @@
             <section class="section">
                 <div class="section__header between">
                     <span>Address Book</span>
-                    <a href="#">Manage Addresses</a>
+                    <a th:href="@{/addresses}">Manage Addresses</a>
                 </div>
                 <div class="section__body">
                     <h4 class="block-title">Default Shipping Address</h4>
