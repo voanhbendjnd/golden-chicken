@@ -7,7 +7,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="header-logo col-4 col-lg-2">
-            <a class="navbar-brand logo-img" href="./trang-chu.html">
+            <a class="navbar-brand logo-img" th:href="@{/home}">
                 <img src="./img/LogoJB_New-02.png" alt="">
             </a>
         </div>
@@ -16,10 +16,18 @@
                 <a href="#" class="user-login btn-icon show-modal">
                     <i class="fa-solid fa-user "></i>
                 </a>
-                <span>
-                    <a th:href="@{/register}" class="login-item">Đăng ký/</a>
+                <span th:if="${session.user == null}">
+                    <a th:href="@{/register}" class="login-item">Đăng ký /</a>
                     <a th:href="@{/login}" class="login-item">Đăng nhập</a>
                 </span>
+
+                <span th:if="${session.user != null}">
+                    <span th:text="${session.fullName}"></span>
+                </span>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-outline-light me-2">Logout</button>
+                </form>
                 <Span class="lang ">
                     <a href="" class="lang-item active-lang">VN</a>
                     |
@@ -30,7 +38,7 @@
                 <div class="">
                     <ul class="navbar-nav justify-content-center flex-grow-1 ">
                         <li class="navbar-item">
-                            <a class="navbar-link active" aria-current="page" href="./trang-chu.html">TRANG CHỦ</a>
+                            <a class="navbar-link active" aria-current="page" th:href="@{/home}">TRANG CHỦ</a>
                         </li>
                         <li class="navbar-item">
                             <a class="navbar-link" href="./vejollibee.html">VỀ JOLLIBEE</a>
