@@ -3,8 +3,6 @@ package vn.edu.fpt.golden_chicken.services;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,5 +96,11 @@ public class ProductService {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         return ProductConvert.toResProduct(product);
+    }
+
+    public void delete(long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        this.productRepository.delete(product);
     }
 }

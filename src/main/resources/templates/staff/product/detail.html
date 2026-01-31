@@ -60,12 +60,10 @@
                         <div class="row">
                             <div class="col-md-5 mb-4">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Main Image</label>
                                     <img th:src="@{'/images/products/' + ${product.img}}"
                                         class="main-img-container shadow-sm border" alt="Product Image">
                                 </div>
 
-                                <label class="form-label fw-bold">Sub Images</label>
                                 <div class="row g-2">
                                     <div class="col-3" th:each="imgName : ${product.imgs}">
                                         <img th:src="@{'/images/products/' + ${imgName}}"
@@ -114,12 +112,6 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 d-flex gap-2">
-                                    <a th:href="@{/staff/product/update/{id}(id=${product.id})}"
-                                        class="btn btn-warning flex-fill">Edit</a>
-                                    <button class="btn btn-danger flex-fill" data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal">Delete</button>
-                                </div>
                             </div>
                         </div>
                     </div>

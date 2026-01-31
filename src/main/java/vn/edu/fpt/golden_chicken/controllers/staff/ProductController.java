@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +38,12 @@ public class ProductController {
         this.categoryService = categoryService;
     }
 
+    @PostMapping("/{id:[0-9]+}")
+    public String delete(@PathVariable("id") Long id) {
+        this.productService.delete(id);
+        return "redirect:/staff/product";
+    }
+
     @GetMapping
     public String getProductTablePage(Model model,
             @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
@@ -55,12 +62,20 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute("product") ProductDTO productDTO,
+    public String create(@ModelAttribute("product") ProductDTO productDTO, BindingResult bd,
             @RequestParam("thumbnailFile") MultipartFile thumbnailFile,
-            @RequestParam("galleryFiles") List<MultipartFile> galleryFiles) throws IOException, URISyntaxException {
+            @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model)
+            throws IOException, URISyntaxException {
+        try {
+            this.productService.create(productDTO, galleryFiles, thumbnailFile);
+            return "redirect:/staff/product";
+        } catch (IOException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/proudct/create";
+        }
 
-        this.productService.create(productDTO, galleryFiles, thumbnailFile);
-        return "redirect:/staff/product";
     }
 
     @GetMapping("/{id:[0-9]+}")
