@@ -13,7 +13,6 @@
     <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/profileTest.css}" rel="stylesheet">
 
-    <!-- CSS riêng trang address -->
     <link th:href="@{/css/address.css}" rel="stylesheet">
 </head>
 
@@ -21,7 +20,6 @@
     <div th:replace="~{client/layout/header}"></div>
 
     <div class="page">
-        <!-- LEFT SIDEBAR -->
         <aside class="addr-sidebar">
             <h3>My Account</h3>
             <nav class="nav">
@@ -33,11 +31,9 @@
             </nav>
         </aside>
 
-        <!-- CONTENT -->
         <main class="addr-main">
             <h1 class="addr-title">Address Book</h1>
 
-            <!-- ĐỊA CHỈ MẶC ĐỊNH -->
             <section class="addr-card">
                 <div class="addr-card__head">ĐỊA CHỈ MẶC ĐỊNH</div>
                 <div class="addr-card__body">
@@ -69,7 +65,6 @@
                 </div>
             </section>
 
-            <!-- ĐỊA CHỈ BỔ SUNG -->
             <section class="addr-card">
                 <div class="addr-card__head">ĐỊA CHỈ BỔ SUNG</div>
                 <div class="addr-card__body">

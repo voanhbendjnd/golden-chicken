@@ -7,7 +7,6 @@
     --text: #111;
 }
 
-/* Layout */
 .addr-page {
     max-width: 1280px;
     margin: 0 auto;
@@ -17,7 +16,6 @@
     gap: 24px;
 }
 
-/* Sidebar */
 .addr-sidebar {
     width: 220px;
     background: #f4c54a;
@@ -51,7 +49,6 @@
     border-left: 5px solid var(--red);
 }
 
-/* Main */
 .addr-main {
     flex: 1;
     min-width: 0;
@@ -64,7 +61,6 @@
     color: var(--red);
 }
 
-/* Card */
 .addr-card {
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -91,7 +87,6 @@
     text-transform: uppercase;
 }
 
-/* Address text */
 .addr-block {
     font-size: 13px;
     line-height: 1.6;
@@ -101,17 +96,16 @@
     font-weight: 700;
 }
 
-/* Actions */
 .addr-actions {
     margin-top: 6px;
     font-size: 13px;
 }
 
-.addr-actions a{
+.addr-actions a {
     margin-right: 10px;
 }
 
-.addr-actions button{
+.addr-actions button {
     margin-right: 10px;
 }
 
