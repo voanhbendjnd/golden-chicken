@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.utils.converts;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
@@ -26,9 +27,10 @@ public class ProductConvert {
         res.setName(product.getName());
         res.setPrice(product.getPrice());
         res.setType(product.getType());
-        res.setCategoryName(product.getCategory().getName());
+        res.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
         res.setImg(product.getImage_url());
-        res.setImgs(product.getProductImages().stream().map(ProductImage::getImage_url).collect(Collectors.toList()));
+        var images = product.getProductImages();
+        res.setImgs(images == null ? Collections.emptyList() : images.stream().map(ProductImage::getImage_url).collect(Collectors.toList()));
         return res;
     }
 }

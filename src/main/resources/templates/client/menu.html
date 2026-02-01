@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thực đơn - Golden Chicken</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS GIỮ NGUYÊN -->
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/menu.css}">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div th:replace="~{client/layout/header}"></div>
+
+    <section class="menu-page section">
+        <div class="container-fluid py-4">
+
+            <h1 class="menu-title text-center">THỰC ĐƠN</h1>
+
+            <!-- DANH MỤC -->
+            <div class="category-block" th:each="block : ${categoryProductList}">
+
+                <h2 class="category-name" th:text="${block.categoryName}">
+                    Danh mục
+                </h2>
+
+                <div class="row product-list g-4">
+
+                    <!-- SẢN PHẨM -->
+                    <div class="col-6 col-md-4 col-lg-3" th:each="product : ${block.products}">
+
+                        <div class="product-card">
+
+                            <!-- IMAGE (SỬA CHUẨN DTO) -->
+                            <img class="product-card__img" th:src="@{'/images/products/' + ${product.img}}"
+                                th:alt="${product.name}">
+
+
+                            <div class="product-card__body">
+                                <h3 class="product-card__name" th:text="${product.name}">
+                                    Tên món
+                                </h3>
+
+                                <p class="product-card__price"
+                                    th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">
+                                    0 ₫
+                                </p>
+
+                                <p class="product-card__desc" th:if="${product.description}"
+                                    th:text="${product.description}">
+                                    Mô tả
+                                </p>
+                            </div>
+
+                            <a class="btn-default btn-yellow btn-order" th:href="@{/order/{id}(id=${product.id})}">
+                                ĐẶT HÀNG
+                            </a>
+
+
+                        </div>
+                    </div>
+                    <!-- END PRODUCT -->
+
+                </div>
+            </div>
+            <!-- END CATEGORY -->
+
+            <!-- KHÔNG CÓ DỮ LIỆU -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(categoryProductList)}">
+                <p class="text-muted">Chưa có sản phẩm nào trong thực đơn.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <div th:replace="~{client/layout/footer}"></div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+
+</body>
+
+</html>

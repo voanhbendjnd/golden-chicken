@@ -9,4 +9,5 @@ import vn.edu.fpt.golden_chicken.domain.entity.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
+    java.util.List<Product> findByActiveTrue();
 }
