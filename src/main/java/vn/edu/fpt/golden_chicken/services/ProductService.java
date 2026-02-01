@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AccessLevel;
@@ -48,8 +49,8 @@ public class ProductService {
 
     public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file)
             throws IOException, URISyntaxException {
-        var category = this.categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategoryId()));
+        var category = this.categoryRepository.findById(dto.getCategory().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
         var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
@@ -65,7 +66,7 @@ public class ProductService {
                 throw new IOException("File Invalid");
 
             }
-            product.setImage_url(this.fileService.getLastNameFile(file));
+            product.setImageUrl(this.fileService.getLastNameFile(file));
 
         }
 
@@ -83,12 +84,97 @@ public class ProductService {
                 }
                 var productImg = new ProductImage();
                 productImg.setProduct(product);
-                productImg.setImage_url(this.fileService.getLastNameFile(x));
+                productImg.setImageUrl(this.fileService.getLastNameFile(x));
                 imgs.add(productImg);
-                product.setProductImages(imgs);
             }
+            product.setProductImages(imgs);
+
         }
         this.productRepository.save(product);
+
+    }
+
+    public boolean validFile(MultipartFile file) {
+        var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
+        var fileName = file.getOriginalFilename();
+        var lastDoIndex = fileName.lastIndexOf(".");
+        if (lastDoIndex == -1) {
+            return false;
+        }
+        var ext = fileName.substring(lastDoIndex).toLowerCase();
+        if (!allowedExtensions.contains(ext)) {
+            return false;
+        }
+        return true;
+    }
+
+    public void handleGalleryUpdate(Product product, List<MultipartFile> newFiles, List<String> remainNames,
+            List<String> filesToDelete) throws URISyntaxException, IOException {
+        var currentImages = product.getProductImages();
+        var interator = currentImages.iterator();
+        while (interator.hasNext()) {
+            var img = interator.next();
+            if (remainNames == null || !remainNames.contains(img.getImageUrl())) {
+                filesToDelete.add(img.getImageUrl());
+                img.setProduct(null);
+                interator.remove();
+            }
+        }
+        if (newFiles != null && !newFiles.isEmpty()) {
+            for (var x : newFiles) {
+                if (x != null && !x.isEmpty() && x.getOriginalFilename() != null
+                        && !x.getOriginalFilename().isBlank()) {
+                    this.validFile(x);
+                    var lastName = this.fileService.getLastNameFile(x);
+                    var newImg = new ProductImage();
+                    newImg.setImageUrl(lastName);
+                    newImg.setProduct(product);
+                    currentImages.add(newImg);
+                }
+
+            }
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void update(ProductDTO dto, MultipartFile file, List<MultipartFile> files)
+            throws IOException, URISyntaxException {
+        List<String> filesToDelete = new ArrayList<>();
+
+        // check category
+        var category = this.categoryRepository.findById(dto.getCategory().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
+        // get record db
+        var product = this.productRepository.findById(dto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.getId()));
+        // check img file
+        if (file != null && !file.isEmpty()) {
+            // check file
+            if (!this.validFile(file)) {
+                throw new IOException("File Invalid");
+            }
+
+            if (product.getImageUrl() != null) {
+                filesToDelete.add(product.getImageUrl());
+            }
+            // save new file
+            product.setImageUrl(this.fileService.getLastNameFile(file));
+        }
+        this.handleGalleryUpdate(product, files, dto.getImgs(), filesToDelete);
+        product.setCategory(category);
+        product.setDescription(dto.getDescription());
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setType(dto.getType());
+        product.setActive(dto.isActive());
+        this.productRepository.save(product);
+        filesToDelete.forEach(x -> {
+            try {
+                this.fileService.deleteFile(x);
+            } catch (IOException e) {
+                System.out.println("Cannot Delete File!");
+            }
+        });
 
     }
 

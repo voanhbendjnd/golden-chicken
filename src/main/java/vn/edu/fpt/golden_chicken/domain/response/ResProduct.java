@@ -17,8 +17,15 @@ public class ResProduct {
     String description;
     boolean active;
     ProductType type;
-    String categoryName;
     String img;
     List<String> imgs;
 
+    // Long categoryId;
+    Category category;
+
+    @Data
+    public static class Category {
+        Long id;
+        String name;
+    }
 }

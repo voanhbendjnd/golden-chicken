@@ -163,6 +163,9 @@ public class UserService {
 
         try (var is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
             var sheet = workbook.getSheetAt(0);
+            if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
+                throw new DataFormatException("File Excel Not Empty!");
+            }
             var users = new ArrayList<User>();
             var mpAcc = new HashMap<ResUser, String>();
             var existingEmails = this.userRepository.findAll().stream()

@@ -68,6 +68,7 @@ public class ProductController {
             @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model)
             throws IOException, URISyntaxException {
         if (bd.hasErrors()) {
+            model.addAttribute("categories", this.categoryService.fetchAll());
             return "staff/product/create";
         }
         try {
@@ -88,4 +89,34 @@ public class ProductController {
         return "staff/product/detail";
     }
 
+    @GetMapping("/update/{id:[0-9]+}")
+    public String updatePage(Model model, @PathVariable("id") Long id) {
+        var product = this.productService.findById(id);
+        model.addAttribute("categories", this.categoryService.fetchAll());
+        model.addAttribute("product", product);
+        model.addAttribute("img", product.getImg());
+        model.addAttribute("imgs", product.getImgs());
+        return "staff/product/update";
+    }
+
+    @PostMapping("/update")
+    public String update(@ModelAttribute("product") @Valid ProductDTO dto, BindingResult bd,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files, Model model)
+            throws IOException, URISyntaxException {
+        if (bd.hasErrors()) {
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/product/update";
+        }
+        try {
+            this.productService.update(dto, file, files);
+
+        } catch (IOException ex) {
+            model.addAttribute("error", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/product/update";
+        }
+        return "redirect:/staff/product";
+
+    }
 }

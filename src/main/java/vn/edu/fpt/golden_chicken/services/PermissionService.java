@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -80,7 +81,7 @@ public class PermissionService {
         return res;
     }
 
-    public void importPermissions(MultipartFile file) throws IOException {
+    public void importPermissions(MultipartFile file) throws IOException, DataFormatException {
         var is = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(is);
         var sheet = workbook.getSheetAt(0);
@@ -88,9 +89,18 @@ public class PermissionService {
                 .map(x -> x.getName() + "-" + x.getApiPath() + "-" + x.getMethod() + "-" + x.getModule())
                 .collect(Collectors.toSet());
         var permissions = new ArrayList<Permission>();
+        if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
+            throw new DataFormatException("File Excel Not Empty!");
+        }
         for (var row : sheet) {
+            int rowNum = row.getRowNum();
+
             if (row.getRowNum() == 0) {
                 continue;
+            }
+            if (row.getCell(0) == null || row.getCell(1) == null ||
+                    row.getCell(2) == null || row.getCell(3) == null) {
+                throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
             }
             var permission = new Permission();
             var name = row.getCell(0).getStringCellValue();
@@ -99,7 +109,8 @@ public class PermissionService {
             var module = row.getCell(3).getStringCellValue();
             var key = name + "-" + apiPath + "-" + method + "-" + module;
             if (set.contains(key)) {
-                throw new DataInvalidException("This Permission (" + name + ") Already Exists!");
+                throw new DataInvalidException(
+                        "This Permission (" + name + ") Already Exists!" + " With row: " + rowNum + 1);
             }
             permission.setName(name);
             permission.setApiPath(apiPath);

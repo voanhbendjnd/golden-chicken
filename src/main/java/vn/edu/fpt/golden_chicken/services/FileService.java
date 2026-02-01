@@ -50,4 +50,12 @@ public class FileService {
         return lastName;
     }
 
+    public void deleteFile(String fileName) throws IOException {
+        if (fileName != null && !fileName.isEmpty()) {
+            var path = Paths.get(baseURI + fileName);
+            Files.deleteIfExists(path);
+        }
+        return;
+    }
+
 }

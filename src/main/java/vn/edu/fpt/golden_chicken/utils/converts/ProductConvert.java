@@ -26,9 +26,12 @@ public class ProductConvert {
         res.setName(product.getName());
         res.setPrice(product.getPrice());
         res.setType(product.getType());
-        res.setCategoryName(product.getCategory().getName());
-        res.setImg(product.getImage_url());
-        res.setImgs(product.getProductImages().stream().map(ProductImage::getImage_url).collect(Collectors.toList()));
+        var cate = new ResProduct.Category();
+        cate.setId(product.getCategory().getId());
+        cate.setName(product.getCategory().getName());
+        res.setCategory(cate);
+        res.setImg(product.getImageUrl());
+        res.setImgs(product.getProductImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
         return res;
     }
 }

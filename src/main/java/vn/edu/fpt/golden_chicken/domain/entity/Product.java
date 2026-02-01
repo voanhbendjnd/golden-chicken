@@ -36,7 +36,7 @@ public class Product {
     @Column(columnDefinition = "NVARCHAR(255)")
     String description;
     Boolean active;
-    String image_url;
+    String imageUrl;
     @Enumerated(EnumType.STRING)
     ProductType type;
     @ManyToOne

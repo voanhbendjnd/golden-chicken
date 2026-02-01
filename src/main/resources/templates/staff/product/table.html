@@ -35,10 +35,12 @@
                                                     onclick="handleSearch()">
                                                     Search
                                                 </button>
+                                                <a href="/staff/product" class="btn btn-outline-dark">Reset</a>
+
                                             </div>
                                         </div>
                                     </div>
-                                    <form th:action="@{/staff/product/import}" method="post"
+                                    <!-- <form th:action="@{/staff/product/import}" method="post"
                                         enctype="multipart/form-data">
                                         <input type="hidden" th:name="${_csrf.parameterName}"
                                             th:value="${_csrf.token}" />
@@ -49,7 +51,7 @@
                                                 required />
                                         </div>
                                         <button type="submit" class="btn btn-success">Upload And Save</button>
-                                    </form>
+                                    </form> -->
                                     <div th:if="${products != null and !products.isEmpty()}">
                                         <table class="table table-striped">
                                             <thead>

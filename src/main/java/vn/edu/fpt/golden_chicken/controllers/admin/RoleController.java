@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.controllers.admin;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -109,6 +110,13 @@ public class RoleController {
             this.roleService.importRoles(file);
             return "redirect:/admin/role";
         } catch (DataInvalidException de) {
+            model.addAttribute("errorMessage", de.getMessage());
+            var data = this.roleService.fetchAllWithPagination(Specification.where(null), pageable);
+            model.addAttribute("roles", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/role/table";
+
+        } catch (DataFormatException de) {
             model.addAttribute("errorMessage", de.getMessage());
             var data = this.roleService.fetchAllWithPagination(Specification.where(null), pageable);
             model.addAttribute("roles", data.getResult());
