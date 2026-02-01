@@ -1,0 +1,113 @@
+.page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 16px 56px;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.addr-sidebar {
+    width: 220px;
+    background: #f4c54a;
+    padding: 16px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.addr-sidebar h3 {
+    margin: 0 0 15px;
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.addr-sidebar .nav a {
+    display: block;
+    margin-bottom: 17px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #000;
+    text-transform: uppercase;
+}
+
+.addr-sidebar .nav a.active {
+    background: #fff;
+    border-left: 5px solid #e11d2e;
+    padding-left: 10px;
+}
+
+.addr-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.addr-title {
+    color: #e11d2e;
+    text-transform: uppercase;
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0 0 16px;
+}
+
+.addr-card {
+    border: 1px solid #e6e6e6;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 25px;
+    background: #fff;
+}
+
+.addr-card__head {
+    background: #f5b800;
+    padding: 14px 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.addr-card__body {
+    padding: 18px;
+}
+
+.addr-subhead {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+}
+
+.addr-block {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.addr-block .name {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.addr-actions {
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.addr-actions a {
+    color: #1677ff;
+    text-decoration: underline;
+}
+
+.addr-divider {
+    height: 1px;
+    background: #e6e6e6;
+    margin: 16px 0;
+}
+
+@media (max-width: 900px) {
+    .page {
+        flex-direction: column;
+    }
+
+    .addr-sidebar {
+        width: 100%;
+    }
+}
