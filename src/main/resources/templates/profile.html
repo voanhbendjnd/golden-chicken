@@ -111,8 +111,24 @@
                 </div>
                 <div class="section__body">
                     <h4 class="block-title">Default Shipping Address</h4>
+
+                    <div th:if="${defaultAddress != null}">
+                        <p><strong th:text="${defaultAddress.recipientName}">Full name</strong></p>
+                        <p>
+                            <span th:text="${defaultAddress.specificAddress}">Specific address</span>,
+                            <span th:text="${defaultAddress.ward}">Ward</span>,
+                            <span th:text="${defaultAddress.district}">District</span>,
+                            <span th:text="${defaultAddress.city}">Cần Thơ</span>
+                        </p>
+                        <p>T: <span th:text="${defaultAddress.recipientPhone}">Phone</span></p>
+                    </div>
+
+                    <div th:if="${defaultAddress == null}">
+                        <p>Chưa có địa chỉ mặc định.</p>
+                    </div>
+
                     <div class="actions">
-                        <a href="#">Edit</a>
+                        <a th:href="@{/addresses}">Quản lý địa chỉ</a>
                     </div>
                 </div>
             </section>

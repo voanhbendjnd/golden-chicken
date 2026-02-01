@@ -10,15 +10,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.domain.request.ProfileUpdateDTO;
+import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.ProfileService;
 
 @Controller
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final AddressServices addressServices;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, AddressServices addressServices) {
         this.profileService = profileService;
+        this.addressServices = addressServices;
     }
 
     @GetMapping("/profile")
@@ -29,7 +32,8 @@ public class ProfileController {
         model.addAttribute("isEdit", edit);
         model.addAttribute("profile", profileService.getProfile());
         model.addAttribute("profileForm", profileService.getProfileForm());
-        return "testProfile";
+        model.addAttribute("defaultAddress", addressServices.getDefaultAddress());
+        return "profile";
     }
 
     @PostMapping("/profile")
@@ -41,7 +45,7 @@ public class ProfileController {
         model.addAttribute("isEdit", true);
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profileService.getProfile());
-            return "testProfile";
+            return "profile";
         }
 
         profileService.updateProfile(profileForm);

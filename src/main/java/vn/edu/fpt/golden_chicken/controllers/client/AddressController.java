@@ -1,8 +1,20 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import jakarta.mail.Address;
+import jakarta.validation.Valid;
+import vn.edu.fpt.golden_chicken.domain.request.AddressFormDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResAddress;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
 
 @Controller
@@ -15,9 +27,94 @@ public class AddressController {
     }
 
     @GetMapping("/addresses")
-    public String addressList(Model model) {
-        model.addAttribute("addresses", addressServices.getMyAddresses());
-        model.addAttribute("defaultAddress", addressServices.getMyDefaultAddress());
-        return "client/address/list";
+    public String addressBook(Model model) {
+        var addresses = addressServices.getAllAddresses();
+        var defaultAddress = addressServices.getDefaultAddress();
+        List<ResAddress> additionalAddresses = new ArrayList<>();
+
+        for (ResAddress a : addresses) {
+            if (a.getIsDefault() == null || !a.getIsDefault()) {
+                additionalAddresses.add(a);
+            }
+        }
+
+        model.addAttribute("additionalAddresses", additionalAddresses);
+        model.addAttribute("defaultAddress", defaultAddress);
+        return "client/address/listAddress";
+    }
+
+    @GetMapping("/addresses/new")
+    public String createForm(Model model) {
+        model.addAttribute("addressForm", new AddressFormDTO());
+        model.addAttribute("districts", districts());
+        model.addAttribute("wards", wards());
+        return "client/address/createAddress";
+    }
+
+    @PostMapping("/addresses/new")
+    public String create(
+            @Valid @ModelAttribute("addressForm") AddressFormDTO form,
+            BindingResult result,
+            Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("districts", districts());
+            model.addAttribute("wards", wards());
+            model.addAttribute("isEdit", false);
+            return "client/address/createAddress";
+        }
+        addressServices.createMyAddress(form);
+        return "redirect:/addresses";
+    }
+
+    @GetMapping("/addresses/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model) {
+        AddressFormDTO form = addressServices.getMyAddressForm(id);
+        if (form == null)
+            return "redirect:/addresses";
+
+        model.addAttribute("addressId", id);
+        model.addAttribute("addressForm", form);
+        model.addAttribute("districts", districts());
+        model.addAttribute("wards", wards());
+        model.addAttribute("isEdit", true);
+        return "client/address/createAddress";
+    }
+
+    @PostMapping("/addresses/{id}/edit")
+    public String edit(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("addressForm") AddressFormDTO form,
+            BindingResult result,
+            Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("addressId", id);
+            model.addAttribute("districts", districts());
+            model.addAttribute("wards", wards());
+            model.addAttribute("isEdit", true);
+            return "client/address/createAddress";
+        }
+        addressServices.updateUserAddress(id, form);
+        return "redirect:/addresses";
+    }
+
+    @PostMapping("/addresses/{id}/default")
+    public String setDefault(@PathVariable Long id) {
+        addressServices.setCurrentUserDefaultAddress(id);
+        return "redirect:/addresses";
+    }
+
+    @PostMapping("/addresses/{id}/delete")
+    public String delete(@PathVariable Long id) {
+        addressServices.deleteMyAddress(id);
+        return "redirect:/addresses";
+    }
+
+    private List<String> districts() {
+        return List.of("Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt",
+                "Phong Điền", "Cờ Đỏ", "Thới Lai", "Vĩnh Thạnh");
+    }
+
+    private List<String> wards() {
+        return List.of("An Khánh", "Xuân Khánh", "Hưng Lợi", "An Bình", "Cái Khế");
     }
 }
