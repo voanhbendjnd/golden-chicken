@@ -37,7 +37,7 @@ public class PermissionInterceptorConfig implements WebMvcConfigurer {
                 "/favicon.ico"
         };
         registry.addInterceptor(getPermissionInterceptor())
-                .addPathPatterns("/admin/**", "/staff/**")
-                .excludePathPatterns(whiteList);
+                .addPathPatterns("/admin/**", "/staff/**");
+        // .excludePathPatterns(whiteList);
     }
 }
