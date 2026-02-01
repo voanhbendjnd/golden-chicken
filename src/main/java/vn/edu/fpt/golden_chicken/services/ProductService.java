@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AccessLevel;
@@ -188,5 +188,12 @@ public class ProductService {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         this.productRepository.delete(product);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResProduct> getAllActiveForMenu() {
+        return this.productRepository.findByActiveTrue().stream()
+                .map(ProductConvert::toResProduct)
+                .collect(Collectors.toList());
     }
 }
