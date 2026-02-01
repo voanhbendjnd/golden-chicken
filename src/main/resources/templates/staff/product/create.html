@@ -32,7 +32,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Category</label>
-                                    <select class="form-select" th:field="*{categoryId}">
+                                    <select class="form-select" th:field="*{categoryId}" required>
                                         <option value="">-- Choose Category --</option>
                                         <option th:each="cat : ${categories}" th:value="${cat.id}"
                                             th:text="${cat.name}"></option>
@@ -63,7 +63,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Product Type</label>
-                                    <select th:field="*{type}" class="form-select">
+                                    <select th:field="*{type}" class="form-select" required>
                                         <option value="">-- Choose Type --</option>
                                         <option th:value="SINGLE">SINGLE</option>
                                         <option th:value="COMBO">COMBO</option>
@@ -74,7 +74,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Status</label>
-                                    <select th:field="*{active}" class="form-select">
+                                    <select th:field="*{active}" class="form-select" required>
                                         <option value="true">Active</option>
                                         <option value="false">Non-active</option>
                                     </select>

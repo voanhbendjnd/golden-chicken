@@ -83,11 +83,13 @@ public class SecurityConfig {
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 String[] whiteList = {
                                 "/",
+                                "/home",
                                 "/login",
                                 "/register",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/img/**",
                                 "/client/**",
                 };
                 http

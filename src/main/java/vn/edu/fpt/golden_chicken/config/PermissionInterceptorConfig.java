@@ -24,6 +24,7 @@ public class PermissionInterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         String[] whiteList = {
                 "/",
+                "/home",
                 "/login",
                 "/register",
                 "/css/**",

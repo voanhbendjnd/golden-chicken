@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
@@ -62,10 +63,13 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute("product") ProductDTO productDTO, BindingResult bd,
+    public String create(@ModelAttribute("product") @Valid ProductDTO productDTO, BindingResult bd,
             @RequestParam("thumbnailFile") MultipartFile thumbnailFile,
             @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model)
             throws IOException, URISyntaxException {
+        if (bd.hasErrors()) {
+            return "staff/product/create";
+        }
         try {
             this.productService.create(productDTO, galleryFiles, thumbnailFile);
             return "redirect:/staff/product";
