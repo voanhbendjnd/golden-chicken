@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.mail.Address;
 import jakarta.validation.Valid;
@@ -48,6 +49,7 @@ public class AddressController {
         model.addAttribute("addressForm", new AddressFormDTO());
         model.addAttribute("districts", districts());
         model.addAttribute("wards", wards());
+        model.addAttribute("isEdit", false);
         return "client/address/createAddress";
     }
 
@@ -66,8 +68,8 @@ public class AddressController {
         return "redirect:/addresses";
     }
 
-    @GetMapping("/addresses/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    @PostMapping("/addresses/edit")
+    public String editForm(@RequestParam("id") Long id, Model model) {
         AddressFormDTO form = addressServices.getMyAddressForm(id);
         if (form == null)
             return "redirect:/addresses";
@@ -80,20 +82,18 @@ public class AddressController {
         return "client/address/createAddress";
     }
 
-    @PostMapping("/addresses/{id}/edit")
-    public String edit(
-            @PathVariable Long id,
+    @PostMapping("/addresses/update")
+    public String update(
             @Valid @ModelAttribute("addressForm") AddressFormDTO form,
             BindingResult result,
             Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("addressId", id);
             model.addAttribute("districts", districts());
             model.addAttribute("wards", wards());
             model.addAttribute("isEdit", true);
             return "client/address/createAddress";
         }
-        addressServices.updateUserAddress(id, form);
+        addressServices.updateUserAddress(form);
         return "redirect:/addresses";
     }
 

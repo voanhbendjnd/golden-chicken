@@ -36,9 +36,9 @@
             <section class="section">
                 <div class="section__header">Thông tin địa chỉ</div>
                 <div class="section__body">
-                    <form th:action="${isEdit} ? @{/addresses/{id}/edit(id=${addressId})} : @{/addresses/new}"
+                    <form th:action="${isEdit} ? @{/addresses/update} : @{/addresses/new}"
                         th:object="${addressForm}" method="post">
-
+                        <input type="hidden" th:field="*{id}" />
                         <div class="mb-3">
                             <label class="form-label">Họ tên người nhận</label>
                             <input type="text" th:field="*{recipientName}" class="form-control" />

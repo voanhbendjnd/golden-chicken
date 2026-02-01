@@ -88,9 +88,10 @@
                         </div>
 
                         <div class="addr-actions">
-                            <a th:href="@{/addresses/{id}/edit(id=${a.id})}" class="btn btn-warning">
-                                Chỉnh sửa
-                            </a>
+                            <form th:action="@{/addresses/edit}" method="post" style="display: inline;">
+                                <input type="hidden" name="id" th:value="${a.id}" />
+                                <button type="submit" class="btn btn-warning">Chỉnh sửa</button>
+                            </form>
                             <form th:action="@{/addresses/{id}/delete(id=${a.id})}" method="post"
                                 style="display: inline;">
                                 <button type="submit" class="btn btn-danger">Xóa</button>

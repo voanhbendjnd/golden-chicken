@@ -107,6 +107,7 @@ public class AddressServices {
             return null;
 
         AddressFormDTO dto = new AddressFormDTO();
+        dto.setId(a.getId());
         dto.setRecipientName(a.getRecipientName());
         dto.setRecipientPhone(a.getRecipientPhone());
         dto.setSpecificAddress(a.getSpecificAddress());
@@ -117,13 +118,13 @@ public class AddressServices {
         return dto;
     }
 
-    public void updateUserAddress(Long id, AddressFormDTO dto) {
+    public void updateUserAddress(AddressFormDTO dto) {
         User user = this.profileService.getCurrentUser();
 
-        if (user == null)
+        if (user == null || dto.getId() == null)
             return;
 
-        Optional<Address> opt = addressRepository.findByIdAndUserId(id, user.getId());
+        Optional<Address> opt = addressRepository.findByIdAndUserId(dto.getId(), user.getId());
         if (opt.isEmpty())
             return;
 

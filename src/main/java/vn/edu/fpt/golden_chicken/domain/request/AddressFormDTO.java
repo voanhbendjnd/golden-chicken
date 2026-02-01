@@ -12,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class AddressFormDTO {
+    Long id;
+    
     @NotBlank(message = "Recipient name is required")
     @Size(max = 100, message = "Recipient name max 100")
     String recipientName;
