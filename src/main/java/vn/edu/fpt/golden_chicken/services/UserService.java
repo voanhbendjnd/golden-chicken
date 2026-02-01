@@ -25,6 +25,7 @@ import vn.edu.fpt.golden_chicken.common.MyLibrary;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
+import vn.edu.fpt.golden_chicken.domain.request.ProfileUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;

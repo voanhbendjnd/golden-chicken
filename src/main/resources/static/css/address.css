@@ -1,0 +1,161 @@
+:root {
+    --red: #e11d2e;
+    --yellow: #f5b800;
+    --sidebar: #f6d88b;
+    --border: #e6e6e6;
+    --link: #1a73e8;
+    --text: #111;
+}
+
+.addr-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 16px 56px;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.addr-sidebar {
+    width: 220px;
+    background: #f4c54a;
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.addr-sidebar h3 {
+    margin: 0 0 15px;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.addr-sidebar .nav {
+    display: block;
+}
+
+.addr-sidebar .nav a {
+    display: block;
+    width: 100%;
+    margin-bottom: 17px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #000;
+    text-transform: uppercase;
+    white-space: normal;
+}
+
+.addr-sidebar .nav a.active {
+    background: #fff;
+    border-left: 5px solid var(--red);
+}
+
+.addr-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.addr-title {
+    margin: 0 0 14px;
+    font-size: 28px;
+    text-transform: uppercase;
+    color: var(--red);
+}
+
+.addr-card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 22px;
+}
+
+.addr-card__head {
+    background: var(--yellow);
+    padding: 14px 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.addr-card__body {
+    padding: 16px 18px 18px;
+}
+
+.addr-subhead {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.addr-block {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.addr-block .name {
+    font-weight: 700;
+}
+
+.addr-actions {
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.addr-actions a {
+    margin-right: 10px;
+}
+
+.addr-actions button {
+    margin-right: 10px;
+}
+
+
+
+
+
+.addr-actions a:hover {
+    text-decoration: underline;
+}
+
+/* Divider */
+.addr-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+}
+
+
+
+.addr-show {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.addr-select {
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+/* Button */
+.addr-btn {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 26px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width:900px) {
+    .addr-page {
+        flex-direction: column;
+    }
+
+    .addr-sidebar {
+        width: 100%;
+        flex: none;
+    }
+}

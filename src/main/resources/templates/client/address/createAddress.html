@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm địa chỉ mới</title>
+    <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+    <th:block th:replace="~{common/head}"></th:block>
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+    <link th:href="@{/css/newAddress.css}" rel="stylesheet">
+</head>
+
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+
+    <div class="page">
+        <aside class="sidebar">
+            <h3>My Account</h3>
+            <nav class="nav">
+                <a th:href="@{/profile}">Account Management</a>
+                <a href="#">My Orders</a>
+                <a class="active" th:href="@{/addresses}">Address Book</a>
+                <a href="#">Account Information</a>
+                <a href="#">Voucher List</a>
+            </nav>
+        </aside>
+
+        <main class="main">
+            <h1 class="title" th:text="${isEdit} ? 'CHỈNH SỬA ĐỊA CHỈ' : 'THÊM ĐỊA CHỈ MỚI'">
+                THÊM ĐỊA CHỈ MỚI
+            </h1>
+
+            <section class="section">
+                <div class="section__header">Thông tin địa chỉ</div>
+                <div class="section__body">
+                    <form th:action="${isEdit} ? @{/addresses/update} : @{/addresses/new}" th:object="${addressForm}"
+                        method="post">
+                        <input type="hidden" th:field="*{id}" />
+                        <div class="mb-3">
+                            <label class="form-label">Họ tên người nhận</label>
+                            <input type="text" th:field="*{recipientName}" class="form-control" />
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('recipientName')}"
+                                th:errors="*{recipientName}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Số điện thoại người nhận</label>
+                            <input type="text" th:field="*{recipientPhone}" class="form-control" />
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('recipientPhone')}"
+                                th:errors="*{recipientPhone}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ cụ thể (số nhà, hẻm, ghi chú)</label>
+                            <input type="text" th:field="*{specificAddress}" class="form-control"
+                                placeholder="VD: 257B, đối diện tòa nhà A" />
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('specificAddress')}"
+                                th:errors="*{specificAddress}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Quận/Huyện</label>
+                            <select th:field="*{district}" class="form-control">
+                                <option value="">-- Chọn quận/huyện --</option>
+                                <option th:each="d : ${districts}" th:value="${d}" th:text="${d}"></option>
+                            </select>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('district')}"
+                                th:errors="*{district}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phường/Xã</label>
+                            <select th:field="*{ward}" class="form-control">
+                                <option value="">-- Chọn phường/xã --</option>
+                                <option th:each="w : ${wards}" th:value="${w}" th:text="${w}"></option>
+                            </select>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('ward')}"
+                                th:errors="*{ward}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>
+                                <input type="checkbox" th:field="*{isDefault}" />
+                                Đặt làm địa chỉ mặc định
+                            </label>
+                        </div>
+
+                        <div class="actions">
+                            <button type="submit" class="btn btn-success" th:text="${isEdit} ? 'Lưu' : 'Tạo mới'">
+                                Tạo mới
+                            </button>
+
+                            <a th:href="@{/addresses}" class="btn btn-outline-danger">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div th:replace="~{client/layout/footer}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+
+</html>
