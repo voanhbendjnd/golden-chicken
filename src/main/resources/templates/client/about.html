@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/css/about.css}" rel="stylesheet">
+    <head th:replace="~{common/head}"></head>
+</head>
+
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+
+    <section class="about-history-section">
+        <div class="container-fluid">
+            <div class="row align-items-center min-vh-50 py-5">
+                <div class="col-md-4 d-flex justify-content-center">
+                    <img th:src="@{/img/anh_thumuc2/bee.png}" alt="Jollibee Mascot" class="about-history__mascot">
+                </div>
+                <div class="col-md-8">
+                    <h2 class="about-history__title">LỊCH SỬ HÌNH THÀNH</h2>
+                    <p class="about-history__text">
+                        Jollibee là một câu chuyện thành công phi thường bởi chỉ từ 2 tiệm kem nhỏ hình thành vào năm 1975, chuyên bán các món ăn nóng và bánh mì kẹp đã trở thành công ty với 7 cửa hàng vào năm 1978, chuyên về bơ gơ. Sau đó trở thành một tập đoàn tạo nên cuộc cách mạng thức ăn nhanh tại Philippines.
+                    </p>
+                    <p class="about-history__text">
+                        Jollibee hiện có hơn 1000 cửa hàng tại Philippines và hơn 300 cửa hàng tại các quốc gia trên khắp thế giới như Mỹ, Hong Kong, các tiểu vương quốc Ả Rập Thống Nhất, Qatar, Brunei, Trung Quốc, và Việt Nam.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="about-history__tab">NHẬN XÉT</div>
+    </section>
+
+    <section class="about-stores-section">
+        <div class="about-stores__images">
+            <img th:src="@{/img/anh_thumuc2/block-1.jpg}" alt="Jollibee">
+            <img th:src="@{/img/anh_thumuc2/block-2.jpg}" alt="Jollibee">
+            <img th:src="@{/img/anh_thumuc2/block-3.jpg}" alt="Jollibee">
+        </div>
+        <div class="about-stores__panel">
+            <div class="about-stores__icons">
+                <a href="#" class="about-stores__icon"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="about-stores__icon"><i class="fa-solid fa-envelope"></i></a>
+            </div>
+            
+        </div>
+    </section>
+
+    <section class="about-vietnam-section">
+        <div class="container py-5">
+            <h2 class="about-vietnam__title">JOLLIBEE VIỆT NAM</h2>
+            <div class="about-vietnam__content">
+                <p>Cửa hàng Jollibee đầu tiên được mở tại Việt Nam vào năm 2005. Kể từ đó, Jollibee đã nỗ lực hết mình để mang đến các gia đình Việt những phần ăn ngon miệng với mức giá hợp lý.</p>
+                <p>Đến hôm nay, Jollibee đã có hơn 100 cửa hàng tại Việt Nam trải rộng trên toàn quốc. Jollibee không đơn thuần phục vụ những món thức ăn nhanh chất lượng theo quy trình được kiểm duyệt nghiêm khắc, mà còn mang đến cho mọi người không gian ấm áp, sang trọng để ai cũng được thưởng thức ẩm thực vui vẻ, thoải mái nhất bên gia đình và bè bạn. Từ những nền tảng này, Jollibee Việt Nam luôn ấp ủ trở thành thương hiệu thức ăn nhanh mang đến những món ăn ngon với hương vị phù hợp cho người Việt bên cạnh mục tiêu tạo ra một địa điểm ẩm thực góp phần gắn kết gia đình Việt qua bữa ăn ngon. Và đây cũng chính là tiền đề để Jollibee củng cố và phát triển bền vững trong dài hạn.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-values-section">
+        <div class="about-values__bg" th:style="'background-image: url(' + @{/img/anh_thumuc2/about-bg2.jpg} + ');'"></div>
+        <div class="about-values__overlay"></div>
+        <div class="about-values__content container position-relative">
+            <h2 class="about-values__title">CÁC GIÁ TRỊ</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-user about-values__icon"></i>
+                        <p>Khách hàng là trọng tâm</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-people-group about-values__icon"></i>
+                        <p>Tình thần tập thể</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-thumbs-up about-values__icon"></i>
+                        <p>Trung thực và liêm chính</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-chart-line about-values__icon"></i>
+                        <p>Mang đến các giá trị vượt trội</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-hand-holding-heart about-values__icon"></i>
+                        <p>Mang tình thần của gia đình và luôn luôn vui vẻ</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-piggy-bank about-values__icon"></i>
+                        <p>Tiết kiệm</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-handshake about-values__icon"></i>
+                        <p>Luôn đề cao sự tôn trọng đối với các cá nhân</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="about-values__item">
+                        <i class="fa-solid fa-book about-values__icon"></i>
+                        <p>Khiêm tốn lắng nghe và học hỏi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-mission-section">
+        <div class="container-fluid">
+            <div class="row align-items-stretch">
+                <div class="col-md-5 p-0">
+                    <img th:src="@{/img/anh_thumuc2/about-img.jpg}" alt="Jollibee" class="about-mission__img">
+                </div>
+                <div class="col-md-7 about-mission__content">
+                    <h2 class="about-mission__title">SỨ MỆNH (MISSION)</h2>
+                    <p class="about-mission__text">Tất cả những gì mà chúng tôi phải làm là mang đến những hương vị tuyệt vời trong từng món ăn, mang lại niềm vui ẩm thực cho tất cả mọi người.</p>
+                    <h2 class="about-mission__title">CÁC TIÊU CHUẨN FSC (FSC STANDARDS)</h2>
+                    <p class="about-mission__text">Sự phát triển vượt bậc của Jollibee có được là nhờ vào việc tuân thủ một cách nghiêm ngặt và tận tâm vào các tiêu chuẩn cao được ký hiệu là "F.S.C.". Thực phẩm (Food) được phục vụ cho công chúng phải đáp ứng được các tiêu chuẩn vượt trội của công ty nếu không chúng tôi sẽ không đưa ra thị trường. Dịch vụ (Service) phải nhanh chóng và lịch sự. Sạch sẽ (Cleanness), từ nhà bếp đến các dụng cụ phải luôn luôn được giữ sạch, Jollibee thực sự tự hào về những nhân viên của mình, những người luôn tận tụy với công việc của họ.</p>
+                    <p class="about-mission__text">Jollibee luôn công nhận họ bằng việc mang đến những chế độ ưu đãi tốt nhất trong ngành công nghiệp thức ăn nhanh và hỗ trợ họ trong những chương trình đào tạo toàn diện và hiện đại. Những nhà quản lý được phổ biến thường xuyên trên những hệ thống vận hành mới nhất ở cửa hàng về kỹ năng quản lý con người theo định hướng riêng so với những người khác. Những nhóm dịch vụ được đào tạo ở những cửa hàng khác nhau và dịch vụ thực phẩm luôn được đổi mới. Jollibee cũng cung cấp những cơ hội nghề nghiệp cho những nhóm thành viên có chất lượng và có trình độ để họ có thể thăng tiến lên cấp quản lý trong ngành dịch vụ thực phẩm.</p>
+                    <p class="about-mission__text">Các hoạt động tại cửa hàng được hỗ trợ đắc lực bởi các chuyên gia có kinh nghiệm trong lĩnh vực Marketing, Kỹ thuật và Quản lý Công nghệ thông tin.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{client/layout/footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+
+</html>

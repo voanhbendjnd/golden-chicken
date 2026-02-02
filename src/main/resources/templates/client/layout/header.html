@@ -7,8 +7,8 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="header-logo col-4 col-lg-2">
-            <a class="navbar-brand logo-img" href="./trang-chu.html">
-                <img src="./img/LogoJB_New-02.png" alt="">
+            <a class="navbar-brand logo-img" th:href="@{/}">
+                <img th:src="@{/img/LogoJB_New-02.png}" alt="Jollibee">
             </a>
         </div>
         <div class="navbar-body ">
@@ -30,10 +30,10 @@
                 <div class="">
                     <ul class="navbar-nav justify-content-center flex-grow-1 ">
                         <li class="navbar-item">
-                            <a class="navbar-link active" aria-current="page" href="./trang-chu.html">TRANG CHỦ</a>
+                            <a class="navbar-link" th:classappend="${activePage == 'home'} ? 'active' : ''" aria-current="page" th:href="@{/}">TRANG CHỦ</a>
                         </li>
                         <li class="navbar-item">
-                            <a class="navbar-link" href="./vejollibee.html">VỀ JOLLIBEE</a>
+                            <a class="navbar-link" th:classappend="${activePage == 'about'} ? 'active' : ''" th:href="@{/ve-jollibee}">VỀ JOLLIBEE</a>
                         </li>
                         <li class="navbar-item children">
                             <a class="navbar-link " href="./Thucdon.html">
@@ -102,15 +102,15 @@
                             <a class="navbar-link " aria-current="page" href="./Trang_lienhe.html">LIÊN HỆ</a>
                         </li>
                         <li class="navbar-item">
-                            <a class="navbar-link active" aria-current="page" href="./tuyendung.html">TUYỂN DỤNG</a>
+                            <a class="navbar-link" th:classappend="${activePage == 'tuyendung'} ? 'active' : ''" aria-current="page" href="./tuyendung.html">TUYỂN DỤNG</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="delivery col-4 col-lg-2">
-            <a href="" class="delivery-logo">
-                <img class="devivery-img" src="./img/delivery.png" alt="">
+            <a href="tel:19001533" class="delivery-logo">
+                <img class="devivery-img" th:src="@{/img/delivery.png}" alt="Giao hàng">
             </a>
         </div>
     </div>
