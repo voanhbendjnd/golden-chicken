@@ -54,7 +54,8 @@ public class RoleService {
         if (this.roleRepository.existsByNameAndIdNot(request.getName(), request.getId())) {
             throw new RuntimeException("Role Name " + request.getName() + " already exists!");
         }
-
+        var permssions = this.permissionRepository.findByIdIn(request.getPermissionIds());
+        role.setPermissions(permssions);
         role.setName(request.getName());
         role.setDescription(request.getDescription());
         return RoleConvert.toRoleRes(this.roleRepository.save(role));

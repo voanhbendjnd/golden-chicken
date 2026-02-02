@@ -78,7 +78,7 @@ public class ProductController {
             model.addAttribute("errorMessage", ex.getMessage());
             // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
             model.addAttribute("categories", this.categoryService.fetchAll());
-            return "staff/proudct/create";
+            return "staff/prouduct/create";
         }
 
     }
