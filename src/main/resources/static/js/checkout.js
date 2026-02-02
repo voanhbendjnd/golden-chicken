@@ -880,3 +880,29 @@ const checkPay = () => {
 payBtn.addEventListener("click", (e) => {
   checkPay();
 });
+function openAddressModal() {
+    document.getElementById('addressModal').style.display = 'block';
+}
+
+function closeAddressModal() {
+    document.getElementById('addressModal').style.display = 'none';
+}
+
+function selectAddress(id, name, phone, fullAddress) {
+    // 1. Cập nhật text hiển thị trên trang checkout
+    document.querySelector('.address-display-box strong').innerText = name;
+    document.querySelector('.address-display-box .fa-phone').nextSibling.textContent = ' T: ' + phone;
+    document.querySelector('.address-display-box .fa-location-dot').nextSibling.textContent = ' ' + fullAddress;
+
+    // 2. Cập nhật ID địa chỉ vào input ẩn trong form để gửi lên Server
+    const addrInput = document.querySelector('input[name="addressId"]');
+    if (addrInput) {
+        addrInput.value = id;
+    }
+
+    // 3. Đóng Modal
+    closeAddressModal();
+
+    // Thông báo nhanh
+    alert("Đã thay đổi địa chỉ nhận hàng!");
+}

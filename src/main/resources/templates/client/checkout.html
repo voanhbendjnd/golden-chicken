@@ -1,364 +1,168 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link
-            rel="stylesheet"
-            href="./icon/fontawesome-free-6.4.0-web/css/all.css"
-    />
+    <th:block th:replace="~{common/head :: head}"></th:block>
 
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
-    />
-    <link rel="stylesheet" href="./css/checkout.css" />
-    <link rel="stylesheet" href="./css/Modal.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/checkout.css}" />
+    <link rel="stylesheet" th:href="@{/css/Modal.css}" />
+
+    <style>
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .total-price-value {
+            color: #e31837;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        /* Style cho phần hiển thị địa chỉ mặc định */
+        .address-display-box {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+            margin-bottom: 20px;
+        }
+        .address-display-box p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .manage-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #e31837;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .manage-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <title>Hoàn tất thanh toán | Golden Chicken</title>
 </head>
 <body>
 <div th:replace="~{client/layout/header}"></div>
 
-<div id="toast-pay"></div>
-<div id="toast"></div>
-<div class="overplays">
-    <div class="backdrop"></div>
-    <div class="modal">
-        <form class="form" id="form-1">
-            <h2 class="heading">Thông tin người nhận hàng</h2>
-            <div class="form-group">
-                <label for="fullname" class="form-label">Tên đầy đủ *</label>
-                <input
-                        id="fullname"
-                        name="fullname"
-                        type="text"
-                        placeholder="Vui lòng nhập tên người nhận"
-                        class="form-control"
-                />
-                <span class="form-message"></span>
-            </div>
-
-            <div class="space-between">
-                <div class="form-group">
-                    <label for="email" class="form-label">Email *</label>
-                    <input
-                            id="email"
-                            name="email"
-                            type="text"
-                            placeholder="Nhập email của bạn"
-                            class="form-control"
-                    />
-                    <span class="form-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone" class="form-label">Số điện thoại *</label>
-                    <input
-                            id="phone"
-                            name="phone"
-                            type="phone"
-                            placeholder="Nhập số điện thoại của bạn"
-                            class="form-control"
-                    />
-                    <span class="form-message"></span>
-                </div>
-            </div>
-            <div class="space-between">
-                <div class="form-group">
-                    <label for="city" class="form-label">Tỉnh/Thành phố *</label>
-                    <div class="dropdown-selected">
-                        <div class="dropdown-selected__citys">
-                            <input
-                                    id="city"
-                                    name="city"
-                                    type="text"
-                                    placeholder="Chọn"
-                                    class="form-control selected-input"
-                                    autocomplete="off"
-                            />
-                            <i class="fa-solid fa-chevron-down icon__selected"></i>
-                        </div>
-                    </div>
-
-                    <span class="form-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="district" class="form-label">Quận/Huyện *</label>
-
-                    <div class="dropdown-selected">
-                        <div class="dropdown-selected__districts">
-                            <input
-                                    id="district"
-                                    name="district"
-                                    type="text"
-                                    placeholder="Chọn"
-                                    class="form-control selected-input"
-                                    autocomplete="off"
-                            />
-                            <i class="fa-solid fa-chevron-down icon__selected"></i>
-                        </div>
-                    </div>
-                    <span class="form-message"></span>
-                </div>
-            </div>
-            <div class="space-between">
-                <div class="form-group">
-                    <label for="ward" class="form-label">Phường/Xã *</label>
-                    <div class="dropdown-selected">
-                        <div class="dropdown-selected__ward">
-                            <input
-                                    id="ward"
-                                    name="ward"
-                                    type="text"
-                                    placeholder="Chọn"
-                                    class="form-control selected-input"
-                                    autocomplete="off"
-                            />
-                            <i class="fa-solid fa-chevron-down icon__selected"></i>
-                        </div>
-                    </div>
-                    <span class="form-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="address" class="form-label">Địa chỉ cụ thể *</label>
-
-                    <input
-                            id="address"
-                            name="address"
-                            type="text"
-                            placeholder="Số nhà, ngõ, ..."
-                            class="form-control"
-                    />
-                    <span class="form-message"></span>
-                </div>
-            </div>
-            <div class="group-btn">
-                <button class="btn btn-cancel">Huỷ bỏ</button>
-                <button class="btn btn-accept">Xác Nhận</button>
-            </div>
-        </form>
-    </div>
-</div>
 <div class="container-default">
-    <h1>HOÀN TẤT THANH TOÁN</h1>
+    <h1 class="text-center my-4">HOÀN TẤT THANH TOÁN</h1>
+
     <div class="main">
         <div class="steps">
-            <div class="steps-address bg-item">
-                <div class="user__login">
-                    <div class="order-title">
-                        <h2>THÔNG TIN NGƯỜI NHẬN</h2>
-                        <a href="" class="showForm" style="color: black">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
+            <div class="steps-address bg-item p-4">
+                <h2 class="heading mb-4">THÔNG TIN NHẬN HÀNG</h2>
+
+                <div class="address-display-box">
+                    <div th:if="${defaultAddress != null}">
+                        <p><i class="fa-solid fa-user"></i> <strong th:text="${defaultAddress.recipientName}">Full name</strong></p>
+                        <p><i class="fa-solid fa-location-dot"></i>
+                            <span th:text="${defaultAddress.specificAddress}">Specific address</span>,
+                            <span th:text="${defaultAddress.ward}">Ward</span>,
+                            <span th:text="${defaultAddress.district}">District</span>,
+                            <span th:text="${defaultAddress.city}">City</span>
+                        </p>
+                        <p><i class="fa-solid fa-phone"></i> T: <span th:text="${defaultAddress.recipientPhone}">Phone</span></p>
                     </div>
-                    <div class="show-form">
-                        <h4>Vui lòng nhập thông tin người nhận</h4>
-                        <button type="button" class="btn button btn-show-form">
-                            <span class="button__text">Thêm thông tin</span>
-                            <span class="button__icon">
-                    <i class="fa-solid fa-plus"></i>
-                  </span>
-                        </button>
+
+                    <div th:if="${defaultAddress == null}">
+                        <p class="text-danger">Bạn chưa có địa chỉ mặc định để thanh toán.</p>
+                    </div>
+
+                    <div class="actions">
+                        <a th:href="@{/addresses}" class="manage-link"><i class="fa-solid fa-arrows-rotate"></i> Thay đổi / Quản lý địa chỉ</a>
                     </div>
                 </div>
-            </div>
-            <div class="steps-deliver">
-                <h2>PHƯƠNG THỨC VẬN CHUYỂN</h2>
-                <div class="radio-group">
-                    <label class="radio">
-                        <input type="radio" value="0" name="deliver" checked />
-                        <h3>Giao hàng tận nơi</h3>
-                        <span></span>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" value="1" name="deliver" />
-                        <h3>Nhận tại cửa hàng</h3>
-                        <span></span>
-                    </label>
-                </div>
-                <div class="selected-group">
-                    <div class="selected-item">
-                        <span>Tỉnh thành</span>
-                        <div class="selected-control">
-                            <i class="fa-solid fa-chevron-down icon__selected"></i>
-                            <select name="" id="cityStore">
-                                <option value="" selected="selected">
-                                    Chọn Tỉnh Thánh
-                                </option>
-                            </select>
+
+                <form id="form-checkout">
+                    <input type="hidden" name="addressId" th:if="${defaultAddress != null}" th:value="${defaultAddress.id}"/>
+
+                    <div class="note mt-3">
+                        <label for="note" class="form-label">Ghi chú cho đơn hàng</label>
+                        <input type="text" name="note" id="note" class="form-control" placeholder="Ghi chú (không bắt buộc)" />
+                    </div>
+
+                    <div class="steps-pay mt-4">
+                        <h2 class="h4 mb-3">PHƯƠNG THỨC THANH TOÁN</h2>
+                        <div class="radio-group">
+                            <label class="radio">
+                                <input type="radio" value="0" name="pay" checked />
+                                <h3>Thanh Toán Tiền Mặt</h3>
+                            </label>
+                            <label class="radio">
+                                <input type="radio" value="1" name="pay" />
+                                <h3>Ví Điện Tử</h3>
+                            </label>
                         </div>
                     </div>
-                    <div class="selected-item">
-                        <span>Cửa hàng</span>
-                        <div class="selected-control">
-                            <i class="fa-solid fa-chevron-down icon__selected"></i>
-                            <select name="" id="store">
-                                <option value="" selected="selected">Chọn Cửa Hàng</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="note">
-                <h2>Ghi chú cho đơn hàng</h2>
-                <div>
-                    <input type="text" name="note" id="note" placeholder="Ghi chú" />
-                </div>
-            </div>
-            <div class="steps-pay">
-                <h2>PHƯƠNG THỨC THANH TOÁN</h2>
-                <div class="radio-group">
-                    <label class="radio">
-                        <input type="radio" value="0" name="pay" checked />
-                        <h3>Thanh Toán Tiền Mặt</h3>
-                        <span></span>
-                    </label>
-                    <label class="radio">
-                        <input type="radio" value="1" name="pay" />
-                        <h3>Ví Điện Tử</h3>
-                        <span></span>
-                    </label>
-                </div>
+                </form>
             </div>
         </div>
-        <div class="order bg-item">
+
+        <div class="order bg-item" th:if="${product != null}">
             <div class="order-title">
                 <h2>CHI TIẾT ĐƠN HÀNG</h2>
-                <a href="./Thucdon.html">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                </a>
-            </div>
-            <div class="order-items"></div>
-            <div class="temporarycost">
-                <h4>Chi phí tạm tính:</h4>
-            </div>
-            <div class="delivercost">
-                <h4>Phí giao hàng:</h4>
-            </div>
-            <div class="discount voucher">
-                <h3>Áp dụng khuyến mãi</h3>
-                <div class="discount-entered">
-                    <input class="enteredVoucher" type="text" />
-                    <button class="btn btn-voucher">Áp dụng</button>
-                </div>
-            </div>
-            <div class="discount coupon">
-                <h3>Áp dụng coupon</h3>
-                <div class="discount-entered">
-                    <input class="enteredCoupon" type="text" />
-                    <button class="btn btn-coupon">Áp dụng</button>
-                </div>
-            </div>
-            <div class="totalPrice">
-                <h3>TỔNG CỘNG</h3>
+                <a th:href="@{/Thucdon}"><i class="fa-solid fa-pen-to-square"></i></a>
             </div>
 
-            <h3 style="text-align: end; margin: 0; font-size: 14px">
-                Lấy dụng cụ ăn uống nhựa
-            </h3>
-            <div class="wrap-btn pay-btn">
-                <button class="btn">THANH TOÁN</button>
+            <div class="order-items">
+                <div class="order-item">
+                    <div class="wrapper-img">
+                        <img th:src="@{'/images/products/' + ${product.img}}" th:alt="${product.name}" />
+                    </div>
+                    <div class="item-description">
+                        <h3 th:text="${product.name}">Tên sản phẩm</h3>
+                        <div class="item-description-quality">
+                            <h4>x1</h4>
+                            <h4 th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}">0đ</h4>
+                        </div>
+                        <small class="text-muted" th:text="${product.categoryName}"></small>
+                    </div>
+                </div>
             </div>
+
+            <div class="price-details mt-4" style="border-top: 1px dashed #ddd; padding-top: 15px;">
+                <div class="summary-line">
+                    <span>Chi phí tạm tính:</span>
+                    <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + 'đ'}"></span>
+                </div>
+                <div class="summary-line">
+                    <span>Phí giao hàng:</span>
+                    <span>15.000đ</span>
+                </div>
+            </div>
+
+            <div class="totalPrice summary-line mt-3" style="border-top: 1px solid #eee; padding-top: 15px;">
+                <h3>TỔNG CỘNG</h3>
+                <h3 class="total-price-value" id="final-total"
+                    th:text="${#numbers.formatDecimal(product.price + 15000, 0, 'COMMA', 0, 'POINT') + 'đ'}"></h3>
+            </div>
+
+            <div class="wrap-btn pay-btn mt-4">
+                <button form="form-checkout" type="submit"
+                        th:disabled="${defaultAddress == null}"
+                        class="btn btn-danger w-100 py-3"
+                        style="background-color: #e31837; border: none; border-radius: 5px; font-weight: bold; color: white;">
+                    XÁC NHẬN THANH TOÁN
+                </button>
+            </div>
+        </div>
+
+        <div class="order bg-item text-center" th:unless="${product != null}">
+            <p>Không có thông tin sản phẩm.</p>
+            <a th:href="@{/Thucdon}" class="btn btn-warning">Quay lại thực đơn</a>
         </div>
     </div>
 </div>
-<footer class="container-fluid footer">
-    <div class="footer-img">
-        <a href="" class="footer-img__logo">
-            <img class="img-responsive" src="./img/LogoJB_New-02.png" alt="" />
-        </a>
-    </div>
-    <div class="footer-text">
-        <div class="row">
-            <div class="col-4 address">
-                <p>CÔNG TY TNHH JOLLIBEE VIỆT NAM</p>
-                <p>
-                    Địa chỉ: Lầu 5, tòa nhà SCIC, 16 Trương Định, Phường Võ Thị Sáu,
-                    Quận 3, Tp. Hồ Chí Minh, Việt Nam
-                </p>
-                <p>Điện thoại: (028) 39309168</p>
-                <p>Tổng đài: <a href="">1900-1533</a></p>
-                <p>Email: <a href="">jbvnfeedback@jollibee.com.vn</a></p>
-                <p>Mã số thuế: 0303883266</p>
-                <p>Ngày cấp: 15/07/2008 – Nơi cấp: Cục Thuế Hồ Chí Minh</p>
-                <p>
-                    Gửi phản hồi đến cửa hàng <a href=""><b>TẠI ĐÂY</b></a>
-                </p>
-                <p>
-                    Gửi phản hồi đến Trụ sở chính Jollibee Việt Nam
-                    <b><a href="">TẠI ĐÂY</a></b>
-                </p>
-            </div>
-            <div class="col-sm-8">
-                <div class="col-12 col-sm-6 text-center phone">
-                    <p class="number">
-                        <a href="" title="GIAO HÀNG TẬN NƠI MIỄN PHÍ">
-                            <img
-                                    src="./img/delivery-lg.png"
-                                    alt=""
-                                    class="img-responsive"
-                            />
-                        </a>
-                    </p>
-                </div>
-                <div class="col-12 col-sm-6 text-center">
-                    <p class="text-uppercase">HÃY KẾT NỐI VỚI CHÚNG TÔI</p>
-                    <a href="" class="footer-icon">
-                        <i class="fa-brands fa-facebook-f"></i>
-                    </a>
-                    <a href="" class="footer-icon">
-                        <i class="fa-brands fa-google"></i>
-                    </a>
-                    <div class="col-md-12">
-                        <a href="">
-                            <img
-                                    class="confirm-logo"
-                                    src="./img/bocongthuong.png"
-                                    alt=""
-                            />
-                        </a>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Chính sách và quy định chung</a></li>
-                        <li><a href="">Chính sách hoạt động</a></li>
-                        <li><a href="">Liên hệ</a></li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Chính sách thanh toán khi đặt hàng</a></li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Hướng dẫn đặt phần ăn</a></li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Thông tin vận chuyển và giao nhận</a></li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Thông tin đăng ký giao dịch chung</a></li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <ul class="list-inline list-page">
-                        <li><a href="">Chính sách bảo mật thông tin</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-<script src="./js/checkout.js"></script>
-<script></script>
+
+<div th:replace="~{client/layout/footer}"></div>
+
+<script th:src="@{/js/checkout.js}"></script>
 </body>
 </html>
