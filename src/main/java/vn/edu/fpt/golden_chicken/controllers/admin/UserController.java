@@ -128,16 +128,17 @@ public class UserController {
         return "redirect:/admin/user";
     }
 
-    @DeleteMapping("/{id:[0-9]+}")
-    @ResponseBody
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        try {
-            this.userService.deleteById(id);
-            return ResponseEntity.ok("Delete User Success!");
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-        }
-    }
+    // @DeleteMapping("/{id:[0-9]+}")
+    // @ResponseBody
+    // public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+    // try {
+    // this.userService.deleteById(id);
+    // return ResponseEntity.ok("Delete User Success!");
+    // } catch (Exception ex) {
+    // return
+    // ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    // }
+    // }
 
     @PostMapping("/import")
     public String importUser(@RequestParam("file") MultipartFile file, Model model,

@@ -88,7 +88,7 @@ public class PermissionController {
         }
     }
 
-    @PostMapping("/{id:[0-9]+}")
+    @PostMapping("/delete/{id:[0-9]+}")
     public String delete(@PathVariable("id") long id) {
         this.permissionService.deleteById(id);
         return "redirect:/admin/permission";

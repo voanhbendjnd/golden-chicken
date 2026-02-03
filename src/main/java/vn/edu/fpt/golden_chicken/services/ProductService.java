@@ -90,6 +90,7 @@ public class ProductService {
             product.setProductImages(imgs);
 
         }
+        product.setIsDelete(false);
         this.productRepository.save(product);
 
     }

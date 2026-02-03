@@ -3,6 +3,9 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,6 +28,8 @@ import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 @Data
 @Table(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@SQLDelete(sql = "UPDATE products SET is_delete = 1 WHERE id = ?")
+@Where(clause = "is_delete = 0")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +44,8 @@ public class Product {
     String imageUrl;
     @Enumerated(EnumType.STRING)
     ProductType type;
+    @Column(name = "is_delete")
+    Boolean isDelete;
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
