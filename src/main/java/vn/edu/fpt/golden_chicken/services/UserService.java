@@ -97,6 +97,7 @@ public class UserService {
             customer.setUser(user);
             user.setCustomer(customer);
             this.userRepository.save(user);
+            this.mailService.allowMailForUser(request.getFullName(), email);
         } else {
             throw new ResourceNotFoundException("ROLE", DefineVariable.roleNameCustomer);
         }
