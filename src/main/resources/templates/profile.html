@@ -15,7 +15,6 @@
 <body>
     <div th:replace="~{client/layout/header}"></div>
     <div class="page">
-        <!-- LEFT SIDEBAR -->
         <aside class="sidebar">
             <h3>My Account</h3>
             <nav class="nav">
@@ -27,7 +26,6 @@
             </nav>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="main">
             <h1 class="title">Account Management</h1>
 
@@ -35,7 +33,6 @@
                 Hi <span th:text="${profile.fullName}">User</span>. With this page, you will be able to manage all your
                 account information.
             </p>
-            <!-- AVATAR -->
             <section class="section">
                 <div class="section__header">AVATAR</div>
 
@@ -57,7 +54,6 @@
             </section>
 
 
-            <!-- ACCOUNT INFORMATION -->
             <section class="section">
                 <div class="section__header">Account Information</div>
                 <div class="section__body grid-2">
@@ -103,7 +99,6 @@
                 </div>
             </section>
 
-            <!-- ADDRESS BOOK -->
             <section class="section">
                 <div class="section__header between">
                     <span>Address Book</span>
@@ -133,7 +128,6 @@
                 </div>
             </section>
 
-            <!-- RECENT ORDERS -->
             <section class="section">
                 <div class="section__header">Recent Orders</div>
                 <div class="section__body">

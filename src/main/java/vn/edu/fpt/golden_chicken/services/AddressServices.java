@@ -197,7 +197,6 @@ public class AddressServices {
         a.setIsDefault(false);
         addressRepository.save(a);
 
-        // delete default → set other default
         if (wasDefault) {
             List<Address> remain = addressRepository.findAllByUserIdAndStatusOrderByIsDefaultDescIdDesc(
                     user.getId(), ACTIVE);
