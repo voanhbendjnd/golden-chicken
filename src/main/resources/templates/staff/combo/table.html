@@ -58,8 +58,7 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>Name</th>
-                                                    <th>Type</th>
-                                                    <th>Category</th>
+                                                    <th>Description</th>
                                                     <th>Price</th>
                                                     <th>Active</th>
                                                     <th>Actions</th>
@@ -73,8 +72,7 @@
                                                             style="text-decoration-line: none;"></a>
                                                     </td>
                                                     <td th:text="${product.name}"></td>
-                                                    <td th:text="${product.type}"></td>
-                                                    <td th:text="${product.category.name}"></td>
+                                                    <td th:text="${product.description}"></td>
                                                     <td
                                                         th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
                                                     </td>
@@ -86,7 +84,7 @@
                                                     </td>
                                                     <td>
                                                         <div style="display: flex; gap:6px">
-                                                            <a th:href="@{/staff/product/update/{id}(id=${product.id})}"
+                                                            <a th:href="@{/staff/combo/update/{id}(id=${product.id})}"
                                                                 class="btn btn-sm btn-warning">Edit</a>
                                                             <form th:action="@{/staff/product/{id}(id=${product.id})}"
                                                                 method="POST" class="delete-form">

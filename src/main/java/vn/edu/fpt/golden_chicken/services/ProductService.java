@@ -23,6 +23,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -197,4 +198,19 @@ public class ProductService {
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
+
+    public ResultPaginationDTO fetchAllComboWithPagination(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> comboSpec = (r, q, c) -> c.equal(r.get("type"), ProductType.COMBO);
+        var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        res.setMeta(meta);
+        return res;
+    }
+
 }
