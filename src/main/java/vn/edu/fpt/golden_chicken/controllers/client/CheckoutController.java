@@ -19,17 +19,38 @@ public class CheckoutController {
     }
 
     @GetMapping("/checkout")
-    public String handleCheckout(@RequestParam("id") long productId, Model model) {
-        ResProduct selectedProduct = productService.findById(productId);
-        var defaultAddress = addressServices.getDefaultAddress();
-        var addresses = addressServices.getAllAddresses();
-        if (selectedProduct != null) {
-            model.addAttribute("defaultAddress", defaultAddress);
-            model.addAttribute("product", selectedProduct);
-            model.addAttribute("addresses", addresses);
-        } else {
+    public String handleCheckout(
+            @RequestParam("id") long productId,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            Model model) {
+
+        ResProduct product = productService.findById(productId);
+
+        var selectedAddress = (addressId != null)
+                ? addressServices.findById(addressId)
+                : addressServices.getDefaultAddress();
+
+        if (product == null) {
             return "redirect:/home";
         }
+
+        model.addAttribute("product", product);
+        model.addAttribute("defaultAddress", selectedAddress);
+
         return "client/checkout";
     }
+
+    @GetMapping("/checkout/addresses")
+    public String listAddressCheckout(
+            @RequestParam("productId") long productId,
+            Model model) {
+
+        var addresses = addressServices.getAllAddresses();
+        model.addAttribute("addresses", addresses);
+        model.addAttribute("productId", productId);
+
+        return "client/address/listAddressCheckout";
+    }
+
+
 }
