@@ -33,6 +33,7 @@ public class CategoryService {
         category.setName(name);
         category.setStatus(dto.getStatus());
         category.setDescription(dto.getDescription());
+        category.setIsDelete(false);
         this.categoryRepository.save(category);
     }
 
