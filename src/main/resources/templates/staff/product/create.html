@@ -2,22 +2,100 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Product Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <head th:replace="~{common/head}"></head>
+    <title>Create Product</title>
 </head>
 
 <body>
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-center">Create New Product</h3>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">Create New Product</h3>
                     </div>
                     <div class="card-body">
-                        <p>Product creation form will be here</p>
+                        <form th:action="@{/staff/product/create}" method="post" th:object="${product}"
+                            enctype="multipart/form-data">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Product Name</label>
+                                <input type="text" class="form-control" th:field="*{name}" required />
+                                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Price</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{price}"
+                                        required />
+                                    <div class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Category</label>
+                                    <select class="form-select" th:field="*{category.id}" required>
+                                        <option value="">-- Choose Category --</option>
+                                        <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                            th:text="${cat.name}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
+                                <div class="text-danger" th:if="${#fields.hasErrors('description')}"
+                                    th:errors="*{description}"></div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Main Image</label>
+                                    <input type="file" name="thumbnailFile" class="form-control" accept="image/*"
+                                        onchange="previewImage(this, 'main-preview')" required />
+                                    <img id="main-preview" src="#" alt="Preview" class="mt-2 img-thumbnail d-none"
+                                        style="height: 100px;" />
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Sub Images (Gallery)</label>
+                                    <input type="file" name="galleryFiles" class="form-control" accept="image/*"
+                                        multiple onchange="previewMultiple(this, 'gallery-preview')" required />
+                                    <div id="gallery-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Product Type</label>
+                                    <select th:field="*{type}" class="form-select" required>
+                                        <option value="">-- Choose Type --</option>
+                                        <option th:value="SINGLE">SINGLE</option>
+                                        <option th:value="COMBO">COMBO</option>
+                                        <!-- <option
+                                            th:each="t : ${T(vn.edu.fpt.golden_chicken.common.ProductType).values()}"
+                                            th:value="${t}" th:text="${t}"></option> -->
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Status</label>
+                                    <select th:field="*{active}" class="form-select" required>
+                                        <option value="true">Active</option>
+                                        <option value="false">Non-active</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a th:href="@{/staff/product}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4">Create Product</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -25,6 +103,37 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewMultiple(input, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail';
+                        img.style.height = '80px';
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
 </body>
 
 </html>

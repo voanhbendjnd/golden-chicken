@@ -2,10 +2,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Role Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <head th:replace="~{common/head}"></head>
 </head>
 
 <body>
@@ -14,7 +13,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-center">Update Role</h3>
+                        <h3 class="text-center">Update Permission</h3>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/permission/update}" method="post" th:object="${permission}">
@@ -24,26 +23,25 @@
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
                                 <input type="text" class="form-control" th:field="*{name}" required />
-                                <div th:if="${#fields.hasErrors('name')}" style="color: red;"
-                                    th:errors="*{name}"></div>
+                                <div th:if="${#fields.hasErrors('name')}" style="color: red;" th:errors="*{name}"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">API Path</label>
                                 <input type="text" class="form-control" th:field="*{apiPath}" required />
-                                <div th:if="${#fields.hasErrors('apiPath')}" style="color: red;"
-                                    th:errors="*{apiPath}"></div>
+                                <div th:if="${#fields.hasErrors('apiPath')}" style="color: red;" th:errors="*{apiPath}">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Method</label>
                                 <input type="text" class="form-control" th:field="*{method}" required />
-                                <div th:if="${#fields.hasErrors('method')}" style="color: red;"
-                                    th:errors="*{method}"></div>
+                                <div th:if="${#fields.hasErrors('method')}" style="color: red;" th:errors="*{method}">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Module</label>
                                 <input type="text" class="form-control" th:field="*{module}" required />
-                                <div th:if="${#fields.hasErrors('module')}" style="color: red;"
-                                    th:errors="*{module}"></div>
+                                <div th:if="${#fields.hasErrors('module')}" style="color: red;" th:errors="*{module}">
+                                </div>
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">

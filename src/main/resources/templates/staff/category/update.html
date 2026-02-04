@@ -2,10 +2,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Category Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <head th:replace="~{common/head}"></head>
 </head>
 
 <body>
@@ -24,8 +23,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
                                 <input type="text" class="form-control" th:field="*{name}" required />
-                                <div th:if="${#fields.hasErrors('name')}" style="color: red;"
-                                    th:errors="*{name}"></div>
+                                <div th:if="${#fields.hasErrors('name')}" style="color: red;" th:errors="*{name}"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Description</label>
@@ -39,8 +37,8 @@
                                     <option value="true">Active</option>
                                     <option value="false">Non-active</option>
                                 </select>
-                                <div th:if="${#fields.hasErrors('status')}" style="color: red;"
-                                    th:errors="*{status}"></div>
+                                <div th:if="${#fields.hasErrors('status')}" style="color: red;" th:errors="*{status}">
+                                </div>
                                 <div th:if="${errorMessage != null}" class="alert alert-danger"
                                     th:text="${errorMessage}">
                                 </div>

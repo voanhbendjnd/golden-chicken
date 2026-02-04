@@ -25,7 +25,6 @@ import vn.edu.fpt.golden_chicken.common.MyLibrary;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
-import vn.edu.fpt.golden_chicken.domain.request.ProfileUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
@@ -129,6 +128,10 @@ public class UserService {
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
         }
+        if (role.getName().equalsIgnoreCase("ADMIN")) {
+            user.setRole(role);
+        }
+
         user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
@@ -160,6 +163,9 @@ public class UserService {
 
         try (var is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
             var sheet = workbook.getSheetAt(0);
+            if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
+                throw new DataFormatException("File Excel Not Empty!");
+            }
             var users = new ArrayList<User>();
             var mpAcc = new HashMap<ResUser, String>();
             var existingEmails = this.userRepository.findAll().stream()

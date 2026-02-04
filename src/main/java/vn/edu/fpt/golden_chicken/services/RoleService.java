@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -53,7 +54,8 @@ public class RoleService {
         if (this.roleRepository.existsByNameAndIdNot(request.getName(), request.getId())) {
             throw new RuntimeException("Role Name " + request.getName() + " already exists!");
         }
-
+        var permssions = this.permissionRepository.findByIdIn(request.getPermissionIds());
+        role.setPermissions(permssions);
         role.setName(request.getName());
         role.setDescription(request.getDescription());
         return RoleConvert.toRoleRes(this.roleRepository.save(role));
@@ -87,15 +89,22 @@ public class RoleService {
         return this.roleRepository.findAll().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList());
     }
 
-    public void importRoles(MultipartFile file) throws IOException {
+    public void importRoles(MultipartFile file) throws IOException, DataFormatException {
         var is = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(is);
         var sheet = workbook.getSheetAt(0);
         var roles = new ArrayList<Role>();
         var set = this.roleRepository.findAll().stream().map(Role::getName).collect(Collectors.toSet());
+        if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
+            throw new DataFormatException("File Excel Not Empty!");
+        }
         for (var row : sheet) {
+            var rowNum = row.getRowNum();
             if (row.getRowNum() == 0) {
                 continue;
+            }
+            if (row.getCell(0) == null || row.getCell(1) == null) {
+                throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
             }
             var role = new Role();
             var name = row.getCell(0).getStringCellValue();

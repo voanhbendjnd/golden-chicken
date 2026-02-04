@@ -24,6 +24,7 @@ public class PermissionInterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         String[] whiteList = {
                 "/",
+                "/home",
                 "/login",
                 "/register",
                 "/css/**",
@@ -33,10 +34,10 @@ public class PermissionInterceptorConfig implements WebMvcConfigurer {
                 "/icon/**",
                 "/client/**",
                 "/access-deny",
-                "/favicon.ico"
+                "/favicon.ico",
         };
         registry.addInterceptor(getPermissionInterceptor())
-                .addPathPatterns("/admin/**", "/staff/**")
-                .excludePathPatterns(whiteList);
+                .addPathPatterns("/admin/**", "/staff/**");
+        // .excludePathPatterns(whiteList);
     }
 }

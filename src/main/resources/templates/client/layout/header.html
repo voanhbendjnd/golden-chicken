@@ -7,8 +7,9 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="header-logo col-4 col-lg-2">
-            <a class="navbar-brand logo-img" href="./trang-chu.html">
-                <img th:src="@{/img/logoNew.png}" alt="">
+            <a class="navbar-brand logo-img" th:href="@{/home}">
+                <img src="./img/LogoJB_New-02.png" alt="">
+
             </a>
         </div>
         <div class="navbar-body ">
@@ -16,10 +17,18 @@
                 <a href="#" class="user-login btn-icon show-modal">
                     <i class="fa-solid fa-user "></i>
                 </a>
-                <span>
-                    <a th:href="@{/register}" class="login-item">Đăng ký/</a>
+                <span th:if="${session.user == null}">
+                    <a th:href="@{/register}" class="login-item">Đăng ký /</a>
                     <a th:href="@{/login}" class="login-item">Đăng nhập</a>
                 </span>
+
+                <span th:if="${session.user != null}">
+                    <span th:text="${session.fullName}"></span>
+                </span>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-outline-light me-2">Logout</button>
+                </form>
                 <Span class="lang ">
                     <a href="" class="lang-item active-lang">VN</a>
                     |
@@ -30,56 +39,58 @@
                 <div class="">
                     <ul class="navbar-nav justify-content-center flex-grow-1 ">
                         <li class="navbar-item">
-                            <a class="navbar-link" aria-current="page" href="./trang-chu.html">TRANG CHỦ</a>
+
+                            <a class="navbar-link active" aria-current="page" th:href="@{/home}">TRANG CHỦ</a>
+
                         </li>
                         <li class="navbar-item">
                             <a class="navbar-link" href="./vejollibee.html">VỀ JOLLIBEE</a>
                         </li>
                         <li class="navbar-item children">
-                            <a class="navbar-link " href="./Thucdon.html">
+                            <a class="navbar-link " th:href="@{/menu}">
                                 THỰC ĐƠN
                             </a>
                             <div class="menu-list">
                                 <ul class="text-center">
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mon-moi-mon-ngon.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/mon-moi-mon-ngon.png" alt="">
                                         </a>
                                         <h5>COMBO</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/ga-gion-vui-ve.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/ga-gion-vui-ve.png" alt="">
                                         </a>
                                         <h5>GÀ GIÒN VUI VẺ</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/ga-sot-cay.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/ga-sot-cay.png" alt="">
                                         </a>
                                         <h5>GÀ SỐT CAY</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mi-y.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/mi-y.png" alt="">
                                         </a>
                                         <h5>MÌ Ý SỐT BÒ BẰM</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/burger-sandwich.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/burger-sandwich.png" alt="">
                                         </a>
                                         <h5>BUEGER & CƠM</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/phan-an-phu.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="./img/phan-an-phu.png" alt="">
                                         </a>
                                         <h5>PHẦN ĂN PHỤ</h5>
                                     </li>
                                     <li class="menu-item">
-                                        <a href="./Thucdon.html" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mon-trang-mieng.png}" alt="">
+                                        <a th:href="@{/menu}" class="menu-item__img">
+                                            <img class="menulist-img" src="/img/mon-trang-mieng.png" alt="">
                                         </a>
                                         <h5>MÓN TRÁNG MIỆNG</h5>
                                     </li>

@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.controllers.admin;
 
 import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -97,11 +98,17 @@ public class PermissionController {
     public String importPermissions(@RequestParam("file") MultipartFile file,
             Model model,
             @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
-            throws IOException {
+            throws IOException, DataFormatException {
         try {
             this.permissionService.importPermissions(file);
             return "redirect:/admin/permission";
         } catch (DataInvalidException de) {
+            model.addAttribute("errorMessage", de.getMessage());
+            var data = this.permissionService.fecthAllWithPaginationDTO(Specification.where(null), pageable);
+            model.addAttribute("permissions", data.getResult());
+            model.addAttribute("meta", data.getMeta());
+            return "admin/permission/table";
+        } catch (DataFormatException de) {
             model.addAttribute("errorMessage", de.getMessage());
             var data = this.permissionService.fecthAllWithPaginationDTO(Specification.where(null), pageable);
             model.addAttribute("permissions", data.getResult());

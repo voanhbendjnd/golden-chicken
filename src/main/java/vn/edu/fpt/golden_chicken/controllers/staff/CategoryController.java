@@ -82,4 +82,10 @@ public class CategoryController {
         }
         return "redirect:/staff/category";
     }
+
+    @PostMapping("/delete/{id:[0-9]+}")
+    public String delete(@PathVariable("id") Long id) {
+        this.categoryService.delete(id);
+        return "redirect:/staff/category";
+    }
 }

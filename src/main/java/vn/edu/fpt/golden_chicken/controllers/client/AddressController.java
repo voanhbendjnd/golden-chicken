@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.mail.Address;
 import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.domain.request.AddressFormDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResAddress;

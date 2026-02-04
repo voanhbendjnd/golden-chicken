@@ -2,8 +2,8 @@ package vn.edu.fpt.golden_chicken.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+// import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+// import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,13 +25,14 @@ import vn.edu.fpt.golden_chicken.services.CustomUserDetailsService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-        @Bean
-        public RoleHierarchy roleHierarchy() {
-                RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-                // Admin có mọi quyền của Staff, Staff có mọi quyền của Customer
-                roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF > ROLE_CUSTOMER");
-                return roleHierarchy;
-        }
+        // @Bean
+        // public RoleHierarchy roleHierarchy() {
+        // RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        // // Admin có mọi quyền của Staff, Staff có mọi quyền của Customer
+        // roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF >
+        // ROLE_CUSTOMER");
+        // return roleHierarchy;
+        // }
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -82,11 +83,13 @@ public class SecurityConfig {
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 String[] whiteList = {
                                 "/",
+                                "/home",
                                 "/login",
                                 "/register",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/img/**",
                                 "/client/**",
                 };
                 http
