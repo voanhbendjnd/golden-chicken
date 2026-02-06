@@ -213,4 +213,8 @@ public class ProductService {
         return res;
     }
 
+    public List<ResProduct> fetchAllProductSingle() {
+        return this.productRepository.searchByType(ProductType.SINGLE).stream().map(ProductConvert::toResProduct)
+                .collect(Collectors.toList());
+    }
 }

@@ -51,4 +51,8 @@ public class Product {
     Category category;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     List<ProductImage> productImages;
+    @OneToMany(mappedBy = "combo")
+    List<ComboDetail> comboDetails;
+    @OneToMany(mappedBy = "product")
+    List<ComboDetail> productDetails;
 }
