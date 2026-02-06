@@ -13,7 +13,8 @@ import vn.edu.fpt.golden_chicken.domain.entity.ComboDetail;
 
 @Repository
 public interface ComboDetailRepository extends JpaRepository<ComboDetail, Long>, JpaSpecificationExecutor<ComboDetail> {
-    List<ComboDetail> findByComboId(Long id);
+    @Query("SELECT cd FROM ComboDetail cd JOIN FETCH cd.product WHERE cd.combo.id = :comboId")
+    List<ComboDetail> findByComboId(@Param("comboId") Long id);
 
     @Modifying
     @Query("delete from ComboDetail cd where cd.combo.id = :comboId")

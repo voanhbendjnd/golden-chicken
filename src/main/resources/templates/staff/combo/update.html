@@ -113,7 +113,7 @@
                             <div class="input-group">
                                 <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
                                 <input type="text" id="productSearch" class="form-control"
-                                    placeholder="Tìm nhanh tên món lẻ..." onkeyup="filterProducts()">
+                                    placeholder="Search product..." onkeyup="filterProducts()">
                             </div>
                         </div>
                         <div class="scroll-container border rounded p-3 bg-white">
@@ -145,11 +145,12 @@
 
                                         <div
                                             class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
-                                            <span class="small text-muted">Số lượng:</span>
+                                            <span class="small text-muted">Quantity:</span>
                                             <div class="input-group input-group-sm" style="width: 80px;">
                                                 <input type="number" th:id="'qty_' + ${product.id}"
                                                     class="form-control text-center item-qty" value="1" min="1"
                                                     max="100"
+                                                    th:value="${currentProductQuantities.containsKey(product.id) ? currentProductQuantities.get(product.id) : 1}"
                                                     th:disabled="${!#lists.contains(currentProductIds, product.id)}">
 
                                                 <input type="hidden" th:value="${product.id}"
@@ -202,7 +203,7 @@
                     </div>
 
                     <div class="mt-5 text-end border-top pt-3">
-                        <a th:href="@{/staff/product}" class="btn btn-outline-secondary me-2 px-4">Cancel</a>
+                        <a th:href="@{/staff/combo}" class="btn btn-outline-secondary me-2 px-4">Cancel</a>
                         <button type="submit" class="btn btn-success px-5 fw-bold">Update Combo</button>
                     </div>
                 </form>

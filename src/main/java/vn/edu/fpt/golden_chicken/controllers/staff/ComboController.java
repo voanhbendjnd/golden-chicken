@@ -3,6 +3,7 @@ package vn.edu.fpt.golden_chicken.controllers.staff;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ComboDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResSingleProduct;
 import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
 import vn.edu.fpt.golden_chicken.services.ComboDetailService;
@@ -62,6 +64,11 @@ public class ComboController {
     public String updatePage(Model model, @PathVariable("id") Long id) {
         var combo = this.productService.findById(id);
         var comboDetails = this.comboDetailRepository.findByComboId(id);
+        List<ResSingleProduct> currentItems = this.comboDetailService.getProductInCombo(id);
+
+        Map<Long, Integer> currentProductQuantities = currentItems.stream()
+                .collect(Collectors.toMap(ResSingleProduct::getId, ResSingleProduct::getQuantity));
+        model.addAttribute("currentProductQuantities", currentProductQuantities);
         model.addAttribute("currentProductIds",
                 comboDetails.stream().map(x -> x.getProduct().getId()).collect(Collectors.toList()));
         model.addAttribute("products", this.productService.fetchAllProductSingle());
@@ -78,17 +85,25 @@ public class ComboController {
             throws IOException, URISyntaxException {
         var combo = this.productService.findById(dto.getId());
         var comboDetails = this.comboDetailRepository.findByComboId(dto.getId());
+        List<ResSingleProduct> currentItems = this.comboDetailService.getProductInCombo(dto.getId());
+
+        Map<Long, Integer> currentProductQuantities = currentItems.stream()
+                .collect(Collectors.toMap(ResSingleProduct::getId, ResSingleProduct::getQuantity));
         if (bd.hasErrors()) {
             model.addAttribute("currentProductIds",
                     comboDetails.stream().map(x -> x.getProduct().getId()).collect(Collectors.toList()));
             model.addAttribute("products", this.productService.fetchAllProductSingle());
             model.addAttribute("updateProduct", combo);
+            model.addAttribute("currentProductQuantities", currentProductQuantities);
+
             model.addAttribute("categories", this.categoryService.fetchAll());
             return "staff/combo/update";
         }
         try {
             this.comboDetailService.update(dto, file, files);
         } catch (IOException ex) {
+            model.addAttribute("currentProductQuantities", currentProductQuantities);
+
             model.addAttribute("error", ex.getMessage());
             model.addAttribute("currentProductIds",
                     comboDetails.stream().map(x -> x.getProduct().getId()).collect(Collectors.toList()));
@@ -97,6 +112,8 @@ public class ComboController {
             model.addAttribute("categories", this.categoryService.fetchAll());
             return "staff/combo/update";
         } catch (ResourceNotFoundException ex) {
+            model.addAttribute("currentProductQuantities", currentProductQuantities);
+
             model.addAttribute("error", ex.getMessage());
             model.addAttribute("currentProductIds",
                     comboDetails.stream().map(x -> x.getProduct().getId()).collect(Collectors.toList()));

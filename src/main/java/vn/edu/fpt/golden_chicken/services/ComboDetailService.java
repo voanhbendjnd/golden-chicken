@@ -3,6 +3,7 @@ package vn.edu.fpt.golden_chicken.services;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.ComboDetail;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ComboDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResSingleProduct;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
 import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
@@ -93,4 +95,18 @@ public class ComboDetailService {
         this.comboDetailRepository.saveAll(details);
     }
 
+    public List<ResSingleProduct> getProductInCombo(long comboId) {
+        var details = this.comboDetailRepository.findByComboId(comboId);
+        return details.stream().map(x -> {
+            var product = x.getProduct();
+            var res = new ResSingleProduct();
+            res.setId(product.getId());
+            res.setActive(product.getActive());
+            res.setImg(product.getImageUrl());
+            res.setName(product.getName());
+            res.setPrice(product.getPrice());
+            res.setQuantity(x.getQuantity());
+            return res;
+        }).collect(Collectors.toList());
+    }
 }
