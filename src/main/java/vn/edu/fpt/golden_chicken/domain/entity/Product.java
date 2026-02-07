@@ -57,4 +57,5 @@ public class Product {
     List<ComboDetail> productDetails;
     @OneToMany(mappedBy = "product")
     List<OrderItem> orderItems;
+    Integer sold;
 }

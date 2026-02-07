@@ -29,4 +29,9 @@ public class GlobalExceptionHandler {
     public String handlePermissionException(PermissionException ex) {
         return "client/auth/access-deny";
     }
+
+    @ExceptionHandler(value = { AmountException.class })
+    public String handleAmountSystemNotTheSame(AmountException ax) {
+        return "error/error-amount";
+    }
 }
