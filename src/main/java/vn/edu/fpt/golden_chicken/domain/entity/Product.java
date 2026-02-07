@@ -55,4 +55,6 @@ public class Product {
     List<ComboDetail> comboDetails;
     @OneToMany(mappedBy = "product")
     List<ComboDetail> productDetails;
+    @OneToMany(mappedBy = "product")
+    List<OrderItem> orderItems;
 }
