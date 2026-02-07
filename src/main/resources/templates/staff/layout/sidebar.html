@@ -59,8 +59,9 @@
 
     </ul>
     <div class="sb-sidenav-footer">
-        <div class="small">Logged in as:</div>
-        <span th:text="${fullName}"></span>
+        <div class="small">Logged in as:
+            <span th:text="${session.fullName}"></span>
+        </div>
     </div>
 
 </div>

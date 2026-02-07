@@ -17,7 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findByActiveTrue();
 
-    @Query("select p from Product p where p.type = :type")
+    @Query("select p from Product p where p.type = :type and p.active = 1")
     List<Product> searchByType(@Param("type") ProductType type);
 
 }

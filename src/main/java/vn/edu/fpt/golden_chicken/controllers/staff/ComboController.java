@@ -124,4 +124,10 @@ public class ComboController {
         }
         return "redirect:/staff/combo";
     }
+
+    @PostMapping("/delete/{id:[0-9]+}")
+    public String delete(@PathVariable("id") Long id) {
+        this.productService.delete(id);
+        return "redirect:/staff/combo";
+    }
 }
