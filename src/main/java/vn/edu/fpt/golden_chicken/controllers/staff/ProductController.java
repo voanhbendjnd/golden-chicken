@@ -39,7 +39,7 @@ public class ProductController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/{id:[0-9]+}")
+    @PostMapping("/delete/{id:[0-9]+}")
     public String delete(@PathVariable("id") Long id) {
         this.productService.delete(id);
         return "redirect:/staff/product";

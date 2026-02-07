@@ -214,7 +214,8 @@ public class ProductService {
     }
 
     public List<ResProduct> fetchAllProductSingle() {
-        return this.productRepository.searchByType(ProductType.SINGLE).stream().map(ProductConvert::toResProduct)
+        return this.productRepository.findByTypeAndActiveTrue(ProductType.SINGLE).stream()
+                .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
 }

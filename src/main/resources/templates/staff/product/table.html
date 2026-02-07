@@ -88,7 +88,8 @@
                                                         <div style="display: flex; gap:6px">
                                                             <a th:href="@{/staff/product/update/{id}(id=${product.id})}"
                                                                 class="btn btn-sm btn-warning">Edit</a>
-                                                            <form th:action="@{/staff/product/{id}(id=${product.id})}"
+                                                            <form
+                                                                th:action="@{/staff/product/delete/{id}(id=${product.id})}"
                                                                 method="POST" class="delete-form">
                                                                 <button type="button"
                                                                     class="btn btn-sm btn-danger btn-delete">Delete</button>
