@@ -42,7 +42,7 @@ public class Order {
     BigDecimal discountAmount;
     BigDecimal finalAmount;
     String phone;
-    Long bonus;
+    // Long bonus;
     @Enumerated(EnumType.STRING)
     OrderStatus status;
     @Column(columnDefinition = "NVARCHAR(255)")

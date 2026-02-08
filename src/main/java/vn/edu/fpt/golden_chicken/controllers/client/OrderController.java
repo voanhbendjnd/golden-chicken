@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.services.OrderService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Controller
 @RequestMapping("/order")
@@ -18,7 +19,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public String order(@ModelAttribute("order") OrderDTO dto) {
+    public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
         this.orderService.order(dto);
         return "redirect:/";
     }

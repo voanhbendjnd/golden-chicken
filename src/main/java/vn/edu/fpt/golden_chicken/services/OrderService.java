@@ -20,6 +20,7 @@ import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.exceptions.AmountException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
@@ -31,8 +32,11 @@ public class OrderService {
     OrderRepository orderRepository;
 
     @Transactional
-    public void order(OrderDTO dto) {
+    public void order(OrderDTO dto) throws PermissionException {
         var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (user.getCustomer() == null) {
+            throw new PermissionException("You do not have permission!");
+        }
         var orderItems = new ArrayList<OrderItem>();
         var order = new Order();
         order.setShippingAddress(dto.getAddress());
@@ -54,7 +58,7 @@ public class OrderService {
             BigDecimal quantity = new BigDecimal(x.getQuantity());
             BigDecimal itemPriceTotal = product.getPrice().multiply(quantity);
             lastPriceProduct = lastPriceProduct.add(itemPriceTotal);
-            product.setSold(product.getSold() + x.getQuantity());
+            product.setSold(product.getSold() != null ? product.getSold() : 0 + x.getQuantity());
             totalBonus += itemPriceTotal.divide(new BigDecimal("1000"), 0, RoundingMode.FLOOR).longValue();
             var orderItem = new OrderItem();
             orderItem.setFirstPrice(product.getPrice());
@@ -69,7 +73,8 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new AmountException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        user.getCustomer().setPoint(totalBonus + user.getCustomer().getPoint());
+        user.getCustomer()
+                .setPoint(totalBonus + (user.getCustomer().getPoint() != null ? user.getCustomer().getPoint() : 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {

@@ -25,6 +25,26 @@ public class AddressServices {
     AddressRepository addressRepository;
     ProfileService profileService;
 
+    public ResAddress findById(Long id) {
+        User user = profileService.getCurrentUser();
+        if (user == null || id == null) {
+            return null;
+        }
+
+        Optional<Address> opt = addressRepository.findByIdAndUserId(id, user.getId());
+        if (opt.isEmpty()) {
+            return null;
+        }
+
+        Address address = opt.get();
+        if (!ACTIVE.equals(address.getStatus())) {
+            return null;
+        }
+
+        return toDto(address);
+    }
+
+
     private ResAddress toDto(Address add) {
         ResAddress dto = new ResAddress();
         dto.setId(add.getId());

@@ -1,0 +1,157 @@
+/* =========================
+   PAGE WRAPPER
+========================= */
+.page-checkout-address {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+/* =========================
+   TITLE
+========================= */
+.addr-title {
+    color: #e31837;
+    font-weight: 800;
+    font-size: 26px;
+    margin-bottom: 35px;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* =========================
+   ADDRESS CARD
+========================= */
+.address-card {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 26px 30px;
+    margin-bottom: 24px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.address-card:hover {
+    border-color: #f7c600;
+    transform: translateY(-2px);
+}
+
+/* =========================
+   ADDRESS INFO
+========================= */
+.address-info {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #333;
+}
+
+.address-info .name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.address-info .phone {
+    color: #e31837;
+    font-weight: 600;
+}
+
+/* =========================
+   RADIO BUTTON
+========================= */
+.address-radio {
+    transform: scale(1.6);
+    cursor: pointer;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+.address-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+}
+
+/* Add new address */
+/* Nút thêm địa chỉ */
+.btn-add {
+    background: #28a745;
+    color: #ffffff;
+
+    padding: 15px 34px;      /* giống btn-confirm */
+    font-size: 16px;         /* cùng cỡ chữ */
+    font-weight: 700;
+
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    transition: 0.2s;
+}
+
+.btn-add {
+    padding: 15px 34px !important;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+
+
+
+/* Confirm button */
+.btn-confirm {
+    background: #e31837;
+    color: #ffffff;
+    padding: 15px 34px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-confirm:hover {
+    background: #c9142f;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+    .address-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .address-actions {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .btn-confirm,
+    .btn-add {
+        width: 100%;
+        text-align: center;
+    }
+}
