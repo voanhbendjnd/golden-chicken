@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Thanh toán đơn hàng</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body class="container mt-5">
+    <h2>Thông tin thanh toán</h2>
+    <hr>
+
+    <form th:action="@{/order/place}" th:object="${order}" method="post">
+        <div class="row">
+            <div class="col-md-7">
+                <h4>Thông tin giao hàng</h4>
+                <div class="mb-3">
+                    <label class="form-label">Họ tên người nhận</label>
+                    <input type="text" class="form-control" th:field="*{name}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <input type="text" class="form-control" th:field="*{address}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại</label>
+                    <input type="text" class="form-control" th:field="*{phone}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea class="form-control" th:field="*{note}"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phương thức thanh toán</label>
+                    <select class="form-select" th:field="*{paymentMethod}">
+                        <option
+                            th:each="method : ${T(vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod).values()}"
+                            th:value="${method}" th:text="${method}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card p-3 shadow-sm">
+                    <h4>Đơn hàng của bạn</h4>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between" th:each="item, iterStat : *{items}">
+                            <div>
+                                <h6 class="my-0">Sản phẩm ID: <span th:text="${item.productId}"></span></h6>
+                                <small class="text-muted">Số lượng: <span th:text="${item.quantity}"></span></small>
+
+                                <input type="hidden" th:field="*{items[__${iterStat.index}__].productId}" />
+                                <input type="hidden" th:field="*{items[__${iterStat.index}__].quantity}" />
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Tiền hàng:</span>
+                        <strong th:text="*{totalProductPrice}">0</strong>
+                        <input type="hidden" th:field="*{totalProductPrice}" />
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Phí ship:</span>
+                        <strong th:text="*{shippingFee}">0</strong>
+                        <input type="hidden" th:field="*{shippingFee}" />
+                    </div>
+                    <div class="d-flex justify-content-between text-danger">
+                        <span>Giảm giá:</span>
+                        <strong th:text="'-' + *{discountAmount}">0</strong>
+                        <input type="hidden" th:field="*{discountAmount}" />
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <h5>Tổng cộng:</h5>
+                        <h5 class="text-success" th:text="*{finalAmount}">0</h5>
+                        <input type="hidden" th:field="*{finalAmount}" />
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100 mt-3" type="submit">Xác nhận đặt hàng</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+
+</html>

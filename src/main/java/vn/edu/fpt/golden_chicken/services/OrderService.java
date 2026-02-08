@@ -1,11 +1,13 @@
 package vn.edu.fpt.golden_chicken.services;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.exceptions.AmountException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -27,6 +30,7 @@ public class OrderService {
     ProductRepository productRepository;
     OrderRepository orderRepository;
 
+    @Transactional
     public void order(OrderDTO dto) {
         var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         var orderItems = new ArrayList<OrderItem>();
@@ -35,7 +39,7 @@ public class OrderService {
         order.setPaymentMethod(dto.getPaymentMethod());
         order.setNote(dto.getNote());
         order.setPhone(dto.getPhone());
-
+        order.setStatus(OrderStatus.PENDING);
         order.setCustomer(user.getCustomer());
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
@@ -47,10 +51,11 @@ public class OrderService {
             if (product == null) {
                 throw new ResourceNotFoundException("Product ID", x.getProductId());
             }
-            product.setSold(product.getSold() + x.getQuantity());
-            totalBonus += product.getPrice().divide(new java.math.BigDecimal(1000)).longValue();
             BigDecimal quantity = new BigDecimal(x.getQuantity());
-            lastPriceProduct = lastPriceProduct.add(product.getPrice().multiply(quantity));
+            BigDecimal itemPriceTotal = product.getPrice().multiply(quantity);
+            lastPriceProduct = lastPriceProduct.add(itemPriceTotal);
+            product.setSold(product.getSold() + x.getQuantity());
+            totalBonus += itemPriceTotal.divide(new BigDecimal("1000"), 0, RoundingMode.FLOOR).longValue();
             var orderItem = new OrderItem();
             orderItem.setFirstPrice(product.getPrice());
             orderItem.setOrder(order);
@@ -58,18 +63,22 @@ public class OrderService {
             orderItem.setProduct(product);
             orderItems.add(orderItem);
         }
-        BigDecimal lastPriceOrder = lastPriceProduct.add(dto.getShippingFee()).subtract(dto.getDiscountAmount());
-        if (Math.abs(lastPriceOrder.subtract(dto.getFinalAmount()).intValue()) > 0.01) {
-            throw new AmountException("Invalid total amount. Recalculated total is " + lastPriceOrder);
+        BigDecimal shippingFee = dto.getShippingFee() != null ? dto.getShippingFee() : BigDecimal.ZERO;
+        BigDecimal discount = dto.getDiscountAmount() != null ? dto.getDiscountAmount() : BigDecimal.ZERO;
+        BigDecimal calculatedFinalAmount = lastPriceProduct.add(shippingFee).subtract(discount);
+        if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
+            throw new AmountException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        order.setTotalProductPrice(dto.getTotalProductPrice());
-        order.setShippingFee(dto.getShippingFee());
+        user.getCustomer().setPoint(totalBonus + user.getCustomer().getPoint());
+        order.setTotalProductPrice(lastPriceProduct);
+        order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
-            order.setDiscountAmount(dto.getDiscountAmount());
+            order.setDiscountAmount(discount);
         }
-        order.setFinalAmount(dto.getFinalAmount());
+        order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         this.orderRepository.save(order);
+        this.productRepository.saveAll(details);
 
     }
 }
