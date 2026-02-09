@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Voucher</title>
+</head>
+<body>
+
+<h2>Update Voucher</h2>
+<div th:if="${error}" style="color:red;">
+    <p th:text="${error}"></p>
+</div>
+<form th:action="@{/staff/voucher/edit}"
+      th:object="${voucher}"
+      method="post">
+
+    <div>
+        <label>Code:</label>
+        <input type="text" th:field="*{code}" required/>
+    </div>
+
+    <div>
+        <label>Name:</label>
+        <input type="text" th:field="*{name}" required/>
+    </div>
+
+    <div>
+        <label>Discount Value:</label>
+        <input type="number" th:field="*{discountValue}" required/>
+    </div>
+
+    <div>
+        <label>Discount Type:</label>
+        <select th:field="*{discountType}">
+            <option value="PERCENT">PERCENT</option>
+            <option value="FIXED">FIXED</option>
+        </select>
+    </div>
+
+
+    <div>
+        <label>Min Order Value:</label>
+        <input type="number" step="0.01" th:field="*{minOrderValue}"/>
+    </div>
+
+    <div>
+        <label>Point Cost:</label>
+        <input type="number" th:field="*{pointCost}"/>
+    </div>
+    <div>
+        <label>Allow exchange by points?</label>
+        <input type="checkbox" th:field="*{exchangeable}"/>
+    </div>
+    <div>
+        <label>Start At:</label>
+        <input type="datetime-local" th:field="*{startAt}"/>
+    </div>
+
+    <div>
+        <label>End At:</label>
+        <input type="datetime-local" th:field="*{endAt}"/>
+    </div>
+
+    <br>
+
+    <button type="submit">update</button>
+    <a th:href="@{/staff/voucher/list}">Cancel</a>
+
+</form>
+
+</body>
+</html>

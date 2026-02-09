@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Voucher List</title>
+</head>
+<body>
+
+<h2>Voucher List</h2>
+
+<a th:href="@{/staff/voucher/create}">Create new voucher</a>
+
+<br><br>
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="v : ${vouchers}">
+        <td th:text="${v.id}"></td>
+        <td th:text="${v.code}"></td>
+        <td th:text="${v.name}"></td>
+        <td th:text="${v.status}"></td>
+        <td>
+            <a th:href="@{/staff/voucher/detail/{id}(id=${v.id})}">View Detail</a>
+            <a th:href="@{/staff/voucher/edit/{id}(id=${v.id})}">Edit</a>
+            |
+            <a th:href="@{/staff/voucher/disable/{id}(id=${v.id})}"
+               onclick="return confirm('Disable this voucher?')">
+                Disable
+            </a>
+            <a th:href="@{/staff/voucher/delete/{id}(id=${v.id})}"
+               onclick="return confirm('Delete this voucher?')">
+                Delete
+            </a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

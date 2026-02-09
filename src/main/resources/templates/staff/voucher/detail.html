@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Voucher Detail</title>
+</head>
+<body>
+
+<h2>Voucher Detail</h2>
+<p><b>ID:</b> <span th:text="${voucher.id}"></span></p>
+<p><b>Code:</b> <span th:text="${voucher.code}"></span></p>
+<p><b>Name:</b> <span th:text="${voucher.name}"></span></p>
+<p><b>Description:</b> <span th:text="${voucher.description}"></span></p>
+<p><b>Discount Value:</b> <span th:text="${voucher.discountValue}"></span></p>
+<p><b>Discount Type:</b> <span th:text="${voucher.discountType}"></span></p>
+<p><b>Min Order Value:</b> <span th:text="${voucher.minOrderValue}"></span></p>
+<p><b>Point Cost:</b> <span th:text="${voucher.pointCost}"></span></p>
+<p><b>Start At:</b> <span th:text="${voucher.startAt}"></span></p>
+<p><b>End At:</b> <span th:text="${voucher.endAt}"></span></p>
+<p><b>Exchangeable:</b> <span th:text="${voucher.exchangeable}"></span></p>
+<br>
+<a th:href="@{/staff/voucher/list}">Back to list</a>
+
+</body>
+</html>
