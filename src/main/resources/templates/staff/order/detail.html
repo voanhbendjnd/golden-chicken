@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Order Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <head th:replace="~{common/head}"></head>
+    <style>
+        .order-info-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #0d6efd;
+        }
+
+        .status-badge {
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .table align-middle td {
+            vertical-align: middle;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{component/header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 p-0">
+                <div th:replace="~{staff/layout/sidebar}"></div>
+            </div>
+
+            <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Order Details <span class="text-primary" th:text="'#' + ${order.id}">#123</span></h2>
+                    <a href="/staff/order" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header bg-white fw-bold">Items Purchased</div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="item : ${order.items}">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img th:src="@{'/images/products/' + ${item.img}}"
+                                                            class="product-img me-3" alt="product">
+                                                        <div>
+                                                            <div class="fw-bold" th:text="${item.name}">Product Name
+                                                            </div>
+                                                            <small class="text-muted"
+                                                                th:text="'ID: ' + ${item.productId}"></small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td
+                                                    th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                                </td>
+                                                <td th:text="${item.quantity}">1</td>
+                                                <td class="text-end fw-bold"
+                                                    th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white text-end py-3">
+                                <h5 class="mb-0">Grand Total: <span class="text-danger"
+                                        th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header bg-white fw-bold">Shipping & Notes</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="info-label text-muted d-block">Recipient Name</label>
+                                        <span class="info-value fw-bold" th:text="${order.name}">John Doe</span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="info-label text-muted d-block">Phone Number</label>
+                                        <span class="info-value fw-bold" th:text="${order.phone}">0123456789</span>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="info-label text-muted d-block">Shipping Address</label>
+                                        <span class="info-value" th:text="${order.address}">123 Street, City</span>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="info-label text-muted d-block">Customer Note</label>
+                                        <p class="info-value italic text-secondary"
+                                            th:text="${#strings.isEmpty(order.note) ? 'No note provided.' : order.note}">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <label class="fw-bold mb-2">Order Management</label>
+                                <select class="form-select mb-3" id="orderStatusSelect"
+                                    th:onchange="'updateStatus(this, ' + ${order.id} + ')'">
+
+                                    <option value="PENDING" th:selected="${order.status.name() == 'PENDING'}">PENDING
+                                    </option>
+                                    <option value="SHIPPING" th:selected="${order.status.name() == 'SHIPPING'}">SHIPPING
+                                    </option>
+                                    <option value="DELIVERED" th:selected="${order.status.name() == 'DELIVERED'}">
+                                        DELIVERED</option>
+                                    <option value="COMPLETED" th:selected="${order.status.name() == 'COMPLETED'}">
+                                        COMPLETED</option>
+                                    <option value="CANCELLED" th:selected="${order.status.name() == 'CANCELLED'}">
+                                        CANCELLED</option>
+                                </select>
+                                <hr>
+                                <div class="small text-muted mb-1">Created At: <span class="float-end text-dark"
+                                        th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                </div>
+                                <div class="small text-muted">Last Update: <span class="float-end text-dark"
+                                        th:text="${#temporals.format(order.updatedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-white fw-bold">Payment Details</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="text-muted d-block small">Method</label>
+                                    <span class="badge bg-light text-dark border"
+                                        th:text="${order.paymentMethod}">CASH</span>
+                                </div>
+                                <div>
+                                    <label class="text-muted d-block small">Payment Status</label>
+                                    <span
+                                        th:classappend="${order.paymentStatus == 'PAID' ? 'text-success' : 'text-danger'}"
+                                        class="fw-bold" th:text="${order.paymentStatus}">UNPAID</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function updateStatus(selectElement, orderId) {
+            const newStatus = selectElement.value;
+
+            Swal.fire({
+                title: 'Confirm update?',
+                text: `Do you want change status order with ID #${orderId} to ${newStatus}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gửi yêu cầu cập nhật về Server bằng Fetch API
+                    fetch(`/staff/order/update-status/${orderId}?status=${newStatus}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire('Success!', 'Order status update successfully.', 'success');
+                        } else {
+                            Swal.fire('Error!', 'Cannot update order status.', 'error');
+                            location.reload(); // Reset lại nếu lỗi
+                        }
+                    });
+                } else {
+                    location.reload(); // Trả lại giá trị cũ nếu nhấn Hủy
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

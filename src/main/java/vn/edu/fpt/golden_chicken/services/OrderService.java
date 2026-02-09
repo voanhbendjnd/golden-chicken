@@ -149,4 +149,31 @@ public class OrderService {
         this.mailService.allowMailUpdateOrderStatus(order.getCustomer().getUser().getEmail(),
                 newOrder.getStatus().toString());
     }
+
+    public ResOrder findById(Long id) {
+        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+        var res = new ResOrder();
+        res.setAddress(order.getShippingAddress());
+        res.setCreatedAt(order.getCreatedAt());
+        res.setId(order.getId());
+        res.setName(order.getName());
+        res.setNote(order.getNote());
+        res.setPaymentMethod(order.getPaymentMethod().toString());
+        res.setPaymentStatus(order.getPaymentStatus().toString());
+        res.setPhone(order.getPhone());
+        res.setStatus(order.getStatus());
+        res.setTotalPrice(order.getTotalProductPrice());
+        res.setUpdatedAt(order.getUpdatedAt());
+        res.setItems(order.getOrderItems().stream().map(x -> {
+            var detail = new ResOrder.OrderDetail();
+            detail.setId(x.getId());
+            detail.setImg(x.getProduct().getImageUrl());
+            detail.setProductId(x.getProduct().getId());
+            detail.setPrice(x.getProduct().getPrice());
+            detail.setQuantity(x.getQuantity());
+            return detail;
+        }).collect(Collectors.toList()));
+        return res;
+
+    }
 }
