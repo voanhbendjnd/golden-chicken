@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
+import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 
 @Data
 @Entity
@@ -42,11 +43,14 @@ public class Order {
     BigDecimal discountAmount;
     BigDecimal finalAmount;
     String phone;
+    String name;
     // Long bonus;
     @Enumerated(EnumType.STRING)
     OrderStatus status;
     @Column(columnDefinition = "NVARCHAR(255)")
+    @Enumerated(EnumType.STRING)
 
+    PaymentStatus paymentStatus;
     String shippingAddress;
     String note;
     @Enumerated(EnumType.STRING)

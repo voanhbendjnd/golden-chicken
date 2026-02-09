@@ -25,7 +25,7 @@ public class ResOrder {
 
     OrderStatus status;
     LocalDateTime createdAt;
-
+    LocalDateTime updatedAt;
     List<OrderDetail> items;
 
     @Data

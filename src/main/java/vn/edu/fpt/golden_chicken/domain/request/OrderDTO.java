@@ -11,6 +11,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDTO {
+
     String name;
     String address;
     String phone;

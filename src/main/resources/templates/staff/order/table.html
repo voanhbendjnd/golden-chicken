@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Product Table</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <head th:replace="~{common/head}"></head>
+</head>
+
+<body>
+    <div th:replace="~{component/header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 p-0">
+                <div th:replace="~{staff/layout/sidebar}"></div>
+            </div>
+            <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h3>Product Management</h3>
+                                    <a th:href="@{/staff/order/create}" class="btn btn-primary">Create New
+                                        Product</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <select id="filterStatus" class="form-select" style="max-width: 150px;"
+                                                    onchange="handleSearch()">
+                                                    <option value="">All Status</option>
+                                                    <option value="PENDING"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PENDING''')}">
+                                                        Pending
+                                                    </option>
+                                                    <option value="SHIPPING"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''SHIPPING''')}">
+                                                        Shipping
+                                                    </option>
+                                                    <option value="COMPLETED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''COMPLETED''')}">
+                                                        Completed
+                                                    </option>
+                                                    <option value="CANCELLED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''CANCELLED''')}">
+                                                        Cancelled
+                                                    </option>
+                                                    <option value="DELIVERED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERED''')}">
+                                                        Delivered
+                                                    </option>
+                                                </select>
+                                                <input type="text" id="searchName" class="form-control"
+                                                    placeholder="Search by number phone..." th:value="${searchName}">
+
+                                                <button class="btn btn-outline-primary" type="button"
+                                                    onclick="handleSearch()">
+                                                    Search
+                                                </button>
+                                                <a href="/staff/order" class="btn btn-outline-dark">Reset</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <form th:action="@{/staff/order/import}" method="post"
+                                        enctype="multipart/form-data">
+                                        <input type="hidden" th:name="${_csrf.parameterName}"
+                                            th:value="${_csrf.token}" />
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Choose file Excel (.xlsx):</label>
+                                            <input type="file" name="file" class="form-control" accept=".xlsx, .xls"
+                                                required />
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Upload And Save</button>
+                                    </form> -->
+                                    <div th:if="${orders != null and !orders.isEmpty()}">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Name</th>
+                                                    <th>Amount</th>
+                                                    <th>Payment Method</th>
+                                                    <th>Payment Status</th>
+                                                    <th>Created At</th>
+                                                    <th>Updated At</th>
+                                                    <th>Status</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="order : ${orders}">
+                                                    <td>
+                                                        <a th:href="@{/staff/order/{id}(id=${order.id})}"
+                                                            th:text="${order.id}"
+                                                            style="text-decoration-line: none;"></a>
+                                                    </td>
+                                                    <td th:text="${order.name}"></td>
+                                                    <td
+                                                        th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                                    </td>
+                                                    <!-- <td th:text="${order.status}"></td> -->
+
+                                                    <td th:text="${order.paymentMethod}"></td>
+                                                    <td th:text="${order.paymentStatus}"></td>
+                                                    <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">
+                                                    </td>
+                                                    <td th:text="${#temporals.format(order.updatedAt, 'dd/MM/yyyy')}">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm status-select"
+                                                            th:data-id="${order.id}"
+                                                            th:onchange="'updateStatus(this, ' + ${order.id} + ')' "
+                                                            th:style="${'background-color: ' + 
+                                                                                                                    (order.status.name() == 'PENDING' ? '#fff3cd' : 
+                                                                                                                     order.status.name() == 'SHIPPING' ? '#cff4fc' : 
+                                                                                                                     order.status.name() == 'COMPLETED' ? '#d1e7dd' : 
+                                                                                                                     order.status.name() == 'CANCELLED' ? '#f8d7da' : 
+                                                                                                                     '#d0ebff') + '; color: ' + 
+                                                                                                                    (order.status.name() == 'PENDING' ? '#856404' : 
+                                                                                                                     order.status.name() == 'SHIPPING' ? '#055160' : 
+                                                                                                                     order.status.name() == 'COMPLETED' ? '#0f5132' : 
+                                                                                                                     order.status.name() == 'CANCELLED' ? '#721c24' : 
+                                                                                                                     '#084298') + '; font-weight: bold;'}">
+                                                            <option value="PENDING"
+                                                                th:selected="${order.status.name() == 'PENDING'}"
+                                                                style="background-color: #fff3cd; color: #856404;">
+                                                                PENDING
+                                                            </option>
+                                                            <option value="SHIPPING"
+                                                                th:selected="${order.status.name() == 'SHIPPING'}"
+                                                                style="background-color: #cff4fc; color: #055160;">
+                                                                SHIPPING
+                                                            </option>
+                                                            <option value="COMPLETED"
+                                                                th:selected="${order.status.name() == 'COMPLETED'}"
+                                                                style="background-color: #d1e7dd; color: #0f5132;">
+                                                                COMPLETED
+                                                            </option>
+                                                            <option value="CANCELLED"
+                                                                th:selected="${order.status.name() == 'CANCELLED'}"
+                                                                style="background-color: #f8d7da; color: #721c24;">
+                                                                CANCELLED
+                                                            </option>
+                                                            <option value="DELIVERED"
+                                                                th:selected="${order.status.name() == 'DELIVERED'}"
+                                                                style="background-color: #d0ebff; color: #084298;">
+                                                                DELIVERED
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
+                                                        <a class="page-link"
+                                                            th:href="@{/staff/order(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
+                                                    </li>
+
+                                                    <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
+                                                        th:class="|page-item ${meta.page == p ? 'active' : ''}|">
+                                                        <a class="page-link"
+                                                            th:href="@{/staff/order(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
+                                                            th:text="${p}"></a>
+                                                    </li>
+
+                                                    <li
+                                                        th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
+                                                        <a class="page-link"
+                                                            th:href="@{/staff/order(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                    <div th:if="${orders == null or orders.isEmpty()}" style="text-align: center;">
+                                        Not Found orders!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateStatus(selectElement, orderId) {
+            const newStatus = selectElement.value;
+
+            Swal.fire({
+                title: 'Confirm update?',
+                text: `Do you want change status order with ID #${orderId} to ${newStatus}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gửi yêu cầu cập nhật về Server bằng Fetch API
+                    fetch(`/staff/order/update-status/${orderId}?status=${newStatus}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire('Success!', 'Order status update successfully.', 'success');
+                        } else {
+                            Swal.fire('Error!', 'Cannot update order status.', 'error');
+                            location.reload(); // Reset lại nếu lỗi
+                        }
+                    });
+                } else {
+                    location.reload(); // Trả lại giá trị cũ nếu nhấn Hủy
+                }
+            });
+        }
+
+
+        function handleSearch() {
+            const name = document.getElementById("searchName").value.trim();
+            const status = document.getElementById("filterStatus").value;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            let filterConditions = [];
+
+            if (name !== "") {
+                filterConditions.push(`phone ~~ '${name}'`);
+            }
+
+            if (status !== "" && status !== "ALL") {
+                filterConditions.push(`status : '${status}'`);
+            }
+
+            if (filterConditions.length > 0) {
+                urlParams.set('filter', filterConditions.join(' and '));
+            } else {
+                urlParams.delete('filter');
+            }
+
+            urlParams.set('page', '1');
+            window.location.href = window.location.pathname + "?" + urlParams.toString();
+        }
+        document.getElementById("searchName").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                handleSearch();
+            }
+        });
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('.delete-form');
+                Swal.fire({
+                    title: 'Are you sure delete?',
+                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
