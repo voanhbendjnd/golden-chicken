@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Thực đơn - Golden Chicken</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}" />
 
     <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,6 +14,11 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/menu.css}">
+    <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <th:block th:replace="~{common/head}"></th:block>
+    <link th:href="@{/css/profileTest.css}" rel="stylesheet">
 </head>
 
 <body>
@@ -60,10 +66,23 @@
                                 </p>
                             </div>
 
-                            <a class="btn-default btn-yellow btn-order" th:href="@{/order/{id}(id=${product.id})}">
-                                ĐẶT HÀNG
+                            <a class="btn-default btn-red btn-order" style="text-decoration-line: none;"
+                                th:href="@{/checkout?id={id}(id=${product.id})}">
+                                Buy Now
                             </a>
+                            <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
+                                <button class="btn-default btn-yellow flex-grow-1 btn-add-to-cart"
+                                    th:data-id="${product.id}">
+                                    Add To Cart
+                                </button>
 
+                                <div class="input-group quantity-selector shadow-sm" style="width: 130px;">
+                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                                    <input type="number" class="form-control text-center input-qty" value="1" min="1"
+                                        th:id="'qty-' + ${product.id}">
+                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
@@ -87,6 +106,61 @@
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/app.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 1. Xử lý nút Tăng/Giảm số lượng
+            document.querySelectorAll('.btn-minus').forEach(btn => {
+                btn.onclick = function () {
+                    let input = this.parentElement.querySelector('.input-qty');
+                    if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+                }
+            });
+
+            document.querySelectorAll('.btn-plus').forEach(btn => {
+                btn.onclick = function () {
+                    let input = this.parentElement.querySelector('.input-qty');
+                    input.value = parseInt(input.value) + 1;
+                }
+            });
+
+            // 2. Xử lý Thêm vào giỏ hàng bằng AJAX
+            document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+                btn.onclick = async function () {
+                    const productId = this.getAttribute('data-id');
+                    const quantity = document.getElementById('qty-' + productId).value;
+
+                    const cartDTO = {
+                        productId: parseInt(productId),
+                        quantity: parseInt(quantity)
+                    };
+
+                    try {
+                        const response = await fetch('/cart/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
+                            },
+                            body: JSON.stringify(cartDTO)
+                        });
+
+                        if (response.ok) {
+                            alert('Đã thêm món ăn vào giỏ hàng!');
+                            // Cập nhật số lượng trên icon giỏ hàng ở Header nếu có
+                        } else if (response.status === 403) {
+                            alert('Vui lòng đăng nhập với tài khoản khách hàng!');
+                        } else {
+                            alert('Có lỗi xảy ra, vui lòng thử lại.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Không thể kết nối đến máy chủ!');
+                    }
+                };
+            });
+        });
+    </script>
 
 </body>
 

@@ -1,0 +1,83 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart-Golden Chicken</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+    <!-- <link th:href="@{/css/base.css}" rel="stylesheet"> -->
+    <!-- <link th:href="@{/css/style.css}" rel="stylesheet"> -->
+
+    <head th:replace="~{common/head}"></head>
+</head>
+
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+
+    <section class="cart-page py-5 bg-light">
+        <div class="container">
+            <h4 class="mb-4">GIỎ HÀNG</h4>
+
+            <div class="cart-table-header d-none d-md-flex bg-white p-3 mb-2 shadow-sm rounded">
+                <div style="width: 45%;">Sản phẩm</div>
+                <div class="text-center" style="width: 15%;">Đơn giá</div>
+                <div class="text-center" style="width: 15%;">Số lượng</div>
+                <div class="text-center" style="width: 15%;">Số tiền</div>
+                <div class="text-center" style="width: 10%;">Thao tác</div>
+            </div>
+
+            <div class="cart-items">
+                <div class="cart-item bg-white p-3 mb-2 shadow-sm rounded d-flex align-items-center"
+                    th:each="item : ${cart.items}">
+
+                    <div class="d-flex align-items-center" style="width: 45%;">
+                        <img th:src="@{'/images/products/' + ${item.productImg}}" class="rounded border"
+                            style="width: 80px; height: 80px; object-fit: cover;">
+                        <div class="ms-3">
+                            <h6 class="mb-1 text-truncate-2" th:text="${item.productName}">Tên sản phẩm</h6>
+                            <span class="badge bg-warning text-dark">Flash Sale</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center" style="width: 15%;">
+                        <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                    </div>
+
+                    <div class="text-center" style="width: 15%;">
+                        <div class="input-group input-group-sm mx-auto" style="width: 100px;">
+                            <button class="btn btn-outline-secondary btn-update" th:data-id="${item.productId}"
+                                data-action="minus">-</button>
+                            <input type="text" class="form-control text-center bg-white" th:value="${item.quantity}"
+                                readonly>
+                            <button class="btn btn-outline-secondary btn-update" th:data-id="${item.productId}"
+                                data-action="plus">+</button>
+                        </div>
+                    </div>
+
+                    <div class="text-center text-danger fw-bold" style="width: 15%;">
+                        <span
+                            th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                    </div>
+
+                    <div class="text-center" style="width: 10%;">
+                        <button class="btn btn-link text-dark text-decoration-none btn-delete"
+                            th:data-id="${item.productId}">Xóa</button>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="checkout-bar bg-white p-3 mt-4 shadow rounded d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="me-3">Tổng cộng (<span th:text="${cart.totalQuantity}">0</span> sản phẩm):</span>
+                    <span class="fs-4 text-danger fw-bold"
+                        th:text="${#numbers.formatDecimal(cart.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                </div>
+                <button class="btn btn-danger btn-lg px-5">Mua Hàng</button>
+            </div>
+        </div>
+    </section>
+    <div th:replace="~{client/layout/footer}"></div>
+
+</body>
