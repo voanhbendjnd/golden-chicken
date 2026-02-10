@@ -80,4 +80,15 @@ public class VoucherService {
         v.setExchangeable(dto.isExchangeable());
         repo.save(v);
     }
+    public void disableVoucher(Long id) {
+        Voucher v = repo.findById(id).orElseThrow();
+        v.setStatus("DISABLED");
+        repo.save(v);
+    }
+    public void deleteVoucher(Long id) {
+        Voucher v = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        v.setIsDeleted(true);
+        repo.save(v);
+    }
 }

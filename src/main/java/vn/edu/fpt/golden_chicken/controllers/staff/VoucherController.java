@@ -38,17 +38,20 @@ public class VoucherController {
             return "staff/voucher/create";
         }
     }
+
     @GetMapping("/list")
     public String list(Model model) {
         model.addAttribute("vouchers", service.getAll());
         return "staff/voucher/list";
     }
+
     // chi tiet voucher
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable("id") Long id, Model model) {
         model.addAttribute("voucher", service.getById(id));
         return "staff/voucher/detail";
     }
+
     //update
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable("id") Long id, Model model) {
@@ -62,6 +65,18 @@ public class VoucherController {
         service.updateVoucher(id, dto);
         return "redirect:/staff/voucher/list";
     }
-    //lap như cái lồn
+
+    @GetMapping("/disable/{id}")
+    public String disable(@PathVariable("id") Long id) {
+        service.disableVoucher(id);
+        return "redirect:/staff/voucher/list";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteVoucher(@PathVariable("id") Long id) {
+        service.deleteVoucher(id);
+        return "redirect:/staff/voucher/list";
+    }
+
 }
 

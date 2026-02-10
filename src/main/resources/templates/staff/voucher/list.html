@@ -3,47 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Voucher List</title>
+    <link rel="stylesheet" th:href="@{/css/voucher.css}">
+
 </head>
 <body>
 
-<h2>Voucher List</h2>
+<div class="voucher-container">
+    <h2 class="page-title">Voucher List</h2>
 
-<a th:href="@{/staff/voucher/create}">Create new voucher</a>
+    <div class="action-bar">
+        <a class="btn btn-primary" th:href="@{/staff/voucher/create}">
+            + Create new voucher
+        </a>
+    </div>
 
-<br><br>
+    <table class="voucher-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="v : ${vouchers}">
+            <td th:text="${v.id}"></td>
+            <td th:text="${v.code}"></td>
+            <td th:text="${v.name}"></td>
+            <td>
+                <span class="status"
+                      th:classappend="' ' + ${v.status.toLowerCase()}"
+                      th:text="${v.status}">
+                </span>
+            </td>
+            <td class="action-col">
+                <a class="link view"
+                   th:href="@{/staff/voucher/detail/{id}(id=${v.id})}">
+                    View
+                </a>
+                <a class="link edit"
+                   th:href="@{/staff/voucher/edit/{id}(id=${v.id})}">
+                    Edit
+                </a>
+                <a class="link disable"
+                   href="javascript:void(0)"
+                   th:onclick="|openConfirm('disable', ${v.id})|">
+                    Disable
+                </a>
 
-<table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Code</th>
-        <th>Name</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="v : ${vouchers}">
-        <td th:text="${v.id}"></td>
-        <td th:text="${v.code}"></td>
-        <td th:text="${v.name}"></td>
-        <td th:text="${v.status}"></td>
-        <td>
-            <a th:href="@{/staff/voucher/detail/{id}(id=${v.id})}">View Detail</a>
-            <a th:href="@{/staff/voucher/edit/{id}(id=${v.id})}">Edit</a>
-            |
-            <a th:href="@{/staff/voucher/disable/{id}(id=${v.id})}"
-               onclick="return confirm('Disable this voucher?')">
-                Disable
-            </a>
-            <a th:href="@{/staff/voucher/delete/{id}(id=${v.id})}"
-               onclick="return confirm('Delete this voucher?')">
-                Delete
-            </a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+                <a class="link delete"
+                   href="javascript:void(0)"
+                   th:onclick="|openConfirm('delete', ${v.id})|">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle"></h3>
+        <p id="modalMessage"></p>
 
+        <div class="modal-actions">
+            <a id="confirmBtn" class="btn-danger">Confirm</a>
+            <button class="btn-secondary" onclick="closeConfirm()">Cancel</button>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/voucher.js}"></script>
 </body>
+
 </html>
