@@ -166,7 +166,21 @@
                 document.getElementById('total-price').innerText = new Intl.NumberFormat('vi-VN').format(totalPrice) + '₫';
 
                 // Vô hiệu hóa nút đặt hàng nếu không chọn món nào
-                document.getElementById('btn-order').disabled = (checkedItems === 0);
+                // Thêm logic này vào phần script của file cart.html
+                document.getElementById('btn-order').onclick = function () {
+                    const selectedIds = [];
+                    document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+                        selectedIds.push(cb.getAttribute('data-id'));
+                    });
+
+                    if (selectedIds.length === 0) {
+                        Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để đặt hàng!', 'info');
+                        return;
+                    }
+
+                    // Chuyển hướng sang trang order kèm theo danh sách ID sản phẩm đã chọn
+                    window.location.href = '/checkout/order?ids=' + selectedIds.join(',');
+                };
 
                 // Cập nhật trạng thái nút Select All
                 const selectAll = document.getElementById('select-all');

@@ -35,15 +35,18 @@ public class MailService {
         this.sendNotice(email, "Register Success", "mail/anu", email, name);
     }
 
-    public void allowMailUpdateOrderStatus(String email, String status) {
-        this.sendStatus(email, "Update Order Status", "mail/os", email, status);
+    public void allowMailUpdateOrderStatus(String email, String status, String id, String name) {
+        this.sendStatus(email, "Update Order Status", "mail/os", email, status, id, name);
     }
 
     @Async
-    public void sendStatus(String to, String subject, String template, String email, String status) {
+    public void sendStatus(String to, String subject, String template, String email, String status, String id,
+            String name) {
         var ctx = new Context();
+        ctx.setVariable("cus", name);
         ctx.setVariable("email", email);
         ctx.setVariable("status", status);
+        ctx.setVariable("id", id);
         var at = new ArrayList<FileSystemResource>();
         var content = this.templateEngine.process(template, ctx);
         this.sendEmailSync(to, subject, content, false, true, at);
