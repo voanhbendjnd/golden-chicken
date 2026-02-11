@@ -18,7 +18,6 @@ import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
-import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -87,6 +86,7 @@ public class CartService {
                         var cartItem = new CartResponse.CartItemDTO();
                         var product = products.get(x.getProduct().getId());
                         if (product != null) {
+                            cartItem.setProductName(product.getName());
                             cartItem.setPrice(product.getPrice());
                             cartItem.setProductId(product.getId());
                             cartItem.setProductImg(product.getImageUrl());
