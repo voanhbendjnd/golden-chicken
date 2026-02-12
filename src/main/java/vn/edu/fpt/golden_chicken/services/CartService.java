@@ -86,6 +86,7 @@ public class CartService {
                         var cartItem = new CartResponse.CartItemDTO();
                         var product = products.get(x.getProduct().getId());
                         if (product != null) {
+                            cartItem.setItemId(x.getId());
                             cartItem.setProductName(product.getName());
                             cartItem.setPrice(product.getPrice());
                             cartItem.setProductId(product.getId());

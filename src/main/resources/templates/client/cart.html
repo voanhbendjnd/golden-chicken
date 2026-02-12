@@ -149,20 +149,20 @@
                 let totalPrice = 0;
                 let checkedItems = 0;
                 const checkboxes = document.querySelectorAll('.item-checkbox');
-
+                var cnt = 0;
                 checkboxes.forEach(cb => {
                     if (cb.checked) {
                         const id = cb.getAttribute('data-id');
                         const qty = parseInt(document.getElementById('qty-' + id).value);
                         const price = parseFloat(document.getElementById('subtotal-' + id).getAttribute('data-price'));
-
+                        cnt++;
                         totalQty += qty;
                         totalPrice += (price * qty);
                         checkedItems++;
                     }
                 });
 
-                document.getElementById('total-qty').innerText = totalQty;
+                document.getElementById('total-qty').innerText = cnt;
                 document.getElementById('total-price').innerText = new Intl.NumberFormat('vi-VN').format(totalPrice) + '₫';
 
                 // Vô hiệu hóa nút đặt hàng nếu không chọn món nào

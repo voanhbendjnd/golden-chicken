@@ -63,6 +63,7 @@ public class CheckoutController {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (var x : cartItems) {
             var detail = new OrderDTO.OrderDetail();
+            detail.setItemId(x.getItemId());
             detail.setProductId(x.getProductId());
             detail.setQuantity(x.getQuantity());
 

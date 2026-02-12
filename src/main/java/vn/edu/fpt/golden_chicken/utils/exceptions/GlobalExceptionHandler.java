@@ -30,8 +30,9 @@ public class GlobalExceptionHandler {
         return "client/auth/access-deny";
     }
 
-    @ExceptionHandler(value = { AmountException.class })
-    public String handleAmountSystemNotTheSame(AmountException ax) {
-        return "error/error-amount";
+    @ExceptionHandler(value = { CheckoutException.class })
+    public String handleAmountSystemNotTheSame(CheckoutException ax) {
+        return "error/checkout-error";
     }
+
 }

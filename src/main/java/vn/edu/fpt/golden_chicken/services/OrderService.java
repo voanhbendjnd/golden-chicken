@@ -14,17 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.domain.entity.CartItem;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
-import vn.edu.fpt.golden_chicken.utils.exceptions.AmountException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -36,6 +38,7 @@ public class OrderService {
     ProductRepository productRepository;
     OrderRepository orderRepository;
     MailService mailService;
+    CartRepository cartRepository;
 
     @Transactional
     public void order(OrderDTO dto) throws PermissionException {
@@ -81,7 +84,7 @@ public class OrderService {
         BigDecimal discount = dto.getDiscountAmount() != null ? dto.getDiscountAmount() : BigDecimal.ZERO;
         BigDecimal calculatedFinalAmount = lastPriceProduct.add(shippingFee).subtract(discount);
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
-            throw new AmountException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
+            throw new CheckoutException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
         customer
                 .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() : 0));
@@ -93,7 +96,42 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-        customer.setCartItems(new ArrayList<>());
+        var listFromCart = new ArrayList<CartItem>();
+        if (dto.getItems().getFirst().getItemId() != null) {
+            var cartItems = this.cartRepository
+                    .findByIdIn(dto.getItems().stream().map(x -> x.getItemId()).collect(Collectors.toList()));
+            var mpCartItems = dto.getItems().stream()
+                    .collect(Collectors.toMap(x -> x.getItemId(), x -> x));
+            for (var x : cartItems) {
+                var qtyInCart = x.getQuantity();
+                if (qtyInCart <= 0) {
+                    throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
+                            + ") in cart less than or equal 0!");
+                }
+                var it = mpCartItems.get(x.getId());
+                if (it != null) {
+                    var lastQty = qtyInCart - it.getQuantity();
+                    if (lastQty < 0) {
+                        throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
+                                + ") in cart less than or equal 0!");
+
+                    } else if (lastQty == 0) {
+                        listFromCart.add(x);
+                    } else if (lastQty > 0) {
+                        x.setQuantity(lastQty);
+                    }
+
+                } else {
+                    throw new ResourceNotFoundException("Cart Item ID", x.getId());
+                }
+            }
+            this.cartRepository.saveAll(cartItems);
+            if (!listFromCart.isEmpty() || listFromCart.size() != 0) {
+                this.cartRepository.deleteAll(listFromCart);
+            }
+            customer.setCartItems(null);
+        }
+
         this.productRepository.saveAll(details);
         this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString(),
                 "#" + order.getId(), order.getName());

@@ -18,6 +18,7 @@ public class CartResponse {
     @Data
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class CartItemDTO {
+        Long itemId;
         Long productId;
         String productName;
         String productImg;

@@ -26,6 +26,7 @@ public class OrderDTO {
 
     @Data
     public static class OrderDetail {
+        Long itemId;
         Long productId;
         Integer quantity;
     }

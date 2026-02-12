@@ -143,6 +143,7 @@
                                 th:each="item, iterStat : *{items}">
                                 <div class="d-flex align-items-center" style="gap: 15px;">
                                     <!-- Lấy thông tin hiển thị từ cartItems theo cùng index -->
+                                    <span th:text="${cartItems[__${iterStat.index}__].itemId}"></span>
                                     <img th:src="@{'/images/products/' + ${cartItems[__${iterStat.index}__].productImg}}"
                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
                                     <div>
@@ -158,6 +159,7 @@
                                 </div>
 
                                 <!-- Hidden fields để bind về OrderDTO -->
+                                <input type="hidden" th:field="*{items[__${iterStat.index}__].itemId}" />
                                 <input type="hidden" th:field="*{items[__${iterStat.index}__].productId}" />
                                 <input type="hidden" th:field="*{items[__${iterStat.index}__].quantity}" />
                             </li>
