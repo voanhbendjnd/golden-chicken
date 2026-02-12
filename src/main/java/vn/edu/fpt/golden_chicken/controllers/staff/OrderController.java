@@ -31,7 +31,7 @@ public class OrderController {
 
     @GetMapping
     public String table(Model model, @Filter Specification<Order> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.orderService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("meta", data.getMeta());
         model.addAttribute("orders", data.getResult());

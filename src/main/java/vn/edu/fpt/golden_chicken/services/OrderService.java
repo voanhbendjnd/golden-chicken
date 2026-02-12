@@ -40,7 +40,9 @@ public class OrderService {
     @Transactional
     public void order(OrderDTO dto) throws PermissionException {
         var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        if (user.getCustomer() == null) {
+        var customer = user.getCustomer();
+
+        if (customer == null) {
             throw new PermissionException("You do not have permission!");
         }
         var orderItems = new ArrayList<OrderItem>();
@@ -52,7 +54,7 @@ public class OrderService {
         order.setNote(dto.getNote());
         order.setPhone(dto.getPhone());
         order.setStatus(OrderStatus.PENDING);
-        order.setCustomer(user.getCustomer());
+        order.setCustomer(customer);
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
         var mpDetails = details.stream().collect(Collectors.toMap(x -> x.getId(), x -> x));
@@ -81,8 +83,8 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new AmountException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        user.getCustomer()
-                .setPoint(totalBonus + (user.getCustomer().getPoint() != null ? user.getCustomer().getPoint() : 0));
+        customer
+                .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() : 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
@@ -91,9 +93,11 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-
+        customer.setCartItems(new ArrayList<>());
         this.productRepository.saveAll(details);
-        this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString());
+        this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString(),
+                "#" + order.getId(), order.getName());
+
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Order> spec, Pageable pageable) {
@@ -147,7 +151,7 @@ public class OrderService {
 
         var newOrder = this.orderRepository.save(order);
         this.mailService.allowMailUpdateOrderStatus(order.getCustomer().getUser().getEmail(),
-                newOrder.getStatus().toString());
+                newOrder.getStatus().toString(), "#" + order.getId(), order.getName());
     }
 
     public ResOrder findById(Long id) {

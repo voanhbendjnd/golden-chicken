@@ -44,10 +44,6 @@
                                                         th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''CANCELLED''')}">
                                                         Cancelled
                                                     </option>
-                                                    <option value="DELIVERED"
-                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERED''')}">
-                                                        Delivered
-                                                    </option>
                                                 </select>
                                                 <input type="text" id="searchName" class="form-control"
                                                     placeholder="Search by number phone..." th:value="${searchName}">
@@ -140,11 +136,6 @@
                                                                 th:selected="${order.status.name() == 'CANCELLED'}"
                                                                 style="background-color: #f8d7da; color: #721c24;">
                                                                 CANCELLED
-                                                            </option>
-                                                            <option value="DELIVERED"
-                                                                th:selected="${order.status.name() == 'DELIVERED'}"
-                                                                style="background-color: #d0ebff; color: #084298;">
-                                                                DELIVERED
                                                             </option>
                                                         </select>
                                                     </td>

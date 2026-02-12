@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -32,4 +33,14 @@ public class Customer implements Serializable {
     Long point;
     @OneToMany(mappedBy = "customer")
     List<Order> orders;
+    @OneToMany(mappedBy = "customer")
+    List<CartItem> cartItems;
+
+    public void addCartItem(CartItem item) {
+        if (this.cartItems == null) {
+            this.cartItems = new ArrayList<>();
+        }
+        this.cartItems.add(item);
+        item.setCustomer(this);
+    }
 }

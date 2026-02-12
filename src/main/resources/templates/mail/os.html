@@ -117,8 +117,8 @@
             <p class="mb-0 opacity-75">Tracking your purchase</p>
         </div>
         <div class="card-body text-center p-4 p-md-5">
-            <p class="text-secondary">Hello,</p>
-            <p>Your order status has been successfully updated to:</p>
+            <p class="text-secondary">Hello, <span th:text="${cus}"></span></p>
+            <p>Your order with ID <span th:text="${id}"></span> status has been successfully updated to:</p>
 
             <div th:classappend="${'bg-' + status}" class="status-badge">
                 <span th:text="${status}">SHIPPING</span>
