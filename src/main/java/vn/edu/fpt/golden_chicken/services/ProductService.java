@@ -13,9 +13,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.criteria.Join;
+import vn.edu.fpt.golden_chicken.controllers.client.AddressController;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
@@ -31,6 +34,8 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ProductService {
+
+    AddressController addressController;
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
@@ -199,8 +204,72 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public ResultPaginationDTO fetchAllChickenHappy(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%gà giòn%");
+            var p2 = c.equal(r.get("active"), true);
+            return c.and(p1, p2);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllChickenSauce(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%gà sốt%");
+            var p2 = c.equal(r.get("active"), true);
+            return c.and(p1, p2);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllNoodle(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%mỳ%");
+            var p2 = c.equal(r.get("active"), true);
+            return c.and(p1, p2);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
     public ResultPaginationDTO fetchAllComboWithPagination(Specification<Product> spec, Pageable pageable) {
-        Specification<Product> comboSpec = (r, q, c) -> c.equal(r.get("type"), ProductType.COMBO);
+        Specification<Product> comboSpec = (r, q, c) -> {
+            var p1 = c.equal(r.get("type"), ProductType.COMBO);
+            var p2 = c.equal(r.get("active"), true);
+            return c.and(p1, p2);
+        };
         var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
@@ -218,4 +287,5 @@ public class ProductService {
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
+
 }

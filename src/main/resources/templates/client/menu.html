@@ -7,10 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}" />
 
-    <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- CSS GIỮ NGUYÊN -->
+    <head th:replace="~{common/head}"></head>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/menu.css}">
@@ -148,7 +153,18 @@
                         });
 
                         if (response.ok) {
-                            alert('Đã thêm món ăn vào giỏ hàng!');
+                            Swal.fire({
+                                tilte: 'Success',
+                                text: 'Add to cart success',
+                                icon: 'success',
+                                showClass: {
+                                    popup: 'animate__animated animate__fadeInDown'
+                                },
+                                hideClass: {
+                                    popup: 'animate__animated animate__fadeOutUp'
+                                }
+                            })
+                            // alert('Đã thêm món ăn vào giỏ hàng!');
                             // Cập nhật số lượng trên icon giỏ hàng ở Header nếu có
                         } else if (response.status === 403) {
                             alert('Vui lòng đăng nhập với tài khoản khách hàng!');

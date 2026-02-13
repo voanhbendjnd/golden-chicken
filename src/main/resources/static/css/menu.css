@@ -2,6 +2,20 @@
    MENU PAGE – BOOTSTRAP + JOLLIBEE
 ====================== */
 
+/* Fix header không bị ảnh hưởng */
+.header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+}
+
+/* Thêm khoảng cách để header không che nội dung */
+.menu-page {
+    margin-top: 80px !important;
+}
+
 .menu-page {
     background: #fff;
 }

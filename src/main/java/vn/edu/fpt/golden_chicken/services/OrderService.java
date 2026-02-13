@@ -129,7 +129,6 @@ public class OrderService {
             if (!listFromCart.isEmpty() || listFromCart.size() != 0) {
                 this.cartRepository.deleteAll(listFromCart);
             }
-            customer.setCartItems(null);
         }
 
         this.productRepository.saveAll(details);
