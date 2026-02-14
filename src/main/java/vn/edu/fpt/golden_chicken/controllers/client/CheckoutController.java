@@ -3,8 +3,6 @@ package vn.edu.fpt.golden_chicken.controllers.client;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.servlet.http.HttpSession;
-import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
@@ -23,7 +19,6 @@ import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.ProductService;
-import vn.edu.fpt.golden_chicken.services.VNPayService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -34,15 +29,13 @@ public class CheckoutController {
     private final AddressServices addressServices;
     private final OrderService orderService;
     private final CartService cartService;
-    private final VNPayService vnPayService;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService, VNPayService vnPayService) {
+            OrderService orderService, CartService cartService) {
         this.productService = productService;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
-        this.vnPayService = vnPayService;
     }
 
     @GetMapping("/order")
@@ -164,17 +157,8 @@ public class CheckoutController {
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
-        // Tạo order
         var order = this.orderService.order(dto);
-        
-        // Nếu thanh toán bằng VNPay thì redirect đến VNPay
-        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
-            String orderInfo = "Thanh toan don hang #" + order.getId();
-            String paymentUrl = vnPayService.createPaymentUrl(order.getId(), dto.getFinalAmount().longValue(), orderInfo);
-            return "redirect:" + paymentUrl;
-        }
-        
-        // Thanh toán COD thì redirect về trang chủ
+
         return "redirect:/";
     }
 
