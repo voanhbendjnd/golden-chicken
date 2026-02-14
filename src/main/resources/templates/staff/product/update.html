@@ -78,7 +78,6 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Category</label>
                             <select class="form-select" th:field="*{category.id}" required>
-                                <option value="">-- Choose Category --</option>
                                 <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
                                     th:selected="${product.category.id == cat.id}">
 

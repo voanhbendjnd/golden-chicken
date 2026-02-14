@@ -94,20 +94,20 @@
                                                 <ul class="pagination">
                                                     <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
                                                         <a class="page-link"
-                                                            th:href="@{/admin/user(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
+                                                            th:href="@{/staff/category(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
                                                     </li>
 
                                                     <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                                         th:class="|page-item ${meta.page == p ? 'active' : ''}|">
                                                         <a class="page-link"
-                                                            th:href="@{/admin/user(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
+                                                            th:href="@{/staff/category(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
                                                             th:text="${p}"></a>
                                                     </li>
 
                                                     <li
                                                         th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
                                                         <a class="page-link"
-                                                            th:href="@{/admin/user(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
+                                                            th:href="@{/staff/category(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
                                                     </li>
                                                 </ul>
                                             </nav>

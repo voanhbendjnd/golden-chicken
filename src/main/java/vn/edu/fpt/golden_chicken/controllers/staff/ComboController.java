@@ -54,7 +54,7 @@ public class ComboController {
     public String comboPage(Model model,
             @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @Filter Specification<Product> spec) {
-        var data = this.productService.fetchAllComboWithPagination(spec, pageable);
+        var data = this.productService.fetchAllComboWithPaginationAndAllStats(spec, pageable);
         model.addAttribute("products", data.getResult());
         model.addAttribute("meta", data.getMeta());
         return "staff/combo/table";

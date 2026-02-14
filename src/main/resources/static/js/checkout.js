@@ -10,14 +10,14 @@ let cartData = {
     {
       id: 1,
       title: "1 MIẾNG GÀ GIÒN VUI VẺ + 1 COMBO GÀ GIÒN VUI VẺ",
-      img: "./img/1_mi_ng_ggvv_png_1.png",
+      img: "/img/1_mi_ng_ggvv_png_1.png",
       amount: 2,
       price: 66000,
     },
     {
       id: 1,
       title: "1 MIẾNG GÀ GIÒN VUI VẺ + 1 COMBO GÀ GIÒN VUI VẺ",
-      img: "./img/1_mi_ng_ggvv_png_1.png",
+      img: "/img/1_mi_ng_ggvv_png_1.png",
       amount: 2,
       price: 66000,
     },

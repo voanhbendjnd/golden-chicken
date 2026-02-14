@@ -41,11 +41,16 @@ public class ProductService {
     FileService fileService;
 
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            return c.equal(categoryJoin.get("status"), true);
+        };
+
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        var page = this.productRepository.findAll(spec, pageable);
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
@@ -209,7 +214,8 @@ public class ProductService {
             Join<Product, Category> categoryJoin = r.join("category");
             var p1 = c.like(categoryJoin.get("name"), "%gà giòn%");
             var p2 = c.equal(r.get("active"), true);
-            return c.and(p1, p2);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
         };
         var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
         var res = new ResultPaginationDTO();
@@ -229,7 +235,8 @@ public class ProductService {
             Join<Product, Category> categoryJoin = r.join("category");
             var p1 = c.like(categoryJoin.get("name"), "%gà sốt%");
             var p2 = c.equal(r.get("active"), true);
-            return c.and(p1, p2);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
         };
         var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
         var res = new ResultPaginationDTO();
@@ -249,7 +256,8 @@ public class ProductService {
             Join<Product, Category> categoryJoin = r.join("category");
             var p1 = c.like(categoryJoin.get("name"), "%mỳ%");
             var p2 = c.equal(r.get("active"), true);
-            return c.and(p1, p2);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
         };
         var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
         var res = new ResultPaginationDTO();
@@ -264,11 +272,29 @@ public class ProductService {
 
     }
 
+    public ResultPaginationDTO fetchAllComboWithPaginationAndAllStats(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> comboSpec = (r, q, c) -> {
+            return c.equal(r.get("type"), ProductType.COMBO);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        res.setMeta(meta);
+        return res;
+    }
+
     public ResultPaginationDTO fetchAllComboWithPagination(Specification<Product> spec, Pageable pageable) {
         Specification<Product> comboSpec = (r, q, c) -> {
+            Join<Product, Category> join = r.join("category");
             var p1 = c.equal(r.get("type"), ProductType.COMBO);
             var p2 = c.equal(r.get("active"), true);
-            return c.and(p1, p2);
+            var p3 = c.equal(join.get("status"), true);
+            return c.and(p1, p2, p3);
         };
         var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
         var res = new ResultPaginationDTO();

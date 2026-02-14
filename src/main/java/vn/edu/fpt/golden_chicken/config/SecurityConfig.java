@@ -93,7 +93,8 @@ public class SecurityConfig {
                                 "/client/**",
                                 "/favicon.ico",
                                 "/fonts/**",
-                                "/menu/**"
+                                "/menu/**",
+                                "/payment/**"
 
                 };
                 http

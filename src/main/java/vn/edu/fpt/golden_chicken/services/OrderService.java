@@ -41,7 +41,7 @@ public class OrderService {
     CartRepository cartRepository;
 
     @Transactional
-    public void order(OrderDTO dto) throws PermissionException {
+    public Order order(OrderDTO dto) throws PermissionException {
         var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         var customer = user.getCustomer();
 
@@ -135,6 +135,7 @@ public class OrderService {
         this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString(),
                 "#" + order.getId(), order.getName());
 
+        return newOrder;
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Order> spec, Pageable pageable) {
