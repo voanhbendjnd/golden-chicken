@@ -26,6 +26,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("select p from Product p join fetch p.category where p.category.name = :categoryName")
     List<Product> findTop5ByCategoryNameRandom(@Param("categoryName") String name);
 
-    @Query(value = "select top 5 p.* from Products p join Categories c on p.category_id = c.id where c.name = :categoryName and p.active = 1 and p.id <> :currId ORDER BY NEWID()", nativeQuery = true)
+    @Query(value = "select top 5 p.* from Products p join Categories c on p.category_id = c.id where c.name = :categoryName and p.active = 1 and p.is_delete = 0 and p.id <> :currId ORDER BY NEWID()", nativeQuery = true)
     List<Product> findRelatedProducts(@Param("categoryName") String name, @Param("currId") Long id);
 }
