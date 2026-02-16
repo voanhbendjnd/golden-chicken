@@ -47,49 +47,51 @@
 
                     <!-- SẢN PHẨM -->
                     <div class="col-6 col-md-4 col-lg-3" th:each="product : ${block.products}">
+                        <a th:href="@{/product/{id}(id=${product.id})}" style="text-decoration-line:none;">
+                            <div class="product-card">
 
-                        <div class="product-card">
-
-                            <!-- IMAGE (SỬA CHUẨN DTO) -->
-                            <img class="product-card__img" th:src="@{'/images/products/' + ${product.img}}"
-                                th:alt="${product.name}">
+                                <!-- IMAGE (SỬA CHUẨN DTO) -->
+                                <img class="product-card__img" th:src="@{'/images/products/' + ${product.img}}"
+                                    th:alt="${product.name}">
 
 
-                            <div class="product-card__body">
-                                <h3 class="product-card__name" th:text="${product.name}">
-                                    Tên món
-                                </h3>
+                                <div class="product-card__body">
+                                    <h3 class="product-card__name" th:text="${product.name}">
+                                        Tên món
+                                    </h3>
 
-                                <p class="product-card__price"
-                                    th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">
-                                    0 ₫
-                                </p>
+                                    <p class="product-card__price"
+                                        th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">
+                                        0 ₫
+                                    </p>
 
-                                <p class="product-card__desc" th:if="${product.description}"
-                                    th:text="${product.description}">
-                                    Mô tả
-                                </p>
-                            </div>
-
-                            <a class="btn-default btn-red btn-order" style="text-decoration-line: none;"
-                                th:href="@{/checkout?id={id}(id=${product.id})}">
-                                Buy Now
-                            </a>
-                            <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                <button class="btn-default btn-yellow flex-grow-1 btn-add-to-cart"
-                                    th:data-id="${product.id}">
-                                    Add To Cart
-                                </button>
-
-                                <div class="input-group quantity-selector shadow-sm" style="width: 130px;">
-                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
-                                    <input type="number" class="form-control text-center input-qty" value="1" min="1"
-                                        th:id="'qty-' + ${product.id}">
-                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                                    <p class="product-card__desc" th:if="${product.description}"
+                                        th:text="${product.description}">
+                                        Mô tả
+                                    </p>
                                 </div>
-                            </div>
 
-                        </div>
+                                <a class="btn-default btn-red btn-order" style="text-decoration-line: none;"
+                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                    Buy Now
+                                </a>
+                                <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
+                                    <button class="btn-default btn-yellow flex-grow-1 btn-add-to-cart"
+                                        th:data-id="${product.id}">
+                                        Add To Cart
+                                    </button>
+
+                                    <div class="input-group quantity-selector shadow-sm" style="width: 130px;">
+                                        <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                                        <input type="number" class="form-control text-center input-qty" value="1"
+                                            min="1" th:id="'qty-' + ${product.id}">
+                                        <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </a>
+
                     </div>
                     <!-- END PRODUCT -->
 
@@ -167,7 +169,7 @@
                             // alert('Đã thêm món ăn vào giỏ hàng!');
                             // Cập nhật số lượng trên icon giỏ hàng ở Header nếu có
                         } else if (response.status === 403) {
-                            alert('Vui lòng đăng nhập với tài khoản khách hàng!');
+                            alert('Vui lòng đăng nhập với tài khoản khách hàng để sử dụng giỏ hàng!');
                         } else {
                             alert('Có lỗi xảy ra, vui lòng thử lại.');
                         }

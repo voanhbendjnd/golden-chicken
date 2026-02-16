@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
+import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
@@ -25,14 +27,16 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 @Controller
 @RequestMapping("/checkout")
 public class CheckoutController {
+    private final UserRepository userRepository;
     private final ProductService productService;
     private final AddressServices addressServices;
     private final OrderService orderService;
     private final CartService cartService;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService) {
+            OrderService orderService, CartService cartService, UserRepository userRepository) {
         this.productService = productService;
+        this.userRepository = userRepository;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
@@ -102,7 +106,13 @@ public class CheckoutController {
             @RequestParam("id") long productId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) {
-
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email != null) {
+            var user = this.userRepository.findByEmail(email);
+            if (user.getCustomer() == null) {
+                return "client/auth/access-deny";
+            }
+        }
         ResProduct product = productService.findById(productId);
 
         var selectedAddress = (addressId != null)

@@ -27,6 +27,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
 import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Controller
 @RequestMapping("/staff/product")
@@ -78,7 +79,12 @@ public class ProductController {
             model.addAttribute("errorMessage", ex.getMessage());
             // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
             model.addAttribute("categories", this.categoryService.fetchAll());
-            return "staff/prouduct/create";
+            return "staff/product/create";
+        } catch (DataInvalidException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/product/create";
         }
 
     }
@@ -113,6 +119,11 @@ public class ProductController {
 
         } catch (IOException ex) {
             model.addAttribute("error", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/product/update";
+        } catch (DataInvalidException ex) {
+            model.addAttribute("error", ex.getMessage());
+            // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
             model.addAttribute("categories", this.categoryService.fetchAll());
             return "staff/product/update";
         }

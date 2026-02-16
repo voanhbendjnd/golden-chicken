@@ -30,14 +30,16 @@ public class CartService {
     ProductRepository productRepository;
 
     @Transactional
-    public void addToCart(CartDTO dto) throws PermissionException {
+    public boolean addToCart(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = this.userRepository.findByEmail(email);
         if (user == null) {
-            throw new ResourceNotFoundException("User Email", email);
+            return false;
+            // throw new ResourceNotFoundException("User Email", email);
         }
         if (user.getCustomer() == null) {
-            throw new PermissionException("Only customers can perform this action!");
+            return false;
+            // throw new PermissionException("Only customers can perform this action!");
         }
         var customer = user.getCustomer();
         var product = this.productRepository.findById(dto.productId())
@@ -59,7 +61,7 @@ public class CartService {
             cartItem.setPrice(product.getPrice());
         }
         this.cartRepository.save(cartItem);
-
+        return true;
     }
 
     public CartResponse getProductInCart() throws PermissionException {

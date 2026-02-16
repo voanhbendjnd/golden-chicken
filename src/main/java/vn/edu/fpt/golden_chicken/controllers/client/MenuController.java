@@ -105,4 +105,18 @@ public class MenuController {
         // model.addAttribute("products", data.getResult());
         return "client/menu";
     }
+
+    @GetMapping("/trang-mieng")
+    public String getTrangMieng(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllLowMeal(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Tráng Miệng");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
 }

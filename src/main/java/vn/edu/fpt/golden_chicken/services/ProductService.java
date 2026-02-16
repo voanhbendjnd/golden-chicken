@@ -28,6 +28,7 @@ import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
@@ -62,6 +63,9 @@ public class ProductService {
             throws IOException, URISyntaxException {
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
+        if (this.productRepository.existsByNameIgnoreCase(dto.getName())) {
+            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+        }
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
         var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
@@ -81,7 +85,7 @@ public class ProductService {
 
         }
 
-        if (files != null && !files.isEmpty()) {
+        if (files != null && !files.isEmpty() && !files.getFirst().getOriginalFilename().isEmpty()) {
             var imgs = new ArrayList<ProductImage>();
             for (var x : files) {
                 var fileName = x.getOriginalFilename();
@@ -151,6 +155,9 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public void update(ProductDTO dto, MultipartFile file, List<MultipartFile> files)
             throws IOException, URISyntaxException {
+        if (this.productRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), dto.getId())) {
+            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+        }
         List<String> filesToDelete = new ArrayList<>();
 
         // check category
@@ -255,6 +262,27 @@ public class ProductService {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
             var p1 = c.like(categoryJoin.get("name"), "%mỳ%");
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllLowMeal(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%tráng miệng%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);

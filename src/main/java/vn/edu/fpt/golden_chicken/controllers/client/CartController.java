@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,12 +34,12 @@ public class CartController {
     @PostMapping("/add")
     @ResponseBody
     public ResponseEntity<?> addToCart(@RequestBody CartDTO dto) throws PermissionException {
-        this.cartService.addToCart(dto);
-        return ResponseEntity.ok().build();
+        return this.cartService.addToCart(dto) != false ? ResponseEntity.ok().build()
+                : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Fail");
     }
 
     @PostMapping("/update")
-    @ResponseBody // Quan trọng để trả về JSON
+    @ResponseBody
     public ResponseEntity<CartResponse> updateCart(@RequestBody CartDTO dto) throws PermissionException {
         this.cartService.updateQuantity(dto);
         CartResponse updatedCart = this.cartService.getProductInCart();

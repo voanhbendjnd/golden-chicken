@@ -97,7 +97,7 @@
                     <div class="mb-4">
                         <label class="form-label fw-bold d-block">Main current picture</label>
                         <div id="thumbnail-container" class="mb-2" style="width: 200px;">
-                            <input type="hidden" th:field="*{img}">
+                            <input type="hidden" th:field="*{img}" required>
                             <img th:src="@{'/images/products/' + *{img}}" class="img-thumbnail" id="main-img-preview">
                         </div>
                         <label class="form-label text-muted small">Change picture:</label>

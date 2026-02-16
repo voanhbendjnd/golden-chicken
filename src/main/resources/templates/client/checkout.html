@@ -1,6 +1,9 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 
     <head th:replace="~{common/head}"></head>
+    <title>Golden Chicken - Checkout</title>
     <link rel="stylesheet" th:href="@{/css/checkout.css}" />
     <link rel="stylesheet" th:href="@{/css/Modal.css}" />
     <style>
@@ -18,6 +21,13 @@
             font-weight: bold;
         }
     </style>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
     <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
     <link th:href="@{/css/base.css}" rel="stylesheet">
     <link th:href="@{/css/style.css}" rel="stylesheet">
@@ -25,185 +35,199 @@
     <link th:href="@{/css/profileTest.css}" rel="stylesheet">
 </head>
 
-<div class="container-default" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    <h1 class="text-center my-4" style="color: #e31837; font-weight: bold;">HOÀN TẤT THANH TOÁN</h1>
-    <a th:href="@{/cart}">Back to cart</a>
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+    <div class="container-default" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <h1 class="text-center my-4" style="color: #e31837; font-weight: bold;">HOÀN TẤT THANH TOÁN</h1>
+        <a th:href="@{/cart}" class="btn btn-danger" style="height: 30px;">Back to cart</a>
 
-    <form th:action="@{/checkout/order}" th:object="${order}" method="post">
-        <div class="checkout-layout" style="display: flex; gap: 30px; align-items: flex-start;">
+        <form th:action="@{/checkout/order}" th:object="${order}" method="post">
+            <div class="checkout-layout" style="display: flex; gap: 30px; align-items: flex-start;">
 
-            <div class="checkout-left"
-                style="flex: 2; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee;">
+                <div class="checkout-left"
+                    style="flex: 2; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee;">
 
-                <h3
-                    style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #e31837; display: inline-block;">
-                    THÔNG TIN NHẬN HÀNG</h3>
+                    <h3
+                        style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #e31837; display: inline-block;">
+                        THÔNG TIN NHẬN HÀNG</h3>
 
-                <div class="address-box"
-                    style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fafafa; position: relative;">
-                    <div th:if="${defaultAddress != null}">
-                        <p><i class="fa-solid fa-user"></i> <strong th:text="${defaultAddress.recipientName}"></strong>
-                        </p>
-                        <p><i class="fa-solid fa-location-dot"></i> <span
-                                th:text="${defaultAddress.specificAddress + ', ' + defaultAddress.ward + ', ' + defaultAddress.district + ', ' + defaultAddress.city}"></span>
-                        </p>
-                        <p><i class="fa-solid fa-phone"></i> <span th:text="${defaultAddress.recipientPhone}"></span>
-                        </p>
+                    <div class="address-box"
+                        style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fafafa; position: relative;">
+                        <div th:if="${defaultAddress != null}">
+                            <p><i class="fa-solid fa-user"></i> <strong
+                                    th:text="${defaultAddress.recipientName}"></strong>
+                            </p>
+                            <p><i class="fa-solid fa-location-dot"></i> <span
+                                    th:text="${defaultAddress.specificAddress + ', ' + defaultAddress.ward + ', ' + defaultAddress.district + ', ' + defaultAddress.city}"></span>
+                            </p>
+                            <p><i class="fa-solid fa-phone"></i> <span
+                                    th:text="${defaultAddress.recipientPhone}"></span>
+                            </p>
 
-                        <input type="hidden" th:field="*{name}" />
-                        <input type="hidden" th:field="*{address}" />
-                        <input type="hidden" th:field="*{phone}" />
-                    </div>
-                    <!-- Link đổi địa chỉ chỉ dùng được trong flow mua 1 sản phẩm (có biến product) -->
-                    <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id})}"
-                        style="color: #e31837; font-size: 0.8rem; text-decoration: none;">
-                        <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
-                    </a>
-                </div>
-
-                <div class="mt-4">
-                    <label class="fw-bold mb-2">Ghi chú</label>
-                    <textarea th:field="*{note}" class="form-control" rows="3" placeholder="Ghi chú cho đơn hàng"
-                        style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px;"></textarea>
-                </div>
-
-                <div class="mt-4">
-                    <label class="fw-bold mb-3">PHƯƠNG THỨC THANH TOÁN</label>
-                    <div class="payment-methods">
-                        <label class="d-flex align-items-center p-3 mb-2 border rounded"
-                            style="cursor: pointer; display: flex; align-items: center; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
-                            <input type="radio" th:field="*{paymentMethod}" value="COD" checked
-                                style="margin-right: 15px;">
-                            <span><i class="fa-solid fa-money-bill-1"></i> Thanh toán tiền mặt</span>
-                        </label>
-                        <label class="d-flex align-items-center p-3 border rounded"
-                            style="cursor: pointer; display: flex; align-items: center; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
-                            <input type="radio" th:field="*{paymentMethod}" value="VNPAY" style="margin-right: 15px;">
-                            <span><i class="fa-solid fa-credit-card"></i> Ví điện tử (VNPay)</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="checkout-right"
-                style="flex: 1; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee; position: sticky; top: 20px;">
-                <h3 style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px;">CHI TIẾT ĐƠN HÀNG</h3>
-
-                <!-- Trường hợp mua 1 sản phẩm (flow từ trang chi tiết sản phẩm) -->
-                <div th:if="${product != null}">
-                    <div class="product-mini-list border-bottom pb-3 mb-3">
-                        <div class="d-flex" style="display: flex; gap: 15px;">
-                            <img th:src="@{'/images/products/' + ${product.img}}"
-                                style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
-                            <div style="flex: 1;">
-                                <h5 th:text="${product.name}" style="margin: 0; font-size: 1rem;"></h5>
-                                <small class="text-muted">Số lượng: 1</small>
-
-                                <input type="hidden" name="items[0].productId" th:value="${product.id}" />
-                                <input type="hidden" name="items[0].quantity" value="1" />
-                            </div>
-                            <strong class="text-danger"
-                                th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT') + 'đ'}"></strong>
+                            <input type="hidden" th:field="*{name}" />
+                            <input type="hidden" th:field="*{address}" />
+                            <input type="hidden" th:field="*{phone}" />
                         </div>
+                        <!-- Link đổi địa chỉ chỉ dùng được trong flow mua 1 sản phẩm (có biến product) -->
+                        <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id})}"
+                            style="color: #e31837; font-size: 0.8rem; text-decoration: none;">
+                            <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
+                        </a>
                     </div>
 
-                    <div class="order-summary" style="font-size: 0.95rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Tạm tính</span>
-                            <span th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT') + 'đ'}"></span>
-                            <input type="hidden" th:field="*{totalProductPrice}" />
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Phí giao hàng</span>
-                            <span>15,000đ</span>
-                            <input type="hidden" th:field="*{shippingFee}" />
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
-                            <span>Giảm giá</span>
-                            <span>0đ</span>
-                            <input type="hidden" th:field="*{discountAmount}" />
-                        </div>
+                    <div class="mt-4">
+                        <label class="fw-bold mb-2">Ghi chú</label>
+                        <textarea th:field="*{note}" class="form-control" rows="3" placeholder="Ghi chú cho đơn hàng"
+                            style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px;"></textarea>
+                    </div>
 
-                        <div class="total-box"
-                            style="background: #fff5f6; padding: 15px; border-radius: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="font-size: 1rem;">TỔNG THANH TOÁN</strong>
-                            <strong class="text-danger" style="font-size: 1.4rem;"
-                                th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT') + 'đ'}"></strong>
-                            <input type="hidden" th:field="*{finalAmount}" />
+                    <div class="mt-4">
+                        <label class="fw-bold mb-3">PHƯƠNG THỨC THANH TOÁN</label>
+                        <div class="payment-methods">
+                            <label class="d-flex align-items-center p-3 mb-2 border rounded"
+                                style="cursor: pointer; display: flex; align-items: center; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+                                <input type="radio" th:field="*{paymentMethod}" value="COD" checked
+                                    style="margin-right: 15px;">
+                                <span><i class="fa-solid fa-money-bill-1"></i> Thanh toán tiền mặt</span>
+                            </label>
+                            <label class="d-flex align-items-center p-3 border rounded"
+                                style="cursor: pointer; display: flex; align-items: center; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                                <input type="radio" th:field="*{paymentMethod}" value="VNPAY"
+                                    style="margin-right: 15px;">
+                                <span><i class="fa-solid fa-credit-card"></i> Ví điện tử (VNPay)</span>
+                            </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Trường hợp vào từ giỏ hàng (nhiều sản phẩm, không có biến product) -->
-                <div th:if="${product == null}">
-                    <div class="card p-3 shadow-sm mb-3">
-                        <h5 class="mb-3">Danh sách sản phẩm</h5>
-                        <ul class="list-group mb-3">
-                            <li class="list-group-item d-flex justify-content-between align-items-center"
-                                th:each="item, iterStat : *{items}">
-                                <div class="d-flex align-items-center" style="gap: 15px;">
-                                    <!-- Lấy thông tin hiển thị từ cartItems theo cùng index -->
-                                    <span th:text="${cartItems[__${iterStat.index}__].itemId}"></span>
-                                    <img th:src="@{'/images/products/' + ${cartItems[__${iterStat.index}__].productImg}}"
-                                        style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
-                                    <div>
-                                        <h6 class="mb-1" th:text="${cartItems[__${iterStat.index}__].productName}"></h6>
-                                        <small class="text-muted">
-                                            Số lượng:
-                                            <span th:text="${item.quantity}"></span>
-                                            - Đơn giá:
-                                            <span
-                                                th:text="${#numbers.formatDecimal(cartItems[__${iterStat.index}__].price,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                                        </small>
-                                    </div>
+                <div class="checkout-right"
+                    style="flex: 1; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee; position: sticky; top: 20px;">
+                    <h3 style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px;">CHI TIẾT ĐƠN HÀNG</h3>
+
+                    <!-- Trường hợp mua 1 sản phẩm (flow từ trang chi tiết sản phẩm) -->
+                    <div th:if="${product != null}">
+                        <div class="product-mini-list border-bottom pb-3 mb-3">
+                            <div class="d-flex" style="display: flex; gap: 15px;">
+                                <img th:src="@{'/images/products/' + ${product.img}}"
+                                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                <div style="flex: 1;">
+                                    <h5 th:text="${product.name}" style="margin: 0; font-size: 1rem;"></h5>
+                                    <small class="text-muted">Số lượng: 1</small>
+
+                                    <input type="hidden" name="items[0].productId" th:value="${product.id}" />
+                                    <input type="hidden" name="items[0].quantity" value="1" />
                                 </div>
+                                <strong class="text-danger"
+                                    th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT') + 'đ'}"></strong>
+                            </div>
+                        </div>
 
-                                <!-- Hidden fields để bind về OrderDTO -->
-                                <input type="hidden" th:field="*{items[__${iterStat.index}__].itemId}" />
-                                <input type="hidden" th:field="*{items[__${iterStat.index}__].productId}" />
-                                <input type="hidden" th:field="*{items[__${iterStat.index}__].quantity}" />
-                            </li>
-                        </ul>
+                        <div class="order-summary" style="font-size: 0.95rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Tạm tính</span>
+                                <span
+                                    th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT') + 'đ'}"></span>
+                                <input type="hidden" th:field="*{totalProductPrice}" />
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Phí giao hàng</span>
+                                <span>15,000đ</span>
+                                <input type="hidden" th:field="*{shippingFee}" />
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
+                                <span>Giảm giá</span>
+                                <span>0đ</span>
+                                <input type="hidden" th:field="*{discountAmount}" />
+                            </div>
+
+                            <div class="total-box"
+                                style="background: #fff5f6; padding: 15px; border-radius: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="font-size: 1rem;">TỔNG THANH TOÁN</strong>
+                                <strong class="text-danger" style="font-size: 1.4rem;"
+                                    th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT') + 'đ'}"></strong>
+                                <input type="hidden" th:field="*{finalAmount}" />
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="order-summary" style="font-size: 0.95rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Tạm tính</span>
-                            <span
-                                th:text="${#numbers.formatDecimal(order.totalProductPrice,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                            <input type="hidden" th:field="*{totalProductPrice}" />
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Phí giao hàng</span>
-                            <span
-                                th:text="${#numbers.formatDecimal(order.shippingFee,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                            <input type="hidden" th:field="*{shippingFee}" />
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
-                            <span>Giảm giá</span>
-                            <span
-                                th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                            <input type="hidden" th:field="*{discountAmount}" />
+                    <!-- Trường hợp vào từ giỏ hàng (nhiều sản phẩm, không có biến product) -->
+                    <div th:if="${product == null}">
+                        <div class="card p-3 shadow-sm mb-3">
+                            <h5 class="mb-3">Danh sách sản phẩm</h5>
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between align-items-center"
+                                    th:each="item, iterStat : *{items}">
+                                    <div class="d-flex align-items-center" style="gap: 15px;">
+                                        <!-- Lấy thông tin hiển thị từ cartItems theo cùng index -->
+                                        <!-- <span th:text="${cartItems[__${iterStat.index}__].itemId}"></span> -->
+                                        <img th:src="@{'/images/products/' + ${cartItems[__${iterStat.index}__].productImg}}"
+                                            style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${cartItems[__${iterStat.index}__].productName}">
+                                            </h6>
+                                            <small class="text-muted">
+                                                Số lượng:
+                                                <span th:text="${item.quantity}"></span>
+                                                - Đơn giá:
+                                                <span
+                                                    th:text="${#numbers.formatDecimal(cartItems[__${iterStat.index}__].price,0,'COMMA',0,'POINT')} + 'đ'"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden fields để bind về OrderDTO -->
+                                    <input type="hidden" th:field="*{items[__${iterStat.index}__].itemId}" />
+                                    <input type="hidden" th:field="*{items[__${iterStat.index}__].productId}" />
+                                    <input type="hidden" th:field="*{items[__${iterStat.index}__].quantity}" />
+                                </li>
+                            </ul>
                         </div>
 
-                        <div class="total-box"
-                            style="background: #fff5f6; padding: 15px; border-radius: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="font-size: 1rem;">TỔNG THANH TOÁN</strong>
-                            <strong class="text-danger" style="font-size: 1.4rem;"
-                                th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + 'đ'"></strong>
-                            <input type="hidden" th:field="*{finalAmount}" />
+                        <div class="order-summary" style="font-size: 0.95rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Tạm tính</span>
+                                <span
+                                    th:text="${#numbers.formatDecimal(order.totalProductPrice,0,'COMMA',0,'POINT')} + 'đ'"></span>
+                                <input type="hidden" th:field="*{totalProductPrice}" />
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Phí giao hàng</span>
+                                <span
+                                    th:text="${#numbers.formatDecimal(order.shippingFee,0,'COMMA',0,'POINT')} + 'đ'"></span>
+                                <input type="hidden" th:field="*{shippingFee}" />
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
+                                <span>Giảm giá</span>
+                                <span
+                                    th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT')} + 'đ'"></span>
+                                <input type="hidden" th:field="*{discountAmount}" />
+                            </div>
+
+                            <div class="total-box"
+                                style="background: #fff5f6; padding: 15px; border-radius: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="font-size: 1rem;">TỔNG THANH TOÁN</strong>
+                                <strong class="text-danger" style="font-size: 1.4rem;"
+                                    th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + 'đ'"></strong>
+                                <input type="hidden" th:field="*{finalAmount}" />
+                            </div>
                         </div>
                     </div>
+
+                    <button type="submit" class="btn-order-submit" th:disabled="${defaultAddress == null}"
+                        style="width: 100%; background: #e31837; color: #fff; border: none; padding: 15px; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
+                        XÁC NHẬN THANH TOÁN
+                    </button>
                 </div>
 
-                <button type="submit" class="btn-order-submit" th:disabled="${defaultAddress == null}"
-                    style="width: 100%; background: #e31837; color: #fff; border: none; padding: 15px; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
-                    XÁC NHẬN THANH TOÁN
-                </button>
             </div>
+        </form>
+        <script th:src="@{/js/checkout.js}"></script>
 
-        </div>
-    </form>
-    <script th:src="@{/js/checkout.js}"></script>
+    </div>
+    <div th:replace="~{client/layout/footer}"></div>
 
-</div>
+</body>
+
+</html>

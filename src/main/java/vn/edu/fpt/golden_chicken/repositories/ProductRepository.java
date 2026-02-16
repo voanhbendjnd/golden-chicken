@@ -13,8 +13,12 @@ import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByIdIn(List<Long> ids);
 
+    boolean existsByNameIgnoreCase(String name);
+
     List<Product> findByActiveTrue();
 
     List<Product> findByTypeAndActiveTrue(ProductType type);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 
 }
