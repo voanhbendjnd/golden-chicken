@@ -19,7 +19,7 @@ public class ProductDetailController {
     @GetMapping("/product/{id:[0-9]+}")
     public String detailPage(Model model, @PathVariable("id") Long id) {
         model.addAttribute("product", this.productService.findById(id));
+        model.addAttribute("related", this.productService.relationshipByCategory(id));
         return "client/product-detail";
     }
-
 }

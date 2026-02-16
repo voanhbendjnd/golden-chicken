@@ -316,6 +316,14 @@ public class ProductService {
         return res;
     }
 
+    public List<ResProduct> relationshipByCategory(Long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        var categoryName = product.getCategory().getName();
+        var products = this.productRepository.findRelatedProducts(categoryName, id);
+        return products.stream().map(ProductConvert::toResProduct).toList();
+    }
+
     public ResultPaginationDTO fetchAllComboWithPagination(Specification<Product> spec, Pageable pageable) {
         Specification<Product> comboSpec = (r, q, c) -> {
             Join<Product, Category> join = r.join("category");
