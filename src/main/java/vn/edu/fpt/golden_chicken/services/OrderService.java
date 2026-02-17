@@ -26,7 +26,9 @@ import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
+import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -217,5 +219,64 @@ public class OrderService {
         }).collect(Collectors.toList()));
         return res;
 
+    }
+
+    public ResultPaginationDTO stateOrder(Specification<Order> spec, Pageable pageable) throws PermissionException {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null) {
+            throw new PermissionException("You Do Not Have Permission!");
+        }
+        var user = this.userRepository.findByEmail(email);
+        if (user == null) {
+            throw new PermissionException("Not Found Account With Email " + email);
+        }
+        var customer = user.getCustomer();
+        if (customer == null) {
+            throw new PermissionException("Please Use Account Customer For This Service!");
+        }
+        Specification<Order> orderSpec = (r, q, c) -> {
+            return c.equal(r.get("customer"), customer);
+        };
+        var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
+
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
+        res.setResult(result);
+        // if (page.getContent().isEmpty() || page.getContent().size() == 0) {
+        // throw new DataInvalidException("No Data!");
+        // }
+        // res.setResult(page.getContent().stream().map(order -> {
+        // var resOrder = new ResOrder();
+        // resOrder.setAddress(order.getShippingAddress());
+        // resOrder.setCreatedAt(order.getCreatedAt());
+        // resOrder.setId(order.getId());
+        // resOrder.setName(order.getName());
+        // resOrder.setNote(order.getNote());
+        // resOrder.setPaymentMethod(order.getPaymentMethod().toString());
+        // resOrder.setPaymentStatus(order.getPaymentStatus().toString());
+        // resOrder.setPhone(order.getPhone());
+        // resOrder.setStatus(order.getStatus());
+        // resOrder.setTotalPrice(order.getTotalProductPrice());
+        // resOrder.setUpdatedAt(order.getUpdatedAt());
+        // resOrder.setItems(order.getOrderItems().stream().filter(x -> x.getProduct()
+        // != null).map(x -> {
+        // var detail = new ResOrder.OrderDetail();
+        // detail.setId(x.getId());
+        // var product = x.getProduct();
+        // detail.setImg(product.getImageUrl());
+        // detail.setProductId(product.getId());
+        // detail.setPrice(product.getPrice());
+        // detail.setQuantity(x.getQuantity());
+        // return detail;
+        // }).toList());
+        // return resOrder;
+        // }).toList());
+        return res;
     }
 }

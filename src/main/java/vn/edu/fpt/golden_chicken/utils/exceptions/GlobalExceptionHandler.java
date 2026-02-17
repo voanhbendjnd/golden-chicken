@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataInvalidException.class)
     public String handleDataInvalidException(DataInvalidException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
-        return "admin/role/table";
+        return "error/400";
     }
 
     @ExceptionHandler(value = { PermissionException.class })
