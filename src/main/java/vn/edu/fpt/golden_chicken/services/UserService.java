@@ -260,4 +260,8 @@ public class UserService {
             throw ex;
         }
     }
+
+    public int countCustomer() {
+        return this.userRepository.countCustomer();
+    }
 }
