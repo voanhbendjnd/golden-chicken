@@ -125,14 +125,17 @@ public class UserService {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
         var role = this.roleRepository.findById(request.getRoleId())
-                .orElseThrow(() -> new ResourceNotFoundException("User ID", request.getRoleId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User ID",
+                        request.getRoleId()));
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
         }
-        if (role.getName().equalsIgnoreCase("ADMIN")) {
-            user.setRole(role);
-        }
-
+        // if (role.getName().equalsIgnoreCase("ADMIN")) {
+        // user.setRole(role);
+        // }
+        // if (role.getName().equalsIgnoreCase("CUSTOMER")) {
+        // user.setRole(role);
+        // }
         user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
