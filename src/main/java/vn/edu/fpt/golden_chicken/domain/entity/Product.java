@@ -20,12 +20,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @SQLDelete(sql = "UPDATE products SET is_delete = 1 WHERE id = ?")

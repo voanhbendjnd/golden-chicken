@@ -3,6 +3,8 @@ package vn.edu.fpt.golden_chicken.services;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.CartItem;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
+import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
@@ -278,5 +281,32 @@ public class OrderService {
         // return resOrder;
         // }).toList());
         return res;
+    }
+
+    public List<OrderStatisResponse> getOrderStatisticData() {
+        // Mảng tên tháng để hiển thị lên biểu đồ
+        String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+        // 1. Gọi Repository lấy dữ liệu đã được SUM và GROUP BY dưới DB
+        List<Object[]> rawData = orderRepository.getMonthlyRevenueRaw();
+
+        // 2. Chuyển List<Object[]> thành Map<Integer, BigDecimal>
+        // Key là tháng (1-12), Value là tổng tiền
+        Map<Integer, BigDecimal> statsMap = rawData.stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0], // Tháng (kết quả của MONTH())
+                        row -> (BigDecimal) row[1] // Tổng doanh thu (kết quả của SUM())
+                ));
+
+        // 3. Khởi tạo danh sách kết quả đủ 12 tháng (điền 0 nếu tháng đó không có doanh
+        // thu)
+        List<OrderStatisResponse> revenues = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            String label = monthLabels[i - 1];
+            BigDecimal total = statsMap.getOrDefault(i, BigDecimal.ZERO);
+            revenues.add(new OrderStatisResponse(label, total));
+        }
+
+        return revenues;
     }
 }

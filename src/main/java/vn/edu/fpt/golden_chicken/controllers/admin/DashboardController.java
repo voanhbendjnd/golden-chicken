@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
+import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 
 @Controller
@@ -16,6 +17,7 @@ import vn.edu.fpt.golden_chicken.services.UserService;
 public class DashboardController {
     UserService userService;
     OrderRepository orderRepository;
+    OrderService orderService;
 
     @GetMapping("/admin")
     public String getDashboardAdminPage() {
@@ -24,6 +26,7 @@ public class DashboardController {
 
     @GetMapping("/staff")
     public String getDashboardStaffPage(Model model) {
+        model.addAttribute("charData", this.orderService.getOrderStatisticData());
         model.addAttribute("cntUser", this.userService.countCustomer());
         model.addAttribute("cntOrder", this.orderRepository.count());
         return "staff/dashboard";

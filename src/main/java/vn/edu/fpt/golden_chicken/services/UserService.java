@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
@@ -12,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,13 +52,14 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     MailService mailService;
 
-    @Transactional
+    // @Transactional
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID",
                         request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
+        user.setPassword(this.passwordEncoder.encode(request.getPassword()));
         this.userRepository.save(user);
         if (role.getName().equals("STAFF")) {
             var staff = new Staff();
@@ -129,6 +132,12 @@ public class UserService {
                         request.getRoleId()));
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
+            user.setUpdatedAt(LocalDateTime.now());
+            var email = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (email == null || email.isEmpty()) {
+                email = "Anonymous";
+            }
+            user.setCreatedBy(email);
         }
         // if (role.getName().equalsIgnoreCase("ADMIN")) {
         // user.setRole(role);
