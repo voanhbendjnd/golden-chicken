@@ -1,12 +1,16 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -28,4 +32,16 @@ public class Customer implements Serializable {
     @Column(columnDefinition = "NVARCHAR(255)")
     String address;
     Long point;
+    @OneToMany(mappedBy = "customer")
+    List<Order> orders;
+    @OneToMany(mappedBy = "customer")
+    List<CartItem> cartItems;
+
+    public void addCartItem(CartItem item) {
+        if (this.cartItems == null) {
+            this.cartItems = new ArrayList<>();
+        }
+        this.cartItems.add(item);
+        item.setCustomer(this);
+    }
 }

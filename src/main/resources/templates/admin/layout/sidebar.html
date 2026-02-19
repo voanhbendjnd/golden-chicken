@@ -16,6 +16,14 @@
                 Home
             </a>
         </li>
+        <li class="nav-item">
+            <a th:href="@{/staff}" class="nav-link text-white" aria-current="page">
+                <svg class="bi me-2" width="16" height="16">
+                    <use xlink:href="#home"></use>
+                </svg>
+                Staff
+            </a>
+        </li>
         <li>
             <a th:href="@{/admin}" class="nav-link text-white">
                 <svg class="bi me-2" width="16" height="16">
@@ -58,3 +66,18 @@
     </div>
 
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentUrl = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        navLinks.forEach(link => {
+            const linkHref = link.getAttribute('href');
+            if (currentUrl === linkHref) {
+                link.classList.add('active');
+                link.classList.remove('text-white');
+            }
+        });
+    });
+</script>

@@ -13,9 +13,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.criteria.Join;
+import vn.edu.fpt.golden_chicken.controllers.client.AddressController;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
@@ -23,23 +26,32 @@ import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ProductService {
+
+    AddressController addressController;
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
 
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            return c.equal(categoryJoin.get("status"), true);
+        };
+
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        var page = this.productRepository.findAll(spec, pageable);
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
@@ -51,6 +63,9 @@ public class ProductService {
             throws IOException, URISyntaxException {
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
+        if (this.productRepository.existsByNameIgnoreCase(dto.getName())) {
+            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+        }
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
         var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
@@ -70,7 +85,7 @@ public class ProductService {
 
         }
 
-        if (files != null && !files.isEmpty()) {
+        if (files != null && !files.isEmpty() && !files.getFirst().getOriginalFilename().isEmpty()) {
             var imgs = new ArrayList<ProductImage>();
             for (var x : files) {
                 var fileName = x.getOriginalFilename();
@@ -90,6 +105,7 @@ public class ProductService {
             product.setProductImages(imgs);
 
         }
+        product.setIsDelete(false);
         this.productRepository.save(product);
 
     }
@@ -139,6 +155,9 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public void update(ProductDTO dto, MultipartFile file, List<MultipartFile> files)
             throws IOException, URISyntaxException {
+        if (this.productRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), dto.getId())) {
+            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+        }
         List<String> filesToDelete = new ArrayList<>();
 
         // check category
@@ -196,4 +215,139 @@ public class ProductService {
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
+
+    public ResultPaginationDTO fetchAllChickenHappy(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%original chicken%");
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllChickenSauce(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%sauce%");
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllNoodle(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%noodles%");
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllLowMeal(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var p1 = c.like(categoryJoin.get("name"), "%dessert%");
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(categoryJoin.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var res = new ResultPaginationDTO();
+        var mt = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+        mt.setPages(page.getTotalPages());
+        mt.setTotal(page.getTotalElements());
+        res.setMeta(mt);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).toList());
+        return res;
+
+    }
+
+    public ResultPaginationDTO fetchAllComboWithPaginationAndAllStats(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> comboSpec = (r, q, c) -> {
+            return c.equal(r.get("type"), ProductType.COMBO);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        res.setMeta(meta);
+        return res;
+    }
+
+    public List<ResProduct> relationshipByCategory(Long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        var categoryName = product.getCategory().getName();
+        var products = this.productRepository.findRelatedProducts(categoryName, id);
+        return products.stream().map(ProductConvert::toResProduct).toList();
+    }
+
+    public ResultPaginationDTO fetchAllComboWithPagination(Specification<Product> spec, Pageable pageable) {
+        Specification<Product> comboSpec = (r, q, c) -> {
+            Join<Product, Category> join = r.join("category");
+            var p1 = c.equal(r.get("type"), ProductType.COMBO);
+            var p2 = c.equal(r.get("active"), true);
+            var p3 = c.equal(join.get("status"), true);
+            return c.and(p1, p2, p3);
+        };
+        var page = this.productRepository.findAll(Specification.where(spec).and(comboSpec), pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        res.setMeta(meta);
+        return res;
+    }
+
+    public List<ResProduct> fetchAllProductSingle() {
+        return this.productRepository.findByTypeAndActiveTrue(ProductType.SINGLE).stream()
+                .map(ProductConvert::toResProduct)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -34,12 +34,15 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Role</label>
-                                <select id="roleSelect" name="roleId" class="form-select" required>
-                                    <option value="">Select Role</option>
+                                <label class="form-label fw-bold">Role</label>
+
+                                <select class="form-select bg-light" disabled id="roleSelect">
                                     <option th:each="role : ${roles}" th:value="${role.id}"
-                                        th:selected="${role.id == updateUser.roleId}" th:text="${role.name}"></option>
+                                        th:selected="${role.id == updateUser.roleId}" th:text="${role.name}">
+                                    </option>
                                 </select>
+
+                                <input type="hidden" name="roleId" th:value="${updateUser.roleId}">
                             </div>
 
                             <div id="staffTypeGroup" class="mb-3" style="display: none;">

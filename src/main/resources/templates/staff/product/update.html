@@ -57,12 +57,14 @@
                     <div class="row mb 4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Product Type</label>
-                            <select th:field="*{type}" class="form-select" required>
+                            <input th:field="*{type}" readonly class="form-select">
+                            <!-- <select th:field="*{type}" class="form-select">
                                 <option value="">-- Choose Type --</option>
                                 <option th:value="SINGLE">SINGLE</option>
                                 <option th:value="COMBO">COMBO</option>
-                            </select>
+                            </select> -->
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Status</label>
                             <select th:field="*{active}" class="form-select" required>
@@ -76,7 +78,6 @@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Category</label>
                             <select class="form-select" th:field="*{category.id}" required>
-                                <option value="">-- Choose Category --</option>
                                 <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
                                     th:selected="${product.category.id == cat.id}">
 
@@ -96,7 +97,7 @@
                     <div class="mb-4">
                         <label class="form-label fw-bold d-block">Main current picture</label>
                         <div id="thumbnail-container" class="mb-2" style="width: 200px;">
-                            <input type="hidden" th:field="*{img}">
+                            <input type="hidden" th:field="*{img}" required>
                             <img th:src="@{'/images/products/' + *{img}}" class="img-thumbnail" id="main-img-preview">
                         </div>
                         <label class="form-label text-muted small">Change picture:</label>

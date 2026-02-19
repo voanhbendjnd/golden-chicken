@@ -18,13 +18,15 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
-@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;

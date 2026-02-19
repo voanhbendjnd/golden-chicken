@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <head th:replace="~{common/head}"></head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử đơn hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #e31837;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* Card Đơn hàng */
+        .order-card {
+            border: none;
+            border-radius: 15px;
+            transition: 0.3s;
+            background: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Badge Trạng thái */
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-PENDING {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-SHIPPING {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-COMPLETED {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-CANCELLED {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Item trong đơn hàng */
+        .order-item-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .price-total {
+            color: var(--primary-red);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{client/layout/header}"></div>
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-danger"></i>Đơn hàng của tôi</h2>
+            <div class="mb-4 overflow-x-auto">
+                <div class="d-flex gap-2 pb-2" style="white-space: nowrap;">
+                    <a th:href="@{/order-history}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.filter == null} ? 'btn-danger' : 'btn-outline-secondary'">
+                        Tất cả
+                    </a>
+
+                    <a th:href="@{/order-history(filter='status : \'PENDING\'')}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.filter != null && #strings.contains(param.filter, 'PENDING')} ? 'btn-danger' : 'btn-outline-secondary'">
+                        Chờ xác nhận
+                    </a>
+
+                    <a th:href="@{/order-history(filter='status : \'SHIPPING\'')}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.filter != null && #strings.contains(param.filter, 'SHIPPING')} ? 'btn-danger' : 'btn-outline-secondary'">
+                        Đang giao
+                    </a>
+                    <a th:href="@{/order-history(filter='status : \'COMPLETED\'')}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.filter != null && #strings.contains(param.filter, 'COMPLETED')} ? 'btn-danger' : 'btn-outline-secondary'">
+                        Hoàn thành
+                    </a>
+
+                    <a th:href="@{/order-history(filter='status : \'CANCELLED\'')}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.filter != null && #strings.contains(param.filter, 'CANCELLED')} ? 'btn-danger' : 'btn-outline-secondary'">
+                        Đã hủy
+                    </a>
+                </div>
+            </div>
+            <a th:href="@{/menu}" class="btn btn-outline-danger btn-sm rounded-pill">Tiếp tục mua sắm</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(data.result)}" class="text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" width="150" alt="Empty">
+            <h4 class="mt-3 text-muted">Bạn chưa có đơn hàng nào!</h4>
+        </div>
+
+        <div th:each="order : ${data.result}" class="card order-card shadow-sm">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small">Mã đơn hàng:</span>
+                    <span class="fw-bold text-dark" th:text="'#' + ${order.id}">#12345</span>
+                    <span class="ms-3 text-muted small"
+                        th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">17/02/2026</span>
+                </div>
+                <span th:classappend="'status-' + ${order.status}" class="status-badge"
+                    th:text="${order.status}">PENDING</span>
+            </div>
+
+            <div class="card-body">
+                <div th:each="item : ${order.items}" class="d-flex align-items-center mb-3">
+                    <img th:src="@{'/images/products/' + ${item.img}}" class="order-item-img border" alt="Sản phẩm">
+                    <div class="ms-3 flex-grow-1">
+                        <h6 class="mb-0 fw-bold">Sản phẩm #<span th:text="${item.productId}"></span></h6>
+                        <small class="text-muted">Số lượng: <span th:text="${item.quantity}">1</span></small>
+                    </div>
+                    <div class="text-end">
+                        <span class="fw-bold"
+                            th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                    </div>
+                </div>
+
+                <hr class="opacity-10">
+
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <p class="mb-1 small text-muted"><i class="fa-solid fa-location-dot me-1"></i> Giao đến: <span
+                                th:text="${order.address}"></span></p>
+                        <p class="mb-0 small text-muted"><i class="fa-solid fa-credit-card me-1"></i> Thanh toán: <span
+                                class="badge bg-light text-dark" th:text="${order.paymentMethod}">VNPAY</span></p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <span class="text-muted small d-block">Tổng thanh toán:</span>
+                        <span class="price-total"
+                            th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'">50.000
+                            ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-0 pb-3">
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-light btn-sm rounded-pill px-3">Chi tiết đơn</button>
+                    <button th:if="${order.status == 'PENDING'}"
+                        class="btn btn-outline-danger btn-sm rounded-pill px-3">Hủy đơn</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li th:class="|page-item ${data.meta.page == 1 ? 'disabled' : ''}|">
+                        <a class="page-link"
+                            th:href="@{/order-history(page=${data.meta.page - 1}, size=${data.meta.pageSize}, filter=${param.filter})}">Previous</a>
+                    </li>
+
+                    <li th:each="p : ${#numbers.sequence(1, data.meta.pages)}"
+                        th:class="|page-item ${data.meta.page == p ? 'active' : ''}|">
+                        <a class="page-link"
+                            th:href="@{/order-history(page=${p}, size=${data.meta.pageSize}, filter=${param.filter})}"
+                            th:text="${p}"></a>
+                    </li>
+
+                    <li th:class="|page-item ${data.meta.page == data.meta.pages ? 'disabled' : ''}|">
+                        <a class="page-link"
+                            th:href="@{/order-history(page=${data.meta.page + 1}, size=${data.meta.pageSize}, filter=${param.filter})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div th:replace="~{client/layout/footer}"></div>
+
+</body>
+
+</html>

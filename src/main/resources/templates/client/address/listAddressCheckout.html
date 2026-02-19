@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>Chọn địa chỉ giao hàng</title>
+
+    <th:block th:replace="~{common/head}"></th:block>
+
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/list-address-checkout.css}" rel="stylesheet">
+</head>
+
+<body>
+
+<div th:replace="~{client/layout/header}"></div>
+<div class="checkout-container">
+    <div class="page-checkout-address">
+        <h1 class="addr-title">📍 CHỌN ĐỊA CHỈ GIAO HÀNG</h1>
+
+        <form th:action="@{/checkout}" method="get">
+            <input type="hidden" name="id" th:value="${productId}"/>
+
+            <div th:each="a : ${addresses}" class="address-card">
+                <div class="address-info">
+                    <div class="name" th:text="${a.recipientName}"></div>
+                    <div>
+                        <span th:text="${a.specificAddress}"></span>,
+                        <span th:text="${a.ward}"></span>,
+                        <span th:text="${a.district}"></span>,
+                        <span th:text="${a.city}"></span>
+                    </div>
+                    <div>📞 <span th:text="${a.recipientPhone}"></span></div>
+                </div>
+
+                <input class="address-radio"
+                       type="radio"
+                       name="addressId"
+                       th:value="${a.id}"
+                       required>
+            </div>
+
+            <div class="address-actions">
+                <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
+                    ➕ Thêm địa chỉ mới
+                </a>
+
+                <button type="submit" class="btn btn-confirm">
+                    Xác nhận địa chỉ
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<div th:replace="~{client/layout/footer}"></div>
+
+</body>
+</html>

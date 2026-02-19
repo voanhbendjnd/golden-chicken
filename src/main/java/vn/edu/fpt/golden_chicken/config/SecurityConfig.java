@@ -91,6 +91,11 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/img/**",
                                 "/client/**",
+                                "/favicon.ico",
+                                "/fonts/**",
+                                "/menu/**",
+                                "/payment/**"
+
                 };
                 http
                                 .logout(logout -> logout

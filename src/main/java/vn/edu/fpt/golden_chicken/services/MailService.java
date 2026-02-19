@@ -31,6 +31,37 @@ public class MailService {
                 password);
     }
 
+    public void allowMailForUser(String name, String email) {
+        this.sendNotice(email, "Register Success", "mail/anu", email, name);
+    }
+
+    public void allowMailUpdateOrderStatus(String email, String status, String id, String name) {
+        this.sendStatus(email, "Update Order Status", "mail/os", email, status, id, name);
+    }
+
+    @Async
+    public void sendStatus(String to, String subject, String template, String email, String status, String id,
+            String name) {
+        var ctx = new Context();
+        ctx.setVariable("cus", name);
+        ctx.setVariable("email", email);
+        ctx.setVariable("status", status);
+        ctx.setVariable("id", id);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(template, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+    }
+
+    @Async
+    public void sendNotice(String to, String subject, String template, String email, String name) {
+        var ctx = new Context();
+        ctx.setVariable("name", name);
+        ctx.setVariable("email", email);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(template, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+    }
+
     // turn on enalbleAsync in application
     @Async
     public void sendEmailAndPasswordForStaff(String to, String subject, String template, String email, String name,

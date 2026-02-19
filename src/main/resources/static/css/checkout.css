@@ -1143,3 +1143,162 @@ h2 {
     background-color: #e31837 !important; /* Màu đỏ Jollibee */
     padding: 10px 0;
 }
+
+/* =====================
+   GLOBAL
+===================== */
+body {
+    background-color: #fffaf5;
+}
+
+/* Card layout */
+.bg-item {
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* =====================
+   HEADINGS
+===================== */
+h1, h2 {
+    color: #e31837;
+    font-weight: 800;
+}
+
+h3 {
+    font-weight: 700;
+}
+
+/* =====================
+   MAIN LAYOUT
+===================== */
+.main {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr;
+    gap: 30px;
+}
+
+/* =====================
+   ADDRESS
+===================== */
+.address-display-box {
+    padding: 15px;
+    background: #fff7e6;
+    border: 1px dashed #f7c600;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.address-display-box p {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.manage-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #e31837;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.manage-link:hover {
+    text-decoration: underline;
+}
+
+/* =====================
+   PAYMENT
+===================== */
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio {
+    flex: 1;
+    padding: 16px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.radio:hover {
+    border-color: #f7c600;
+    background-color: #fffdf5;
+}
+
+.radio input {
+    margin-right: 8px;
+}
+
+/* =====================
+   ORDER
+===================== */
+.order-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.order-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* =====================
+   PRICE
+===================== */
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.totalPrice {
+    background: #fff1f1;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.total-price-value {
+    color: #e31837;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+/* =====================
+   BUTTON
+===================== */
+.pay-btn button {
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background-color: #e31837;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(227, 24, 55, 0.4);
+}
+
+.pay-btn button:hover {
+    background-color: #c9142f;
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media (max-width: 992px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+}

@@ -22,11 +22,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataInvalidException.class)
     public String handleDataInvalidException(DataInvalidException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
-        return "admin/role/table";
+        return "error/400";
     }
 
     @ExceptionHandler(value = { PermissionException.class })
     public String handlePermissionException(PermissionException ex) {
         return "client/auth/access-deny";
     }
+
+    @ExceptionHandler(value = { CheckoutException.class })
+    public String handleAmountSystemNotTheSame(CheckoutException ax) {
+        return "error/checkout-error";
+    }
+
 }
