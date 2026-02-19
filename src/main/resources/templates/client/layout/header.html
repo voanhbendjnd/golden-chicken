@@ -8,13 +8,13 @@
         </button>
         <div class="header-logo col-4 col-lg-2">
             <a class="navbar-brand logo-img" th:href="@{/home}">
-                <img src="./img/LogoJB_New-02.png" alt="">
+                <img th:src="@{/img/logoNew.png}" alt="">
 
             </a>
         </div>
         <div class="navbar-body ">
             <div class="user ">
-                <a href="#" class="user-login btn-icon show-modal">
+                <a th:href="@{/profile}" class="user-login btn-icon show-modal">
                     <i class="fa-solid fa-user "></i>
                 </a>
                 <span th:if="${session.user == null}">
@@ -23,7 +23,7 @@
                 </span>
 
                 <span th:if="${session.user != null}">
-                    <span th:text="${session.fullName}"></span>
+                    <span th:text="${session.fullName}" style="margin-right: 10px;"></span>
                 </span>
                 <form th:action="@{/logout}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

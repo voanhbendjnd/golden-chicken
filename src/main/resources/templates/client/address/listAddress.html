@@ -32,79 +32,107 @@
         </aside>
 
         <main class="addr-main">
-            <h1 class="addr-title">Address Book</h1>
-
-            <section class="addr-card">
-                <div class="addr-card__head">ĐỊA CHỈ MẶC ĐỊNH</div>
-                <div class="addr-card__body">
-                    <p class="addr-subhead">ĐỊA CHỈ GIAO HÀNG MẶC ĐỊNH</p>
-
-                    <div th:if="${defaultAddress != null}">
-                        <div class="addr-block">
-                            <div th:text="${defaultAddress.recipientName}" class="name">Full name</div>
-                            <div style="margin-bottom: 4px;">
-                                <span th:text="${defaultAddress.specificAddress}">specific</span>,
-                                <span th:text="${defaultAddress.ward}">ward</span>,
-                                <span th:text="${defaultAddress.district}">district</span>,
-                                <span th:text="${defaultAddress.city}">Cần Thơ</span>
-                            </div>
-                            <div>T: <span th:text="${defaultAddress.recipientPhone}">phone</span></div>
-                        </div>
-
-                        <div class="addr-actions">
-                            <form th:action="@{/addresses/edit}" method="post" style="display: inline;">
-                                <input type="hidden" name="id" th:value="${defaultAddress.id}" />
-                                <button type="submit" class="btn btn-warning">Chỉnh sửa</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div th:if="${defaultAddress == null}">
-                        <div>Chưa có địa chỉ mặc định.</div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="addr-card">
-                <div class="addr-card__head">ĐỊA CHỈ BỔ SUNG</div>
-                <div class="addr-card__body">
-                    <div th:if="${#lists.isEmpty(additionalAddresses)}">Chưa có địa chỉ bổ sung.</div>
-
-                    <div th:each="a : ${additionalAddresses}" class="addr-item">
-                        <div class="addr-block">
-                            <div th:text="${a.recipientName}" class="name">Name</div>
-                            <div>
-                                <span th:text="${a.specificAddress}">specific</span>,
-                                <span th:text="${a.ward}">ward</span>,
-                                <span th:text="${a.district}">district</span>,
-                                <span th:text="${a.city}">Cần Thơ</span>
-                            </div>
-                            <div>T: <span th:text="${a.recipientPhone}">phone</span></div>
-                        </div>
-
-                        <div class="addr-actions">
-                            <form th:action="@{/addresses/edit}" method="post" style="display: inline;">
-                                <input type="hidden" name="id" th:value="${a.id}" />
-                                <button type="submit" class="btn btn-warning">Chỉnh sửa</button>
-                            </form>
-                            <form th:action="@{/addresses/{id}/delete(id=${a.id})}" method="post"
-                                style="display: inline;">
-                                <button type="submit" class="btn btn-danger">Xóa</button>
-                            </form>
-                            <form th:action="@{/addresses/{id}/default(id=${a.id})}" method="post"
-                                style="display: inline;">
-                                <button type="submit" class="btn btn-info">Đặt mặc định</button>
-                            </form>
-                        </div>
-
-                        <div class="addr-divider"></div>
-                    </div>
-                </div>
-            </section>
-
-            <div>
-                <a th:href="@{/addresses/new}" class="btn btn-success">THÊM ĐỊA CHỈ MỚI</a>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1 class="addr-title">Address Book</h1>
+                <a th:href="@{/addresses/new}" class="btn btn-success">
+                    THÊM ĐỊA CHỈ MỚI
+                </a>
             </div>
+
+            <section class="addr-card">
+                <div class="addr-card__head">DANH SÁCH ĐỊA CHỈ</div>
+                <div class="addr-card__body">
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Người nhận</th>
+                                <th>Địa chỉ</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:if="${defaultAddress == null and #lists.isEmpty(additionalAddresses)}">
+                                <td colspan="5" class="text-center">
+                                    Chưa có địa chỉ nào.
+                                </td>
+                            </tr>
+
+                            <tr th:if="${defaultAddress != null}" class="table-warning">
+                                <td th:text="${defaultAddress.recipientName}">Name</td>
+
+                                <td>
+                                    <span th:text="${defaultAddress.specificAddress}"></span>,
+                                    <span th:text="${defaultAddress.ward}"></span>,
+                                    <span th:text="${defaultAddress.district}"></span>,
+                                    <span th:text="${defaultAddress.city}"></span>
+                                </td>
+
+                                <td th:text="${defaultAddress.recipientPhone}"></td>
+
+                                <td>
+                                    <span class="badge bg-success">Mặc định</span>
+                                </td>
+
+                                <td>
+                                    <form th:action="@{/addresses/edit}" method="post" style="display:inline;">
+                                        <input type="hidden" name="id" th:value="${defaultAddress.id}" />
+                                        <button class="btn btn-sm btn-warning px-3 py-2">Sửa</button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <tr th:each="a : ${additionalAddresses}"
+                                th:if="${defaultAddress == null or a.id != defaultAddress.id}">
+
+                                <td th:text="${a.recipientName}">Name</td>
+
+                                <td>
+                                    <span th:text="${a.specificAddress}"></span>,
+                                    <span th:text="${a.ward}"></span>,
+                                    <span th:text="${a.district}"></span>,
+                                    <span th:text="${a.city}"></span>
+                                </td>
+
+                                <td th:text="${a.recipientPhone}"></td>
+
+                                <td>
+                                    <span class="badge bg-secondary">Phụ</span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center flex-nowrap gap-2">
+                                        <form th:action="@{/addresses/edit}" method="post" class="m-0">
+                                            <input type="hidden" name="id" th:value="${a.id}" />
+                                            <button type="submit" class="btn btn-warning px-3 py-2">Sửa</button>
+                                        </form>
+
+                                        <form th:action="@{/addresses/{id}/delete(id=${a.id})}" method="post"
+                                            class="m-0">
+                                            <button type="submit" class="btn btn-danger px-3 py-2">Xóa</button>
+                                        </form>
+
+                                        <form th:action="@{/addresses/{id}/default(id=${a.id})}" method="post"
+                                            class="m-0">
+                                            <button type="submit" class="btn btn-info px-3 py-2 btn-nowrap">Đặt mặc
+                                                định</button>
+                                        </form>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+
+
+
         </main>
     </div>
 

@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .trim();
     }
 
-    setState(districtSelect, [], '�ang t?i qu?n/huy?n...', true);
-    setState(wardSelect, [], 'Vui l�ng ch?n qu?n/huy?n tru?c', true);
+    setState(districtSelect, [], 'Đang tải Quận/Huyện...', true);
+    setState(wardSelect, [], 'Vui lòng chọn Quận/Huyện trước', true);
 
     fetch('https://provinces.open-api.vn/api/?depth=3')
         .then(function (res) { return res.json(); })
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var districts = Array.isArray(target.districts) ? target.districts : [];
             var districtNames = districts.map(function (d) { return d.name; });
 
-            setState(districtSelect, districtNames, '-- Ch?n qu?n/huy?n --', false);
+            setState(districtSelect, districtNames, '-- Chọn Quận/Huyện --', false);
 
             if (initialDistrict) {
                 districtSelect.value = initialDistrict;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             function renderWards(districtName) {
                 if (!districtName) {
-                    setState(wardSelect, [], '-- Ch?n phu?ng/x� --', true);
+                    setState(wardSelect, [], '-- Chọn Phường/Xã --', true);
                     return;
                 }
 
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var wards = district && Array.isArray(district.wards) ? district.wards : [];
                 var wardNames = wards.map(function (w) { return w.name; });
 
-                setState(wardSelect, wardNames, '-- Ch?n phu?ng/x� --', false);
+                setState(wardSelect, wardNames, '-- Chọn Phường/Xã --', false);
 
                 if (initialWard && districtName === initialDistrict) {
                     wardSelect.value = initialWard;
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(function (err) {
             console.error('Address API error:', err);
-            setState(districtSelect, [], 'Kh�ng t?i du?c qu?n/huy?n', true);
-            setState(wardSelect, [], 'Kh�ng t?i du?c phu?ng/x�', true);
+            setState(districtSelect, [], 'Không tải được Quận/Huyện', true);
+            setState(wardSelect, [], 'Không tải được Phường/Xã', true);
         });
 });

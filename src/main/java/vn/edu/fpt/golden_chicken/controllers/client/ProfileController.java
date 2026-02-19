@@ -25,7 +25,7 @@ public class ProfileController {
     }
 
     @GetMapping("/profile")
-    public String getProfilePage(
+    public String showProfile(
             @RequestParam(name = "edit", required = false, defaultValue = "false") boolean edit,
             Model model) {
 
@@ -33,11 +33,11 @@ public class ProfileController {
         model.addAttribute("profile", profileService.getProfile());
         model.addAttribute("profileForm", profileService.getProfileForm());
         model.addAttribute("defaultAddress", addressServices.getDefaultAddress());
-        return "profile";
+        return "client/profile";
     }
 
     @PostMapping("/profile")
-    public String updateProfile(
+    public String updateProfileForm(
             @Valid @ModelAttribute("profileForm") ProfileUpdateDTO profileForm,
             BindingResult bindingResult,
             Model model) {
@@ -45,7 +45,7 @@ public class ProfileController {
         model.addAttribute("isEdit", true);
         if (bindingResult.hasErrors()) {
             model.addAttribute("profile", profileService.getProfile());
-            return "profile";
+            return "client/profile";
         }
 
         profileService.updateProfile(profileForm);
