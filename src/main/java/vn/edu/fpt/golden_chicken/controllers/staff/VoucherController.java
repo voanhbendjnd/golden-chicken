@@ -25,8 +25,7 @@ public class VoucherController {
     @PostMapping("/create")
     public String create(
             @ModelAttribute("voucher") VoucherCreateDTO dto,
-            Model model
-    ) {
+            Model model) {
         try {
             service.createVoucher(dto);
             return "redirect:/staff/voucher/list";
@@ -52,17 +51,17 @@ public class VoucherController {
         return "staff/voucher/detail";
     }
 
-    //update
+    // update
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable("id") Long id, Model model) {
         model.addAttribute("voucher", service.getById(id));
         return "staff/voucher/edit";
     }
 
-    @PostMapping("/edit/{id}")
-    public String update(@PathVariable("id") Long id,
-                         @ModelAttribute VoucherUpdateDTO dto) {
-        service.updateVoucher(id, dto);
+    @PostMapping("/edit")
+    public String update(
+            @ModelAttribute VoucherUpdateDTO dto) {
+        service.updateVoucher(dto);
         return "redirect:/staff/voucher/list";
     }
 
@@ -79,4 +78,3 @@ public class VoucherController {
     }
 
 }
-

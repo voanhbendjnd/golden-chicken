@@ -28,6 +28,7 @@ public class VoucherService {
             return res;
         }).toList();
     }
+
     public ResVoucher getById(Long id) {
         Voucher v = repo.findById(id).orElseThrow();
         ResVoucher res = new ResVoucher();
@@ -45,6 +46,7 @@ public class VoucherService {
         res.setEndAt(v.getEndAt());
         return res;
     }
+
     public void createVoucher(VoucherCreateDTO dto) {
         // 1. check trùng code
         if (repo.existsByCode(dto.getCode())) {
@@ -65,8 +67,9 @@ public class VoucherService {
         v.setStatus("ACTIVE");
         repo.save(v);
     }
-    public void updateVoucher(Long id, VoucherUpdateDTO dto) {
-        Voucher v = repo.findById(id)
+
+    public void updateVoucher(VoucherUpdateDTO dto) {
+        Voucher v = repo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
         v.setName(dto.getName());
         v.setDescription(dto.getDescription());
@@ -80,11 +83,13 @@ public class VoucherService {
         v.setExchangeable(dto.isExchangeable());
         repo.save(v);
     }
+
     public void disableVoucher(Long id) {
         Voucher v = repo.findById(id).orElseThrow();
         v.setStatus("DISABLED");
         repo.save(v);
     }
+
     public void deleteVoucher(Long id) {
         Voucher v = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
