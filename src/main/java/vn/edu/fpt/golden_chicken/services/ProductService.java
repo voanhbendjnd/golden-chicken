@@ -219,7 +219,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllChickenHappy(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%gà giòn%");
+            var p1 = c.like(categoryJoin.get("name"), "%original chicken%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
@@ -240,7 +240,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllChickenSauce(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%gà sốt%");
+            var p1 = c.like(categoryJoin.get("name"), "%sauce%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
@@ -261,7 +261,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllNoodle(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%mỳ%");
+            var p1 = c.like(categoryJoin.get("name"), "%noodles%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
@@ -282,7 +282,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllLowMeal(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%tráng miệng%");
+            var p1 = c.like(categoryJoin.get("name"), "%dessert%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
