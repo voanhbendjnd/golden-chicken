@@ -50,12 +50,12 @@
 
         <div class="form-group">
             <label>Min Order Value</label>
-            <input type="number" step="0.01" th:field="*{minOrderValue}"/>
+            <input type="number" step="0.01" th:field="*{minOrderValue}" required/>
         </div>
 
         <div class="form-group">
             <label>Point Cost</label>
-            <input type="number" th:field="*{pointCost}"/>
+            <input type="number" th:field="*{pointCost}" required/>
         </div>
         <div class="checkbox-group">
             <label>Allow exchange by points?</label>

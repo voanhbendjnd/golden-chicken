@@ -14,7 +14,7 @@
         <p th:text="${error}"></p>
     </div>
 
-    <form th:action="@{/staff/voucher/edit}"
+    <form th:action="@{/staff/voucher/edit/{id}(id=${voucher.id})}"
           th:object="${voucher}"
           method="post">
 
