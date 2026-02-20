@@ -15,6 +15,7 @@ public class ResUser {
     String email;
     String phone;
     Boolean status;
+    String avatar;
     Long roleId;
     StaffType staffType;
     String createdBy, updatedBy;

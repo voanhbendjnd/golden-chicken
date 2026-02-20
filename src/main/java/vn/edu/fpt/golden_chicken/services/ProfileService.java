@@ -51,6 +51,7 @@ public class ProfileService {
         res.setCreatedBy(user.getCreatedBy());
         res.setUpdatedAt(user.getUpdatedAt());
         res.setUpdatedBy(user.getUpdatedBy());
+        res.setAvatar(user.getAvatar());
         if (user.getRole() != null) {
             res.setRoleId(user.getRole().getId());
         }
@@ -70,6 +71,13 @@ public class ProfileService {
         }
         user.setFullName(dto.getFullName());
         user.setPhone(dto.getPhone());
+        userRepository.save(user);
+    }
+
+    public void updateAvatar(String fileName) {
+        User user = getCurrentUser();
+        if (user == null || fileName == null || fileName.isEmpty()) return;
+        user.setAvatar(fileName);
         userRepository.save(user);
     }
 }

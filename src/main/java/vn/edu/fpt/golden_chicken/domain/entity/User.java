@@ -48,6 +48,9 @@ public class User implements Serializable {
     @ToString.Exclude
     Staff staff;
     String phone;
+
+    String avatar;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;

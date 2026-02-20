@@ -139,6 +139,7 @@ public class UserService {
             }
             user.setCreatedBy(email);
         }
+
         // if (role.getName().equalsIgnoreCase("ADMIN")) {
         // user.setRole(role);
         // }
