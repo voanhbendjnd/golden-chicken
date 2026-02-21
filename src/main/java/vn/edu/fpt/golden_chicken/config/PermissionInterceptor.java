@@ -40,6 +40,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (user != null) {
             var role = user.getRole();
+
             if (role != null) {
                 var permissions = role.getPermissions();
                 var isAllow = permissions.stream()

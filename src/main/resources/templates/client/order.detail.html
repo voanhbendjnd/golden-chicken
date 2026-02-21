@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>My Order Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <head th:replace="~{common/head}"></head>
+    <style>
+        .order-container {
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 6px 15px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .product-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .order-id-highlight {
+            color: #ff6b6b;
+            font-weight: 800;
+        }
+
+        .timeline-info {
+            border-left: 2px dashed #dee2e6;
+            padding-left: 20px;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div th:replace="~{client/layout/header}"></div>
+
+    <div class="container order-container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Order Details</h2>
+                <span class="text-muted">ID: <span class="order-id-highlight"
+                        th:text="'#' + ${order.id}">#12345</span></span>
+            </div>
+            <button th:if="${order.status.name() == 'PENDING'}" class="btn btn-danger btn-sm rounded-pill px-4"
+                th:onclick="'cancelOrder(' + ${order.id} + ')'">
+                <i class="bi bi-x-circle me-1"></i> Cancel Order
+            </button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-white py-3 fw-bold">
+                        <i class="bi bi-bag-check me-2 text-primary"></i>Items Purchased
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Product</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th class="text-end pe-4">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${order.items}">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <img th:src="@{'/images/products/' + ${item.img}}"
+                                                    class="product-img me-3" alt="product">
+                                                <div>
+                                                    <div class="fw-bold text-dark" th:text="${item.name}">Product Name
+                                                    </div>
+                                                    <small class="text-muted" th:text="'Unit: 1 portion'"></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td
+                                            th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                        </td>
+                                        <td th:text="'x' + ${item.quantity}">x1</td>
+                                        <td class="text-end pe-4 fw-bold text-primary"
+                                            th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-end py-3 pe-4">
+                        <span class="text-muted me-2">Total Amount:</span>
+                        <h4 class="d-inline-block mb-0 fw-bold text-danger"
+                            th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></h4>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-white py-3 fw-bold">
+                        <i class="bi bi-geo-alt me-2 text-primary"></i>Delivery Information
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="small text-muted d-block">Full Name</label>
+                                <span class="fw-bold" th:text="${order.name}">John Doe</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="small text-muted d-block">Phone Number</label>
+                                <span class="fw-bold" th:text="${order.phone}">0123456789</span>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="small text-muted d-block">Shipping Address</label>
+                                <span th:text="${order.address}">123 Street, District 1, HCM City</span>
+                            </div>
+                            <div class="col-12">
+                                <label class="small text-muted d-block">Your Note</label>
+                                <p class="fst-italic text-secondary mb-0"
+                                    th:text="${#strings.isEmpty(order.note) ? 'No note for this order.' : order.note}">
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <label class="d-block text-muted small mb-2">CURRENT STATUS</label>
+                            <span class="status-badge"
+                                th:classappend="${order.status.name() == 'COMPLETED' ? 'bg-success text-white' : 
+                                                 (order.status.name() == 'CANCELLED' ? 'bg-secondary text-white' : 'bg-warning text-dark')}"
+                                th:text="${order.status}">PENDING</span>
+                        </div>
+                        <hr>
+                        <div class="timeline-info">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Order Placed</small>
+                                <strong th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, HH:mm')}"></strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Last Update</small>
+                                <strong th:text="${#temporals.format(order.updatedAt, 'dd MMM yyyy, HH:mm')}"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-white fw-bold">Payment Summary</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Method</span>
+                            <span class="badge bg-light text-dark border" th:text="${order.paymentMethod}">CASH</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Payment Status</span>
+                            <span th:classappend="${order.paymentStatus == 'PAID' ? 'text-success' : 'text-danger'}"
+                                class="fw-bold" th:text="${order.paymentStatus}">UNPAID</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <p class="small text-muted">Need help with this order? <br> <a href="/contact"
+                            class="text-decoration-none">Contact Support</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{client/layout/footer}"></div>
+
+
+    <script th:inline="javascript">
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to cancel this order? This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gọi API hủy đơn dành cho khách hàng
+                    fetch(`/api/orders/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            // Nhớ thêm CSRF token nếu project có dùng Spring Security
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire('Cancelled!', 'Your order has been cancelled.', 'success')
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

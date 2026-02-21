@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Voucher Detail</title>
+    <link rel="stylesheet" href="/css/voucher.css">
+</head>
+<body>
+
+<div class="voucher-detail">
+    <h2>Voucher Detail</h2>
+
+    <div class="detail-item">
+        <span class="label">ID</span>
+        <span class="value" th:text="${voucher.id}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Code</span>
+        <span class="value" th:text="${voucher.code}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Name</span>
+        <span class="value" th:text="${voucher.name}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Description</span>
+        <span class="value" th:text="${voucher.description}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Discount Value</span>
+        <span class="value" th:text="${voucher.discountValue}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Discount Type</span>
+        <span class="value badge" th:text="${voucher.discountType}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Min Order Value</span>
+        <span class="value" th:text="${voucher.minOrderValue}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Point Cost</span>
+        <span class="value" th:text="${voucher.pointCost}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Start At</span>
+        <span class="value" th:text="${voucher.startAt}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">End At</span>
+        <span class="value" th:text="${voucher.endAt}"></span>
+    </div>
+
+    <div class="detail-item">
+        <span class="label">Exchangeable</span>
+        <span class="value"
+              th:text="${voucher.exchangeable ? 'YES' : 'NO'}"></span>
+    </div>
+
+    <div class="detail-actions">
+        <a class="btn-back" th:href="@{/staff/voucher/list}">← Back to list</a>
+    </div>
+</div>
+
+</body>
+</html>

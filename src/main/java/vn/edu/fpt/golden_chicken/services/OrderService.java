@@ -283,6 +283,54 @@ public class OrderService {
         return res;
     }
 
+    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, OrderStatus status)
+            throws PermissionException {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null) {
+            throw new PermissionException("You Do Not Have Permission!");
+        }
+        var user = this.userRepository.findByEmail(email);
+        if (user == null) {
+            throw new PermissionException("Not Found Account With Email " + email);
+        }
+        var customer = user.getCustomer();
+        if (customer == null) {
+            throw new PermissionException("Please Use Account Customer For This Service!");
+        }
+        // if (status != OrderStatus.CANCELLED || status != OrderStatus.COMPLETED ||
+        // status != OrderStatus.PENDING
+        // || status != OrderStatus.SHIPPING) {
+
+        // }
+        Specification<Order> orderSpec = (r, q, c) -> {
+            return c.equal(r.get("customer"), customer);
+        };
+        // var lastStatus = status.toString();
+        if (status != null) {
+            var checkStatus = OrderStatus.safeValueOf(status.toString());
+            if (checkStatus != null) {
+                Specification<Order> orderStatus = (r, q, c) -> {
+                    return c.equal(r.get("status"), status);
+                };
+                orderSpec = orderSpec.and(orderStatus);
+                // var page = this.orderRepository.findAll(spec.and(orderSpec).and(orderStatus),
+                // pageable);
+            }
+        }
+        var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
+        res.setResult(result);
+
+        return res;
+    }
+
     public List<OrderStatisResponse> getOrderStatisticData() {
         // Mảng tên tháng để hiển thị lên biểu đồ
         String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
