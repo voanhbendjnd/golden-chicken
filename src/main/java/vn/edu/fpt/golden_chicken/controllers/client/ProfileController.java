@@ -12,21 +12,21 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.domain.request.ProfileUpdateDTO;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
+import vn.edu.fpt.golden_chicken.services.FileService;
 import vn.edu.fpt.golden_chicken.services.ProfileService;
-import vn.edu.fpt.golden_chicken.services.UploadService;
 
 @Controller
 public class ProfileController {
 
     private final ProfileService profileService;
     private final AddressServices addressServices;
-    private final UploadService uploadService;
+    private final FileService fileService;
 
     public ProfileController(ProfileService profileService, AddressServices addressServices,
-        UploadService uploadService) {
+            FileService fileService) {
+        this.fileService = fileService;
         this.profileService = profileService;
         this.addressServices = addressServices;
-        this.uploadService = uploadService;
     }
 
     @GetMapping("/profile")
@@ -60,7 +60,7 @@ public class ProfileController {
     @PostMapping("/profile/avatar")
     public String updateAvatar(@RequestParam("avatarFile") MultipartFile avatarFile) {
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String fileName = uploadService.handleSaveUploadFile(avatarFile, "img/avatar");
+            String fileName = this.fileService.handleSaveUploadFile(avatarFile, "img/avatar");
             profileService.updateAvatar(fileName);
         }
         return "redirect:/profile";

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
@@ -23,6 +24,37 @@ import vn.edu.fpt.golden_chicken.common.DefineVariable;
 public class FileService {
     @Value("${djnd.upload-file.base-uri}")
     private String baseURI;
+
+    public String handleSaveUploadFile(MultipartFile file, String targetFolder) {
+        try {
+            if (file == null || file.isEmpty()) {
+                return "";
+            }
+
+            Path sourceDirectory = Paths.get("src", "main", "resources", "static", targetFolder).toAbsolutePath();
+            Path runtimeDirectory = Paths.get("target", "classes", "static", targetFolder).toAbsolutePath();
+            Files.createDirectories(sourceDirectory);
+            Files.createDirectories(runtimeDirectory);
+
+            String originalName = file.getOriginalFilename();
+            if (!StringUtils.hasText(originalName)) {
+                originalName = "avatar.png";
+            }
+
+            String cleanedName = StringUtils.cleanPath(originalName);
+            String finalName = System.currentTimeMillis() + "-" + cleanedName;
+            byte[] content = file.getBytes();
+
+            Path sourcePath = sourceDirectory.resolve(finalName);
+            Path runtimePath = runtimeDirectory.resolve(finalName);
+            Files.write(sourcePath, content);
+            Files.write(runtimePath, content);
+            return finalName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
     public void initFolder(String folderName) throws URISyntaxException, IOException {
         var path = Paths.get(baseURI, folderName);
