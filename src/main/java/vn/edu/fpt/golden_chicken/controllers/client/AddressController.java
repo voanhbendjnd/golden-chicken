@@ -46,8 +46,6 @@ public class AddressController {
     @GetMapping("/addresses/new")
     public String createForm(Model model) {
         model.addAttribute("addressForm", new AddressFormDTO());
-        model.addAttribute("districts", districts());
-        model.addAttribute("wards", wards());
         model.addAttribute("isEdit", false);
         return "client/address/createAddress";
     }
@@ -58,8 +56,6 @@ public class AddressController {
             BindingResult result,
             Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("districts", districts());
-            model.addAttribute("wards", wards());
             model.addAttribute("isEdit", false);
             return "client/address/createAddress";
         }
@@ -75,8 +71,6 @@ public class AddressController {
 
         model.addAttribute("addressId", id);
         model.addAttribute("addressForm", form);
-        model.addAttribute("districts", districts());
-        model.addAttribute("wards", wards());
         model.addAttribute("isEdit", true);
         return "client/address/createAddress";
     }
@@ -87,8 +81,6 @@ public class AddressController {
             BindingResult result,
             Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("districts", districts());
-            model.addAttribute("wards", wards());
             model.addAttribute("isEdit", true);
             return "client/address/createAddress";
         }
@@ -108,12 +100,5 @@ public class AddressController {
         return "redirect:/addresses";
     }
 
-    private List<String> districts() {
-        return List.of("Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt",
-                "Phong Điền", "Cờ Đỏ", "Thới Lai", "Vĩnh Thạnh");
-    }
 
-    private List<String> wards() {
-        return List.of("An Khánh", "Xuân Khánh", "Hưng Lợi", "An Bình", "Cái Khế");
-    }
 }
