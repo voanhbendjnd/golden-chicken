@@ -27,12 +27,12 @@ public class MailService {
     SpringTemplateEngine templateEngine;
 
     public void configBeforeSendForStaff(String name, String email, String password) {
-        this.sendEmailAndPasswordForStaff(email, "Password At Golden Chicken", "mail/sas", email, name,
+        this.sendEmailAndPasswordForStaff(email, "Your password at Golden Chicken", "mail/sas", email, name,
                 password);
     }
 
     public void allowMailForUser(String name, String email) {
-        this.sendNotice(email, "Register Success", "mail/anu", email, name);
+        this.sendNotice(email, "Registration successful", "mail/anu", email, name);
     }
 
     public void allowMailUpdateOrderStatus(String email, String status, String id, String name) {

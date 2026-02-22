@@ -110,14 +110,21 @@
 }
 
 
+table th {
+    vertical-align: middle;
+    white-space: nowrap;
+    text-align: left;
+}
 
+.btn-nowrap {
+    white-space: nowrap;
+}
 
 
 .addr-actions a:hover {
     text-decoration: underline;
 }
 
-/* Divider */
 .addr-divider {
     height: 1px;
     background: var(--border);

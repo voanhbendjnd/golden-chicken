@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Voucher</title>
+    <link rel="stylesheet" th:href="@{/css/voucher.css}">
+</head>
+<body>
+
+<div class="voucher-container">
+    <h2 class="page-title">Create Voucher</h2>
+
+    <div class="error-box" th:if="${error}">
+        <p th:text="${error}"></p>
+    </div>
+
+    <form class="voucher-form"
+          th:action="@{/staff/voucher/create}"
+          th:object="${voucher}"
+          method="post">
+
+        <div class="form-group">
+            <label>Code</label>
+            <input type="text" th:field="*{code}" required/>
+        </div>
+
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" th:field="*{name}" required/>
+        </div>
+
+        <div class="form-group full">
+            <label>Description</label>
+            <input type="text" th:field="*{description}" required/>
+        </div>
+
+        <div class="form-group">
+            <label>Discount Value</label>
+            <input type="number" th:field="*{discountValue}" required/>
+        </div>
+
+        <div class="form-group">
+            <label>Discount Type</label>
+            <select th:field="*{discountType}" required>
+                <option value="" disabled selected>-- Select discount type --</option>
+                <option value="PERCENT">PERCENT</option>
+                <option value="FIXED">FIXED</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Min Order Value</label>
+            <input type="number" step="0.01" th:field="*{minOrderValue}"/>
+        </div>
+
+        <div class="form-group">
+            <label>Point Cost</label>
+            <input type="number" th:field="*{pointCost}"/>
+        </div>
+        <div class="checkbox-group">
+            <label>Allow exchange by points?</label>
+            <input type="checkbox" th:field="*{exchangeable}"/>
+        </div>
+        <div class="form-group">
+            <label>Start At:</label>
+            <input type="datetime-local" th:field="*{startAt}"/>
+        </div>
+
+        <div class="form-group">
+            <label>End At:</label>
+            <input type="datetime-local" th:field="*{endAt}"/>
+        </div>
+
+
+        <div class="form-actions">
+            <button type="submit">Create</button>
+            <a class="btn-cancel" th:href="@{/staff/voucher/list}">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

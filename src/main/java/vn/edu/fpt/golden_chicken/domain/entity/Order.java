@@ -43,6 +43,8 @@ public class Order {
     BigDecimal discountAmount;
     BigDecimal finalAmount;
     String phone;
+    @Column(columnDefinition = "NVARCHAR(255)")
+
     String name;
     // Long bonus;
     @Enumerated(EnumType.STRING)
@@ -51,7 +53,11 @@ public class Order {
     @Enumerated(EnumType.STRING)
 
     PaymentStatus paymentStatus;
+    @Column(columnDefinition = "NVARCHAR(255)")
+
     String shippingAddress;
+    @Column(columnDefinition = "NVARCHAR(255)")
+
     String note;
     @Enumerated(EnumType.STRING)
     PaymentMethod paymentMethod;

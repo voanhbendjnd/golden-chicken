@@ -47,7 +47,6 @@ public class OrderController {
 
     @GetMapping("/{id:[0-9]+}")
     public String detailPage(@PathVariable("id") Long id, Model model) {
-        this.orderService.findById(id);
         model.addAttribute("order", this.orderService.findById(id));
         return "staff/order/detail";
     }
