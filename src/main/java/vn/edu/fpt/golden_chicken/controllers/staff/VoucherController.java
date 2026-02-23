@@ -58,9 +58,9 @@ public class VoucherController {
         return "staff/voucher/edit";
     }
 
-    @PostMapping("/edit")
-    public String update(
-            @ModelAttribute VoucherUpdateDTO dto) {
+    @PostMapping("/edit/{id}")
+    public String update(@PathVariable Long id,
+                         @ModelAttribute VoucherUpdateDTO dto) {
         service.updateVoucher(dto);
         return "redirect:/staff/voucher/list";
     }
