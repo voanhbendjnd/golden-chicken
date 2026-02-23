@@ -20,16 +20,7 @@
     <div th:replace="~{client/layout/header}"></div>
 
     <div class="page">
-        <aside class="addr-sidebar">
-            <h3>My Account</h3>
-            <nav class="nav">
-                <a href="#">Account Management</a>
-                <a href="#">My Orders</a>
-                <a class="active" href="#">Address</a>
-                <a href="#">Account Information</a>
-                <a href="#">Voucher List</a>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <main class="addr-main">
             <div style="display: flex; justify-content: space-between; align-items: center;">

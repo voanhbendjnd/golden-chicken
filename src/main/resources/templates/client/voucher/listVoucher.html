@@ -1,0 +1,239 @@
+﻿<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đổi điểm</title>
+  <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+  <link th:href="@{/css/base.css}" rel="stylesheet">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <th:block th:replace="~{common/head}"></th:block>
+  <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#fff7ed;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --orange:#f97316;
+      --amber:#f59e0b;
+      --border:#fcd34d;
+    }
+    *{box-sizing:border-box}
+    .voucher-container{max-width:1100px;margin:0 auto;padding:16px}
+
+    .voucher-header{
+      background: linear-gradient(90deg, var(--orange), var(--amber));
+      color:#fff;
+      border-radius:12px;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .voucher-header h1{margin:0;font-size:18px}
+    .points{opacity:.95;font-size:13px}
+    .points b{font-size:18px}
+    .btn{
+      border:0; cursor:pointer;
+      background:#fff;
+      color:#9a3412;
+      font-weight:700;
+      padding:8px 12px;
+      border-radius:10px;
+      white-space:nowrap;
+    }
+
+    .tabs{display:flex;gap:8px;margin:14px 0}
+    .tab{
+      padding:8px 12px;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      color:#9a3412;
+    }
+    .tab.active{
+      background:#fff3e0;
+    }
+
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
+    .section-head h2{margin:0;font-size:14px;color:#9a3412}
+    .link{border:0;background:transparent;color:#9a3412;font-weight:700;cursor:pointer}
+
+    .list{display:flex;flex-direction:column;gap:10px}
+    .voucher{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .v-left{min-width:0}
+    .v-title{font-weight:800}
+    .v-sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .v-right{display:flex;align-items:center;gap:10px;white-space:nowrap}
+    .tag{
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:700;
+      color:#9a3412;
+    }
+    .tag.personal{background:#e0f2fe;border-color:#bae6fd;color:#075985}
+    .tag.system{background:#dcfce7;border-color:#bbf7d0;color:#166534}
+    .tag.expired{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+    .btn-primary{
+      border:0; cursor:pointer;
+      background: linear-gradient(90deg, var(--orange), var(--amber));
+      color:#fff;
+      font-weight:800;
+      padding:8px 12px;
+      border-radius:10px;
+    }
+    .btn-primary:disabled{opacity:.55;cursor:not-allowed}
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{client/layout/header}"></div>
+  <div class="page">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="main">
+      <div class="voucher-container">
+        <div class="voucher-header">
+          <div>
+            <h1>Đổi điểm lấy Voucher</h1>
+            <div class="points">
+              <b id="pointsText" th:text="${#numbers.formatInteger(points, 1, 'POINT')}">0</b>
+              điểm • dùng để đổi voucher
+            </div>
+          </div>
+          <button class="btn" id="btnMyVouchers" type="button">Voucher của tôi</button>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <div class="tab active" id="tabRedeem" role="tab" aria-selected="true">Đổi quà</div>
+          <div class="tab" id="tabHistory" role="tab" aria-selected="false">Lịch sử</div>
+        </div>
+
+        <section id="myVoucherSection" style="display:none">
+          <div class="section-head">
+            <h2>Voucher hiện có</h2>
+            <button class="link" id="btnBackFromMy" type="button">Quay lại</button>
+          </div>
+
+          <div class="list">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title">Voucher của tôi</div>
+                <div class="v-sub">Tạm thời chưa kết nối dữ liệu voucher cá nhân.</div>
+              </div>
+              <div class="v-right">
+                <span class="tag personal">Cá nhân</span>
+                <button class="btn-primary" type="button" disabled>Sắp có</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="redeemSection">
+          <div class="section-head">
+            <h2>Danh sách voucher đổi điểm</h2>
+            <button class="link" type="button">Xem tất cả</button>
+          </div>
+
+          <div class="list">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title">Voucher Shopee 10K</div>
+              </div>
+              <div class="v-right">
+                <span class="tag">1.000 điểm</span>
+                <button class="btn-primary" type="button" data-cost="1000">Đổi</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="historySection" style="display:none">
+          <div class="section-head">
+            <h2>Lịch sử đổi điểm</h2>
+            <button class="link" type="button">Lọc</button>
+          </div>
+
+          <div class="list">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title">Lịch sử đổi điểm</div>
+                <div class="v-sub">Tạm thời chưa kết nối lịch sử từ backend.</div>
+              </div>
+              <div class="v-right">
+                <span class="tag">-0 điểm</span>
+                <span class="tag system">Chờ cập nhật</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div th:replace="~{client/layout/footer}"></div>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const tabRedeem = $("tabRedeem");
+      const tabHistory = $("tabHistory");
+      const redeemSection = $("redeemSection");
+      const historySection = $("historySection");
+      const myVoucherSection = $("myVoucherSection");
+      const btnMyVouchers = $("btnMyVouchers");
+      const btnBackFromMy = $("btnBackFromMy");
+      if (!tabRedeem || !tabHistory || !redeemSection || !historySection || !myVoucherSection || !btnMyVouchers || !btnBackFromMy) return;
+
+      const show = (el, on) => el.style.display = on ? "" : "none";
+      const activateTab = (isRedeem) => {
+        tabRedeem.classList.toggle("active", isRedeem);
+        tabHistory.classList.toggle("active", !isRedeem);
+        tabRedeem.setAttribute("aria-selected", String(isRedeem));
+        tabHistory.setAttribute("aria-selected", String(!isRedeem));
+      };
+
+      const setTab = (isRedeem) => {
+        if (myVoucherSection.style.display !== "none") return;
+        activateTab(isRedeem);
+        show(redeemSection, isRedeem);
+        show(historySection, !isRedeem);
+      };
+
+      const showMyVouchers = (showMine) => {
+        show(myVoucherSection, showMine);
+        show(redeemSection, !showMine);
+        show(historySection, false);
+        activateTab(true);
+      };
+
+      tabRedeem.onclick = () => setTab(true);
+      tabHistory.onclick = () => setTab(false);
+      btnMyVouchers.onclick = () => showMyVouchers(true);
+      btnBackFromMy.onclick = () => showMyVouchers(false);
+
+      document.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-cost]");
+        if (!btn) return;
+        alert(`Xác nhận đổi (tốn ${btn.dataset.cost} điểm)?`);
+      });
+    })();
+  </script>
+</body>
+</html>

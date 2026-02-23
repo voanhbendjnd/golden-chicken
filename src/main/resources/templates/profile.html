@@ -15,16 +15,7 @@
 <body>
     <div th:replace="~{client/layout/header}"></div>
     <div class="page">
-        <aside class="sidebar">
-            <h3>My Account</h3>
-            <nav class="nav">
-                <a class="active" href="#">Account Management</a>
-                <a href="#">My Orders</a>
-                <a href="#">Address Book</a>
-                <a href="#">Account Information</a>
-                <a href="#">Voucher List</a>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <main class="main">
             <h1 class="title">Account Management</h1>
@@ -36,21 +27,18 @@
             <form th:action="@{/profile/avatar}" method="post" enctype="multipart/form-data" id="avatarForm">
                 <section class="section">
                     <div class="section__header">AVATAR</div>
-            
+
                     <div class="section__body grid-2">
                         <div class="col avatar-col">
-                            <img id="avatarPreview"
-                                 th:src="${profile.avatar != null}
+                            <img id="avatarPreview" th:src="${profile.avatar != null}
                                           ? @{/img/avatar/{file}(file=${profile.avatar})}
-                                          : @{/img/testavt.jpg}"
-                                 alt="Avatar"
-                                 class="avatar-img">
+                                          : @{/img/testavt.jpg}" alt="Avatar" class="avatar-img">
                         </div>
-            
+
                         <div>
                             <h4 class="block-title">Thay đổi ảnh đại diện</h4>
                             <p>Ảnh sẽ hiển thị trên hồ sơ và đơn hàng của bạn.</p>
-            
+
                             <label class="btn-upload" for="avatarFile">
                                 Chọn ảnh mới
                                 <input type="file" name="avatarFile" id="avatarFile" hidden accept=".png,.jpg,.jpeg">

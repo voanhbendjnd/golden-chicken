@@ -76,7 +76,8 @@ public class ProfileService {
 
     public void updateAvatar(String fileName) {
         User user = getCurrentUser();
-        if (user == null || fileName == null || fileName.isEmpty()) return;
+        if (user == null || fileName == null || fileName.isEmpty())
+            return;
         user.setAvatar(fileName);
         userRepository.save(user);
     }
