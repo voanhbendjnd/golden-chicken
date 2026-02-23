@@ -71,6 +71,7 @@ public class VoucherService {
     public void updateVoucher(VoucherUpdateDTO dto) {
         Voucher v = repo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        v.setCode(dto.getCode());
         v.setName(dto.getName());
         v.setDescription(dto.getDescription());
         v.setDiscountValue(dto.getDiscountValue());
