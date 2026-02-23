@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.controllers.staff;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
@@ -26,14 +27,16 @@ public class VoucherController {
     public String create(
             @ModelAttribute("voucher") VoucherCreateDTO dto,
             Model model) {
+
         try {
             service.createVoucher(dto);
             return "redirect:/staff/voucher/list";
 
         } catch (IllegalArgumentException e) {
-            // báo lỗi ra view
+
             model.addAttribute("error", e.getMessage());
             model.addAttribute("voucher", dto);
+
             return "staff/voucher/create";
         }
     }
@@ -59,9 +62,24 @@ public class VoucherController {
     }
 
     @PostMapping("/edit/{id}")
-    public String update(@PathVariable Long id,
-                         @ModelAttribute VoucherUpdateDTO dto) {
-        service.updateVoucher(dto);
+    public String update(
+            @PathVariable Long id,
+            @ModelAttribute("voucher") VoucherUpdateDTO dto,
+            BindingResult result) {
+
+        try {
+            service.updateVoucher(dto);
+        } catch (IllegalArgumentException e) {
+
+            result.rejectValue(
+                    "endAt",
+                    "error.endAt",
+                    e.getMessage()
+            );
+
+            return "staff/voucher/edit";
+        }
+
         return "redirect:/staff/voucher/list";
     }
 
