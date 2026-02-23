@@ -94,11 +94,19 @@ public class AddressController {
         return "redirect:/addresses";
     }
 
+    @GetMapping("/addresses/{id}/delete")
+    public String confirmDelete(@PathVariable Long id, Model model) {
+        var address = addressServices.findById(id);
+        if (address == null) {
+            return "redirect:/addresses";
+        }
+        model.addAttribute("address", address);
+        return "client/address/deleteAddress";
+    }
+
     @PostMapping("/addresses/{id}/delete")
     public String delete(@PathVariable Long id) {
         addressServices.deleteMyAddress(id);
         return "redirect:/addresses";
     }
-
-
 }

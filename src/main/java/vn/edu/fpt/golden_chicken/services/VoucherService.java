@@ -8,8 +8,10 @@ import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
+import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VoucherService {
     VoucherRepository repo;
+    ProfileService profileService;
+    CustomerRepository customerRepository;
 
     public List<ResVoucher> getAll() {
         return repo.findByIsDeletedFalse().stream().map(v -> {
@@ -96,5 +100,41 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
         v.setIsDeleted(true);
         repo.save(v);
+    }
+
+    private ResVoucher toResVoucher(Voucher voucher) {
+        ResVoucher res = new ResVoucher();
+        res.setId(voucher.getId());
+        res.setCode(voucher.getCode());
+        res.setName(voucher.getName());
+        res.setDescription(voucher.getDescription());
+        res.setDiscountValue(voucher.getDiscountValue());
+        res.setDiscountType(voucher.getDiscountType());
+        res.setPointCost(voucher.getPointCost());
+        res.setStartAt(voucher.getStartAt());
+        res.setEndAt(voucher.getEndAt());
+        return res;
+    }
+
+    public List<ResVoucher> getListVoucherForExchange() {
+        List<Voucher> vouchers = repo.findAvailableForExchange();
+
+        List<ResVoucher> resVouchers = new ArrayList<>();
+        for (Voucher voucher : vouchers) {
+            resVouchers.add(toResVoucher(voucher));
+        }
+        return resVouchers;
+
+    }
+
+    public long getPoints() {
+        long points = 0L;
+
+        var currentUser = profileService.getCurrentUser();
+        if (currentUser != null) {
+            var customer = customerRepository.findById(currentUser.getId()).orElse(null);
+            points = customer.getPoint();
+        }
+        return points;
     }
 }
