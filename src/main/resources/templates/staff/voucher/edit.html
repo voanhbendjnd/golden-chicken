@@ -17,7 +17,10 @@
     </div>
 
     <form th:action="@{/staff/voucher/edit/{id}(id=${voucher.id})}" th:object="${voucher}" method="post">
-
+        <div class="error-box"
+             th:if="${#fields.hasErrors('endAt')}"
+             th:errors="*{endAt}">
+        </div>
 
         <div class="form-group">
             <label>Code</label>
@@ -62,15 +65,17 @@
         <div class="form-group">
             <label>Start At</label>
             <input type="datetime-local"
+                   id="startAt"
                    name="startAt"
-                   th:value="${#temporals.format(voucher.startAt, 'yyyy-MM-dd''T''HH:mm')}" />
+                   th:value="${#temporals.format(voucher.startAt, 'yyyy-MM-dd''T''HH:mm')}"/>
         </div>
 
         <div class="form-group">
             <label>End At</label>
             <input type="datetime-local"
+                   id="endAt"
                    name="endAt"
-                   th:value="${#temporals.format(voucher.endAt, 'yyyy-MM-dd''T''HH:mm')}" />
+                   th:value="${#temporals.format(voucher.endAt, 'yyyy-MM-dd''T''HH:mm')}"/>
         </div>
 
         <div class="form-group">
@@ -89,7 +94,7 @@
 
     </form>
 </div>
-
+<script th:src="@{/js/voucher.js}"></script>
 </body>
 
 </html>

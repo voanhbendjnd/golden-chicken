@@ -64,6 +64,8 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     List<OrderItem> orderItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    List<CustomerVoucher> customerVouchers;
 
     @PrePersist
     public void handleBeforeCreateAt() {

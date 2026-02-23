@@ -69,6 +69,50 @@ public class VoucherService {
         v.setEndAt(dto.getEndAt());
         v.setExchangeable(dto.isExchangeable());
         v.setStatus("ACTIVE");
+
+        if (dto.getCode() == null || dto.getCode().isBlank()) {
+            throw new IllegalArgumentException("Code is required");
+        }
+
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        if (dto.getDiscountValue() == null) {
+            throw new IllegalArgumentException("Discount value is required");
+        }
+
+        if (dto.getDiscountType() == null) {
+            throw new IllegalArgumentException("Discount type is required");
+        }
+        if (dto.getMinOrderValue() == null) {
+            throw new IllegalArgumentException("Min Order Value is required");
+        }
+        if (dto.getPointCost() == null) {
+            throw new IllegalArgumentException("Point cost is required");
+        }
+        if (dto.getStartAt() == null) {
+            throw new IllegalArgumentException("Start time is required");
+        }
+
+        if (dto.getEndAt() == null) {
+            throw new IllegalArgumentException("End time is required");
+        }
+        if (v.getEndAt().isBefore(v.getStartAt())
+                || v.getEndAt().isEqual(v.getStartAt())) {
+            throw new IllegalArgumentException("End time must be after start time");
+        }
+        // Logic chống nhập sai Percent vs Fixed
+        if ("PERCENT".equals(dto.getDiscountType())
+                && dto.getDiscountValue() > 100) {
+
+            throw new IllegalArgumentException(
+                    "Percent cannot exceed 100");
+        }
+        // nếu exchangeable = true thì pointCost phải > 0
+        if (Boolean.TRUE.equals(dto.isExchangeable())
+                && (dto.getPointCost() == null || dto.getPointCost() <= 0))
+            throw new IllegalArgumentException("Point cost must be greater than 0");
         repo.save(v);
     }
 
@@ -86,6 +130,14 @@ public class VoucherService {
         v.setEndAt(dto.getEndAt());
         v.setStatus(dto.getStatus());
         v.setExchangeable(dto.isExchangeable());
+        if (v.getEndAt().isBefore(v.getStartAt())
+                || v.getEndAt().isEqual(v.getStartAt())) {
+            throw new IllegalArgumentException("End time must be after start time");
+        }
+        // nếu exchangeable = true thì pointCost phải > 0
+        if (Boolean.TRUE.equals(dto.isExchangeable())
+                && (dto.getPointCost() == null || dto.getPointCost() <= 0))
+            throw new IllegalArgumentException("Point cost must be greater than 0");
         repo.save(v);
     }
 
