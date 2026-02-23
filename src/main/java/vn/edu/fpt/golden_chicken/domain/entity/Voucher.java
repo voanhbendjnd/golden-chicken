@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,9 +34,10 @@ public class Voucher {
     private BigDecimal minOrderValue;
 
     private Integer pointCost;
-
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startAt;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endAt;
 
     @Column(nullable = false, length = 20)
