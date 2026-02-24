@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
@@ -17,6 +18,7 @@ import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProfileService {
     UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -76,8 +78,28 @@ public class ProfileService {
 
     public void updateAvatar(String fileName) {
         User user = getCurrentUser();
-        if (user == null || fileName == null || fileName.isEmpty()) return;
+        if (user == null || fileName == null || fileName.isEmpty())
+            return;
         user.setAvatar(fileName);
         userRepository.save(user);
+    }
+
+    public boolean changePassword(String oldPassword, String newPassword) {
+
+        User user = getCurrentUser();
+        if (user == null) {
+            return false;
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return false;
+        }
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+
+        userRepository.save(user);
+
+        return true;
     }
 }

@@ -21,16 +21,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // username ở đây chính là Email từ form login gửi lên
         vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository.findByEmail(username.toLowerCase());
-
         if (user == null) {
             throw new UsernameNotFoundException("Not Found User With email: " + username);
         }
 
-        // Trả về đối tượng User của Spring Security
         return new User(
-                user.getEmail(),
+                user.getEmail().toLowerCase(),
                 user.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName())));
     }
