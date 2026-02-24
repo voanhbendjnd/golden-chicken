@@ -65,4 +65,34 @@ public class ProfileController {
         }
         return "redirect:/profile";
     }
+
+    @GetMapping("/change-password")
+    public String showChangePasswordPage() {
+        return "change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            Model model) {
+
+        // 1️⃣ Confirm password check
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "Mật khẩu xác nhận không khớp.");
+            return "change-password";
+        }
+
+        // 2️⃣ Gọi service
+        boolean changed = profileService.changePassword(oldPassword, newPassword);
+
+        if (!changed) {
+            model.addAttribute("error", "Mật khẩu cũ không đúng.");
+            return "change-password";
+        }
+
+        model.addAttribute("success", "Đổi mật khẩu thành công!");
+        return "change-password";
+    }
 }
