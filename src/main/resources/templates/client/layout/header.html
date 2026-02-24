@@ -75,48 +75,18 @@
                             </a>
                             <div class="menu-list">
                                 <ul class="text-center">
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/combo}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mon-moi-mon-ngon.png}" alt="">
+
+                                    <li class="menu-item" th:each="c : ${menuCategories}">
+
+                                        <a th:href="@{'/menu'(cat=${c.anchor})}" class="menu-item__img">
+
+                                           <img class="menulist-img" th:src="@{/images/products/{f}(f=${c.img})}" th:alt="${c.name}">
                                         </a>
-                                        <h5>COMBO</h5>
+
+                                        <h5 th:text="${c.name}">CATEGORY</h5>
+
                                     </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/ga-gion}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/ga-gion-vui-ve.png}" alt="">
-                                        </a>
-                                        <h5>GÀ GIÒN VUI VẺ</h5>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/ga-sot}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/ga-sot-cay.png}" alt="">
-                                        </a>
-                                        <h5>GÀ SỐT CAY</h5>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/my}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mi-y.png}" alt="">
-                                        </a>
-                                        <h5>MÌ Ý SỐT BÒ BẰM</h5>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/burger-sandwich.png}" alt="">
-                                        </a>
-                                        <h5>BURGER & CƠM</h5>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/burger}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/phan-an-phu.png}" alt="">
-                                        </a>
-                                        <h5>PHẦN ĂN PHỤ</h5>
-                                    </li>
-                                    <li class="menu-item">
-                                        <a th:href="@{/menu/trang-mieng}" class="menu-item__img">
-                                            <img class="menulist-img" th:src="@{/img/mon-trang-mieng.png}" alt="">
-                                        </a>
-                                        <h5>MÓN TRÁNG MIỆNG</h5>
-                                    </li>
+
                                 </ul>
                             </div>
                         </li>
@@ -144,3 +114,93 @@
         }
     });
 </script>
+<head>
+ <style>
+
+/* ===== DROPDOWN THỰC ĐƠN GIỮ HIỆU ỨNG MỜ + CĂN ĐỀU ===== */
+
+/* nền dropdown */
+.navbar-item.children .menu-list{
+  background: #f6d6db;
+  padding: 25px 24px 20px;
+  border-radius: 10px;
+}
+
+/* layout ngang đều */
+.navbar-item.children .menu-list ul.text-center{
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   /* quan trọng để chữ thẳng hàng */
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* mỗi item cùng kích thước */
+.navbar-item.children .menu-list .menu-item{
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* khung ảnh cố định */
+.navbar-item.children .menu-list .menu-item__img{
+  width: 110px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* ===== ẢNH GIỮ NGUYÊN HIỆU ỨNG LÀM MỜ ===== */
+.navbar-item.children .menu-list .menulist-img{
+  max-width: 90px;
+  max-height: 70px;
+  object-fit: contain;
+  display: block;
+
+  /* giữ nguyên hiệu ứng mờ nền */
+  mix-blend-mode: multiply;
+  opacity: 0.96;
+  filter: brightness(0.93) contrast(1.08)
+          drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+}
+
+/* chữ cố định chiều cao để không lệch */
+.navbar-item.children .menu-list .menu-item h5{
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.3;
+
+  height: 36px;             /* khóa chiều cao chữ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+/* hover nâng nhẹ */
+.menu-item__img:hover{
+  transform: translateY(-4px);
+  transition: 0.2s ease;
+}
+
+/* responsive */
+@media (max-width: 992px){
+  .navbar-item.children .menu-list ul.text-center{
+    justify-content: flex-start;
+    overflow-x: auto;
+    gap: 25px;
+  }
+  .navbar-item.children .menu-list .menu-item{
+    flex: 0 0 auto;
+  }
+}
+
+</style>
+</head>
