@@ -1,74 +1,132 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="utf-8" />
-    <title>Login</title>
+    <title>Golden Chicken - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #d90429, #ffbe0b);
+            height: 100vh;
+        }
+
+        .login-card {
+            border-radius: 25px;
+            overflow: hidden;
+        }
+
+        .brand-section {
+            background: #d90429;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .brand-section img {
+            width: 90px;
+            margin-bottom: 15px;
+        }
+
+        .form-section {
+            padding: 40px;
+            background: white;
+        }
+
+        .btn-login {
+            background: #d90429;
+            color: white;
+            border-radius: 30px;
+            padding: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #9d0208;
+        }
+
+        .form-control {
+            border-radius: 30px;
+            padding: 12px 20px;
+        }
+
+        .link-style {
+            text-decoration: none;
+            color: #d90429;
+            font-weight: 500;
+        }
+
+        .link-style:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
-<body class="bg-danger">
-    <div id="layoutAuthentication">
-        <div id="layoutAuthentication_content">
-            <main>
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-5">
-                            <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                <div class="card-header">
-                                    <h3 class="text-center font-weight-light my-4">Login</h3>
-                                </div>
-                                <div class="card-body">
-                                    <form method="post" th:action="@{/login}">
-                                        <div th:if="${param.error != null}" class="my-2" style="color: red;">
-                                            Invalid email or password.
-                                        </div>
-                                        <div th:if="${param.logout != null}" class="my-2" style="color: green">
-                                            Logout success!.
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" type="email" name="username"
-                                                placeholder="name@example.com" />
-                                            <label>Email</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" type="password" name="password"
-                                                placeholder="Password" />
-                                            <label>Password</label>
-                                        </div>
-                                        <div>
-                                            <input type="hidden" th:name="${_csrf.parameterName}"
-                                                th:value="${_csrf.token}" />
-                                        </div>
-                                        <div class="mt-4 mb-0">
-                                            <div class="d-grid">
-                                                <button class="btn btn-danger btn-block">
-                                                    Login
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </form>
+<body class="d-flex align-items-center justify-content-center">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card shadow-lg login-card">
+
+                    <div class="row g-0">
+
+                        <!-- Brand Side -->
+                        <div class="col-md-5 brand-section d-flex flex-column justify-content-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Chicken">
+                            <h2>Golden Chicken</h2>
+                            <p>Fresh • Crispy • Delicious</p>
+                        </div>
+
+                        <!-- Form Side -->
+                        <div class="col-md-7 form-section">
+
+                            <h3 class="text-center mb-4">Welcome Back 🍗</h3>
+
+                            <form method="post" th:action="@{/login}">
+
+                                <div th:if="${param.error != null}" class="alert alert-danger">
+                                    Invalid email or password.
                                 </div>
 
-                                <div class="card-footer text-center py-3">
-                                    <div class="small"><a style="text-decoration-line: none; color: red;"
-                                            th:href="@{/register}">Forgot password?</a>
-                                    </div>
-                                    <div class="small"><a style="text-decoration: none; color: red;"
-                                            th:href="@{/register}">Need an
-                                            account? Sign up!</a>
-                                    </div>
+                                <div th:if="${param.logout != null}" class="alert alert-success">
+                                    Logout successful!
                                 </div>
-                            </div>
+
+                                <div class="mb-3">
+                                    <input class="form-control" type="email" name="username"
+                                        placeholder="Enter your email" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <input class="form-control" type="password" name="password"
+                                        placeholder="Enter your password" required />
+                                </div>
+
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                                <div class="d-grid mb-3">
+                                    <button class="btn btn-login">
+                                        Login
+                                    </button>
+                                </div>
+
+                                <div class="text-center">
+                                    <a th:href="@{/register}" class="link-style">Need an account? Sign up</a>
+                                </div>
+
+                            </form>
+
                         </div>
+
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        crossorigin="anonymous"></script>
-    <script th:src="@{/js/scripts.js}"></script>
+
 </body>
 
 </html>
