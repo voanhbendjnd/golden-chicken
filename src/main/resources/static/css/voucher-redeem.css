@@ -175,3 +175,20 @@
     opacity: 0.55;
     cursor: not-allowed;
 }
+
+.btn-danger {
+    border: 0;
+    cursor: pointer;
+    background: #dc2626;
+    color: #fff;
+    font-weight: 800;
+    padding: 8px 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}

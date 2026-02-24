@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Xác nhận đổi voucher</title>
+  <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+  <link th:href="@{/css/base.css}" rel="stylesheet">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <th:block th:replace="~{common/head}"></th:block>
+  <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+  <link th:href="@{/css/voucher-redeem.css}" rel="stylesheet">
+</head>
+
+<body>
+  <div th:replace="~{client/layout/header}"></div>
+  <div class="page">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="main">
+      <div class="voucher-container">
+        <div class="voucher-header">
+          <div>
+            <h1>Xác nhận đổi voucher</h1>
+            <div class="points">
+              <b th:text="${points}">0</b>
+              điểm • điểm hiện tại
+            </div>
+          </div>
+          <a class="btn" th:href="@{/vouchers}">Quay lại</a>
+        </div>
+
+        <section>
+          <div class="section-head">
+            <h2>Thông tin voucher</h2>
+          </div>
+
+          <div class="list">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title" th:text="${voucher.name}">Voucher</div>
+                <div class="v-sub" th:text="${voucher.description}">Mô tả</div>
+              </div>
+              <div class="v-right">
+                <span class="tag" th:text="${voucher.pointCost + ' điểm'}">0 điểm</span>
+              </div>
+            </div>
+          </div>
+
+          <form th:action="@{/vouchers/redeem}" method="post" style="margin-top: 16px;">
+            <input type="hidden" name="voucherId" th:value="${voucher.id}">
+            <button type="submit" class="btn btn-primary" th:disabled="${points lt voucher.pointCost}">Xác nhận đổi</button>
+            <a class="btn btn-danger" th:href="@{/vouchers}" style="margin-left: 8px;">Hủy</a>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div th:replace="~{client/layout/footer}"></div>
+</body>
+
+</html>

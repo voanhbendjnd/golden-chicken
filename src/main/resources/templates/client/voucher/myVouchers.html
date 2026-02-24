@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Đổi điểm lấy Voucher</title>
+  <title>Voucher của tôi</title>
   <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
   <link th:href="@{/css/base.css}" rel="stylesheet">
   <link th:href="@{/css/style.css}" rel="stylesheet">
@@ -22,50 +22,47 @@
       <div class="voucher-container">
         <div class="voucher-header">
           <div>
-            <h1>Đổi điểm lấy Voucher</h1>
+            <h1>Voucher của tôi</h1>
             <div class="points">
               <b th:text="${points}">0</b>
-              điểm • dùng để đổi voucher
+              điểm • điểm hiện tại
             </div>
           </div>
           <div class="header-actions">
-            <a class="btn" th:href="@{/vouchers/myVouchers}">Voucher của tôi</a>
+            <a class="btn" th:href="@{/vouchers}">Quay lại</a>
+            <a class="btn" th:href="@{/vouchers}">Đổi thêm voucher</a>
             <a class="btn" th:href="@{/vouchers/history}">Lịch sử</a>
           </div>
         </div>
 
-        <!-- Section: Danh sách voucher có thể đổi -->
-        <section th:if="${showMyVouchers == null}">
+        <section>
           <div class="section-head">
-            <h2>Danh sách voucher đổi điểm</h2>
+            <h2>Danh sách voucher sở hữu</h2>
           </div>
 
-          <div class="list" th:if="${#lists.isEmpty(vouchers)}">
+          <div class="list" th:if="${#lists.isEmpty(myVouchers)}">
             <div class="voucher">
               <div class="v-left">
-                <div class="v-title">Chưa có voucher khả dụng</div>
+                <div class="v-title">Bạn chưa sở hữu voucher nào</div>
+              </div>
+              <div class="v-right">
+                <a th:href="@{/vouchers}" class="btn-primary" style="text-decoration: none;">Đổi ngay</a>
               </div>
             </div>
           </div>
 
-          <div class="list" th:unless="${#lists.isEmpty(vouchers)}">
-            <div class="voucher" th:each="v : ${vouchers}">
+          <div class="list" th:unless="${#lists.isEmpty(myVouchers)}">
+            <div class="voucher" th:each="cv : ${myVouchers}">
               <div class="v-left">
-                <div class="v-title" th:text="${v.name}">Voucher</div>
-                <div class="v-sub" th:text="${v.description}">Mô tả</div>
+                <div class="v-title" th:text="${cv.voucher.name}">Voucher</div>
+                <div class="v-sub" th:text="${cv.voucher.code}">CODE</div>
               </div>
               <div class="v-right">
-                <span class="tag" th:text="${v.pointCost} + ' điểm'">1000 điểm</span>
-                <a th:href="@{/vouchers/redeem/confirm(voucherId=${v.id})}" 
-                   class="btn btn-primary" 
-                   th:classappend="${points lt v.pointCost} ? 'disabled' : ''"
-                   th:text="${points >= v.pointCost ? 'Đổi' : 'Không đủ điểm'}">Đổi</a>
+                <span class="tag personal" th:text="${cv.status}">AVAILABLE</span>
               </div>
             </div>
           </div>
         </section>
-
-
       </div>
     </main>
   </div>

@@ -4,13 +4,20 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import vn.edu.fpt.golden_chicken.domain.entity.Customer;
+import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
+import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +28,7 @@ public class VoucherService {
     VoucherRepository repo;
     ProfileService profileService;
     CustomerRepository customerRepository;
+    CustomerVoucherRepository customerVoucherRepository;
 
     public List<ResVoucher> getAll() {
         return repo.findByIsDeletedFalse().stream().map(v -> {
@@ -188,5 +196,73 @@ public class VoucherService {
             points = customer.getPoint();
         }
         return points;
+    }
+
+    @Transactional
+    public void redeemVoucher(Long voucherId) {
+        var currentUser = profileService.getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Bạn cần đăng nhập.");
+        }
+
+        var customer = customerRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khách hàng."));
+
+        var voucher = repo.findById(voucherId)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher không tồn tại."));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (Boolean.TRUE.equals(voucher.getIsDeleted())) {
+            throw new IllegalArgumentException("Voucher đã bị xóa.");
+        }
+        if (!"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
+            throw new IllegalArgumentException("Voucher không còn hoạt động.");
+        }
+        if (!voucher.isExchangeable()) {
+            throw new IllegalArgumentException("Voucher không hỗ trợ đổi điểm.");
+        }
+        if (voucher.getStartAt() == null || voucher.getEndAt() == null
+                || now.isBefore(voucher.getStartAt())
+                || now.isAfter(voucher.getEndAt())) {
+            throw new IllegalArgumentException("Voucher đã hết hạn hoặc chưa tới thời gian áp dụng.");
+        }
+        if (voucher.getPointCost() == null || voucher.getPointCost() <= 0) {
+            throw new IllegalArgumentException("Voucher chưa cấu hình điểm đổi hợp lệ.");
+        }
+
+        long currentPoints = customer.getPoint() == null ? 0L : customer.getPoint();
+        if (currentPoints < voucher.getPointCost()) {
+            throw new IllegalArgumentException("Không đủ điểm để đổi voucher.");
+        }
+
+        customer.setPoint(currentPoints - voucher.getPointCost());
+
+        CustomerVoucher cv = new CustomerVoucher();
+        cv.setCustomer(customer);
+        cv.setVoucher(voucher);
+        cv.setStatus(StatusVoucher.AVAILABLE);
+        cv.setUsedAt(null);
+
+        customerVoucherRepository.save(cv);
+        customerRepository.save(customer);
+    }
+
+    public List<CustomerVoucher> getMyVouchers() {
+        var currentUser = profileService.getCurrentUser();
+        if (currentUser == null)
+            return new ArrayList<>();
+
+        Customer customer = currentUser.getCustomer();
+        return customerVoucherRepository.findByCustomer(customer);
+    }
+
+    public List<CustomerVoucher> getRedeemHistory() {
+        var currentUser = profileService.getCurrentUser();
+        if (currentUser == null)
+            return new ArrayList<>();
+
+        Customer customer = currentUser.getCustomer();
+        return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
     }
 }
