@@ -13,4 +13,5 @@ import lombok.experimental.FieldDefaults;
 public class CategoryProductsView {
     String categoryName;
     Object products;
+    
 }

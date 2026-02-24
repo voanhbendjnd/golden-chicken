@@ -14,6 +14,7 @@ import vn.edu.fpt.golden_chicken.services.ProductService;
 
 @Controller
 public class HomeController {
+
     private final ProductService productService;
 
     public HomeController(ProductService productService) {
@@ -24,10 +25,11 @@ public class HomeController {
     public String getHomePage(Model model,
             @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @Filter Specification<Product> spec) {
+
         var data = this.productService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("meta", data.getMeta());
         model.addAttribute("products", data.getResult());
+
         return "client/home";
     }
-
 }
