@@ -20,17 +20,7 @@
 
     <main class="main">
       <div class="voucher-container">
-        <div class="voucher-header">
-          <div>
-            <h1>Xác nhận đổi voucher</h1>
-            <div class="points">
-              <b th:text="${points}">0</b>
-              điểm • điểm hiện tại
-            </div>
-          </div>
-          <a class="btn" th:href="@{/vouchers}">Quay lại</a>
-        </div>
-
+        <div th:replace="~{fragments/voucher-header :: voucher-header}"></div>
         <section>
           <div class="section-head">
             <h2>Thông tin voucher</h2>

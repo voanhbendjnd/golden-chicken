@@ -1,0 +1,13 @@
+<div class="voucher-header" th:fragment="voucher-header">
+    <div>
+      <h1>Đổi điểm lấy Voucher</h1>
+      <div class="points">
+        <b th:text="${points}">0</b>
+        điểm • dùng để đổi voucher
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="btn" th:href="@{/vouchers/myVouchers}">Voucher của tôi</a>
+      <a class="btn" th:href="@{/vouchers/history}">Lịch sử</a>
+    </div>
+  </div>

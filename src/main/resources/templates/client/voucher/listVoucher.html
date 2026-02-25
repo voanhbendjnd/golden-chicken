@@ -19,22 +19,10 @@
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <main class="main">
+      <h1 class="title">REDEEM POINTS</h1>
       <div class="voucher-container">
-        <div class="voucher-header">
-          <div>
-            <h1>Đổi điểm lấy Voucher</h1>
-            <div class="points">
-              <b th:text="${points}">0</b>
-              điểm • dùng để đổi voucher
-            </div>
-          </div>
-          <div class="header-actions">
-            <a class="btn" th:href="@{/vouchers/myVouchers}">Voucher của tôi</a>
-            <a class="btn" th:href="@{/vouchers/history}">Lịch sử</a>
-          </div>
-        </div>
+        <div th:replace="~{fragments/voucher-header :: voucher-header}"></div>
 
-        <!-- Section: Danh sách voucher có thể đổi -->
         <section th:if="${showMyVouchers == null}">
           <div class="section-head">
             <h2>Danh sách voucher đổi điểm</h2>

@@ -49,6 +49,14 @@ public class ClientVoucherController {
         return "client/voucher/historyRedeem";
     }
 
+    @GetMapping("/list-vouchers")
+    public String listAllVouchers(Model model) {
+        model.addAttribute("points", voucherService.getPoints());
+        model.addAttribute("myVouchers", voucherService.getMyVouchers());
+        model.addAttribute("systemVouchers", voucherService.getListVoucherForExchange());
+        return "client/voucher/listAllVouchers";
+    }
+
     @GetMapping("/vouchers/redeem/confirm")
     public String redeemConfirm(@RequestParam("voucherId") Long voucherId, Model model) {
         model.addAttribute("points", voucherService.getPoints());
