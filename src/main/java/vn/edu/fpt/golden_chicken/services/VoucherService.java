@@ -195,6 +195,7 @@ public class VoucherService {
         res.setDescription(voucher.getDescription());
         res.setDiscountValue(voucher.getDiscountValue());
         res.setDiscountType(voucher.getDiscountType());
+        res.setMinOrderValue(voucher.getMinOrderValue());
         res.setPointCost(voucher.getPointCost());
         res.setStartAt(voucher.getStartAt());
         res.setEndAt(voucher.getEndAt());
@@ -281,7 +282,10 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-        Customer customer = currentUser.getCustomer();
+        var customer = customerRepository.findById(currentUser.getId()).orElse(null);
+        if (customer == null)
+            return new ArrayList<>();
+
         return customerVoucherRepository.findByCustomer(customer);
     }
 
@@ -290,7 +294,10 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-        Customer customer = currentUser.getCustomer();
+        var customer = customerRepository.findById(currentUser.getId()).orElse(null);
+        if (customer == null)
+            return new ArrayList<>();
+
         return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
     }
 }
