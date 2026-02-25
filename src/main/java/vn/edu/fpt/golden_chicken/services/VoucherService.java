@@ -138,6 +138,30 @@ public class VoucherService {
         v.setEndAt(dto.getEndAt());
         v.setStatus(dto.getStatus());
         v.setExchangeable(dto.isExchangeable());
+        if (dto.getCode() == null || dto.getCode().isBlank()) {
+            throw new IllegalArgumentException("Code is required");
+        }
+
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        if (dto.getDiscountValue() == null) {
+            throw new IllegalArgumentException("Discount value is required");
+        }
+
+        if (dto.getDiscountType() == null) {
+            throw new IllegalArgumentException("Discount type is required");
+        }
+        if (dto.getMinOrderValue() == null) {
+            throw new IllegalArgumentException("Min Order Value is required");
+        }
+        if (dto.getPointCost() == null) {
+            throw new IllegalArgumentException("Point cost is required");
+        }
+        if (dto.getStartAt() == null) {
+            throw new IllegalArgumentException("Start time is required");
+        }
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
             throw new IllegalArgumentException("End time must be after start time");
