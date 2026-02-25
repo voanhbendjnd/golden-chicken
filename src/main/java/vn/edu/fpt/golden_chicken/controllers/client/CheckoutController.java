@@ -34,7 +34,7 @@ public class CheckoutController {
     private final CartService cartService;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService, UserRepository userRepository) {
+                              OrderService orderService, CartService cartService, UserRepository userRepository) {
         this.productService = productService;
         this.userRepository = userRepository;
         this.orderService = orderService;
@@ -42,9 +42,12 @@ public class CheckoutController {
         this.cartService = cartService;
     }
 
+    // 1. SỬA HÀM NÀY: Thêm tham số addressId để nhận địa chỉ mới chọn từ Cart
     @GetMapping("/order")
     public String handleOrderFromCart(
-            @RequestParam(value = "ids", required = false) List<Long> ids, Model model) throws PermissionException {
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "addressId", required = false) Long addressId, // Mới thêm
+            Model model) throws PermissionException {
         var orderDTO = new OrderDTO();
         var details = new ArrayList<OrderDTO.OrderDetail>();
 
@@ -83,7 +86,11 @@ public class CheckoutController {
         orderDTO.setFinalAmount(finalAmount);
         orderDTO.setPaymentMethod(PaymentMethod.COD);
 
-        var selectedAddress = addressServices.getDefaultAddress();
+        // Lấy địa chỉ vừa chọn hoặc địa chỉ mặc định
+        var selectedAddress = (addressId != null)
+                ? addressServices.findById(addressId)
+                : addressServices.getDefaultAddress();
+
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
@@ -145,7 +152,8 @@ public class CheckoutController {
         orderDTO.setShippingFee(shippingFee);
         orderDTO.setDiscountAmount(BigDecimal.ZERO);
         orderDTO.setFinalAmount(product.getPrice().add(shippingFee));
-        orderDTO.setPaymentMethod(PaymentMethod.COD); // Mặc định phương th
+        orderDTO.setPaymentMethod(PaymentMethod.COD);
+
         model.addAttribute("order", orderDTO);
         model.addAttribute("product", product);
         model.addAttribute("defaultAddress", selectedAddress);
@@ -155,12 +163,14 @@ public class CheckoutController {
 
     @GetMapping("/addresses")
     public String listAddressCheckout(
-            @RequestParam("productId") long productId,
+            @RequestParam(value = "productId", required = false) Long productId, // Cho Buy Now
+            @RequestParam(value = "productIds", required = false) List<Long> productIds, // Cho Cart (nhiều món)
             Model model) {
 
         var addresses = addressServices.getAllAddresses();
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
+        model.addAttribute("productIds", productIds); // Gửi danh sách đã chọn xuống
 
         return "client/address/listAddressCheckout";
     }
@@ -168,8 +178,6 @@ public class CheckoutController {
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
         var order = this.orderService.order(dto);
-
         return "redirect:/";
     }
-
 }

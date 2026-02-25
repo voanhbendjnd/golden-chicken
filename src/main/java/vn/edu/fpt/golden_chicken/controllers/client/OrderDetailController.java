@@ -39,8 +39,9 @@ public class OrderDetailController {
 
     @GetMapping("/order-history")
     public String getOrderHistory(@RequestParam(required = false) OrderStatus status, Model model,
-            @Filter Specification<Order> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable)
+                                  @Filter Specification<Order> spec,
+                                  // ĐỔI "updatedAt" THÀNH "id" ĐỂ ĐƠN HÀNG MỚI NHẤT LUÔN Ở ĐẦU
+                                  @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws PermissionException {
         var data = this.orderService.getOrderHistory(spec, pageable, status);
         model.addAttribute("data", data);
