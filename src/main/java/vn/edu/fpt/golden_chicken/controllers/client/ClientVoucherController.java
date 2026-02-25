@@ -51,7 +51,7 @@ public class ClientVoucherController {
     }
 
     @GetMapping("/list-vouchers")
-    public String listAllVouchers(Model model) {
+    public String listAllVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
         model.addAttribute("myVouchers", voucherService.getMyVouchers());
         model.addAttribute("systemVouchers", voucherService.getListVoucherForExchange());
