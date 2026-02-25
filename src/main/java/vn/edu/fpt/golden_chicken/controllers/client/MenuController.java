@@ -211,4 +211,75 @@ public class MenuController {
                 .replaceAll("\\s+", "-");
         return s;
     }
+
+    @GetMapping("/ga-gion")
+    public String getGaGon(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllChickenHappy(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Gà Giòn");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
+
+    // ========== Djnd contribute adding more features to the product filter.
+    @GetMapping("/ga-sot")
+    public String getGaSot(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllChickenSauce(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Gà Sốt");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
+
+    @GetMapping("/combo")
+    public String getCombo(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllComboWithPagination(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Combo");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
+
+    @GetMapping("/my")
+    public String getMy(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllNoodle(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Mỳ");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
+
+    @GetMapping("/trang-mieng")
+    public String getTrangMieng(Model model, @Filter Specification<Product> spec,
+            @PageableDefault(size = 20) Pageable pageable) {
+        var views = new ArrayList<CategoryProductsView>();
+        var data = this.productService.fetchAllLowMeal(spec, pageable);
+        var view = new CategoryProductsView();
+        view.setCategoryName("Tráng Miệng");
+        view.setProducts(data.getResult());
+        views.add(view);
+        model.addAttribute("categoryProductList", views);
+        // model.addAttribute("products", data.getResult());
+        return "client/menu";
+    }
 }

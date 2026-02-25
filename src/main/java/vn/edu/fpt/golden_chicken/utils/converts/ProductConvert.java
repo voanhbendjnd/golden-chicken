@@ -6,11 +6,16 @@ import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
+import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 
 public class ProductConvert {
     public static Product toProduct(ProductDTO dto) {
         var product = new Product();
-        product.setActive(dto.isActive());
+        if (dto.getType().equals(ProductType.COMBO)) {
+            product.setActive(false);
+        } else {
+            product.setActive(dto.isActive());
+        }
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setType(dto.getType());

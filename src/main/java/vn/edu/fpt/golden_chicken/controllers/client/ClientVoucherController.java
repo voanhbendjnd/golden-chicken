@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class ClientVoucherController {
     VoucherService voucherService;
 
     @GetMapping("/vouchers")
-    public String listVoucher(Model model) {
+    public String listVoucher(Model model) throws PermissionException {
         long points = voucherService.getPoints();
         var vouchers = voucherService.getListVoucherForExchange();
         var myVouchers = voucherService.getMyVouchers();
@@ -36,21 +37,21 @@ public class ClientVoucherController {
     }
 
     @GetMapping("/vouchers/myVouchers")
-    public String myVouchers(Model model) {
+    public String myVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
         model.addAttribute("myVouchers", voucherService.getMyVouchers());
         return "client/voucher/myVouchers";
     }
 
     @GetMapping("/vouchers/history")
-    public String history(Model model) {
+    public String history(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
         model.addAttribute("history", voucherService.getRedeemHistory());
         return "client/voucher/historyRedeem";
     }
 
     @GetMapping("/vouchers/redeem/confirm")
-    public String redeemConfirm(@RequestParam("voucherId") Long voucherId, Model model) {
+    public String redeemConfirm(@RequestParam("voucherId") Long voucherId, Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
         model.addAttribute("voucher", voucherService.getById(voucherId));
         return "client/voucher/redeemConfirm";

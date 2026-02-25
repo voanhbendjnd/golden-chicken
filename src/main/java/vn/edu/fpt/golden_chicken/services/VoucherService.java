@@ -16,6 +16,7 @@ import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -211,10 +212,13 @@ public class VoucherService {
 
     }
 
-    public long getPoints() {
+    public long getPoints() throws PermissionException {
         long points = 0L;
 
         var currentUser = profileService.getCurrentUser();
+        if (currentUser.getCustomer() == null) {
+            throw new PermissionException("You do not have permission!");
+        }
         if (currentUser != null) {
             var customer = customerRepository.findById(currentUser.getId()).orElse(null);
             points = customer.getPoint();

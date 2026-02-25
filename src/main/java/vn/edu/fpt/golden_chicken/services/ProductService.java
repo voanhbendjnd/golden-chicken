@@ -160,15 +160,11 @@ public class ProductService {
         }
         List<String> filesToDelete = new ArrayList<>();
 
-        // check category
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
-        // get record db
         var product = this.productRepository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.getId()));
-        // check img file
         if (file != null && !file.isEmpty()) {
-            // check file
             if (!this.validFile(file)) {
                 throw new IOException("File Invalid");
             }
@@ -176,7 +172,6 @@ public class ProductService {
             if (product.getImageUrl() != null) {
                 filesToDelete.add(product.getImageUrl());
             }
-            // save new file
             product.setImageUrl(this.fileService.getLastNameFile(file));
         }
         this.handleGalleryUpdate(product, files, dto.getImgs(), filesToDelete);
