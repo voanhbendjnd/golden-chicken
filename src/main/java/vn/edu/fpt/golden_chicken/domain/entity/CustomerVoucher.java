@@ -2,8 +2,6 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.time.LocalDateTime;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,13 +35,18 @@ public class CustomerVoucher {
     Voucher voucher;
     StatusVoucher status;
     LocalDateTime usedAt;
+    LocalDateTime redeemedAt;
     @ManyToOne
     @JoinColumn(name = "order_id")
     Order order;
 
+    // @PrePersist
+    // public void handleBeforeCreateAt() {
+    // this.usedAt = LocalDateTime.now();
+
+    // }
     @PrePersist
     public void handleBeforeCreateAt() {
-        this.usedAt = LocalDateTime.now();
-
+        this.redeemedAt = LocalDateTime.now();
     }
 }

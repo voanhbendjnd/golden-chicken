@@ -20,16 +20,7 @@
     <div th:replace="~{client/layout/header}"></div>
 
     <div class="page">
-        <aside class="addr-sidebar">
-            <h3>My Account</h3>
-            <nav class="nav">
-                <a href="#">Account Management</a>
-                <a href="#">My Orders</a>
-                <a class="active" href="#">Address</a>
-                <a href="#">Account Information</a>
-                <a href="#">Voucher List</a>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <main class="addr-main">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -110,10 +101,7 @@
                                             <button type="submit" class="btn btn-warning px-3 py-2">Sửa</button>
                                         </form>
 
-                                        <form th:action="@{/addresses/{id}/delete(id=${a.id})}" method="post"
-                                            class="m-0">
-                                            <button type="submit" class="btn btn-danger px-3 py-2">Xóa</button>
-                                        </form>
+                                        <a th:href="@{/addresses/{id}/delete(id=${a.id})}" class="btn btn-danger px-3 py-2">Xóa</a>
 
                                         <form th:action="@{/addresses/{id}/default(id=${a.id})}" method="post"
                                             class="m-0">
@@ -129,9 +117,6 @@
 
                 </div>
             </section>
-
-
-
 
         </main>
     </div>
