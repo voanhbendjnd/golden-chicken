@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -43,16 +44,17 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(HttpSession session, @ModelAttribute("registerUser") UserDTO userRequest,
+    public String register(HttpServletRequest request, @ModelAttribute("registerUser") UserDTO userRequest,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "client/admin/register";
+            return "client/auth/register";
         }
         // this.userService.register(userRequest);
         if (this.userRepository.existsByEmail(userRequest.getEmail())) {
             bindingResult.rejectValue("email", "CONFLICT", "Email already exists!");
             return "client/auth/register";
         }
+        var session = request.getSession(true);
         var otp = this.userService.generateBase();
         session.setAttribute("PENDING_USER", userRequest);
         session.setAttribute("OTP_CODE", otp);
@@ -75,25 +77,38 @@ public class AuthController {
     @PostMapping("/verify")
     @ResponseBody
     public ResponseEntity<?> verify(@RequestBody Map<String, String> request, HttpSession session) {
-        var otp = request.get("otp");
-        var email = request.get("email");
+        String otp = request.get("otp");
+        String email = request.get("email");
 
-        var sOTP = (String) session.getAttribute("OTP_CODE");
-        var sEmail = (String) session.getAttribute("OTP_EMAIL");
-        var expire = (LocalDateTime) session.getAttribute("OTP_EXPIRE");
+        String sOTP = (String) session.getAttribute("OTP_CODE");
+        String sEmail = (String) session.getAttribute("OTP_EMAIL");
+        LocalDateTime expire = (LocalDateTime) session.getAttribute("OTP_EXPIRE");
+        UserDTO pendingUser = (UserDTO) session.getAttribute("PENDING_USER");
 
-        if (sOTP.equals(otp) && sEmail.equals(email)) {
-            UserDTO pendingUser = (UserDTO) session.getAttribute("PENDING_USER");
+        if (sOTP == null || sEmail == null || expire == null || pendingUser == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "Session expired or invalid. Please register again."));
+        }
+        if (LocalDateTime.now().isAfter(expire)) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "OTP has expired."));
+        }
 
-            if (pendingUser != null) {
+        if (sOTP.equals(otp) && sEmail.equalsIgnoreCase(email)) {
+            try {
                 this.userService.register(pendingUser);
+
                 session.removeAttribute("PENDING_USER");
                 session.removeAttribute("OTP_CODE");
                 session.removeAttribute("OTP_EMAIL");
+                session.removeAttribute("OTP_EXPIRE");
 
-                return ResponseEntity.ok(Map.of("success", true));
+                return ResponseEntity.ok(Map.of("success", true, "message", "Registration successful!"));
+            } catch (Exception e) {
+                return ResponseEntity.internalServerError()
+                        .body(Map.of("success", false, "message", "Error saving user: " + e.getMessage()));
             }
         }
-        return ResponseEntity.badRequest().body("INVALID_DATA");
+
+        return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid OTP code."));
     }
 }

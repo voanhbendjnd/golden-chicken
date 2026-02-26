@@ -107,7 +107,8 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/fonts/**",
                                 "/menu/**",
-                                "/payment/**"
+                                "/payment/**",
+                                "/verify/**"
 
                 };
                 http
@@ -135,12 +136,14 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
 
                                 .sessionManagement((sessionManagement) -> sessionManagement
-                                                // luôn tạo session giữ cho trang thái đăng nhập
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                                                .invalidSessionUrl("/logout?expired")
-                                                // chỉ 1 browser được đăng nhập
+                                                // Sửa dòng này: Cho phép Spring quản lý việc đổi Session ID linh hoạt
+                                                // hơn
+                                                .sessionFixation().migrateSession()
+                                                .invalidSessionUrl("/login?invalid")
                                                 .maximumSessions(1)
-                                                .maxSessionsPreventsLogin(false).sessionRegistry(sessionRegistry()))
+                                                .maxSessionsPreventsLogin(false)
+                                                .sessionRegistry(sessionRegistry()))
                                 .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
                                 .rememberMe(r -> r.rememberMeServices(rememberMeServices()))
 
