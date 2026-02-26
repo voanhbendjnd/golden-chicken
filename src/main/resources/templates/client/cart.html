@@ -143,7 +143,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             const csrfToken = document.getElementById('csrf-token').value;
 
-            // 1. HÀM TÍNH TỔNG TIỀN DỰA TRÊN CHECKBOX
             function calculateFinalTotal() {
                 let totalQty = 0;
                 let totalPrice = 0;
@@ -165,8 +164,6 @@
                 document.getElementById('total-qty').innerText = cnt;
                 document.getElementById('total-price').innerText = new Intl.NumberFormat('vi-VN').format(totalPrice) + '₫';
 
-                // Vô hiệu hóa nút đặt hàng nếu không chọn món nào
-                // Thêm logic này vào phần script của file cart.html
                 document.getElementById('btn-order').onclick = function () {
                     const selectedIds = [];
                     document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
@@ -178,16 +175,13 @@
                         return;
                     }
 
-                    // Chuyển hướng sang trang order kèm theo danh sách ID sản phẩm đã chọn
                     window.location.href = '/checkout/order?ids=' + selectedIds.join(',');
                 };
 
-                // Cập nhật trạng thái nút Select All
                 const selectAll = document.getElementById('select-all');
                 if (selectAll) selectAll.checked = (checkedItems === checkboxes.length && checkboxes.length > 0);
             }
 
-            // 2. XỬ LÝ CHỌN TẤT CẢ
             document.body.addEventListener('change', function (e) {
                 if (e.target.id === 'select-all') {
                     document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = e.target.checked);
@@ -213,7 +207,6 @@
                 } catch (err) { console.error("Lỗi:", err); }
             }
 
-            // 4. CẬP NHẬT GIAO DIỆN SAU KHI GỌI API
             function renderUI(cart, updatedId) {
                 const itemData = cart.items.find(i => i.productId == updatedId);
                 const itemRow = document.getElementById('item-row-' + updatedId);
@@ -229,9 +222,7 @@
                 calculateFinalTotal();
             }
 
-            // 5. BẮT SỰ KIỆN CLICK (TĂNG/GIẢM/XÓA)
             document.body.addEventListener('click', function (e) {
-                // Tăng/Giảm
                 const btnUpdate = e.target.closest('.btn-update');
                 if (btnUpdate) {
                     const id = btnUpdate.getAttribute('data-id');
@@ -243,7 +234,6 @@
                     updateCart(id, action === 'plus' ? val + 1 : val - 1);
                 }
 
-                // Xóa món
                 const btnDelete = e.target.closest('.btn-delete');
                 if (btnDelete) {
                     const id = btnDelete.getAttribute('data-id');
@@ -261,7 +251,6 @@
                 }
             });
 
-            // Khởi tạo lần đầu
             calculateFinalTotal();
         });
     </script>
