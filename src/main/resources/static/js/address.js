@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setState(districtSelect, [], 'Đang tải Quận/Huyện...', true);
     setState(wardSelect, [], 'Vui lòng chọn Quận/Huyện trước', true);
-
+    // https://provinces.open-api.vn/api/v2/p/92?depth=2
     fetch('https://provinces.open-api.vn/api/?depth=3')
         .then(function (res) { return res.json(); })
         .then(function (provinces) {
