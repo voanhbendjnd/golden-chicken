@@ -24,7 +24,10 @@ import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.CartItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
+import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
+import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
@@ -40,6 +43,9 @@ public class ProductService {
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
+    CartItemRepository cartItemRepository;
+    OrderItemRepository orderItemRepository;
+    ComboDetailRepository comboDetailRepository;
 
     public void updateStatus(Long id) {
         var product = this.productRepository.findById(id)
@@ -216,8 +222,18 @@ public class ProductService {
     public void delete(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
-
-        this.productRepository.delete(product);
+        if (this.orderItemRepository.existsByProductId(id) || this.cartItemRepository.existsByProductId(id)
+                || this.comboDetailRepository.existsByProductId(id)) {
+            product.setActive(false);
+            var combos = this.comboDetailRepository.findByProductId(id);
+            for (var x : combos) {
+                x.getCombo().setActive(false);
+            }
+            this.comboDetailRepository.saveAll(combos);
+            return;
+        } else {
+            this.productRepository.delete(product);
+        }
     }
 
     @Transactional(readOnly = true)
