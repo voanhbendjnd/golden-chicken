@@ -57,10 +57,10 @@ public class AuthController {
         var session = request.getSession(true);
         var otp = this.userService.generateBase();
         session.setAttribute("PENDING_USER", userRequest);
-        session.setAttribute("OTP_CODE", otp);
+        // session.setAttribute("OTP_CODE", otp);
         session.setAttribute("OTP_EMAIL", userRequest.getEmail());
-        session.setAttribute("OTP_EXPIRE", LocalDateTime.now().plusMinutes(5));
-        this.mailService.startOTP(userRequest.getEmail(), otp);
+        // session.setAttribute("OTP_EXPIRE", LocalDateTime.now().plusMinutes(5));
+        // this.mailService.startOTP(userRequest.getEmail(), otp);
         return "redirect:/verify";
     }
 
@@ -70,7 +70,16 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public String verifyPage() {
+    public String verifyPage(HttpServletRequest request) {
+        var session = request.getSession(true);
+        var OTP = this.userService.generateBase();
+        session.setAttribute("OTP_CODE", OTP);
+        session.setAttribute("OTP_EXPIRE", LocalDateTime.now().plusMinutes(5));
+        var email = (String) request.getSession().getAttribute("OTP_EMAIL");
+        if (email == null || email.isEmpty()) {
+            return "redirect:/login";
+        }
+        this.mailService.startOTP(email, OTP);
         return "client/auth/verify";
     }
 

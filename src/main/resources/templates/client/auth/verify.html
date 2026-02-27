@@ -104,12 +104,14 @@
             <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
             <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
         </div>
-        <a class="btn-verify" href="/register">Back</a>
 
         <button class="btn-verify" onclick="verifyOTP()">Xác nhận</button>
 
         <div class="resend">
-            Bạn không nhận được mã? <a href="#">Gửi lại</a>
+            Bạn không nhận được mã? <a href="/verify">Gửi lại</a>
+        </div>
+        <div class="text-center">
+            <a th:href="@{/register}" class="link-style">Need an account? Sign up</a>
         </div>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrf-token" />
 
