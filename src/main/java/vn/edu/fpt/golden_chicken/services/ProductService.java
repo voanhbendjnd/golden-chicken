@@ -41,10 +41,19 @@ public class ProductService {
     ProductRepository productRepository;
     FileService fileService;
 
+    public void updateStatus(Long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        product.setActive(!product.getActive());
+        this.productRepository.save(product);
+    }
+
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            return c.equal(categoryJoin.get("status"), true);
+            var p1 = c.equal(categoryJoin.get("status"), true);
+            var p2 = c.equal(r.get("type"), ProductType.SINGLE);
+            return c.and(p1, p2);
         };
 
         var res = new ResultPaginationDTO();
@@ -59,7 +68,7 @@ public class ProductService {
         return res;
     }
 
-    public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file)
+    public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file, boolean isCombo)
             throws IOException, URISyntaxException {
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
@@ -68,6 +77,12 @@ public class ProductService {
         }
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
+        if (isCombo) {
+            product.setType(ProductType.COMBO);
+        } else {
+            product.setType(ProductType.SINGLE);
+
+        }
         var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
 
         if (file != null && !file.isEmpty()) {
@@ -179,7 +194,7 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
-        product.setType(dto.getType());
+        // product.setType(dto.getType());
         product.setActive(dto.isActive());
         this.productRepository.save(product);
         filesToDelete.forEach(x -> {
@@ -201,6 +216,7 @@ public class ProductService {
     public void delete(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+
         this.productRepository.delete(product);
     }
 

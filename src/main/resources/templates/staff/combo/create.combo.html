@@ -13,14 +13,14 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="text-center mb-0">Create New Product</h3>
+                        <h3 class="text-center mb-0">Create New Combo</h3>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/staff/product/create}" method="post" th:object="${product}"
+                        <form th:action="@{/staff/combo/create}" method="post" th:object="${product}"
                             enctype="multipart/form-data">
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Product Name</label>
+                                <label class="form-label fw-bold">Combo Name</label>
                                 <input type="text" class="form-control" th:field="*{name}" required />
                                 <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
 
@@ -44,7 +44,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <input type="hidden" name="type" value="SINGLE">
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Description</label>
                                 <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
@@ -73,19 +73,22 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Product Type</label>
-                                    <div>SINGLE</div>
+                                    <div>COMBO</div>
+                                    <input type="hidden" name="type" value="COMBO" hidden>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Status</label>
                                     <select th:field="*{active}" class="form-select" required>
-                                        <option value="true">Active</option>
+                                        <!-- <option value="true">Active</option> -->
                                         <option value="false">Non-active</option>
                                     </select>
+                                    <p style="font-size: 10px;">#If the product type is combo, the status will be
+                                        Non-Active until updated.</p>
                                 </div>
                             </div>
                             <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                <a th:href="@{/staff/product}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <a th:href="@{/staff/combo}" class="btn btn-secondary me-md-2">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4">Create Product</button>
                             </div>
                         </form>

@@ -96,6 +96,14 @@
                                                                 <input type="hidden" th:name="${_csrf.parameterName}"
                                                                     th:value="${_csrf.token}" />
                                                             </form>
+                                                            <form
+                                                                th:action="@{/staff/product/status/{id}(id=${product.id})}"
+                                                                method="POST" class="status-form">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-primary btn-status">Status</button>
+                                                                <input type="hidden" th:name="${_csrf.parameterName}"
+                                                                    th:value="${_csrf.token}" />
+                                                            </form>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -164,6 +172,26 @@
                 Swal.fire({
                     title: 'Are you sure delete?',
                     text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('.btn-status').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('.status-form');
+                Swal.fire({
+                    title: 'Are you sure change status?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
