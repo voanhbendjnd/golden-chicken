@@ -43,6 +43,7 @@
 .today-list {
     border-radius: 50px;
     width: 100%;
+    height: 100%;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -94,14 +95,36 @@
 
 .menu-slider__item {
     position: relative;
-    flex: 0 0 auto;
+    /* Cố định chiều rộng, ảnh sẽ không bị thu nhỏ theo màn hình */
+    width: 230px;
+    /* Đảm bảo item không bị co lại trong flex container */
+    flex-shrink: 0;
     border-radius: 33px;
     overflow: hidden;
     transition: 0.35s ease;
+    display: block;
+    /* Vì là thẻ <a> nên cần display block hoặc inline-block */
+}
+
+.menu-slider {
+    display: flex;
+    gap: 20px;
+    /* Khoảng cách giữa các món ăn */
+    overflow-x: auto;
+    /* Tạo thanh cuộn ngang khi màn hình nhỏ */
+    padding: 20px 10px;
+    scroll-behavior: smooth;
+}
+
+/* Ẩn thanh cuộn xấu xí nếu muốn */
+.menu-slider::-webkit-scrollbar {
+    display: none;
 }
 
 .menu-slider__item img {
+    /* Ảnh bây giờ sẽ rộng bằng 100% của 230px (tức là 230px cố định) */
     width: 100%;
+    display: block;
     border-radius: 22px;
 }
 
