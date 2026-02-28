@@ -52,7 +52,11 @@
                         </button>
                     </form>
                 </div>
+                <!-- <a th:if="${session.roleName == ADMIN}" href="/admin">
+                    <h1 th:text="${session.roleName}">100</h1>
 
+                </a> -->
+                <h1 th:text="${session.cartSum}"></h1>
                 <span th:if="${session.user == null}">
                     <a th:href="@{/register}" class="login-item">Đăng ký /</a>
                     <a th:href="@{/login}" class="login-item">Đăng nhập</a>

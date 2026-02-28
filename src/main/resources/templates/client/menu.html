@@ -65,12 +65,12 @@
                                     </p>
                                 </div>
 
-                                <a class="btn-default btn-red btn-order" style="text-decoration-line: none;"
+                                <a class="btn-default btn-danger btn-order" style="text-decoration-line: none;"
                                     th:href="@{/checkout?id={id}(id=${product.id})}">
                                     Buy Now
                                 </a>
                                 <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                    <button class="btn-default btn-yellow flex-grow-1 btn-add-to-cart"
+                                    <button class="btn-default btn-warning flex-grow-1 btn-add-to-cart"
                                         th:data-id="${product.id}">
                                         Add To Cart
                                     </button>
@@ -78,7 +78,7 @@
                                     <div class="input-group quantity-selector shadow-sm" style="width: 130px;">
                                         <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
                                         <input type="number" class="form-control text-center input-qty" value="1"
-                                            min="1" th:id="'qty-' + ${product.id}">
+                                            min="1" max="33" th:id="'qty-' + ${product.id}" style="width: auto;">
                                         <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
                                     </div>
                                 </div>

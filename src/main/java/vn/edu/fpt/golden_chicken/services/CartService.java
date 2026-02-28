@@ -152,4 +152,25 @@ public class CartService {
         }
         this.cartRepository.save(cartItem);
     }
+
+    public int sumCart() {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null || email.isEmpty()) {
+            throw new ResourceNotFoundException("User Email", email);
+        }
+        var user = this.userRepository.findByEmail(email);
+        if (user == null) {
+            throw new ResourceNotFoundException("User Email", email);
+        }
+        var customer = user.getCustomer();
+        if (customer == null) {
+            throw new ResourceNotFoundException("User Email", email);
+        }
+        var cartItems = customer.getCartItems();
+        if (cartItems == null) {
+            return 0;
+        } else {
+            return cartItems.size();
+        }
+    }
 }

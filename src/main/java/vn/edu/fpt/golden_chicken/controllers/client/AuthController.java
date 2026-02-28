@@ -55,7 +55,7 @@ public class AuthController {
             return "client/auth/register";
         }
         var session = request.getSession(true);
-        var otp = this.userService.generateBase();
+        // var otp = this.userService.generateBase();
         session.setAttribute("PENDING_USER", userRequest);
         // session.setAttribute("OTP_CODE", otp);
         session.setAttribute("OTP_EMAIL", userRequest.getEmail());
