@@ -19,8 +19,8 @@ import vn.edu.fpt.golden_chicken.repositories.AddressRepository;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AddressServices {
-    private static final String ACTIVE = "ACTIVE";
-    private static final String INACTIVE = "INACTIVE";
+    // private static final String ACTIVE = "ACTIVE";
+    // private static final String INACTIVE = "INACTIVE";
     private static final String CITY = "Cần Thơ";
     AddressRepository addressRepository;
     ProfileService profileService;
@@ -37,13 +37,12 @@ public class AddressServices {
         }
 
         Address address = opt.get();
-        if (!ACTIVE.equals(address.getStatus())) {
-            return null;
-        }
+        // if (!ACTIVE.equals(address.getStatus())) {
+        //     return null;
+        // }
 
         return toDto(address);
     }
-
 
     private ResAddress toDto(Address add) {
         ResAddress dto = new ResAddress();
@@ -52,7 +51,7 @@ public class AddressServices {
         dto.setRecipientPhone(add.getRecipientPhone());
         dto.setSpecificAddress(add.getSpecificAddress());
         dto.setWard(add.getWard());
-        dto.setDistrict(add.getDistrict());
+        // dto.setDistrict(add.getDistrict());
         dto.setCity(add.getCity());
         dto.setIsDefault(add.getIsDefault());
         return dto;
@@ -64,8 +63,7 @@ public class AddressServices {
             return new ArrayList<>();
         }
 
-        List<Address> addresses = addressRepository.findAllByUserIdAndStatusOrderByIsDefaultDescIdDesc(user.getId(),
-                ACTIVE);
+        List<Address> addresses = addressRepository.findAllByUserId(user.getId());
 
         List<ResAddress> result = new ArrayList<>();
         for (Address a : addresses) {
@@ -80,8 +78,7 @@ public class AddressServices {
             return null;
         }
 
-        Optional<Address> addressOpt = this.addressRepository.findFirstByUserIdAndStatusAndIsDefaultTrue(user.getId(),
-                ACTIVE);
+        Optional<Address> addressOpt = this.addressRepository.findFirstByUserIdAndIsDefaultTrue(user.getId());
         if (addressOpt.isPresent()) {
             return toDto(addressOpt.get());
         }
@@ -99,9 +96,9 @@ public class AddressServices {
         a.setRecipientPhone(dto.getRecipientPhone());
         a.setSpecificAddress(dto.getSpecificAddress());
         a.setWard(dto.getWard());
-        a.setDistrict(dto.getDistrict());
+        // a.setDistrict(dto.getDistrict());
         a.setCity(CITY);
-        a.setStatus(ACTIVE);
+        // a.setStatus(ACTIVE);
 
         if (Boolean.TRUE.equals(dto.getIsDefault())) {
             unsetDefaultForUser(user.getId());
@@ -123,8 +120,8 @@ public class AddressServices {
             return null;
 
         Address a = opt.get();
-        if (!ACTIVE.equals(a.getStatus()))
-            return null;
+        // if (!ACTIVE.equals(a.getStatus()))
+        //     return null;
 
         AddressFormDTO dto = new AddressFormDTO();
         dto.setId(a.getId());
@@ -132,7 +129,7 @@ public class AddressServices {
         dto.setRecipientPhone(a.getRecipientPhone());
         dto.setSpecificAddress(a.getSpecificAddress());
         dto.setWard(a.getWard());
-        dto.setDistrict(a.getDistrict());
+        // dto.setDistrict(a.getDistrict());
         dto.setIsDefault(a.getIsDefault());
 
         return dto;
@@ -149,14 +146,14 @@ public class AddressServices {
             return;
 
         Address add = opt.get();
-        if (!ACTIVE.equals(add.getStatus()))
-            return;
+        // if (!ACTIVE.equals(add.getStatus()))
+        //     return;
 
         add.setRecipientName(dto.getRecipientName());
         add.setRecipientPhone(dto.getRecipientPhone());
         add.setSpecificAddress(dto.getSpecificAddress());
         add.setWard(dto.getWard());
-        add.setDistrict(dto.getDistrict());
+        // add.setDistrict(dto.getDistrict());
         add.setCity(CITY);
 
         if (Boolean.TRUE.equals(dto.getIsDefault())) {
@@ -168,7 +165,7 @@ public class AddressServices {
     }
 
     private void unsetDefaultForUser(Long userId) {
-        List<Address> defaults = addressRepository.findAllByUserIdAndStatusAndIsDefaultTrue(userId, ACTIVE);
+        List<Address> defaults = addressRepository.findAllByUserIdOrderByIsDefaultDescIdDesc(userId);
 
         for (Address a : defaults) {
             a.setIsDefault(false);
@@ -190,8 +187,8 @@ public class AddressServices {
             return;
 
         Address a = opt.get();
-        if (!ACTIVE.equals(a.getStatus()))
-            return;
+        // if (!ACTIVE.equals(a.getStatus()))
+        //     return;
 
         unsetDefaultForUser(user.getId());
         a.setIsDefault(true);
@@ -208,18 +205,18 @@ public class AddressServices {
             return;
 
         Address a = opt.get();
-        if (!ACTIVE.equals(a.getStatus()))
-            return;
+        // if (!ACTIVE.equals(a.getStatus()))
+        //     return;
 
         boolean wasDefault = Boolean.TRUE.equals(a.getIsDefault());
 
-        a.setStatus(INACTIVE);
-        a.setIsDefault(false);
-        addressRepository.save(a);
+        addressRepository.delete(a);
+        // a.setStatus(INACTIVE);
+        // a.setIsDefault(false);
+        // addressRepository.save(a);
 
         if (wasDefault) {
-            List<Address> remain = addressRepository.findAllByUserIdAndStatusOrderByIsDefaultDescIdDesc(
-                    user.getId(), ACTIVE);
+            List<Address> remain = addressRepository.findAllByUserIdOrderByIsDefaultDescIdDesc(user.getId());
 
             if (!remain.isEmpty()) {
                 unsetDefaultForUser(user.getId());

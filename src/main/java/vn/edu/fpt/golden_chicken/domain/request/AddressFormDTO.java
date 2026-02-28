@@ -30,9 +30,9 @@ public class AddressFormDTO {
     @Size(max = 100)
     private String ward;
 
-    @NotBlank(message = "District is required")
-    @Size(max = 100)
-    private String district;
+    // @NotBlank(message = "District is required")
+    // @Size(max = 100)
+    // private String district;
 
     private Boolean isDefault = false;
 }
