@@ -38,7 +38,7 @@ public class AddressServices {
 
         Address address = opt.get();
         // if (!ACTIVE.equals(address.getStatus())) {
-        //     return null;
+        // return null;
         // }
 
         return toDto(address);
@@ -120,8 +120,6 @@ public class AddressServices {
             return null;
 
         Address a = opt.get();
-        // if (!ACTIVE.equals(a.getStatus()))
-        //     return null;
 
         AddressFormDTO dto = new AddressFormDTO();
         dto.setId(a.getId());
@@ -129,7 +127,6 @@ public class AddressServices {
         dto.setRecipientPhone(a.getRecipientPhone());
         dto.setSpecificAddress(a.getSpecificAddress());
         dto.setWard(a.getWard());
-        // dto.setDistrict(a.getDistrict());
         dto.setIsDefault(a.getIsDefault());
 
         return dto;
@@ -146,14 +143,11 @@ public class AddressServices {
             return;
 
         Address add = opt.get();
-        // if (!ACTIVE.equals(add.getStatus()))
-        //     return;
 
         add.setRecipientName(dto.getRecipientName());
         add.setRecipientPhone(dto.getRecipientPhone());
         add.setSpecificAddress(dto.getSpecificAddress());
         add.setWard(dto.getWard());
-        // add.setDistrict(dto.getDistrict());
         add.setCity(CITY);
 
         if (Boolean.TRUE.equals(dto.getIsDefault())) {
@@ -187,8 +181,6 @@ public class AddressServices {
             return;
 
         Address a = opt.get();
-        // if (!ACTIVE.equals(a.getStatus()))
-        //     return;
 
         unsetDefaultForUser(user.getId());
         a.setIsDefault(true);
@@ -205,15 +197,10 @@ public class AddressServices {
             return;
 
         Address a = opt.get();
-        // if (!ACTIVE.equals(a.getStatus()))
-        //     return;
 
         boolean wasDefault = Boolean.TRUE.equals(a.getIsDefault());
 
         addressRepository.delete(a);
-        // a.setStatus(INACTIVE);
-        // a.setIsDefault(false);
-        // addressRepository.save(a);
 
         if (wasDefault) {
             List<Address> remain = addressRepository.findAllByUserIdOrderByIsDefaultDescIdDesc(user.getId());

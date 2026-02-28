@@ -27,9 +27,5 @@ public class AddressCreateDTO {
     @Size(max = 255, message = "Ward must be <= 255 characters")
     String ward;
 
-    // @NotBlank(message = "District cannot be empty")
-    // @Size(max = 255, message = "District must be <= 255 characters")
-    // String district;
-
     Boolean isDefault;
 }

@@ -14,47 +14,43 @@
 
 <body>
 
-<div th:replace="~{client/layout/header}"></div>
-<div class="checkout-container">
-    <div class="page-checkout-address">
-        <h1 class="addr-title">📍 CHỌN ĐỊA CHỈ GIAO HÀNG</h1>
+    <div th:replace="~{client/layout/header}"></div>
+    <div class="checkout-container">
+        <div class="page-checkout-address">
+            <h1 class="addr-title">📍 CHỌN ĐỊA CHỈ GIAO HÀNG</h1>
 
-        <form th:action="@{/checkout}" method="get">
-            <input type="hidden" name="id" th:value="${productId}"/>
+            <form th:action="@{/checkout}" method="get">
+                <input type="hidden" name="id" th:value="${productId}" />
 
-            <div th:each="a : ${addresses}" class="address-card">
-                <div class="address-info">
-                    <div class="name" th:text="${a.recipientName}"></div>
-                    <div>
-                        <span th:text="${a.specificAddress}"></span>,
-                        <span th:text="${a.ward}"></span>,
-                        <!-- <span th:text="${a.district}"></span>, -->
-                        <span th:text="${a.city}"></span>
+                <div th:each="a : ${addresses}" class="address-card">
+                    <div class="address-info">
+                        <div class="name" th:text="${a.recipientName}"></div>
+                        <div>
+                            <span th:text="${a.specificAddress}"></span>,
+                            <span th:text="${a.ward}"></span>,
+                            <span th:text="${a.city}"></span>
+                        </div>
+                        <div>📞 <span th:text="${a.recipientPhone}"></span></div>
                     </div>
-                    <div>📞 <span th:text="${a.recipientPhone}"></span></div>
+
+                    <input class="address-radio" type="radio" name="addressId" th:value="${a.id}" required>
                 </div>
 
-                <input class="address-radio"
-                       type="radio"
-                       name="addressId"
-                       th:value="${a.id}"
-                       required>
-            </div>
+                <div class="address-actions">
+                    <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
+                        ➕ Thêm địa chỉ mới
+                    </a>
 
-            <div class="address-actions">
-                <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
-                    ➕ Thêm địa chỉ mới
-                </a>
+                    <button type="submit" class="btn btn-confirm">
+                        Xác nhận địa chỉ
+                    </button>
+                </div>
 
-                <button type="submit" class="btn btn-confirm">
-                    Xác nhận địa chỉ
-                </button>
-            </div>
-
-        </form>
+            </form>
+        </div>
     </div>
-</div>
-<div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer}"></div>
 
 </body>
+
 </html>
