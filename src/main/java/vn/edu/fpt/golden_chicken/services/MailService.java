@@ -39,6 +39,20 @@ public class MailService {
         this.sendStatus(email, "Update Order Status", "mail/os", email, status, id, name);
     }
 
+    public void startOTP(String email, String otp) {
+        this.sendOTP(email, "OTP Verify", "mail/otp", email, otp);
+    }
+
+    @Async
+    public void sendOTP(String to, String subject, String tmp, String email, String otp) {
+        var ctx = new Context();
+        ctx.setVariable("email", email);
+        ctx.setVariable("otp", otp);
+        var at = new ArrayList<FileSystemResource>();
+        var contect = this.templateEngine.process(tmp, ctx);
+        this.sendEmailSync(to, subject, contect, false, true, at);
+    }
+
     @Async
     public void sendStatus(String to, String subject, String template, String email, String status, String id,
             String name) {

@@ -59,6 +59,7 @@
                         <p th:text="${profile.phone}">0123456789</p>
                         <div class="actions">
                             <a th:if="${!isEdit}" th:href="@{/profile(edit=true)}" class="btn btn-warning">Edit</a>
+                            <a th:href="@{change-password}" class="btn btn-warning">Change Password</a>
                         </div>
                     </div>
 

@@ -15,6 +15,7 @@ import vn.edu.fpt.golden_chicken.domain.request.CategoryDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResCategory;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
+import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -23,6 +24,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 public class CategoryService {
     CategoryRepository categoryRepository;
+    ProductRepository productRepository;
 
     public void create(CategoryDTO dto) {
         var name = dto.getName();
@@ -107,7 +109,14 @@ public class CategoryService {
     public void delete(Long id) {
         var cate = this.categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", id));
-        this.categoryRepository.delete(cate);
+
+        if (this.productRepository.existsByCategoryId(id)) {
+            cate.setStatus(false);
+            this.categoryRepository.save(cate);
+            return;
+        } else {
+            this.categoryRepository.delete(cate);
+        }
     }
 
 }

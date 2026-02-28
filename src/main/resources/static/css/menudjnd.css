@@ -1,0 +1,284 @@
+.product-card__action .btn {
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.35s ease;
+    backdrop-filter: blur(10px);
+}
+
+/* Buy Now */
+.product-card__action .btn-warning {
+    background: linear-gradient(135deg, #ffc72c, #ffdf70);
+    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+}
+
+.product-card__action .btn-warning:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255, 193, 7, 0.5);
+}
+
+/* Add To Cart */
+.product-card__action .btn-danger {
+    background: linear-gradient(135deg, #e31837, #ff4d6d);
+    box-shadow: 0 8px 20px rgba(227, 24, 55, 0.4);
+}
+
+.product-card__action .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(227, 24, 55, 0.6);
+}
+
+/* Quantity Glass */
+.quantity-selector {
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+.quantity-selector .form-control {
+    border: none;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.quantity-selector .btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.quantity-selector .btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.header {
+    overflow: visible !important;
+}
+
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-item.children {
+    position: relative;
+}
+
+.navbar-item.children .menu-list {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    overflow: visible;
+    width: max-content;
+}
+
+/* ============================= */
+/* ===== PRODUCT CARD FIX HEIGHT ===== */
+/* ============================= */
+
+.product-list {
+    align-items: stretch;
+}
+
+.product-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    border-radius: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+}
+
+/* body chiếm toàn bộ không gian còn lại */
+.product-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* tên cố định 2 dòng */
+.product-card__name {
+    font-size: 16px;
+    font-weight: 700;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    min-height: 48px;
+}
+
+/* giá */
+.product-card__price {
+    font-weight: 700;
+    margin: 8px 0;
+}
+
+/* mô tả chỉ 2 dòng */
+.product-card__desc {
+    font-size: 13px;
+    color: #555;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* chỉ 2 dòng */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    min-height: 38px;
+}
+
+/* phần action luôn nằm dưới cùng */
+.product-card__action {
+    margin-top: auto;
+}
+
+/* ===== BACKGROUND MENU ===== */
+.menu-page {
+    background-size: 200% 200%;
+    animation: gradientMove 12s ease infinite;
+    padding-bottom: 80px;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ===== TITLE ===== */
+.menu-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 50px;
+}
+
+/* ===== CATEGORY ===== */
+.category-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 40px 0 25px;
+    color: #fff;
+}
+
+/* ===== PRODUCT CARD ===== */
+.product-card {
+    position: relative;
+    border-radius: 30px;
+    overflow: hidden;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    transition: all 0.4s ease;
+    padding-bottom: 20px;
+}
+
+/* ===== IMAGE ===== */
+.product-card__img {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+}
+
+/* ===== BODY ===== */
+.product-card__body {
+    padding: 20px;
+}
+
+.product-card__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+}
+
+.product-card__price {
+    font-size: 17px;
+    font-weight: 700;
+    color: #b00020;
+}
+
+.product-card__desc {
+    font-size: 14px;
+    color: #333;
+    opacity: 0.8;
+}
+
+/* ===== HOVER EFFECT (GIỐNG POPEYES) ===== */
+.product-card:hover {
+    transform: translateY(-12px) scale(1.05);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.product-card:hover .product-card__img {
+    transform: scale(1.1);
+}
+
+/* ===== ACTION BUTTON ===== */
+.btn-order {
+    display: block;
+    text-align: center;
+    margin: 0 20px;
+    border-radius: 20px;
+    padding: 10px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-red {
+    background: linear-gradient(135deg, #d90429, #ef233c);
+    color: white !important;
+    border: none;
+}
+
+.btn-red:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ADD TO CART ===== */
+.btn-yellow {
+    background: linear-gradient(135deg, #ffbe0b, #ff9f1c);
+    border-radius: 15px;
+    font-weight: 600;
+    border: none;
+    transition: 0.3s ease;
+}
+
+.btn-yellow:hover {
+    transform: scale(1.05);
+}
+
+/* ===== QUANTITY ===== */
+.quantity-selector {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.quantity-selector .btn {
+    border: none;
+}
+
+.input-qty {
+    border: none;
+}

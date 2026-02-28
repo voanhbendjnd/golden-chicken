@@ -27,11 +27,13 @@ import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ComboDTO;
+import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResSingleProduct;
 import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
 import vn.edu.fpt.golden_chicken.services.ComboDetailService;
 import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Controller
@@ -48,6 +50,45 @@ public class ComboController {
         this.comboDetailService = comboDetailService;
         this.categoryService = categoryService;
         this.comboDetailRepository = comboDetailRepository;
+    }
+
+    @PostMapping("/status/{id:[0-9]+}")
+    public String changeStatus(@PathVariable("id") Long id) {
+        this.productService.updateStatus(id);
+        return "redirect:/staff/combo";
+    }
+
+    @PostMapping("/create")
+    public String create(@ModelAttribute("product") @Valid ProductDTO productDTO, BindingResult bd,
+            @RequestParam("thumbnailFile") MultipartFile thumbnailFile,
+            @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model)
+            throws IOException, URISyntaxException {
+        if (bd.hasErrors()) {
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/combo/create.combo";
+        }
+        try {
+            this.productService.create(productDTO, galleryFiles, thumbnailFile, true);
+            return "redirect:/staff/combo";
+        } catch (IOException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/combo/create.combo";
+        } catch (DataInvalidException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/combo/create.combo";
+        }
+
+    }
+
+    @GetMapping("/create")
+    public String getCreatePage(Model model) {
+        model.addAttribute("categories", this.categoryService.fetchAll());
+        model.addAttribute("product", new ProductDTO());
+        return "staff/combo/create.combo";
     }
 
     @GetMapping

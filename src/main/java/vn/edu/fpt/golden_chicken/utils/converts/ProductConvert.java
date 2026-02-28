@@ -13,7 +13,6 @@ public class ProductConvert {
         product.setActive(dto.isActive());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
-        product.setType(dto.getType());
         product.setName(dto.getName());
         return product;
     }

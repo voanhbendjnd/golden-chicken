@@ -9,11 +9,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 
 import jakarta.servlet.DispatcherType;
@@ -60,6 +63,16 @@ public class SecurityConfig {
                 return authProvider;
         }
 
+        @Bean
+        public SessionRegistry sessionRegistry() {
+                return new SessionRegistryImpl();
+        }
+
+        @Bean
+        public HttpSessionEventPublisher httpSessionEventPublisher() {
+                return new HttpSessionEventPublisher();
+        }
+
         /*
          * Tự động trả về trang khớp với role người đó
          */
@@ -94,7 +107,8 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/fonts/**",
                                 "/menu/**",
-                                "/payment/**"
+                                "/payment/**",
+                                "/verify/**"
 
                 };
                 http
@@ -122,12 +136,14 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
 
                                 .sessionManagement((sessionManagement) -> sessionManagement
-                                                // luôn tạo session giữ cho trang thái đăng nhập
                                                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                                                .invalidSessionUrl("/logout?expired")
-                                                // chỉ 1 browser được đăng nhập
+                                                // Sửa dòng này: Cho phép Spring quản lý việc đổi Session ID linh hoạt
+                                                // hơn
+                                                .sessionFixation().migrateSession()
+                                                .invalidSessionUrl("/login?invalid")
                                                 .maximumSessions(1)
-                                                .maxSessionsPreventsLogin(false))
+                                                .maxSessionsPreventsLogin(false)
+                                                .sessionRegistry(sessionRegistry()))
                                 .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
                                 .rememberMe(r -> r.rememberMeServices(rememberMeServices()))
 

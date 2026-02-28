@@ -16,6 +16,7 @@ import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -138,6 +139,30 @@ public class VoucherService {
         v.setEndAt(dto.getEndAt());
         v.setStatus(dto.getStatus());
         v.setExchangeable(dto.isExchangeable());
+        if (dto.getCode() == null || dto.getCode().isBlank()) {
+            throw new IllegalArgumentException("Code is required");
+        }
+
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        if (dto.getDiscountValue() == null) {
+            throw new IllegalArgumentException("Discount value is required");
+        }
+
+        if (dto.getDiscountType() == null) {
+            throw new IllegalArgumentException("Discount type is required");
+        }
+        if (dto.getMinOrderValue() == null) {
+            throw new IllegalArgumentException("Min Order Value is required");
+        }
+        if (dto.getPointCost() == null) {
+            throw new IllegalArgumentException("Point cost is required");
+        }
+        if (dto.getStartAt() == null) {
+            throw new IllegalArgumentException("Start time is required");
+        }
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
             throw new IllegalArgumentException("End time must be after start time");
@@ -188,10 +213,13 @@ public class VoucherService {
 
     }
 
-    public long getPoints() {
+    public long getPoints() throws PermissionException {
         long points = 0L;
 
         var currentUser = profileService.getCurrentUser();
+        if (currentUser.getCustomer() == null) {
+            throw new PermissionException("You do not have permission!");
+        }
         if (currentUser != null) {
             var customer = customerRepository.findById(currentUser.getId()).orElse(null);
             points = customer.getPoint();

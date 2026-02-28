@@ -31,7 +31,10 @@
             <label>Name</label>
             <input type="text" th:field="*{name}" required/>
         </div>
-
+        <div class="form-group">
+            <label>Description</label>
+            <input type="text" th:field="*{description}" required/>
+        </div>
         <div class="form-group">
             <label>Discount Value</label>
             <input type="number" th:field="*{discountValue}" required/>

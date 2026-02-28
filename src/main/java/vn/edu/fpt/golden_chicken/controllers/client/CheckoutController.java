@@ -167,7 +167,7 @@ public class CheckoutController {
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
-        var order = this.orderService.order(dto);
+        this.orderService.order(dto);
 
         return "redirect:/";
     }

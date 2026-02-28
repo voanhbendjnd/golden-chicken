@@ -16,7 +16,12 @@ public interface ComboDetailRepository extends JpaRepository<ComboDetail, Long>,
     @Query("SELECT cd FROM ComboDetail cd JOIN FETCH cd.product WHERE cd.combo.id = :comboId")
     List<ComboDetail> findByComboId(@Param("comboId") Long id);
 
+    @Query("select cd from ComboDetail cd join fetch cd.product where cd.product.id = :productId")
+    List<ComboDetail> findByProductId(@Param("productId") Long id);
+
     @Modifying
     @Query("delete from ComboDetail cd where cd.combo.id = :comboId")
     void deleteByComboId(@Param("comboId") Long comboId);
+
+    boolean existsByProductId(long id);
 }

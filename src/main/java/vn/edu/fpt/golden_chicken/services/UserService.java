@@ -3,7 +3,9 @@ package vn.edu.fpt.golden_chicken.services;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -100,10 +102,15 @@ public class UserService {
             customer.setUser(user);
             user.setCustomer(customer);
             this.userRepository.save(user);
-            this.mailService.allowMailForUser(request.getFullName(), email);
+            // this.mailService.startOTP(email, this.generateOTP(user), email);
+            // this.mailService.allowMailForUser(request.getFullName(), email);
         } else {
             throw new ResourceNotFoundException("ROLE", DefineVariable.roleNameCustomer);
         }
+
+    }
+
+    public void registerSuccess(User user) {
 
     }
 
@@ -277,4 +284,28 @@ public class UserService {
     public int countCustomer() {
         return this.userRepository.countCustomer();
     }
+
+    public String generateOTP(User user) {
+        this.clearOTP(user);
+        var ran = new Random();
+        var code = ran.nextInt(1000, 9999) + "";
+        var encodeOTP = this.passwordEncoder.encode(code);
+        user.setPassword(encodeOTP);
+        user.setOtpRequestedTime(new Date());
+        this.userRepository.save(user);
+        return code;
+    }
+
+    public String generateBase() {
+        var ran = new Random();
+        var code = ran.nextInt(1000, 9999) + "";
+        return code;
+    }
+
+    private void clearOTP(User user) {
+        user.setOneTimePassword(null);
+        user.setOtpRequestedTime(null);
+        this.userRepository.save(user);
+    }
+
 }

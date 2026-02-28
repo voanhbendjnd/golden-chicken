@@ -11,4 +11,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSp
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(String name, Long id);
+
 }

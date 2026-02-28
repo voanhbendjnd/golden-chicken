@@ -2,8 +2,8 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.util.List;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+// import org.hibernate.annotations.SQLDelete;
+// import org.hibernate.annotations.Where;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,8 +22,8 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE categories SET is_delete = 1 WHERE id = ?")
-@Where(clause = "is_delete = 0")
+// @SQLDelete(sql = "UPDATE categories SET is_delete = 1 WHERE id = ?")
+// @Where(clause = "is_delete = 0")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
