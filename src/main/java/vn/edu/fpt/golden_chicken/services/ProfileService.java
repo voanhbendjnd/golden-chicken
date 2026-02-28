@@ -74,11 +74,13 @@ public class ProfileService {
         userRepository.save(user);
     }
 
-    public void updateAvatar(String fileName) {
+    public String updateAvatar(String fileName) {
         User user = getCurrentUser();
         if (user == null || fileName == null || fileName.isEmpty())
-            return;
+            return null;
+        String oldAvatar = user.getAvatar();
         user.setAvatar(fileName);
         userRepository.save(user);
+        return oldAvatar;
     }
 }
