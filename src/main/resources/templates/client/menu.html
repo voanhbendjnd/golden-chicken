@@ -15,6 +15,7 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/menudjnd.css}">
+    <script th:src="@{/js/menu.js}"></script>
 
     <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
 
@@ -110,99 +111,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.querySelectorAll('.product-card').forEach(card => {
 
-            card.addEventListener("mousemove", (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                const rotateX = ((y - centerY) / 40) * -1;
-                const rotateY = (x - centerX) / 40;
-
-                card.style.transform =
-                    `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-            });
-
-            card.addEventListener("mouseleave", () => {
-                card.style.transform =
-                    "rotateX(0deg) rotateY(0deg) scale(1)";
-            });
-
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-
-            // 1. Xử lý nút Tăng/Giảm số lượng
-            document.querySelectorAll('.btn-minus').forEach(btn => {
-                btn.onclick = function () {
-                    let input = this.parentElement.querySelector('.input-qty');
-                    if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
-                }
-            });
-
-            document.querySelectorAll('.btn-plus').forEach(btn => {
-                btn.onclick = function () {
-                    let input = this.parentElement.querySelector('.input-qty');
-                    input.value = parseInt(input.value) + 1;
-                }
-            });
-
-            // 2. Xử lý Thêm vào giỏ hàng bằng AJAX
-            document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
-                btn.onclick = async function () {
-                    const productId = this.getAttribute('data-id');
-                    const quantity = document.getElementById('qty-' + productId).value;
-
-                    const cartDTO = {
-                        productId: parseInt(productId),
-                        quantity: parseInt(quantity)
-                    };
-
-                    try {
-                        const response = await fetch('/cart/add', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
-                            },
-                            body: JSON.stringify(cartDTO)
-                        });
-
-                        if (response.ok) {
-                            Swal.fire({
-                                title: 'Success',
-                                text: 'Add to cart success',
-                                icon: 'success',
-                                showCancelButton: true,
-                                confirmButtonText: 'Go to cart',
-                                cancelButtonText: 'Stay here',
-                                reverseButtons: true,
-                                showClass: {
-                                    popup: 'animate__animated animate__fadeInDown'
-                                },
-                                hideClass: {
-                                    popup: 'animate__animated animate__fadeOutUp'
-                                }
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = '/cart';
-                                }
-                            });
-                        } else if (response.status === 403) {
-                            alert('Vui lòng đăng nhập với tài khoản khách hàng để sử dụng giỏ hàng!');
-                        } else {
-                            alert('Có lỗi xảy ra, vui lòng thử lại.');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Không thể kết nối đến máy chủ!');
-                    }
-                };
-            });
-        });
     </script>
 
 </body>
