@@ -84,22 +84,46 @@ public class ProfileService {
         userRepository.save(user);
     }
 
-    public boolean changePassword(String oldPassword, String newPassword) {
+    public record ChangePasswordResult(boolean success, String message) {}
 
+    public ChangePasswordResult changePassword(String oldPassword, String newPassword) {
+    
         User user = getCurrentUser();
         if (user == null) {
-            return false;
+            return new ChangePasswordResult(false, "Bạn cần đăng nhập để đổi mật khẩu.");
         }
-
+    
+        if (oldPassword == null || oldPassword.isBlank()) {
+            return new ChangePasswordResult(false, "Vui lòng nhập mật khẩu cũ.");
+        }
+    
+        if (newPassword == null || newPassword.isBlank()) {
+            return new ChangePasswordResult(false, "Vui lòng nhập mật khẩu mới.");
+        }
+    
+        // optional: rule mạnh hơn
+        if (newPassword.length() < 6) {
+            return new ChangePasswordResult(false, "Mật khẩu mới phải có ít nhất 6 ký tự.");
+        }
+    
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            return false;
+            return new ChangePasswordResult(false, "Mật khẩu cũ không đúng.");
         }
-
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
-
+    
+        // optional: không cho đặt trùng mật khẩu cũ
+        //if (passwordEncoder.matches(newPassword, user.getPassword())) {
+        //    return new ChangePasswordResult(false, "Mật khẩu mới không được trùng mật khẩu cũ.");
+        //}
+    
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-
-        return true;
+    
+        return new ChangePasswordResult(true, "Đổi mật khẩu thành công!");
+    }
+    public boolean checkOldPassword(String oldPassword) {
+        User user = getCurrentUser();
+        if (user == null) return false;
+        if (oldPassword == null || oldPassword.isBlank()) return false;
+        return passwordEncoder.matches(oldPassword, user.getPassword());
     }
 }

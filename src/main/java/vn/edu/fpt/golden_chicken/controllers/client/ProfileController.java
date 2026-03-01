@@ -1,5 +1,7 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
@@ -78,19 +81,58 @@ public class ProfileController {
             @RequestParam String confirmPassword,
             Model model) {
 
+        // ✅ 1) Check mật khẩu cũ trước: sai -> dừng ngay, focus vào old
+        if (!profileService.checkOldPassword(oldPassword)) {
+            model.addAttribute("errorOld", "Mật khẩu cũ không đúng.");
+            model.addAttribute("focusField", "old");
+            return "change-password";
+        }
+
+        // ✅ 2) Old đúng rồi mới check new/confirm
+        if (newPassword == null || newPassword.isBlank()) {
+            model.addAttribute("errorNew", "Vui lòng nhập mật khẩu mới.");
+            model.addAttribute("focusField", "new");
+            return "change-password";
+        }
+
+        if (confirmPassword == null || confirmPassword.isBlank()) {
+            model.addAttribute("errorConfirm", "Vui lòng nhập xác nhận mật khẩu.");
+            model.addAttribute("focusField", "confirm");
+            return "change-password";
+        }
+
         if (!newPassword.equals(confirmPassword)) {
-            model.addAttribute("error", "Mật khẩu xác nhận không khớp.");
+            model.addAttribute("errorConfirm", "Mật khẩu xác nhận không khớp.");
+            model.addAttribute("focusField", "confirm");
             return "change-password";
         }
 
-        boolean changed = profileService.changePassword(oldPassword, newPassword);
+        // ✅ 3) Gọi service đổi mật khẩu (service sẽ check length >= 6, v.v.)
+        var result = profileService.changePassword(oldPassword, newPassword);
 
-        if (!changed) {
-            model.addAttribute("error", "Mật khẩu cũ không đúng.");
+        if (!result.success()) {
+            // phân loại focus cho hợp lý
+            String msg = result.message() == null ? "Đổi mật khẩu thất bại." : result.message();
+            model.addAttribute("error", msg);
+
+            String lower = msg.toLowerCase();
+            if (lower.contains("cũ")) {
+                model.addAttribute("focusField", "old"); 
+            }else {
+                model.addAttribute("focusField", "new");
+            }
+
             return "change-password";
         }
 
-        model.addAttribute("success", "Đổi mật khẩu thành công!");
+        model.addAttribute("success", result.message());
         return "change-password";
+    }
+
+    @PostMapping("/change-password/check-old")
+    @ResponseBody
+    public Map<String, Object> checkOld(@RequestParam String oldPassword) {
+        boolean valid = profileService.checkOldPassword(oldPassword);
+        return Map.of("valid", valid);
     }
 }
