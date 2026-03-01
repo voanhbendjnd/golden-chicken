@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 public class AddressFormDTO {
     Long id;
-    
+
     @NotBlank(message = "Recipient name is required")
     @Size(max = 100, message = "Recipient name max 100")
     String recipientName;
@@ -29,10 +29,6 @@ public class AddressFormDTO {
     @NotBlank(message = "Ward is required")
     @Size(max = 100)
     private String ward;
-
-    @NotBlank(message = "District is required")
-    @Size(max = 100)
-    private String district;
 
     private Boolean isDefault = false;
 }

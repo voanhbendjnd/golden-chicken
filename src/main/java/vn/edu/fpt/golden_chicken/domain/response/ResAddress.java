@@ -12,7 +12,6 @@ public class ResAddress {
     String recipientPhone;
     String specificAddress;
     String ward;
-    String district;
     String city;
     Boolean isDefault;
 }

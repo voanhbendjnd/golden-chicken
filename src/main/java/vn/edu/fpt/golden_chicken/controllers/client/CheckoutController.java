@@ -87,10 +87,10 @@ public class CheckoutController {
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
@@ -135,7 +135,7 @@ public class CheckoutController {
             String fullAddress = String.format("%s, %s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
