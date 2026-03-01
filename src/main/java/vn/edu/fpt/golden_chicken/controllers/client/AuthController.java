@@ -1,7 +1,9 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -55,7 +59,7 @@ public class AuthController {
             return "client/auth/register";
         }
         var session = request.getSession(true);
-        var otp = this.userService.generateBase();
+        // var otp = this.userService.generateBase();
         session.setAttribute("PENDING_USER", userRequest);
         // session.setAttribute("OTP_CODE", otp);
         session.setAttribute("OTP_EMAIL", userRequest.getEmail());
@@ -119,5 +123,194 @@ public class AuthController {
         }
 
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid OTP code."));
+    }
+
+     // Session keys riêng cho forgot-password để tránh xung đột với register verify
+    private static final String FP_EMAIL = "FP_EMAIL";
+    private static final String FP_OTP = "FP_OTP";
+    private static final String FP_EXPIRE_AT = "FP_EXPIRE_AT"; // epoch seconds
+    private static final String FP_VERIFIED = "FP_VERIFIED";
+    private static final long FP_TTL_SECONDS = 5 * 60; // 5 phút
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "client/auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String handleForgotPassword(
+            @RequestParam("email") String email,
+            HttpSession session,
+            RedirectAttributes ra
+    ) {
+        String normalized = normalizeEmail(email);
+
+        if (normalized.isBlank() || !this.userService.existsByEmail(normalized)) {
+            ra.addFlashAttribute("error", "Email không tồn tại trong hệ thống.");
+            return "redirect:/forgot-password";
+        }
+
+        String otp = generateOtp6();
+        long expireAt = Instant.now().getEpochSecond() + FP_TTL_SECONDS;
+
+        session.setAttribute(FP_EMAIL, normalized);
+        session.setAttribute(FP_OTP, otp);
+        session.setAttribute(FP_EXPIRE_AT, expireAt);
+        session.setAttribute(FP_VERIFIED, false);
+
+        // dùng MailService có sẵn (giống flow register)
+        this.mailService.startOTP(normalized, otp);
+
+        ra.addFlashAttribute("message", "Đã gửi OTP về email. Vui lòng kiểm tra hộp thư.");
+        return "redirect:/verify-otp";
+    }
+
+    @PostMapping("/forgot-password/resend")
+    public String resendForgotOtp(HttpSession session, RedirectAttributes ra) {
+        String email = (String) session.getAttribute(FP_EMAIL);
+        if (email == null || email.isBlank()) {
+            ra.addFlashAttribute("error", "Session đã hết. Vui lòng nhập email lại.");
+            return "redirect:/forgot-password";
+        }
+
+        String otp = generateOtp6();
+        long expireAt = Instant.now().getEpochSecond() + FP_TTL_SECONDS;
+
+        session.setAttribute(FP_OTP, otp);
+        session.setAttribute(FP_EXPIRE_AT, expireAt);
+        session.setAttribute(FP_VERIFIED, false);
+
+        this.mailService.startOTP(email, otp);
+
+        ra.addFlashAttribute("message", "Đã gửi lại OTP.");
+        return "redirect:/verify-otp";
+    }
+
+    @GetMapping("/verify-otp")
+    public String verifyOtpPage(HttpSession session, Model model, RedirectAttributes ra) {
+        String email = (String) session.getAttribute(FP_EMAIL);
+        if (email == null || email.isBlank()) {
+            ra.addFlashAttribute("error", "Vui lòng nhập email để nhận OTP.");
+            return "redirect:/forgot-password";
+        }
+        model.addAttribute("email", email);
+        return "client/auth/verify-otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String handleVerifyOtp(
+            @RequestParam("otp") String otp,
+            HttpSession session,
+            RedirectAttributes ra
+    ) {
+        String email = (String) session.getAttribute(FP_EMAIL);
+        String savedOtp = (String) session.getAttribute(FP_OTP);
+        Long expireAt = (Long) session.getAttribute(FP_EXPIRE_AT);
+
+        if (email == null || savedOtp == null || expireAt == null) {
+            ra.addFlashAttribute("error", "Session đã hết. Vui lòng thao tác lại.");
+            return "redirect:/forgot-password";
+        }
+
+        otp = otp == null ? "" : otp.trim();
+        if (!otp.matches("\\d{6}")) {
+            ra.addFlashAttribute("error", "OTP phải đúng 6 chữ số.");
+            return "redirect:/verify-otp";
+        }
+
+        long now = Instant.now().getEpochSecond();
+        if (now > expireAt) {
+            ra.addFlashAttribute("error", "OTP đã hết hạn. Vui lòng gửi lại OTP.");
+            return "redirect:/verify-otp";
+        }
+
+        if (!savedOtp.equals(otp)) {
+            ra.addFlashAttribute("error", "OTP không đúng.");
+            return "redirect:/verify-otp";
+        }
+
+        session.setAttribute(FP_VERIFIED, true);
+        ra.addFlashAttribute("message", "Xác thực OTP thành công. Vui lòng đặt mật khẩu mới.");
+        return "redirect:/reset-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPasswordPage(HttpSession session, Model model, RedirectAttributes ra) {
+        String email = (String) session.getAttribute(FP_EMAIL);
+        Boolean verified = (Boolean) session.getAttribute(FP_VERIFIED);
+
+        if (email == null || email.isBlank()) {
+            ra.addFlashAttribute("error", "Vui lòng nhập email để nhận OTP.");
+            return "redirect:/forgot-password";
+        }
+        if (verified == null || !verified) {
+            ra.addFlashAttribute("error", "Bạn cần xác thực OTP trước.");
+            return "redirect:/verify-otp";
+        }
+
+        model.addAttribute("email", email);
+        return "client/auth/reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String handleResetPassword(
+            @RequestParam("password") String password,
+            @RequestParam("confirmPassword") String confirmPassword,
+            HttpSession session,
+            RedirectAttributes ra
+    ) {
+        String email = (String) session.getAttribute(FP_EMAIL);
+        Boolean verified = (Boolean) session.getAttribute(FP_VERIFIED);
+
+        if (email == null || email.isBlank()) {
+            ra.addFlashAttribute("error", "Session đã hết. Vui lòng thao tác lại.");
+            return "redirect:/forgot-password";
+        }
+        if (verified == null || !verified) {
+            ra.addFlashAttribute("error", "Bạn cần xác thực OTP trước.");
+            return "redirect:/verify-otp";
+        }
+
+        password = password == null ? "" : password.trim();
+        confirmPassword = confirmPassword == null ? "" : confirmPassword.trim();
+
+        if (password.length() < 6) {
+            ra.addFlashAttribute("error", "Mật khẩu phải ít nhất 6 ký tự.");
+            return "redirect:/reset-password";
+        }
+        if (!password.equals(confirmPassword)) {
+            ra.addFlashAttribute("error", "Password và Confirm Password không khớp.");
+            return "redirect:/reset-password";
+        }
+
+        // Update password (encode inside UserService)
+        this.userService.updatePasswordByEmail(email, password);
+
+        // clear flow session
+        clearForgotSession(session);
+
+        ra.addFlashAttribute("message", "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
+        return "redirect:/login";
+    }
+
+    // =========================
+    // Helpers
+    // =========================
+
+    private String normalizeEmail(String email) {
+        if (email == null) return "";
+        return email.trim().toLowerCase();
+    }
+
+    private String generateOtp6() {
+        int n = ThreadLocalRandom.current().nextInt(0, 1_000_000);
+        return String.format("%06d", n);
+    }
+
+    private void clearForgotSession(HttpSession session) {
+        session.removeAttribute(FP_EMAIL);
+        session.removeAttribute(FP_OTP);
+        session.removeAttribute(FP_EXPIRE_AT);
+        session.removeAttribute(FP_VERIFIED);
     }
 }

@@ -46,6 +46,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
+
     private final static String city_constant = "Thành Phố Cần Thơ";
     UserRepository userRepository;
     RoleRepository roleRepository;
@@ -58,7 +59,7 @@ public class UserService {
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID",
-                        request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
+                request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
@@ -136,7 +137,7 @@ public class UserService {
         }
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("User ID",
-                        request.getRoleId()));
+                request.getRoleId()));
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
             user.setUpdatedAt(LocalDateTime.now());
@@ -209,8 +210,8 @@ public class UserService {
                     continue;
                 }
 
-                if (row.getCell(1) == null || row.getCell(2) == null ||
-                        row.getCell(3) == null || row.getCell(6) == null) {
+                if (row.getCell(1) == null || row.getCell(2) == null
+                        || row.getCell(3) == null || row.getCell(6) == null) {
                     throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
                 }
 
@@ -307,5 +308,41 @@ public class UserService {
         user.setOtpRequestedTime(null);
         this.userRepository.save(user);
     }
+// ====== ADD for Forgot Password (OTP) ======
 
+    public boolean existsByEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        return this.userRepository.existsByEmail(email.trim().toLowerCase());
+    }
+
+    @Transactional
+    public void updatePasswordByEmail(String email, String rawPassword) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        var user = this.userRepository.findByEmail(normalizedEmail);
+
+        if (user == null) {
+            throw new ResourceNotFoundException("Email", normalizedEmail);
+        }
+
+        // encode + update
+        user.setPassword(this.passwordEncoder.encode(rawPassword.trim()));
+
+        // clear OTP fields if your User entity has these fields
+        try {
+            user.setOneTimePassword(null);
+            user.setOtpRequestedTime(null);
+        } catch (Exception ignored) {
+        }
+
+        this.userRepository.save(user);
+    }
 }

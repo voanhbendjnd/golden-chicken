@@ -1,0 +1,162 @@
+/* ============================= */
+/* ===== HERO SLIDER ===== */
+/* ============================= */
+
+.section {
+    margin-top: 120px;
+}
+
+.swiper {
+    width: 100%;
+    /* max-width: 1400px; */
+    margin: auto;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+}
+
+.swiper-slide img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* pagination */
+.swiper-pagination-bullet {
+    background: #fff;
+    opacity: 0.6;
+}
+
+.swiper-pagination-bullet-active {
+    background: #c9152b;
+    opacity: 1;
+}
+
+/* ============================= */
+/* ===== TODAY SECTION ===== */
+/* ============================= */
+.today-menu {
+    display: flex;
+    justify-content: center;
+}
+
+.today-list {
+    border-radius: 50px;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* text block */
+
+.today-text h3 {
+    font-weight: 800;
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.today-text p {
+    font-size: 14px;
+    color: #444;
+}
+
+/* menu slider */
+.header {
+    overflow: visible !important;
+}
+
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-item.children {
+    position: relative;
+}
+
+.navbar-item.children .menu-list {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    overflow: visible;
+    width: max-content;
+}
+
+.menu-slider {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+}
+
+.menu-slider__item {
+    position: relative;
+    /* Cố định chiều rộng, ảnh sẽ không bị thu nhỏ theo màn hình */
+    width: 230px;
+    /* Đảm bảo item không bị co lại trong flex container */
+    flex-shrink: 0;
+    border-radius: 33px;
+    overflow: hidden;
+    transition: 0.35s ease;
+    display: block;
+    /* Vì là thẻ <a> nên cần display block hoặc inline-block */
+}
+
+.menu-slider {
+    display: flex;
+    gap: 20px;
+    /* Khoảng cách giữa các món ăn */
+    overflow-x: auto;
+    /* Tạo thanh cuộn ngang khi màn hình nhỏ */
+    padding: 20px 10px;
+    scroll-behavior: smooth;
+}
+
+/* Ẩn thanh cuộn xấu xí nếu muốn */
+.menu-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.menu-slider__item img {
+    /* Ảnh bây giờ sẽ rộng bằng 100% của 230px (tức là 230px cố định) */
+    width: 100%;
+    display: block;
+    border-radius: 22px;
+}
+
+.menu-slider__item:hover {
+    transform: translateY(-10px);
+}
+
+/* title overlay */
+
+.menu-item__title {
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+.menu-item__title button {
+    margin-top: 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-yellow {
+    background: #ffd84d;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 14px;
+    transition: 0.3s ease;
+}
+
+.btn-yellow:hover {
+    background: #ffc107;
+    transform: translateY(-3px);
+}

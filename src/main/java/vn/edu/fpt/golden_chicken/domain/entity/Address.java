@@ -30,10 +30,8 @@ public class Address {
     String specificAddress;
     @Column(columnDefinition = "NVARCHAR(255)")
     String ward;
-    @Column(columnDefinition = "NVARCHAR(255)")
-    String district;
+
     @Column(columnDefinition = "NVARCHAR(255)")
     String city;
     Boolean isDefault = false;
-    String status = "ACTIVE";
 }

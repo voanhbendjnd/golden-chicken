@@ -52,14 +52,6 @@
                                 th:errors="*{specificAddress}"></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Quận/Huyện</label>
-                            <select th:field="*{district}" class="form-control" th:attr="data-selected=*{district}">
-                                <option value="">-- Chọn quận/huyện --</option>
-                            </select>
-                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('district')}"
-                                th:errors="*{district}"></div>
-                        </div>
 
                         <div class="mb-3">
                             <label class="form-label">Phường/Xã</label>

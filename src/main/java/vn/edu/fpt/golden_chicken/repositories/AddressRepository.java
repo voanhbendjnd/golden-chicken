@@ -11,11 +11,17 @@ import vn.edu.fpt.golden_chicken.domain.entity.Address;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
-    List<Address> findAllByUserIdAndStatusOrderByIsDefaultDescIdDesc(Long userId, String status);
+    // List<Address> findAllByUserIdAndStatusOrderByIsDefaultDescIdDesc(Long userId, String status);
+
+    List<Address> findAllByUserIdOrderByIsDefaultDescIdDesc(Long userId);
+
+    List<Address> findAllByUserId(Long userId);
 
     Optional<Address> findByIdAndUserId(Long id, Long userId);
 
-    Optional<Address> findFirstByUserIdAndStatusAndIsDefaultTrue(Long userId, String status);
+    // Optional<Address> findFirstByUserIdAndStatusAndIsDefaultTrue(Long userId, String status);
+    Optional<Address> findFirstByUserIdAndIsDefaultTrue(Long userId);
 
-    List<Address> findAllByUserIdAndStatusAndIsDefaultTrue(Long userId, String status);
+    // List<Address> findAllByUserIdAndStatusAndIsDefaultTrue(Long userId, String status);
+    List<Address> findAllByUserIdAndIsDefaultTrue(Long userId);
 }

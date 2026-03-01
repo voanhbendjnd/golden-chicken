@@ -16,6 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.services.UserService;
 
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
@@ -57,6 +58,11 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                     user.getStaff() != null && user.getStaff().getStaffType() != null
                             ? user.getStaff().getStaffType().name()
                             : null);
+            // if
+            // (user.getRole().getName().equalsIgnoreCase(DefineVariable.roleNameCustomer))
+            // {
+            // session.setAttribute("cartCount", 1);
+            // }
         }
 
     }

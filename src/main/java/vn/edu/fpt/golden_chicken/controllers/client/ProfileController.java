@@ -63,8 +63,15 @@ public class ProfileController {
     @PostMapping("/profile/avatar")
     public String updateAvatar(@RequestParam("avatarFile") MultipartFile avatarFile) {
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String fileName = this.fileService.handleSaveUploadFile(avatarFile, "img/avatar");
-            profileService.updateAvatar(fileName);
+            String newFileName = this.fileService.handleSaveUploadFile(avatarFile, "img/avatar");
+            String oldFileName = profileService.updateAvatar(newFileName);
+
+            if (oldFileName != null
+                    && !oldFileName.isBlank()
+                    && !oldFileName.equals("testavt.jpg")
+                    && !oldFileName.equals(newFileName)) {
+                this.fileService.deleteAvatarFile(oldFileName, "img/avatar");
+            }
         }
         return "redirect:/profile";
     }

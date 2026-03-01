@@ -56,6 +56,20 @@ public class FileService {
         }
     }
 
+    public void deleteAvatarFile(String fileName, String targetFolder) {
+        if (!StringUtils.hasText(fileName)) return;
+    
+        try {
+            Path sourcePath = Paths.get("src", "main", "resources", "static", targetFolder, fileName).toAbsolutePath();
+            Path runtimePath = Paths.get("target", "classes", "static", targetFolder, fileName).toAbsolutePath();
+    
+            Files.deleteIfExists(sourcePath);
+            Files.deleteIfExists(runtimePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void initFolder(String folderName) throws URISyntaxException, IOException {
         var path = Paths.get(baseURI, folderName);
         if (!Files.exists(path)) {
