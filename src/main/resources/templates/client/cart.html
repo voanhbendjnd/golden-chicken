@@ -11,38 +11,20 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+    <script th:src="@{/js/cart.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
 
     <th:block th:replace="~{common/head}"></th:block>
 
     <style>
-        .cart-page {
-            min-height: 80vh;
-        }
 
-        .text-truncate-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .checkout-bar {
-            position: sticky;
-            bottom: 0;
-            z-index: 100;
-            border-top: 2px dashed #ffc107;
-        }
-
-        .cart-item:hover {
-            background-color: #f8f9fa !important;
-        }
     </style>
 </head>
 
 <body>
     <div th:replace="~{client/layout/header}"></div>
 
-    <section class="cart-page py-5 bg-light">
+    <section class="cart-page py-5 bg-light" style="margin-top: 30px;">
         <div class="container">
             <h4 class="mb-4 fw-bold"><i class="fa-solid fa-basket-shopping me-2"></i>GIỎ HÀNG CỦA BẠN</h4>
 
@@ -95,8 +77,10 @@
                                     data-action="minus">
                                     <i class="fa-solid fa-minus"></i>
                                 </button>
-                                <input type="text" class="form-control text-center bg-white fw-bold shadow-none"
-                                    th:id="'qty-' + ${item.productId}" th:value="${item.quantity}" readonly>
+                                <input type="number"
+                                    class="form-control text-center bg-white fw-bold shadow-none qty-input"
+                                    th:id="'qty-' + ${item.productId}" th:data-id="${item.productId}"
+                                    th:value="${item.quantity}" min="1" max="33">
                                 <button class="btn btn-outline-secondary btn-update" th:data-id="${item.productId}"
                                     data-action="plus">
                                     <i class="fa-solid fa-plus"></i>
@@ -140,119 +124,7 @@
     <div th:replace="~{client/layout/footer}"></div>
 
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            const csrfToken = document.getElementById('csrf-token').value;
 
-            function calculateFinalTotal() {
-                let totalQty = 0;
-                let totalPrice = 0;
-                let checkedItems = 0;
-                const checkboxes = document.querySelectorAll('.item-checkbox');
-                var cnt = 0;
-                checkboxes.forEach(cb => {
-                    if (cb.checked) {
-                        const id = cb.getAttribute('data-id');
-                        const qty = parseInt(document.getElementById('qty-' + id).value);
-                        const price = parseFloat(document.getElementById('subtotal-' + id).getAttribute('data-price'));
-                        cnt++;
-                        totalQty += qty;
-                        totalPrice += (price * qty);
-                        checkedItems++;
-                    }
-                });
-
-                document.getElementById('total-qty').innerText = cnt;
-                document.getElementById('total-price').innerText = new Intl.NumberFormat('vi-VN').format(totalPrice) + '₫';
-
-                document.getElementById('btn-order').onclick = function () {
-                    const selectedIds = [];
-                    document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
-                        selectedIds.push(cb.getAttribute('data-id'));
-                    });
-
-                    if (selectedIds.length === 0) {
-                        Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để đặt hàng!', 'info');
-                        return;
-                    }
-
-                    window.location.href = '/checkout/order?ids=' + selectedIds.join(',');
-                };
-
-                const selectAll = document.getElementById('select-all');
-                if (selectAll) selectAll.checked = (checkedItems === checkboxes.length && checkboxes.length > 0);
-            }
-
-            document.body.addEventListener('change', function (e) {
-                if (e.target.id === 'select-all') {
-                    document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = e.target.checked);
-                    calculateFinalTotal();
-                }
-                if (e.target.classList.contains('item-checkbox')) {
-                    calculateFinalTotal();
-                }
-            });
-
-            // 3. GỌI API CẬP NHẬT
-            async function updateCart(productId, quantity) {
-                try {
-                    const response = await fetch('/cart/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                        body: JSON.stringify({ productId: productId, quantity: quantity })
-                    });
-                    if (response.ok) {
-                        const cart = await response.json();
-                        renderUI(cart, productId);
-                    }
-                } catch (err) { console.error("Lỗi:", err); }
-            }
-
-            function renderUI(cart, updatedId) {
-                const itemData = cart.items.find(i => i.productId == updatedId);
-                const itemRow = document.getElementById('item-row-' + updatedId);
-
-                if (!itemData) {
-                    if (itemRow) itemRow.remove();
-                    if (cart.items.length === 0) location.reload();
-                } else {
-                    document.getElementById('qty-' + updatedId).value = itemData.quantity;
-                    const subtotal = document.getElementById('subtotal-' + updatedId);
-                    subtotal.innerText = new Intl.NumberFormat('vi-VN').format(itemData.price * itemData.quantity) + '₫';
-                }
-                calculateFinalTotal();
-            }
-
-            document.body.addEventListener('click', function (e) {
-                const btnUpdate = e.target.closest('.btn-update');
-                if (btnUpdate) {
-                    const id = btnUpdate.getAttribute('data-id');
-                    const action = btnUpdate.getAttribute('data-action');
-                    const input = document.getElementById('qty-' + id);
-                    let val = parseInt(input.value);
-
-                    if (action === 'minus' && val <= 1) return;
-                    updateCart(id, action === 'plus' ? val + 1 : val - 1);
-                }
-
-                const btnDelete = e.target.closest('.btn-delete');
-                if (btnDelete) {
-                    const id = btnDelete.getAttribute('data-id');
-                    Swal.fire({
-                        title: 'Xóa món này?',
-                        text: "Món ăn sẽ được loại bỏ khỏi giỏ hàng",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: 'Xóa ngay',
-                        cancelButtonText: 'Hủy'
-                    }).then((result) => {
-                        if (result.isConfirmed) updateCart(id, 0);
-                    });
-                }
-            });
-
-            calculateFinalTotal();
-        });
     </script>
 </body>
 

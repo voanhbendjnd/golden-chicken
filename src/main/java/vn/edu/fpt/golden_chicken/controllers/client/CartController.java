@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.servlet.http.HttpSession;
 import vn.edu.fpt.golden_chicken.domain.request.CartDTO;
-import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -40,9 +40,12 @@ public class CartController {
 
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<CartResponse> updateCart(@RequestBody CartDTO dto) throws PermissionException {
+    public ResponseEntity<?> updateCart(@RequestBody CartDTO dto, HttpSession session)
+            throws PermissionException {
         this.cartService.updateQuantity(dto);
-        CartResponse updatedCart = this.cartService.getProductInCart();
-        return ResponseEntity.ok(updatedCart);
+        int total = this.cartService.sumCart();
+        session.setAttribute("cartCount", total);
+        var res = this.cartService.getProductInCart();
+        return ResponseEntity.ok(res);
     }
 }

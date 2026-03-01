@@ -167,8 +167,11 @@ public class CheckoutController {
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
-        this.orderService.order(dto);
+        var order = this.orderService.order(dto);
 
+        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
+            return "redirect:/payment/create?orderId=" + order.getId();
+        }
         return "redirect:/";
     }
 

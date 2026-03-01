@@ -17,9 +17,9 @@
                 <a th:if="${session.roleName == 'CUSTOMER'}" th:href="@{/cart}" class="btn-icon position-relative"
                     style="text-decoration: none; color: white;">
                     <i class="fa-solid fa-cart-shopping fs-4"></i>
-                    <span th:if="${session.cartCount != null && session.cartCount > 0}"
+                    <span id="cart-badge" th:classappend="${cartCount == null || cartCount == 0} ? 'd-none' : ''"
                         class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style="font-size: 0.6rem;" th:text="${session.cartCount}">0</span>
+                        style="font-size: 0.6rem;" th:text="${cartCount}">0</span>
                 </a>
 
                 <a th:if="${session.roleName == 'CUSTOMER'}" th:href="@{/order-history}"
@@ -56,7 +56,6 @@
                     <h1 th:text="${session.roleName}">100</h1>
 
                 </a> -->
-                <h1 th:text="${session.cartSum}"></h1>
                 <span th:if="${session.user == null}">
                     <a th:href="@{/register}" class="login-item">Đăng ký /</a>
                     <a th:href="@{/login}" class="login-item">Đăng nhập</a>
