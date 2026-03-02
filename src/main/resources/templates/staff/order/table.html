@@ -166,6 +166,11 @@
                                             </nav>
                                         </div>
                                     </div>
+                                    <form id="updateStatusForm" th:action="@{/staff/order/update-status}" method="POST"
+                                        style="display: none;">
+                                        <input type="hidden" name="orderId" id="submitOrderId">
+                                        <input type="hidden" name="status" id="submitStatus">
+                                    </form>
                                     <div th:if="${orders == null or orders.isEmpty()}" style="text-align: center;">
                                         Not Found orders!
                                     </div>
@@ -185,33 +190,26 @@
 
             Swal.fire({
                 title: 'Confirm update?',
-                text: `Do you want change status order with ID #${orderId} to ${newStatus}?`,
+                text: `Do you want to change status of order #${orderId} to ${newStatus}?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes',
-                cancelButtonText: 'No'
+                cancelButtonText: 'No',
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Gửi yêu cầu cập nhật về Server bằng Fetch API
-                    fetch(`/staff/order/update-status/${orderId}?status=${newStatus}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]').value
-                        }
-                    }).then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'Order status update successfully.', 'success');
-                        } else {
-                            Swal.fire('Error!', 'Cannot update order status.', 'error');
-                            location.reload(); // Reset lại nếu lỗi
-                        }
-                    });
+                    // 1. Điền dữ liệu vào form ẩn
+                    document.getElementById('submitOrderId').value = orderId;
+                    document.getElementById('submitStatus').value = newStatus;
+
+                    // 2. Gửi form (trang web sẽ tải lại)
+                    document.getElementById('updateStatusForm').submit();
                 } else {
-                    location.reload(); // Trả lại giá trị cũ nếu nhấn Hủy
+                    // Trả lại giá trị cũ của select nếu nhấn Cancel
+                    location.reload();
                 }
             });
         }
-
 
         function handleSearch() {
             const name = document.getElementById("searchName").value.trim();

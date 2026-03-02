@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
-import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -63,6 +63,7 @@ public class OrderService {
         order.setPhone(dto.getPhone());
         order.setStatus(OrderStatus.PENDING);
         order.setCustomer(customer);
+        order.setUpdatedAt(LocalDateTime.now());
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
         var mpDetails = details.stream().collect(Collectors.toMap(x -> x.getId(), x -> x));
@@ -181,6 +182,7 @@ public class OrderService {
                 break;
             case "COMPLETED":
                 order.setStatus(OrderStatus.COMPLETED);
+                order.setPaymentStatus(PaymentStatus.PAID);
                 break;
             case "CANCELLED":
                 order.setStatus(OrderStatus.CANCELLED);
@@ -202,7 +204,8 @@ public class OrderService {
     }
 
     public void updatePaymentStatus(Long orderId, PaymentStatus status) {
-        var order = this.orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
+        var order = this.orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
         order.setPaymentStatus(status);
         this.orderRepository.save(order);
     }

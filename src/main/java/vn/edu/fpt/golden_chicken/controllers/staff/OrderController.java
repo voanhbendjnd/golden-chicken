@@ -31,18 +31,24 @@ public class OrderController {
 
     @GetMapping
     public String table(Model model, @Filter Specification<Order> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DefineVariable.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.orderService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("meta", data.getMeta());
         model.addAttribute("orders", data.getResult());
         return "staff/order/table";
     }
 
-    @PostMapping("/update-status/{id:[0-9]+}")
+    @PostMapping("/update-status/uuid/{id:[0-9]+}")
     @ResponseBody
-    public ResponseEntity<?> updateStatus(@RequestParam String status, @PathVariable("id") Long id) {
+    public ResponseEntity<?> updateStatusBase(@RequestParam String status, @PathVariable("id") Long id) {
         this.orderService.changeOrderStatus(id, status);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/update-status")
+    public String updateStatus(@RequestParam("status") String status, @RequestParam("orderId") Long id) {
+        this.orderService.changeOrderStatus(id, status);
+        return "redirect:/staff/order";
     }
 
     @GetMapping("/{id:[0-9]+}")

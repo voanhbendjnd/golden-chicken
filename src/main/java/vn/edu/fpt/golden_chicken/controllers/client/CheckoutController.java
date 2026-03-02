@@ -60,6 +60,11 @@ public class CheckoutController {
         if (cartItems == null || cartItems.isEmpty()) {
             return "redirect:/cart";
         }
+        for (var x : cartItems) {
+            if (x.getQuantity() > 33 || x.getQuantity() < 1) {
+                return "redirect:/cart";
+            }
+        }
 
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (var x : cartItems) {
