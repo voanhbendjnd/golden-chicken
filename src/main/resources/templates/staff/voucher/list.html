@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Voucher List</title>
     <link rel="stylesheet" th:href="@{/css/voucher.css}">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
     <head th:replace="~{common/head}"></head>
 
 </head>
@@ -39,7 +39,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="v : ${vouchers}">
+                        <tr th:each="v : ${vouchers.content}">
                             <td th:text="${v.id}"></td>
                             <td th:text="${v.code}"></td>
                             <td th:text="${v.name}"></td>
@@ -68,6 +68,42 @@
                         </tr>
                     </tbody>
                 </table>
+                <nav aria-label="Artist pagination">
+                    <ul class="pagination justify-content-center flex-wrap">
+
+                        <!-- Previous -->
+                        <li class="page-item"
+                            th:classappend="${!vouchers.hasPrevious()} ? 'disabled'">
+
+                            <a class="page-link"
+                               th:href="@{/staff/voucher/list(page=${currentPage - 1}, size=${vouchers.size})}">
+                                Previous
+                            </a>
+                        </li>
+
+                        <!-- Page numbers -->
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, vouchers.totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+
+                            <a class="page-link"
+                               th:href="@{/staff/voucher/list(page=${i}, size=${vouchers.size})}"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- Next -->
+                        <li class="page-item"
+                            th:classappend="${!vouchers.hasNext()} ? 'disabled'">
+
+                            <a class="page-link"
+                               th:href="@{/staff/voucher/list(page=${currentPage + 1}, size=${vouchers.size})}">
+                                Next
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
         </main>
 
