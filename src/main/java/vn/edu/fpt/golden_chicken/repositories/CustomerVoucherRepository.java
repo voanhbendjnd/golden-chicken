@@ -14,4 +14,6 @@ public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher
     List<CustomerVoucher> findByCustomerOrderByRedeemedAtDesc(Customer customer);
 
     List<CustomerVoucher> findByStatus(StatusVoucher status);
+
+    boolean existsByVoucher_Id(Long voucherId);
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Page<Voucher> findByIsDeletedFalse(Pageable pageable);
-    List<Voucher> findByIsDeletedFalse();
+//    List<Voucher> findByIsDeletedFalse();
     @Query("""
             SELECT v FROM Voucher v
             WHERE v.isDeleted = false

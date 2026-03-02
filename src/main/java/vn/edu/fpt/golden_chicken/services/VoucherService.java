@@ -151,10 +151,16 @@ public class VoucherService {
 
     @Transactional
     public void deleteVoucher(Long id) {
-        Voucher v = repo.findById(id)
+
+        Voucher voucher = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        v.setIsDeleted(true);
-        repo.save(v);
+
+        boolean isUsed = customerVoucherRepository.existsByVoucher_Id(id);
+
+        if (isUsed) {
+            throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
+        }
+        repo.delete(voucher); // HARD DELETE
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
