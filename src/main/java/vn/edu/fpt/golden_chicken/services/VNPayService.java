@@ -80,8 +80,13 @@ public class VNPayService {
         if (signValue == null || signValue.isEmpty()) {
             return false;
         }
+        // String hashData = fields.entrySet().stream()
+        // .map(e -> e.getKey() + "=" + e.getValue())
+        // .collect(Collectors.joining("&"));
         String hashData = fields.entrySet().stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
+                .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.US_ASCII)
+                        + "="
+                        + URLEncoder.encode(e.getValue(), StandardCharsets.US_ASCII))
                 .collect(Collectors.joining("&"));
         String calculatedHash = hmacSHA512(vnPayConfig.getHashSecret(), hashData);
         return calculatedHash.equalsIgnoreCase(signValue);

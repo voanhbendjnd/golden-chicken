@@ -132,7 +132,7 @@ public class CheckoutController {
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
                     // selectedAddress.getDistrict(),
