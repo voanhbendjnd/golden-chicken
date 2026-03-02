@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
-import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -63,6 +63,7 @@ public class OrderService {
         order.setPhone(dto.getPhone());
         order.setStatus(OrderStatus.PENDING);
         order.setCustomer(customer);
+        order.setUpdatedAt(LocalDateTime.now());
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
         var mpDetails = details.stream().collect(Collectors.toMap(x -> x.getId(), x -> x));
@@ -170,31 +171,67 @@ public class OrderService {
         return res;
     }
 
-    public void changeOrderStatus(Long id, String status) {
-        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
-        switch (status) {
-            case "PENDING":
-                order.setStatus(OrderStatus.PENDING);
-                break;
-            case "SHIPPING":
-                order.setStatus(OrderStatus.SHIPPING);
-                break;
-            case "COMPLETED":
-                order.setStatus(OrderStatus.COMPLETED);
-                break;
-            case "CANCELLED":
-                order.setStatus(OrderStatus.CANCELLED);
-                break;
-            case "DELIVERED":
-                order.setStatus(OrderStatus.DELIVERED);
-                break;
-            default:
-                break;
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName) {
+        // 1. Tìm đơn hàng
+        var order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
+        OrderStatus currentStatus = order.getStatus();
+        OrderStatus nextStatus;
+
+        try {
+            nextStatus = OrderStatus.valueOf(statusName);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
+        // 2. Chặn nếu đơn hàng đã hoàn thành hoặc đã hủy
+        if (currentStatus == OrderStatus.COMPLETED || currentStatus == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Đơn hàng đã kết thúc (Completed/Cancelled), không thể thay đổi trạng thái!");
+        }
+
+        // 3. Logic chặn "Đi lùi"
+        // Không cho phép từ SHIPPING quay lại PENDING
+        if (currentStatus == OrderStatus.SHIPPING && nextStatus == OrderStatus.PENDING) {
+            throw new RuntimeException("Đơn hàng đang giao, không thể quay về trạng thái chờ xử lý!");
+        }
+
+        // Nếu chọn trạng thái trùng với hiện tại thì không cần làm gì cả
+        if (currentStatus == nextStatus) {
+            return;
+        }
+
+        // 4. Cập nhật trạng thái và các logic đi kèm
+        order.setStatus(nextStatus);
+        order.setUpdatedAt(LocalDateTime.now()); // Cập nhật ngày chỉnh sửa
+
+        if (nextStatus == OrderStatus.COMPLETED) {
+            // Nếu hoàn thành thì mặc định là đã thanh toán
+            order.setPaymentStatus(PaymentStatus.PAID);
+        }
+
+        // 5. Lưu và gửi mail
         var newOrder = this.orderRepository.save(order);
-        this.mailService.allowMailUpdateOrderStatus(order.getCustomer().getUser().getEmail(),
-                newOrder.getStatus().toString(), "#" + order.getId(), order.getName());
+
+        if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
+            this.mailService.allowMailUpdateOrderStatus(
+                    order.getCustomer().getUser().getEmail(),
+                    newOrder.getStatus().toString(),
+                    "#" + order.getId(),
+                    order.getName()
+            );
+        }
+    }
+    public Order getOrderEntity(Long id) {
+        return this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+    }
+
+    public void updatePaymentStatus(Long orderId, PaymentStatus status) {
+        var order = this.orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
+        order.setPaymentStatus(status);
+        this.orderRepository.save(order);
     }
 
     public ResOrder findById(Long id) {
