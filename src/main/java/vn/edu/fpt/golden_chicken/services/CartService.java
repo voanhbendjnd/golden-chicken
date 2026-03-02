@@ -14,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.CartItem;
 import vn.edu.fpt.golden_chicken.domain.request.CartDTO;
+import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -44,7 +46,7 @@ public class CartService {
         var customer = user.getCustomer();
         var product = this.productRepository.findById(dto.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.productId()));
-        var cart = this.cartRepository.findByCustomerId(customer.getId());
+        // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId());
         if (cartItem == null) {
             cartItem = new CartItem();
@@ -127,7 +129,7 @@ public class CartService {
             throw new PermissionException("Only customers can perform this action!");
         }
         var customer = user.getCustomer();
-        var cart = this.cartRepository.findByCustomerId(customer.getId());
+        // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), dto.productId());
         if (cartItem == null) {
             cartItem = new CartItem();
@@ -171,6 +173,43 @@ public class CartService {
             return 0;
         } else {
             return cartItems.size();
+        }
+    }
+
+    public void cleanCartAfterCheckout(List<OrderDTO.OrderDetail> item) {
+        var listFromCart = new ArrayList<CartItem>();
+        if (item.getFirst().getItemId() != null) {
+            var cartItems = this.cartRepository
+                    .findByIdIn(item.stream().map(x -> x.getItemId()).collect(Collectors.toList()));
+            var mpCartItems = item.stream()
+                    .collect(Collectors.toMap(x -> x.getItemId(), x -> x));
+            for (var x : cartItems) {
+                var qtyInCart = x.getQuantity();
+                if (qtyInCart <= 0) {
+                    throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
+                            + ") in cart less than or equal 0!");
+                }
+                var it = mpCartItems.get(x.getId());
+                if (it != null) {
+                    var lastQty = qtyInCart - it.getQuantity();
+                    if (lastQty < 0) {
+                        throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
+                                + ") in cart less than or equal 0!");
+
+                    } else if (lastQty == 0) {
+                        listFromCart.add(x);
+                    } else if (lastQty > 0) {
+                        x.setQuantity(lastQty);
+                    }
+
+                } else {
+                    throw new ResourceNotFoundException("Cart Item ID", x.getId());
+                }
+            }
+            this.cartRepository.saveAll(cartItems);
+            if (!listFromCart.isEmpty() || listFromCart.size() != 0) {
+                this.cartRepository.deleteAll(listFromCart);
+            }
         }
     }
 }
