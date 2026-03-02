@@ -1,26 +1,29 @@
 package vn.edu.fpt.golden_chicken.services.kafka;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
+import vn.edu.fpt.golden_chicken.services.MailService;
 
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class MailConsumer {
-    @Autowired
-    private JavaMailSender mailSender;
+
+    MailService mailService;
 
     @KafkaListener(topics = "order-chicken-topic", groupId = "email-group")
     public void listenOrderAndSendMail(OrderMessage msg) {
-        System.out.println(">>>> Kafka ACCEPT REQUEST");
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(msg.getCustomerEmail());
-        email.setSubject("Confirm Order #" + msg.getOrderId());
-        email.setText("Order Status: " + msg.getStatus());
-        this.mailSender.send(email);
+        System.out.println(">>>> KAFKA ACCEPT REQUEST ORDER");
+
+        this.mailService.sendStatus(msg.getCustomerEmail(), "Confirm Order With ID #" + msg.getOrderId(), "mail/os",
+                msg.getCustomerEmail(), msg.getStatus().name(), String.valueOf(msg.getOrderId()),
+                msg.getCustomerName());
+
         System.out.println(">>> SEND MAIL SUCCESS");
 
     }

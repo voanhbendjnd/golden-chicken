@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.criteria.Join;
-import vn.edu.fpt.golden_chicken.controllers.client.AddressController;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,7 +38,6 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 public class ProductService {
 
-    AddressController addressController;
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;

@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
@@ -33,11 +32,11 @@ public class VoucherService {
     CustomerRepository customerRepository;
     CustomerVoucherRepository customerVoucherRepository;
 
-    //   @Transactional
-    //    public Page<Artist> getAllArtist(int page,int size){
-    //        Pageable pageable = PageRequest.of(page,size);
-    //        return artistRepository.findAll(pageable);
-    //    }
+    // @Transactional
+    // public Page<Artist> getAllArtist(int page,int size){
+    // Pageable pageable = PageRequest.of(page,size);
+    // return artistRepository.findAll(pageable);
+    // }
     @Transactional
     public Page<ResVoucher> getAll(int page, int size) {
 

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.domain.entity.CartItem;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
@@ -27,7 +26,6 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -118,8 +116,9 @@ public class OrderService {
 
         this.cartService.cleanCartAfterCheckout(dto.getItems());
         this.productRepository.saveAll(details);
-        this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString(),
-                "#" + order.getId(), order.getName());
+        // this.mailService.allowMailUpdateOrderStatus(user.getEmail(),
+        // newOrder.getStatus().toString(),
+        // "#" + order.getId(), order.getName());
 
         return newOrder;
     }
