@@ -348,6 +348,9 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         var categoryName = product.getCategory().getName();
         var products = this.productRepository.findRelatedProducts(categoryName, id);
+        if (products.size() < 5) {
+            products.addAll(this.productRepository.findByTopSold());
+        }
         return products.stream().map(ProductConvert::toResProduct).toList();
     }
 
