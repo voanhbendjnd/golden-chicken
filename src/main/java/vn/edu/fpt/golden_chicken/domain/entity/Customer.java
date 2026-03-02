@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -36,6 +35,8 @@ public class Customer implements Serializable {
     List<Order> orders;
     @OneToMany(mappedBy = "customer")
     List<CartItem> cartItems;
+    @OneToMany(mappedBy = "customer")
+    List<CustomerVoucher> customerVouchers;
 
     public void addCartItem(CartItem item) {
         if (this.cartItems == null) {

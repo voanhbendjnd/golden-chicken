@@ -1,5 +1,7 @@
 package vn.edu.fpt.golden_chicken.domain.request;
 
+import java.io.Serializable;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,7 +13,8 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 // @StrongPassword
-public class UserDTO {
+public class UserDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     Long id;
     @Email(message = "Email Incorrect Format!")
     @NotBlank(message = "Email Cannot Be Empty!")

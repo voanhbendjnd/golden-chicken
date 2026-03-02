@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <head th:replace="~{common/head}"></head>
+    <title>Create Product</title>
+</head>
+
+<body>
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">Create New Combo</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/staff/combo/create}" method="post" th:object="${product}"
+                            enctype="multipart/form-data">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Combo Name</label>
+                                <input type="text" class="form-control" th:field="*{name}" required />
+                                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Price</label>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{price}"
+                                        required />
+                                    <div class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Category</label>
+                                    <select class="form-select" th:field="*{category.id}" required>
+                                        <option value="">-- Choose Category --</option>
+                                        <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                            th:text="${cat.name}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
+                                <div class="text-danger" th:if="${#fields.hasErrors('description')}"
+                                    th:errors="*{description}"></div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Main Image</label>
+                                    <input type="file" name="thumbnailFile" class="form-control" accept="image/*"
+                                        onchange="previewImage(this, 'main-preview')" required />
+                                    <img id="main-preview" src="#" alt="Preview" class="mt-2 img-thumbnail d-none"
+                                        style="height: 100px;" />
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Sub Images (Gallery)</label>
+                                    <input type="file" name="galleryFiles" class="form-control" accept="image/*"
+                                        multiple onchange="previewMultiple(this, 'gallery-preview')" />
+                                    <div id="gallery-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Product Type</label>
+                                    <div>COMBO</div>
+                                    <input type="hidden" name="type" value="COMBO" hidden>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Status</label>
+                                    <select th:field="*{active}" class="form-select" required>
+                                        <!-- <option value="true">Active</option> -->
+                                        <option value="false">Non-active</option>
+                                    </select>
+                                    <p style="font-size: 10px;">#If the product type is combo, the status will be
+                                        Non-Active until updated.</p>
+                                </div>
+                            </div>
+                            <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a th:href="@{/staff/combo}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4">Create Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewMultiple(input, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail';
+                        img.style.height = '80px';
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

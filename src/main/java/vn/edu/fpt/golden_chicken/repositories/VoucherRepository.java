@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Page<Voucher> findByIsDeletedFalse(Pageable pageable);
+    List<Voucher> findByIsDeletedFalse();
     @Query("""
             SELECT v FROM Voucher v
             WHERE v.isDeleted = false
@@ -23,5 +23,5 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             """)
     List<Voucher> findAvailableForExchange();
     boolean existsByCode(String code);
+    List<Voucher> findAllByStatus(String status);
 }
-

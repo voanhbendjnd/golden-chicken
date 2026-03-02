@@ -119,8 +119,7 @@
                         <div class="scroll-container border rounded p-3 bg-white">
                             <div class="row" id="product-list">
                                 <div th:each="product, iterStat : ${products}"
-                                    class="col-md-4 mb-3 product-item-container"
-                                    th:classappend="${iterStat.index >= 9 && !#lists.contains(currentProductIds, product.id)} ? 'd-none-limit' : ''">
+                                    class="col-md-4 mb-3 product-item-container">
 
                                     <div class="card p-2 product-item-card h-100"
                                         th:classappend="${#lists.contains(currentProductIds, product.id)} ? 'selected' : ''">

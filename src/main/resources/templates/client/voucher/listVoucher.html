@@ -1,0 +1,63 @@
+﻿<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đổi điểm lấy Voucher</title>
+  <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+  <link th:href="@{/css/base.css}" rel="stylesheet">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <th:block th:replace="~{common/head}"></th:block>
+  <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+  <link th:href="@{/css/voucher-redeem.css}" rel="stylesheet">
+</head>
+
+<body>
+  <div th:replace="~{client/layout/header}"></div>
+  <div class="page">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="main">
+      <h1 class="title">REDEEM POINTS</h1>
+      <div class="voucher-container">
+        <div th:replace="~{fragments/voucher-header :: voucher-header}"></div>
+
+        <section th:if="${showMyVouchers == null}">
+          <div class="section-head">
+            <h2>Danh sách voucher đổi điểm</h2>
+          </div>
+
+          <div class="list" th:if="${#lists.isEmpty(vouchers)}">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title">Chưa có voucher khả dụng</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="list" th:unless="${#lists.isEmpty(vouchers)}">
+            <div class="voucher" th:each="v : ${vouchers}">
+              <div class="v-left">
+                <div class="v-title" th:text="${v.name}">Voucher</div>
+                <div class="v-sub" th:text="${v.description}">Mô tả</div>
+              </div>
+              <div class="v-right">
+                <span class="tag" th:text="${v.pointCost} + ' điểm'">1000 điểm</span>
+                <a th:href="@{/vouchers/redeem/confirm(voucherId=${v.id})}" 
+                   class="btn btn-primary" 
+                   th:classappend="${points lt v.pointCost} ? 'disabled' : ''"
+                   th:text="${points >= v.pointCost ? 'Đổi' : 'Không đủ điểm'}">Đổi</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+      </div>
+    </main>
+  </div>
+  <div th:replace="~{client/layout/footer}"></div>
+</body>
+
+</html>

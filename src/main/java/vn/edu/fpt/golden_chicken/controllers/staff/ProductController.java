@@ -46,6 +46,12 @@ public class ProductController {
         return "redirect:/staff/product";
     }
 
+    @PostMapping("/status/{id:[0-9]+}")
+    public String updateStatus(@PathVariable("id") Long id) {
+        this.productService.updateStatus(id);
+        return "redirect:/staff/product";
+    }
+
     @GetMapping
     public String getProductTablePage(Model model,
             @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
@@ -73,7 +79,7 @@ public class ProductController {
             return "staff/product/create";
         }
         try {
-            this.productService.create(productDTO, galleryFiles, thumbnailFile);
+            this.productService.create(productDTO, galleryFiles, thumbnailFile, false);
             return "redirect:/staff/product";
         } catch (IOException ex) {
             model.addAttribute("errorMessage", ex.getMessage());

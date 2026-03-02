@@ -44,7 +44,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            <input type="hidden" name="type" value="SINGLE">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Description</label>
                                 <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
@@ -73,14 +73,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Product Type</label>
-                                    <select th:field="*{type}" class="form-select" required>
-                                        <option value="">-- Choose Type --</option>
-                                        <option th:value="SINGLE">SINGLE</option>
-                                        <option th:value="COMBO">COMBO</option>
-                                        <!-- <option
-                                            th:each="t : ${T(vn.edu.fpt.golden_chicken.common.ProductType).values()}"
-                                            th:value="${t}" th:text="${t}"></option> -->
-                                    </select>
+                                    <div>SINGLE</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Status</label>

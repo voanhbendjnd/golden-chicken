@@ -87,10 +87,10 @@ public class CheckoutController {
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
@@ -132,10 +132,10 @@ public class CheckoutController {
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
@@ -169,6 +169,9 @@ public class CheckoutController {
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
         var order = this.orderService.order(dto);
 
+        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
+            return "redirect:/payment/create?orderId=" + order.getId();
+        }
         return "redirect:/";
     }
 

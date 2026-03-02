@@ -24,7 +24,10 @@ import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.CartItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
+import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
+import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
@@ -40,11 +43,23 @@ public class ProductService {
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
+    CartItemRepository cartItemRepository;
+    OrderItemRepository orderItemRepository;
+    ComboDetailRepository comboDetailRepository;
+
+    public void updateStatus(Long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        product.setActive(!product.getActive());
+        this.productRepository.save(product);
+    }
 
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            return c.equal(categoryJoin.get("status"), true);
+            var p1 = c.equal(categoryJoin.get("status"), true);
+            var p2 = c.equal(r.get("type"), ProductType.SINGLE);
+            return c.and(p1, p2);
         };
 
         var res = new ResultPaginationDTO();
@@ -59,7 +74,7 @@ public class ProductService {
         return res;
     }
 
-    public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file)
+    public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file, boolean isCombo)
             throws IOException, URISyntaxException {
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
@@ -68,6 +83,12 @@ public class ProductService {
         }
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
+        if (isCombo) {
+            product.setType(ProductType.COMBO);
+        } else {
+            product.setType(ProductType.SINGLE);
+
+        }
         var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
 
         if (file != null && !file.isEmpty()) {
@@ -160,15 +181,11 @@ public class ProductService {
         }
         List<String> filesToDelete = new ArrayList<>();
 
-        // check category
         var category = this.categoryRepository.findById(dto.getCategory().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
-        // get record db
         var product = this.productRepository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.getId()));
-        // check img file
         if (file != null && !file.isEmpty()) {
-            // check file
             if (!this.validFile(file)) {
                 throw new IOException("File Invalid");
             }
@@ -176,7 +193,6 @@ public class ProductService {
             if (product.getImageUrl() != null) {
                 filesToDelete.add(product.getImageUrl());
             }
-            // save new file
             product.setImageUrl(this.fileService.getLastNameFile(file));
         }
         this.handleGalleryUpdate(product, files, dto.getImgs(), filesToDelete);
@@ -184,7 +200,7 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
-        product.setType(dto.getType());
+        // product.setType(dto.getType());
         product.setActive(dto.isActive());
         this.productRepository.save(product);
         filesToDelete.forEach(x -> {
@@ -206,7 +222,18 @@ public class ProductService {
     public void delete(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
-        this.productRepository.delete(product);
+        if (this.orderItemRepository.existsByProductId(id) || this.cartItemRepository.existsByProductId(id)
+                || this.comboDetailRepository.existsByProductId(id)) {
+            product.setActive(false);
+            var combos = this.comboDetailRepository.findByProductId(id);
+            for (var x : combos) {
+                x.getCombo().setActive(false);
+            }
+            this.comboDetailRepository.saveAll(combos);
+            return;
+        } else {
+            this.productRepository.delete(product);
+        }
     }
 
     @Transactional(readOnly = true)

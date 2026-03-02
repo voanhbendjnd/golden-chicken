@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lịch sử đổi điểm</title>
+  <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
+  <link th:href="@{/css/base.css}" rel="stylesheet">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+  <th:block th:replace="~{common/head}"></th:block>
+  <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+  <link th:href="@{/css/voucher-redeem.css}" rel="stylesheet">
+</head>
+
+<body>
+  <div th:replace="~{client/layout/header}"></div>
+  <div class="page">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="main">
+      <div class="voucher-container">
+        <div th:replace="~{fragments/voucher-header :: voucher-header}"></div>
+
+        <section>
+          <div class="section-head">
+            <h2>Danh sách lịch sử</h2>
+            <a class="btn btn-primary" th:href="@{/vouchers}">Quay lại</a>
+          </div>
+
+          <div class="list" th:if="${#lists.isEmpty(history)}">
+            <div class="voucher">
+              <div class="v-left">
+                <div class="v-title">Chưa có lịch sử đổi điểm</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="list" th:unless="${#lists.isEmpty(history)}">
+            <div class="voucher" th:each="cv : ${history}">
+              <div class="v-left">
+                <div class="v-title" th:text="${cv.voucher.name}">Tên voucher </div>
+                <div class="v-sub" th:text="${#temporals.format(cv.redeemedAt, 'dd/MM/yyyy HH:mm')}">24/02/2026 13:04
+                </div>
+              </div>
+              <div class="v-right">
+                <span class="tag personal" th:text="${' -' + cv.voucher.pointCost + ' điểm'}">-100 điểm</span>
+                <!-- <span class="tag personal" th:text="${cv.status}">AVAILABLE</span> -->
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div th:replace="~{client/layout/footer}"></div>
+</body>
+
+</html>

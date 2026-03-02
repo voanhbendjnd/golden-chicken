@@ -52,41 +52,26 @@ public class DatabaseIntializer implements CommandLineRunner {
 
             permissions.add(new Permission("IMPORT_PERMISSIONS", "/admin/permission/import", "POST", "PERMISSIONS"));
             permissions.add(new Permission("VIEW_PERMISSIONS", "/admin/permission", "GET", "PERMISSIONS"));
-            permissions
-                    .add(new Permission("CREATE_PERMISSION", "/admin/permission/create", "GET,POST", "PERMISSIONS"));
-            permissions.add(
-                    new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
-            permissions
-                    .add(new Permission("DELETE_PERMISSION", "/admin/permission/delete/**", "POST", "PERMISSIONS"));
-            permissions
-                    .add(new Permission("STAFF_PAGE", "/staff/**", "GET,POST", "STAFFS"));
-            // permissions.add(new Permission("FIND USER BY ID", "/admin/user/**", "GET",
-            // "USERS"));
-
-            // permissions.add(new Permission("FIND ROLE BY ID", "/admin/role/{id:[0-9]+}",
-            // "GET", "ROLES"));
-
-            // permissions.add(
-            // new Permission("FIND PERMISSION BY ID", "/admin/permission/{id:[0-9]+}",
-            // "GET", "PERMISSIONS"));
-
-            // permissions.add(new Permission("CATEGORY TABLE", "/staff/category", "GET",
-            // "CATEGORIES"));
-            // permissions.add(new Permission("CREATE CATEGORY PAGE",
-            // "/staff/category/create", "GET", "CATEGORIES"));
-            // permissions.add(new Permission("CREATE CATEGORY", "/staff/category/create",
-            // "GET", "CATEGORIES"));
-            // permissions.add(new Permission("UPDATE CATEGORY", "/staff/category/update",
-            // "POST", "CATEGORIES"));
-            // permissions
-            // .add(new Permission("UPDATE CATEGORY", "/staff/category/update/{id:[0-9]+}",
-            // "GET", "CATEGORIES"));
-            // permissions.add(new Permission("DELETE CATEGORY",
-            // "/staff/category/{id:[0-9]+}", "POST", "CATEGORIES"));
-            // permissions.add(new Permission("FIND ROLE BY ID",
-            // "/staff/category/{id:[0-9]+}", "GET", "CATEGORIES"));
+            permissions.add(new Permission("CREATE_PERMISSION", "/admin/permission/create", "GET,POST", "PERMISSIONS"));
+            permissions.add(new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
+            permissions.add(new Permission("DELETE_PERMISSION", "/admin/permission/delete/**", "POST", "PERMISSIONS"));
+            permissions.add(new Permission("STAFF_PAGE", "/staff/**", "GET,POST", "STAFFS"));
+            permissions.add(new Permission("STAFF_DASHBOARD", "/staff", "GET", "STAFFS"));
             this.permissionRepository.saveAll(permissions);
         }
+
+        var staffPagePermission = this.permissionRepository.findAll().stream()
+                .filter(p -> "/staff/**".equals(p.getApiPath()))
+                .findFirst()
+                .orElseGet(() -> this.permissionRepository
+                        .save(new Permission("STAFF_PAGE", "/staff/**", "GET,POST", "STAFFS")));
+
+        var staffDashboardPermission = this.permissionRepository.findAll().stream()
+                .filter(p -> "/staff".equals(p.getApiPath()))
+                .findFirst()
+                .orElseGet(() -> this.permissionRepository
+                        .save(new Permission("STAFF_DASHBOARD", "/staff", "GET", "STAFFS")));
+
         if (roleCnt == 0) {
             var roles = new ArrayList<Role>();
 
@@ -102,12 +87,46 @@ public class DatabaseIntializer implements CommandLineRunner {
             var roleStaff = new Role();
             roleStaff.setName(DefineVariable.roleNameStaff);
             roleStaff.setDescription("Staff Golden Chicken");
+            var staffPermissions = new ArrayList<Permission>();
+            staffPermissions.add(staffPagePermission);
+            staffPermissions.add(staffDashboardPermission);
+            roleStaff.setPermissions(staffPermissions);
+
             roles.add(roleAdmin);
             roles.add(roleCustomer);
             roles.add(roleStaff);
 
             this.roleRepository.saveAll(roles);
         }
+
+        var existingStaffRole = this.roleRepository.findWithPermissionsByName(DefineVariable.roleNameStaff);
+        if (existingStaffRole != null) {
+            var currentPermissions = existingStaffRole.getPermissions();
+            if (currentPermissions == null) {
+                currentPermissions = new ArrayList<>();
+            }
+
+            var hasStaffAccessPermission = currentPermissions.stream()
+                    .anyMatch(p -> "/staff/**".equals(p.getApiPath()));
+            var hasStaffDashboardPermission = currentPermissions.stream()
+                    .anyMatch(p -> "/staff".equals(p.getApiPath()));
+
+            boolean changed = false;
+            if (!hasStaffAccessPermission) {
+                currentPermissions.add(staffPagePermission);
+                changed = true;
+            }
+            if (!hasStaffDashboardPermission) {
+                currentPermissions.add(staffDashboardPermission);
+                changed = true;
+            }
+
+            if (changed) {
+                existingStaffRole.setPermissions(currentPermissions);
+                this.roleRepository.save(existingStaffRole);
+            }
+        }
+
         if (userCnt == 0) {
             var users = new ArrayList<User>();
             var admin = new User();

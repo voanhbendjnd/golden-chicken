@@ -16,6 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.fpt.golden_chicken.common.DefineVariable;
 import vn.edu.fpt.golden_chicken.services.UserService;
 
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
@@ -39,15 +40,11 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
         throw new IllegalStateException();
     }
 
-    /*
-     * Thay vì gọi DB lấy Name thì hàm này giúp chỉ cần làm 1 lần duy nhất
-     */
     protected void clearAuthenticationAttributes(HttpServletRequest request, Authentication authentication) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             return;
         }
-        // dọn các thông báo lỗi trước đó
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
         String email = authentication.getName();
         var user = this.userService.getByEmail(email);
@@ -57,8 +54,15 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("email", user.getEmail());
             session.setAttribute("roleName", user.getRole().getName());
-            // int sum = user.getCart() == null ? 0 : user.getCart().getSum();
-            // session.setAttribute("sum", sum);
+            session.setAttribute("staffType",
+                    user.getStaff() != null && user.getStaff().getStaffType() != null
+                            ? user.getStaff().getStaffType().name()
+                            : null);
+            // if
+            // (user.getRole().getName().equalsIgnoreCase(DefineVariable.roleNameCustomer))
+            // {
+            // session.setAttribute("cartCount", 1);
+            // }
         }
 
     }

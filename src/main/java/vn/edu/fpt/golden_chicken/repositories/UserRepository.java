@@ -1,8 +1,10 @@
 package vn.edu.fpt.golden_chicken.repositories;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import vn.edu.fpt.golden_chicken.domain.entity.User;
@@ -12,6 +14,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByEmail(String email);
 
     User findByEmail(String email);
+
+    @EntityGraph(attributePaths = { "role", "role.permissions", "staff" })
+    @Query("select u from User u where lower(u.email) = lower(:email)")
+    User findByEmailWithRolePermissions(@Param("email") String email);
 
     boolean existsByEmailAndIdNot(String email, Long id);
 
