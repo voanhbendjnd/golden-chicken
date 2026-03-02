@@ -3,9 +3,11 @@ package vn.edu.fpt.golden_chicken.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
@@ -31,17 +33,29 @@ public class VoucherService {
     CustomerRepository customerRepository;
     CustomerVoucherRepository customerVoucherRepository;
 
-    public List<ResVoucher> getAll() {
-        return repo.findByIsDeletedFalse().stream().map(v -> {
+    //   @Transactional
+    //    public Page<Artist> getAllArtist(int page,int size){
+    //        Pageable pageable = PageRequest.of(page,size);
+    //        return artistRepository.findAll(pageable);
+    //    }
+    @Transactional
+    public Page<ResVoucher> getAll(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Voucher> voucherPage = repo.findByIsDeletedFalse(pageable);
+
+        return voucherPage.map(v -> {
             ResVoucher res = new ResVoucher();
             res.setId(v.getId());
             res.setCode(v.getCode());
             res.setName(v.getName());
             res.setStatus(v.getStatus());
             return res;
-        }).toList();
+        });
     }
 
+    @Transactional
     public ResVoucher getById(Long id) {
         Voucher v = repo.findById(id).orElseThrow();
         ResVoucher res = new ResVoucher();
@@ -60,12 +74,13 @@ public class VoucherService {
         return res;
     }
 
+    @Transactional
     public void createVoucher(VoucherCreateDTO dto) {
-        // 1. check trùng code
+
         if (repo.existsByCode(dto.getCode())) {
             throw new IllegalArgumentException("Voucher code already exists");
         }
-        // 2. map DTO → Entity
+
         Voucher v = new Voucher();
         v.setCode(dto.getCode());
         v.setName(dto.getName());
@@ -76,55 +91,27 @@ public class VoucherService {
         v.setPointCost(dto.getPointCost());
         v.setStartAt(dto.getStartAt());
         v.setEndAt(dto.getEndAt());
-        v.setExchangeable(dto.isExchangeable());
-        v.setStatus("ACTIVE");
+        v.setExchangeable(dto.getExchangeable());
+        v.setStatus("DISABLED");
 
-        if (dto.getCode() == null || dto.getCode().isBlank()) {
-            throw new IllegalArgumentException("Code is required");
-        }
-
-        if (dto.getName() == null || dto.getName().isBlank()) {
-            throw new IllegalArgumentException("Name is required");
-        }
-
-        if (dto.getDiscountValue() == null) {
-            throw new IllegalArgumentException("Discount value is required");
-        }
-
-        if (dto.getDiscountType() == null) {
-            throw new IllegalArgumentException("Discount type is required");
-        }
-        if (dto.getMinOrderValue() == null) {
-            throw new IllegalArgumentException("Min Order Value is required");
-        }
-        if (dto.getPointCost() == null) {
-            throw new IllegalArgumentException("Point cost is required");
-        }
-        if (dto.getStartAt() == null) {
-            throw new IllegalArgumentException("Start time is required");
-        }
-
-        if (dto.getEndAt() == null) {
-            throw new IllegalArgumentException("End time is required");
-        }
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
             throw new IllegalArgumentException("End time must be after start time");
         }
-        // Logic chống nhập sai Percent vs Fixed
         if ("PERCENT".equals(dto.getDiscountType())
                 && dto.getDiscountValue() > 100) {
-
-            throw new IllegalArgumentException(
-                    "Percent cannot exceed 100");
+            throw new IllegalArgumentException("Percent cannot exceed 100");
         }
-        // nếu exchangeable = true thì pointCost phải > 0
-        if (Boolean.TRUE.equals(dto.isExchangeable())
-                && (dto.getPointCost() == null || dto.getPointCost() <= 0))
+
+        if (Boolean.TRUE.equals(dto.getExchangeable())
+                && (dto.getPointCost() == null || dto.getPointCost() <= 0)) {
             throw new IllegalArgumentException("Point cost must be greater than 0");
+        }
+
         repo.save(v);
     }
 
+    @Transactional
     public void updateVoucher(VoucherUpdateDTO dto) {
         Voucher v = repo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
@@ -138,53 +125,42 @@ public class VoucherService {
         v.setStartAt(dto.getStartAt());
         v.setEndAt(dto.getEndAt());
         v.setStatus(dto.getStatus());
-        v.setExchangeable(dto.isExchangeable());
-        if (dto.getCode() == null || dto.getCode().isBlank()) {
-            throw new IllegalArgumentException("Code is required");
-        }
+        v.setExchangeable(dto.getExchangeable());
 
-        if (dto.getName() == null || dto.getName().isBlank()) {
-            throw new IllegalArgumentException("Name is required");
-        }
-
-        if (dto.getDiscountValue() == null) {
-            throw new IllegalArgumentException("Discount value is required");
-        }
-
-        if (dto.getDiscountType() == null) {
-            throw new IllegalArgumentException("Discount type is required");
-        }
-        if (dto.getMinOrderValue() == null) {
-            throw new IllegalArgumentException("Min Order Value is required");
-        }
-        if (dto.getPointCost() == null) {
-            throw new IllegalArgumentException("Point cost is required");
-        }
-        if (dto.getStartAt() == null) {
-            throw new IllegalArgumentException("Start time is required");
-        }
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
             throw new IllegalArgumentException("End time must be after start time");
         }
+        if ("PERCENT".equals(dto.getDiscountType())
+                && dto.getDiscountValue() > 100) {
+            throw new IllegalArgumentException("Percent cannot exceed 100");
+        }
         // nếu exchangeable = true thì pointCost phải > 0
-        if (Boolean.TRUE.equals(dto.isExchangeable())
+        if (Boolean.TRUE.equals(dto.getExchangeable())
                 && (dto.getPointCost() == null || dto.getPointCost() <= 0))
             throw new IllegalArgumentException("Point cost must be greater than 0");
         repo.save(v);
     }
 
+    @Transactional
     public void disableVoucher(Long id) {
         Voucher v = repo.findById(id).orElseThrow();
         v.setStatus("DISABLED");
         repo.save(v);
     }
 
+    @Transactional
     public void deleteVoucher(Long id) {
-        Voucher v = repo.findById(id)
+
+        Voucher voucher = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
-        v.setIsDeleted(true);
-        repo.save(v);
+
+        boolean isUsed = customerVoucherRepository.existsByVoucher_Id(id);
+
+        if (isUsed) {
+            throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
+        }
+        repo.delete(voucher); // HARD DELETE
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
