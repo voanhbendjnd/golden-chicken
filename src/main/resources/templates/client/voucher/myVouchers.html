@@ -45,6 +45,10 @@
               <div class="v-left">
                 <div class="v-title" th:text="${cv.voucher.name}">Voucher</div>
                 <div class="v-sub" th:text="${cv.voucher.code}">CODE</div>
+                <div class="v-sub"
+                  th:text="${cv.voucher.endAt != null ? #temporals.format(cv.voucher.endAt, 'dd/MM/yyyy HH:mm') : 'Không xác định'}">
+                  Date
+                </div>
               </div>
               <div class="v-right">
                 <span class="tag personal" th:text="${cv.status}">AVAILABLE</span>

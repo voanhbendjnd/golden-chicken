@@ -203,6 +203,7 @@ public class VoucherService {
     }
 
     public List<ResVoucher> getListVoucherForExchange() {
+        refreshVoucherStatuses();
         List<Voucher> vouchers = repo.findAvailableForExchange();
 
         List<ResVoucher> resVouchers = new ArrayList<>();
@@ -282,6 +283,8 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
+        // update voucher status
+        refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
             return new ArrayList<>();
@@ -293,11 +296,61 @@ public class VoucherService {
         var currentUser = profileService.getCurrentUser();
         if (currentUser == null)
             return new ArrayList<>();
-
+        refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
             return new ArrayList<>();
 
         return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
+    }
+
+    private void refreshVoucherStatuses() {
+        refreshExpiredStatus();
+        refreshCustomerVoucherExpiredStatus();
+    }
+
+    @Transactional
+    public void refreshExpiredStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Voucher> activeVouchers = this.repo.findAllByStatus("ACTIVE");
+
+        List<Voucher> toUpdate = new ArrayList<>();
+        for (Voucher v : activeVouchers) {
+            if (v.getEndAt() != null && now.isAfter(v.getEndAt())) {
+                v.setStatus("EXPIRED");
+                ;
+                toUpdate.add(v);
+            }
+        }
+        if (!toUpdate.isEmpty()) {
+            repo.saveAll(toUpdate);
+        }
+    }
+
+    @Transactional
+    public void refreshCustomerVoucherExpiredStatus() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<CustomerVoucher> availableList = customerVoucherRepository.findByStatus(StatusVoucher.AVAILABLE);
+
+        List<CustomerVoucher> toUpdate = new ArrayList<>();
+
+        for (CustomerVoucher cv : availableList) {
+            Voucher voucher = cv.getVoucher();
+            if (voucher == null)
+                continue;
+
+            boolean expiredByStatus = "EXPIRED".equalsIgnoreCase(voucher.getStatus());
+            boolean expiredByTime = voucher.getEndAt() != null && now.isAfter(voucher.getEndAt());
+
+            if (expiredByStatus || expiredByTime) {
+                cv.setStatus(StatusVoucher.EXPIRED);
+                toUpdate.add(cv);
+            }
+        }
+
+        if (!toUpdate.isEmpty()) {
+            customerVoucherRepository.saveAll(toUpdate);
+        }
     }
 }

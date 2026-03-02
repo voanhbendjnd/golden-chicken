@@ -40,10 +40,12 @@
             <div class="voucher" th:each="cv : ${history}">
               <div class="v-left">
                 <div class="v-title" th:text="${cv.voucher.name}">Tên voucher </div>
-                <div class="v-sub" th:text="${#temporals.format(cv.redeemedAt, 'dd/MM/yyyy HH:mm')}">24/02/2026 13:04</div>
+                <div class="v-sub" th:text="${#temporals.format(cv.redeemedAt, 'dd/MM/yyyy HH:mm')}">24/02/2026 13:04
+                </div>
               </div>
               <div class="v-right">
                 <span class="tag personal" th:text="${' -' + cv.voucher.pointCost + ' điểm'}">-100 điểm</span>
+                <!-- <span class="tag personal" th:text="${cv.status}">AVAILABLE</span> -->
               </div>
             </div>
           </div>
