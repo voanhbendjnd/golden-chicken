@@ -19,35 +19,61 @@
         <div class="page-checkout-address">
             <h1 class="addr-title">📍 CHỌN ĐỊA CHỈ GIAO HÀNG</h1>
 
-            <form th:action="@{/checkout}" method="get">
-                <input type="hidden" name="id" th:value="${productId}" />
-
-                <div th:each="a : ${addresses}" class="address-card">
-                    <div class="address-info">
-                        <div class="name" th:text="${a.recipientName}"></div>
-                        <div>
-                            <span th:text="${a.specificAddress}"></span>,
-                            <span th:text="${a.ward}"></span>,
-                            <span th:text="${a.city}"></span>
-                        </div>
-                        <div>📞 <span th:text="${a.recipientPhone}"></span></div>
+            <div th:each="a : ${addresses}" class="address-card">
+                <div class="address-info">
+                    <div class="name" th:text="${a.recipientName}"></div>
+                    <div>
+                        <span th:text="${a.specificAddress}"></span>,
+                        <span th:text="${a.ward}"></span>,
+                        <span th:text="${a.district}"></span>,
+                        <span th:text="${a.city}"></span>
                     </div>
-
-                    <input class="address-radio" type="radio" name="addressId" th:value="${a.id}" required>
+                    <div>📞 <span th:text="${a.recipientPhone}"></span></div>
                 </div>
 
-                <div class="address-actions">
-                    <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
-                        ➕ Thêm địa chỉ mới
-                    </a>
+                <input class="address-radio" type="radio" name="addressId" th:value="${a.id}" required>
+            </div>
 
-                    <button type="submit" class="btn btn-confirm">
-                        Xác nhận địa chỉ
-                    </button>
-                </div>
+            <div class="address-actions">
+                <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
+                    ➕ Thêm địa chỉ mới
+                </a>
 
-            </form>
+                <button type="button" onclick="confirmAddress()" class="btn btn-confirm">
+                    Xác nhận địa chỉ
+                </button>
+            </div>
         </div>
+
+        <script th:inline="javascript">
+            function confirmAddress() {
+                const selectedRadio = document.querySelector('input[name="addressId"]:checked');
+                if (!selectedRadio) {
+                    alert("Vui lòng chọn một địa chỉ!");
+                    return;
+                }
+
+                const addressId = selectedRadio.value;
+                const productId = [[${ productId }]]; // Dùng cho Buy Now
+                const productIds = [[${ productIds }]]; // Dùng cho Cart
+
+                let url = "";
+                if (productId != null) {
+                    // Trường hợp Buy Now
+                    url = `/checkout?id=${productId}&addressId=${addressId}`;
+                } else if (productIds != null && productIds.length > 0) {
+                    // Trường hợp mua vài món trong Cart: quay về kèm danh sách ids
+                    // Chuyển mảng [1,2] thành chuỗi ids=1&ids=2
+                    const idsQuery = productIds.map(id => `ids=${id}`).join('&');
+                    url = `/checkout/order?${idsQuery}&addressId=${addressId}`;
+                } else {
+                    // Trường hợp mua cả giỏ hàng (không lọc ids)
+                    url = `/checkout/order?addressId=${addressId}`;
+                }
+
+                window.location.href = url;
+            }
+        </script>
     </div>
     <div th:replace="~{client/layout/footer}"></div>
 
