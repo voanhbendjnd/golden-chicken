@@ -4,7 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
+// import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+// import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -38,16 +38,17 @@ public class OrderController {
         return "staff/order/table";
     }
 
-    @PostMapping("/update-status/uuid/{id:[0-9]+}")
-    @ResponseBody
-    public ResponseEntity<?> updateStatusBase(@RequestParam String status, @PathVariable("id") Long id) {
-        this.orderService.changeOrderStatus(id, status);
-        return ResponseEntity.ok().build();
-    }
+    // @PostMapping("/update-status/uuid/{id:[0-9]+}")
+    // @ResponseBody
+    // public ResponseEntity<?> updateStatusBase(@RequestParam String status,
+    // @PathVariable("id") Long id) {
+    // this.orderService.changeOrderStatus(id, status, null);
+    // return ResponseEntity.ok().build();
+    // }
 
     @PostMapping("/update-status")
     public String updateStatus(@RequestParam("status") String status, @RequestParam("orderId") Long id) {
-        this.orderService.changeOrderStatus(id, status);
+        this.orderService.changeOrderStatus(id, status, null);
         return "redirect:/staff/order";
     }
 

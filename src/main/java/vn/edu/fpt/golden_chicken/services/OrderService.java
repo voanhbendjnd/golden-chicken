@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
+import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
@@ -49,7 +50,6 @@ public class OrderService {
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
-    MailService mailService;
     CartService cartService;
 
     @Transactional
@@ -165,10 +165,12 @@ public class OrderService {
     }
 
     @Transactional
-    public void changeOrderStatus(Long id, String statusName) {
+    public void changeOrderStatus(Long id, String statusName, Staff shipper) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
-
+        if (shipper != null) {
+            order.setShipper(shipper);
+        }
         OrderStatus currentStatus = order.getStatus();
         OrderStatus nextStatus;
 
@@ -355,22 +357,15 @@ public class OrderService {
     }
 
     public List<OrderStatisResponse> getOrderStatisticData() {
-        // Mảng tên tháng để hiển thị lên biểu đồ
         String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-        // 1. Gọi Repository lấy dữ liệu đã được SUM và GROUP BY dưới DB
         List<Object[]> rawData = orderRepository.getMonthlyRevenueRaw();
 
-        // 2. Chuyển List<Object[]> thành Map<Integer, BigDecimal>
-        // Key là tháng (1-12), Value là tổng tiền
         Map<Integer, BigDecimal> statsMap = rawData.stream()
                 .collect(Collectors.toMap(
-                        row -> (Integer) row[0], // Tháng (kết quả của MONTH())
-                        row -> (BigDecimal) row[1] // Tổng doanh thu (kết quả của SUM())
-                ));
+                        row -> (Integer) row[0],
+                        row -> (BigDecimal) row[1]));
 
-        // 3. Khởi tạo danh sách kết quả đủ 12 tháng (điền 0 nếu tháng đó không có doanh
-        // thu)
         List<OrderStatisResponse> revenues = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
             String label = monthLabels[i - 1];
@@ -379,11 +374,5 @@ public class OrderService {
         }
 
         return revenues;
-    }}
-
-    
-    
-    
-    
-
-    
+    }
+}

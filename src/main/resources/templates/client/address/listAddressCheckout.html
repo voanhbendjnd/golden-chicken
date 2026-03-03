@@ -36,7 +36,7 @@
 
             <div class="address-actions">
                 <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
-                    ➕ Thêm địa chỉ mới
+                    Thêm địa chỉ mới
                 </a>
 
                 <button type="button" onclick="confirmAddress()" class="btn btn-confirm">
@@ -54,20 +54,16 @@
                 }
 
                 const addressId = selectedRadio.value;
-                const productId = [[${ productId }]]; // Dùng cho Buy Now
-                const productIds = [[${ productIds }]]; // Dùng cho Cart
+                const productId = [[${ productId }]];
+                const productIds = [[${ productIds }]];
 
                 let url = "";
                 if (productId != null) {
-                    // Trường hợp Buy Now
                     url = `/checkout?id=${productId}&addressId=${addressId}`;
                 } else if (productIds != null && productIds.length > 0) {
-                    // Trường hợp mua vài món trong Cart: quay về kèm danh sách ids
-                    // Chuyển mảng [1,2] thành chuỗi ids=1&ids=2
                     const idsQuery = productIds.map(id => `ids=${id}`).join('&');
                     url = `/checkout/order?${idsQuery}&addressId=${addressId}`;
                 } else {
-                    // Trường hợp mua cả giỏ hàng (không lọc ids)
                     url = `/checkout/order?addressId=${addressId}`;
                 }
 

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        /* ===== GLOBAL ===== */
+        /* ===== BACKGROUND SHOPEE STYLE ===== */
         body {
             margin: 0;
             height: 100vh;
@@ -15,105 +15,138 @@
             align-items: center;
             justify-content: center;
             font-family: "Segoe UI", sans-serif;
-            background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+            background: linear-gradient(135deg, #ff512f, #f09819);
+            overflow: hidden;
+            position: relative;
         }
 
-        /* ===== GLASS CARD ===== */
+        /* Glow circles */
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 70%);
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: 0;
+        }
+
+        body::before {
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            bottom: -120px;
+            right: -120px;
+        }
+
+        /* ===== LIQUID GLASS CARD ===== */
         .success-card {
+            position: relative;
+            z-index: 2;
             width: 95%;
-            max-width: 480px;
-            padding: 50px 40px;
+            max-width: 500px;
+            padding: 55px 45px;
             text-align: center;
-            border-radius: 30px;
+            border-radius: 35px;
 
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
 
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.25),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
 
-            animation: fadeIn 0.6s ease;
+            animation: fadeIn 0.7s ease;
         }
 
         /* ===== CHECK ICON ===== */
         .check-circle {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 25px;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 30px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4CAF50, #81C784);
+            background: linear-gradient(135deg, #00c853, #69f0ae);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
-            animation: pop 0.6s ease;
+            box-shadow: 0 20px 40px rgba(0, 200, 83, 0.5);
+            animation: pop 0.7s ease;
         }
 
         .check-circle svg {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             fill: white;
         }
 
         /* ===== TEXT ===== */
         .success-card h1 {
-            font-size: 26px;
-            margin-bottom: 10px;
-            font-weight: 600;
+            font-size: 28px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.5px;
         }
 
         .success-card p {
-            color: #444;
+            color: rgba(255, 255, 255, 0.85);
             font-size: 15px;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
         }
 
         /* ===== BUTTONS ===== */
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
         }
 
         .btn-glass {
-            padding: 12px;
-            border-radius: 50px;
+            padding: 14px;
+            border-radius: 60px;
             font-weight: 600;
             border: none;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.35s ease;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
-        /* Continue shopping */
+        /* Shopee style primary */
         .btn-primary-glass {
-            background: linear-gradient(135deg, #e31837, #ff4d6d);
+            background: linear-gradient(135deg, #ff3c00, #ff7a00);
             color: white;
-            box-shadow: 0 10px 25px rgba(227, 24, 55, 0.4);
+            box-shadow: 0 15px 30px rgba(255, 60, 0, 0.4);
         }
 
         .btn-primary-glass:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 60, 0, 0.6);
         }
 
-        /* View order */
+        /* Secondary glass */
         .btn-outline-glass {
-            background: rgba(255, 255, 255, 0.4);
-            color: #111;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .btn-outline-glass:hover {
-            background: rgba(255, 255, 255, 0.7);
-            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-4px) scale(1.02);
         }
 
-        /* ===== ANIMATIONS ===== */
+        /* ===== ANIMATION ===== */
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(25px);
             }
 
             to {
@@ -154,15 +187,15 @@
             </svg>
         </div>
 
-        <h1>Thanh toán thành công 🎉</h1>
-        <p>Đơn hàng của bạn đã được ghi nhận. Cảm ơn bạn đã mua hàng!</p>
+        <h1>Thanh toán thành công</h1>
+        <p>Đơn hàng của bạn đã được ghi nhận và đang được xử lý.</p>
 
-        <div class="btn-group">
+        <div class="btn-group" style="display: flex; justify-content: center;">
             <a href="/home" class="btn-glass btn-primary-glass">
                 Tiếp tục mua hàng
             </a>
 
-            <a href="/order" class="btn-glass btn-outline-glass">
+            <a href="/order-history" class="btn-glass btn-outline-glass">
                 Xem đơn hàng
             </a>
         </div>

@@ -46,11 +46,10 @@ public class CheckoutController {
         this.revenueService = revenueService;
     }
 
-    // 1. SỬA HÀM NÀY: Thêm tham số addressId để nhận địa chỉ mới chọn từ Cart
     @GetMapping("/order")
     public String handleOrderFromCart(
             @RequestParam(value = "ids", required = false) List<Long> ids,
-            @RequestParam(value = "addressId", required = false) Long addressId, // Mới thêm
+            @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
         var orderDTO = new OrderDTO();
         var details = new ArrayList<OrderDTO.OrderDetail>();
@@ -192,13 +191,18 @@ public class CheckoutController {
             return "redirect:/payment/create?orderId=" + order.getId();
         }
         System.out.println(">>> TOTAL AMOUNT:" + this.revenueService.getTotalRevenue());
-        return "redirect:/";
+        return "redirect:/checkout/payment-success";
     }
 
     @GetMapping("/revenue")
     public String testPage() {
         System.out.println(">>> Revenue: " + this.revenueService.getTotalRevenue());
         return "redirect:/login";
+    }
+
+    @GetMapping("/payment-success")
+    public String successPage() {
+        return "client/payment/payment.success";
     }
 
 }
