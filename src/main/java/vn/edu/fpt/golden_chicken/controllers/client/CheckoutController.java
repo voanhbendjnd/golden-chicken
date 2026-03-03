@@ -21,6 +21,7 @@ import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -32,16 +33,18 @@ public class CheckoutController {
     private final AddressServices addressServices;
     private final OrderService orderService;
     private final CartService cartService;
+    private final RevenueService revenueService;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
             OrderService orderService,
             CartService cartService,
-            UserRepository userRepository) {
+            UserRepository userRepository, RevenueService revenueService) {
         this.productService = productService;
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
+        this.revenueService = revenueService;
     }
 
     @GetMapping("/order")
@@ -175,20 +178,18 @@ public class CheckoutController {
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
         var order = this.orderService.order(dto);
-        // var msg = new OrderMessage();
-        // msg.setCustomerEmail(order.getCustomer().getUser().getEmail());
-        // msg.setCustomerName(order.getName());
-        // msg.setOrderId(order.getId());
-        // msg.setStatus(order.getStatus());
-        // msg.setTotalPrice(order.getFinalAmount());
-        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
 
-            // this.mailConsumer.listenOrderAndSendMail(msg);
+        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
             return "redirect:/payment/create?orderId=" + order.getId();
         }
-        // this.mailConsumer.listenOrderAndSendMail(msg);
-
+        System.out.println(">>> TOTAL AMOUNT:" + this.revenueService.getTotalRevenue());
         return "redirect:/";
+    }
+
+    @GetMapping("/revenue")
+    public String testPage() {
+        System.out.println(">>> Revenue: " + this.revenueService.getTotalRevenue());
+        return "redirect:/login";
     }
 
 }
