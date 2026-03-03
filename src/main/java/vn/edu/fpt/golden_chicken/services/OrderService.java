@@ -183,12 +183,18 @@ public class OrderService {
             case "COMPLETED":
                 order.setStatus(OrderStatus.COMPLETED);
                 order.setPaymentStatus(PaymentStatus.PAID);
+                order.setDeliveredAt(LocalDateTime.now());
                 break;
             case "CANCELLED":
                 order.setStatus(OrderStatus.CANCELLED);
                 break;
             case "DELIVERED":
                 order.setStatus(OrderStatus.DELIVERED);
+                if (order.getPaymentMethod() != null
+                        && order.getPaymentMethod().equals(vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod.COD)) {
+                    order.setPaymentStatus(PaymentStatus.PAID);
+                }
+                order.setDeliveredAt(LocalDateTime.now());
                 break;
             default:
                 break;

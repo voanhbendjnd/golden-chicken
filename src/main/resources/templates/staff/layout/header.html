@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<header class="shipper-header navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold text-white d-flex align-items-center gap-2"
+           th:href="@{/staff/shipper}">
+            <i class="fa-solid fa-truck-fast fs-4"></i>
+            Shipper Panel
+        </a>
+
+        <!-- Toggle mobile -->
+        <button class="navbar-toggler text-white border-0"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#shipperNavbar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse justify-content-between"
+             id="shipperNavbar">
+
+            <!-- Left Menu -->
+            <ul class="navbar-nav mb-2 mb-lg-0 gap-lg-3">
+
+                <li class="nav-item">
+                    <a class="nav-link shipper-link"
+                       th:href="@{/staff/shipper/dashboard}">
+                        <i class="fa-solid fa-gauge-high me-1"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link shipper-link"
+                       th:href="@{/staff/shipper/orders}">
+                        <i class="fa-solid fa-box me-1"></i>
+                        Đơn hàng
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link shipper-link"
+                       th:href="@{/staff/shipper/statistics}">
+                        <i class="fa-solid fa-chart-line me-1"></i>
+                        Thống kê
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- Right User -->
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="text-white fw-semibold"
+                     th:text="${session.fullName}">
+                </div>
+
+                <a th:href="@{/profile}"
+                   class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-user"></i>
+                </a>
+
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}" />
+                    <button type="submit"
+                            class="btn btn-light btn-sm rounded-pill px-3 fw-bold">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</header>
+
+<style>
+:root {
+    --shipper-red: #e31837;
+}
+
+.shipper-header {
+    background: linear-gradient(90deg, #c40000, #ff1a1a);
+    padding: 12px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.shipper-link {
+    color: white !important;
+    font-weight: 500;
+    transition: 0.3s;
+    position: relative;
+}
+
+.shipper-link:hover {
+    color: #ffd700 !important;
+}
+
+.shipper-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #ffd700;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const currentUrl = window.location.pathname;
+    document.querySelectorAll(".shipper-link").forEach(link => {
+        if (currentUrl === link.getAttribute("href")) {
+            link.classList.add("active");
+        }
+    });
+});
+</script>
+
+</html>

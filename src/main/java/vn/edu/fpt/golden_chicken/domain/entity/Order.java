@@ -36,7 +36,11 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     Customer customer;
+    @ManyToOne
+    @JoinColumn(name = "shipper_id")
+    Staff shipper;
     LocalDateTime updatedAt;
+    LocalDateTime deliveredAt;
     LocalDateTime createdAt;
     BigDecimal totalProductPrice;
     BigDecimal shippingFee;
