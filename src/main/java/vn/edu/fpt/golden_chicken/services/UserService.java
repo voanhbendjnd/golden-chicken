@@ -40,6 +40,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
@@ -59,7 +60,7 @@ public class UserService {
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID",
-                request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
+                        request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
@@ -137,7 +138,7 @@ public class UserService {
         }
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("User ID",
-                request.getRoleId()));
+                        request.getRoleId()));
         if (role.getName().equalsIgnoreCase("STAFF")) {
             user.getStaff().setStaffType(request.getStaffType());
             user.setUpdatedAt(LocalDateTime.now());
@@ -308,7 +309,7 @@ public class UserService {
         user.setOtpRequestedTime(null);
         this.userRepository.save(user);
     }
-// ====== ADD for Forgot Password (OTP) ======
+    // ====== ADD for Forgot Password (OTP) ======
 
     public boolean existsByEmail(String email) {
         if (email == null) {
@@ -344,5 +345,20 @@ public class UserService {
         }
 
         this.userRepository.save(user);
+    }
+
+    public void updateCustomerPoint(Customer customer, Long point, boolean action) throws PermissionException {
+        var currentPoint = customer.getPoint() != null ? customer.getPoint() : 0;
+        if (action) {
+            customer.setPoint(currentPoint + point);
+        } else {
+            var lastPoint = currentPoint - point;
+            if (lastPoint <= 0) {
+                lastPoint = 0;
+            }
+            customer.setPoint(lastPoint);
+        }
+        this.customerRepository.save(customer);
+
     }
 }

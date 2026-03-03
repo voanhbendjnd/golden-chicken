@@ -22,6 +22,7 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
@@ -42,6 +43,9 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 public class OrderService {
     @Autowired
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, ActionPointMessage> kafkaTemplatePoint;
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
@@ -95,8 +99,9 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new CheckoutException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        customer
-                .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() : 0));
+        // customer
+        // .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() :
+        // 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
@@ -105,6 +110,15 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
+
+        var actionMessage = new ActionPointMessage();
+        actionMessage.setAction("ADD");
+        actionMessage.setReason("ORDER #" + order.getId());
+        actionMessage.setChange(totalBonus);
+        actionMessage.setActionAt(LocalDateTime.now());
+        actionMessage.setUserId(user.getId());
+
+        this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
         OrderMessage message = new OrderMessage();
         message.setCustomerEmail(user.getEmail());
@@ -150,32 +164,49 @@ public class OrderService {
         return res;
     }
 
-    public void changeOrderStatus(Long id, String status) {
-        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
-        switch (status) {
-            case "PENDING":
-                order.setStatus(OrderStatus.PENDING);
-                break;
-            case "SHIPPING":
-                order.setStatus(OrderStatus.SHIPPING);
-                break;
-            case "COMPLETED":
-                order.setStatus(OrderStatus.COMPLETED);
-                order.setPaymentStatus(PaymentStatus.PAID);
-                break;
-            case "CANCELLED":
-                order.setStatus(OrderStatus.CANCELLED);
-                break;
-            case "DELIVERED":
-                order.setStatus(OrderStatus.DELIVERED);
-                break;
-            default:
-                break;
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName) {
+        var order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
+        OrderStatus currentStatus = order.getStatus();
+        OrderStatus nextStatus;
+
+        try {
+            nextStatus = OrderStatus.valueOf(statusName);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
-        var newOrder = this.orderRepository.save(order);
-        this.mailService.allowMailUpdateOrderStatus(order.getCustomer().getUser().getEmail(),
-                newOrder.getStatus().toString(), "#" + order.getId(), order.getName());
+        if (currentStatus == OrderStatus.COMPLETED || currentStatus == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Đơn hàng đã kết thúc (Completed/Cancelled), không thể thay đổi trạng thái!");
+        }
+
+        if (currentStatus == OrderStatus.SHIPPING && nextStatus == OrderStatus.PENDING) {
+            throw new RuntimeException("Đơn hàng đang giao, không thể quay về trạng thái chờ xử lý!");
+        }
+
+        if (currentStatus == nextStatus) {
+            return;
+        }
+
+        order.setStatus(nextStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+        if (nextStatus == OrderStatus.COMPLETED) {
+            order.setPaymentStatus(PaymentStatus.PAID);
+        }
+
+        var lastOrder = this.orderRepository.save(order);
+
+        if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
+            OrderMessage message = new OrderMessage();
+            message.setCustomerEmail(lastOrder.getCustomer().getUser().getEmail());
+            message.setOrderId(lastOrder.getId());
+            message.setStatus(lastOrder.getStatus());
+            message.setTotalPrice(lastOrder.getFinalAmount());
+            message.setCustomerName(lastOrder.getName());
+            this.kafkaTemplate.send("order-chicken-topic", message);
+        }
     }
 
     public Order getOrderEntity(Long id) {
