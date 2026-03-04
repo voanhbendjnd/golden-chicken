@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
+import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.MailService;
 import vn.edu.fpt.golden_chicken.services.UserService;
@@ -29,6 +32,9 @@ public class AuthController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final MailService mailService;
+
+    @Autowired
+    private KafkaTemplate<String, VerifyAccountMessage> verifyAccountKafka;
 
     public AuthController(MailService mailService, UserService userService, UserRepository userRepository) {
         this.userService = userService;
@@ -83,7 +89,14 @@ public class AuthController {
         if (email == null || email.isEmpty()) {
             return "redirect:/login";
         }
-        this.mailService.startOTP(email, OTP);
+
+        // this.mailService.startOTP(email, OTP);
+        var msg = new VerifyAccountMessage();
+        msg.setDescription("Verify Account");
+        msg.setCreatedAt(LocalDateTime.now());
+        msg.setEmail(email);
+        msg.setOtp(OTP);
+        this.verifyAccountKafka.send("customer-account-topic", msg);
         return "client/auth/verify";
     }
 
@@ -125,7 +138,7 @@ public class AuthController {
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid OTP code."));
     }
 
-     // Session keys riêng cho forgot-password để tránh xung đột với register verify
+    // Session keys riêng cho forgot-password để tránh xung đột với register verify
     private static final String FP_EMAIL = "FP_EMAIL";
     private static final String FP_OTP = "FP_OTP";
     private static final String FP_EXPIRE_AT = "FP_EXPIRE_AT"; // epoch seconds
@@ -141,8 +154,7 @@ public class AuthController {
     public String handleForgotPassword(
             @RequestParam("email") String email,
             HttpSession session,
-            RedirectAttributes ra
-    ) {
+            RedirectAttributes ra) {
         String normalized = normalizeEmail(email);
 
         if (normalized.isBlank() || !this.userService.existsByEmail(normalized)) {
@@ -201,8 +213,7 @@ public class AuthController {
     public String handleVerifyOtp(
             @RequestParam("otp") String otp,
             HttpSession session,
-            RedirectAttributes ra
-    ) {
+            RedirectAttributes ra) {
         String email = (String) session.getAttribute(FP_EMAIL);
         String savedOtp = (String) session.getAttribute(FP_OTP);
         Long expireAt = (Long) session.getAttribute(FP_EXPIRE_AT);
@@ -257,8 +268,7 @@ public class AuthController {
             @RequestParam("password") String password,
             @RequestParam("confirmPassword") String confirmPassword,
             HttpSession session,
-            RedirectAttributes ra
-    ) {
+            RedirectAttributes ra) {
         String email = (String) session.getAttribute(FP_EMAIL);
         Boolean verified = (Boolean) session.getAttribute(FP_VERIFIED);
 
@@ -298,7 +308,8 @@ public class AuthController {
     // =========================
 
     private String normalizeEmail(String email) {
-        if (email == null) return "";
+        if (email == null)
+            return "";
         return email.trim().toLowerCase();
     }
 
