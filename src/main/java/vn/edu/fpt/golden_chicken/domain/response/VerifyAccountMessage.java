@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 public class VerifyAccountMessage {
     String description;
     String email;
-    String otp;
+    // String otp;
     LocalDateTime createdAt;
 }

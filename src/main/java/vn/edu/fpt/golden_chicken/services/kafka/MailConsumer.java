@@ -3,18 +3,23 @@ package vn.edu.fpt.golden_chicken.services.kafka;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.services.MailService;
+import vn.edu.fpt.golden_chicken.services.redis.RedisOTPService;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class MailConsumer {
     MailService mailService;
+    RedisOTPService redisOTPService;
+    StringRedisTemplate redis;
 
     @KafkaListener(topics = "order-chicken-topic", groupId = "email-group")
     public void listenOrderAndSendMail(OrderMessage msg) {
@@ -31,7 +36,8 @@ public class MailConsumer {
     @KafkaListener(topics = "customer-account-topic", groupId = "email-group")
     public void listenOrderAndSendMailVerify(VerifyAccountMessage msg) {
         System.out.println(">>>> KAFKA ACCEPT REQUEST ORDER");
-        this.mailService.sendOTP(msg.getEmail(), "Verify Account", "mail/otp", msg.getEmail(), msg.getOtp());
+        var otp = this.redis.opsForValue().get(msg.getEmail());
+        this.mailService.sendOTP(msg.getEmail(), "Verify Account", "mail/otp", msg.getEmail(), otp);
         System.out.println(">>> SEND MAIL SUCCESS");
 
     }

@@ -26,20 +26,24 @@ import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.MailService;
 import vn.edu.fpt.golden_chicken.services.UserService;
+import vn.edu.fpt.golden_chicken.services.redis.RedisOTPService;
 
 @Controller
 public class AuthController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final RedisOTPService redisOTPService;
 
     @Autowired
     private KafkaTemplate<String, VerifyAccountMessage> verifyAccountKafka;
 
-    public AuthController(MailService mailService, UserService userService, UserRepository userRepository) {
+    public AuthController(MailService mailService, RedisOTPService redisOTPService, UserService userService,
+            UserRepository userRepository) {
         this.userService = userService;
         this.mailService = mailService;
         this.userRepository = userRepository;
+        this.redisOTPService = redisOTPService;
     }
 
     @GetMapping("/login")
@@ -89,13 +93,14 @@ public class AuthController {
         if (email == null || email.isEmpty()) {
             return "redirect:/login";
         }
-
+        this.redisOTPService.saveOTP(email, OTP);
         // this.mailService.startOTP(email, OTP);
         var msg = new VerifyAccountMessage();
         msg.setDescription("Verify Account");
         msg.setCreatedAt(LocalDateTime.now());
         msg.setEmail(email);
-        msg.setOtp(OTP);
+
+        // msg.setOtp(OTP);
         this.verifyAccountKafka.send("customer-account-topic", msg);
         return "client/auth/verify";
     }
