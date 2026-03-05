@@ -171,16 +171,23 @@ public class CheckoutController {
 
     @GetMapping("/addresses")
     public String listAddressCheckout(
-            @RequestParam(value = "productId", required = false) Long productId, // Cho Buy Now
-            @RequestParam(value = "productIds", required = false) List<Long> productIds, // Cho Cart (nhiều món)
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "productIds", required = false) String productIds,
             Model model) {
 
         var addresses = addressServices.getAllAddresses();
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
-        model.addAttribute("productIds", productIds); // Gửi danh sách đã chọn xuống
+        model.addAttribute("productIds", productIds);
 
-        return "client/address/listAddressCheckout";
+        // KIỂM TRA ĐIỀU KIỆN ĐỂ TRẢ VỀ ĐÚNG GIAO DIỆN
+        if (productId != null || (productIds != null && !productIds.isEmpty())) {
+            // Trả về trang giao diện chọn địa chỉ cho Checkout (có nút Xác nhận địa chỉ)
+            return "client/address/listAddressCheckout";
+        }
+
+        // Trả về trang quản lý địa chỉ cá nhân (hình số 6 bạn gửi)
+        return "client/address/addressBook";
     }
 
     @PostMapping("/order")

@@ -4,13 +4,12 @@
 <head>
     <title>Quản lý đơn hàng - Staff</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link th:href="@{/css/staff-order.css}" rel="stylesheet">
+
     <head th:replace="~{common/head}"></head>
-    <style>
-        .status-select {
-            min-width: 160px;
-            transition: all 0.3s ease;
-        }
-    </style>
 </head>
 
 <body>
@@ -20,20 +19,20 @@
         <div class="col-md-3 col-lg-2 p-0">
             <div th:replace="~{staff/layout/sidebar}"></div>
         </div>
+
         <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
             <div class="container mt-5">
                 <div class="row">
                     <div class="col-12">
                         <div class="card shadow-sm">
                             <div class="card-header bg-white py-3">
-                                <h5 class="mb-0">Danh sách đơn hàng vận hành</h5>
+                                <h5 class="mb-0 text-primary"><i class="bi bi-cart-check me-2"></i>Danh sách đơn hàng vận hành</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
                                     <div class="col-md-8">
                                         <div class="input-group">
-                                            <select id="filterStatus" class="form-select" style="max-width: 200px;"
-                                                    onchange="handleSearch()">
+                                            <select id="filterStatus" class="form-select" style="max-width: 200px;" onchange="handleSearch()">
                                                 <option value="">-- Tất cả trạng thái --</option>
                                                 <option value="PENDING" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PENDING''')}">Pending (Chờ xác nhận)</option>
                                                 <option value="PREPARING" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PREPARING''')}">Preparing (Đang chuẩn bị)</option>
@@ -46,8 +45,7 @@
                                                 <option value="CANCELLED" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''CANCELLED''')}">Cancelled (Đã hủy)</option>
                                             </select>
 
-                                            <input type="text" id="searchName" class="form-control"
-                                                   placeholder="Tìm theo số điện thoại..." th:value="${searchName}">
+                                            <input type="text" id="searchName" class="form-control" placeholder="Tìm theo số điện thoại..." th:value="${searchName}">
 
                                             <button class="btn btn-primary" type="button" onclick="handleSearch()">
                                                 <i class="bi bi-search"></i> Tìm kiếm
@@ -72,17 +70,15 @@
                                         <tbody>
                                         <tr th:each="order : ${orders}">
                                             <td>
-                                                <a th:href="@{/staff/order/{id}(id=${order.id})}"
-                                                   th:text="'#' + ${order.id}" class="fw-bold"></a>
+                                                <a th:href="@{/staff/order/{id}(id=${order.id})}" th:text="'#' + ${order.id}" class="fw-bold text-decoration-none"></a>
                                             </td>
                                             <td>
                                                 <div th:text="${order.name}"></div>
                                                 <small class="text-muted" th:text="${order.phone}"></small>
                                             </td>
-                                            <td th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
+                                            <td class="fw-bold text-danger" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
                                             <td>
-                                                <span class="badge" th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-warning text-dark'}"
-                                                      th:text="${order.paymentStatus}"></span>
+                                                <span class="badge" th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-warning text-dark'}" th:text="${order.paymentStatus}"></span>
                                             </td>
                                             <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                                             <td>
@@ -94,6 +90,7 @@
                                                              order.status.name() == 'DELIVERING' ? '#cff4fc' :
                                                              order.status.name() == 'DELIVERED' ? '#d1e7dd' :
                                                              order.status.name() == 'CANCELLED' ? '#f8d7da' :
+                                                             order.status.name() == 'COMPLETED' ? '#d1e7dd' :
                                                              (order.status.name() == 'SHIPPER_ISSUE' or order.status.name() == 'DELIVERY_FAILED') ? '#ffe5d0' : '#e2e3e5') +
                                                             '; color: #333;'}">
 
@@ -102,6 +99,7 @@
                                                     <th:block th:if="${order.status.name() == 'PENDING'}">
                                                         <option value="PREPARING">PREPARING (Chuẩn bị hàng)</option>
                                                         <option value="CANCELLED">CANCELLED (Hủy đơn)</option>
+                                                        <option value="COMPLETED">COMPLETED (Đã nhận đơn)</option>
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'PREPARING'}">
@@ -128,7 +126,7 @@
 
                                                     <th:block th:if="${order.status.name() == 'DELIVERY_FAILED'}">
                                                         <option value="DELIVERING">DELIVERING (Thử giao lại lần 2)</option>
-                                                        <option value="CANCELLED">CANCELLED (Hủy do không liên lạc được)</option>
+                                                        <option value="CANCELLED">CANCELLED (Hủy đơn)</option>
                                                     </th:block>
                                                 </select>
                                             </td>
@@ -140,14 +138,14 @@
                                         <nav aria-label="Page navigation">
                                             <ul class="pagination">
                                                 <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
-                                                    <a class="page-link" th:href="@{/staff/order(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trước</a>
+                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trước</a>
                                                 </li>
                                                 <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                                     th:class="|page-item ${meta.page == p ? 'active' : ''}|">
-                                                    <a class="page-link" th:href="@{/staff/order(page=${p}, size=${meta.pageSize}, filter=${param.filter})}" th:text="${p}"></a>
+                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${p}, size=${meta.pageSize}, filter=${param.filter})}" th:text="${p}"></a>
                                                 </li>
                                                 <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
-                                                    <a class="page-link" th:href="@{/staff/order(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Sau</a>
+                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Sau</a>
                                                 </li>
                                             </ul>
                                         </nav>
@@ -194,7 +192,7 @@
                 document.getElementById('submitStatus').value = newStatus;
                 document.getElementById('updateStatusForm').submit();
             } else {
-                location.reload(); // Quay lại trạng thái cũ trên UI
+                location.reload();
             }
         });
     }

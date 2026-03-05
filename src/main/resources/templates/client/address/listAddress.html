@@ -67,7 +67,7 @@
                                 </td>
 
                                 <td>
-                                    <form th:action="@{/addresses/edit}" method="post" style="display:inline;">
+                                    <form th:action="@{/addresses/edit}" method="get" style="display:inline;">
                                         <input type="hidden" name="id" th:value="${defaultAddress.id}" />
                                         <button class="btn btn-sm btn-warning px-3 py-2">Sửa</button>
                                     </form>
@@ -93,7 +93,7 @@
 
                                 <td>
                                     <div class="d-flex align-items-center flex-nowrap gap-2">
-                                        <form th:action="@{/addresses/edit}" method="post" class="m-0">
+                                        <form th:action="@{/addresses/edit}" method="get" class="m-0">
                                             <input type="hidden" name="id" th:value="${a.id}" />
                                             <button type="submit" class="btn btn-warning px-3 py-2">Sửa</button>
                                         </form>

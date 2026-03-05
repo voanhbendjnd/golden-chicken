@@ -57,4 +57,9 @@ public class OrderDetailController {
         model.addAttribute("order", this.orderService.findById(id));
         return "client/order.detail";
     }
+    @GetMapping("/order/cancel/{id}")
+    public String handleCancel(@PathVariable Long id) throws PermissionException {
+        orderService.cancelOrderByCustomer(id);
+        return "redirect:/order-history?successCancel";
+    }
 }

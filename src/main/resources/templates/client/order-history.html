@@ -555,7 +555,9 @@
                                 <a th:href="@{/order/{id}(id=${order.id})}" class="btn-detail">
                                     <i class="fa-regular fa-eye"></i> Chi tiết
                                 </a>
-                                <button th:if="${order.status.name() == 'PENDING'}" class="btn-cancel">
+                                <button th:if="${order.status.name() == 'PENDING'}"
+                                        class="btn-cancel"
+                                        th:onclick="'cancelOrder(' + ${order.id} + ')'">
                                     <i class="fa-solid fa-xmark"></i> Hủy đơn
                                 </button>
                                 <a th:if="${order.status.name() == 'DELIVERED' or order.status.name() == 'COMPLETED'}"
@@ -592,7 +594,52 @@
 
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script th:inline="javascript">
+    function cancelOrder(orderId) {
+        Swal.fire({
+            title: 'Xác nhận hủy đơn?',
+            text: "Đơn hàng sẽ bị hủy và trạng thái thanh toán chuyển về UNPAID. Bạn chắc chắn chứ?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e31837', // Màu đỏ Golden Chicken
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý hủy',
+            cancelButtonText: 'Quay lại',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Hiển thị hiệu ứng loading trong khi chuyển trang
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Điều hướng tới controller xử lý hủy đơn
+                window.location.href = '/order/cancel/' + orderId;
+            }
+        })
+    }
+
+    // Tùy chọn: Hiển thị thông báo thành công nếu có tham số successCancel trên URL
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('successCancel')) {
+            Swal.fire({
+                title: 'Thành công!',
+                text: 'Đơn hàng của bạn đã được hủy.',
+                icon: 'success',
+                confirmButtonColor: '#e31837'
+            });
+            // Xóa tham số trên URL để không hiện lại khi F5
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+</script>
 <div th:replace="~{client/layout/footer}"></div>
 </body>
 </html>
