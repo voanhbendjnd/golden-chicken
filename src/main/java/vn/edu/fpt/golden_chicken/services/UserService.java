@@ -174,6 +174,10 @@ public class UserService {
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
+
+        // check staff
+        // check customer
+
         this.userRepository.delete(user);
 
     }
