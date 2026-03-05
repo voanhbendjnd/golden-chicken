@@ -27,8 +27,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
 
     Page<Order> findByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses, Pageable pageable);
-
-    long countByShipperAndStatus(Staff shipper, OrderStatus status);
+    // Thay vì findByUserIdAndStatusIn
+// Hãy dùng: findByCustomerUserIdAndStatusIn
+    Page<Order> findByCustomerUserIdAndStatusIn(Long userId, List<OrderStatus> statuses, Pageable pageable);    long countByShipperAndStatus(Staff shipper, OrderStatus status);
 
     long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status,
             java.time.LocalDateTime start, java.time.LocalDateTime end);

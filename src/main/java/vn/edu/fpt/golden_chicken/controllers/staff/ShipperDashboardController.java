@@ -89,7 +89,7 @@ public class ShipperDashboardController {
         if (order.getShipper() == null && order.getStatus() == OrderStatus.PENDING) {
             order.setShipper(shipper);
             // order.setStatus(OrderStatus.SHIPPING);
-            this.orderService.changeOrderStatus(orderId, OrderStatus.SHIPPING.name(), shipper);
+            this.orderService.changeOrderStatus(orderId, OrderStatus.DELIVERING.name(), shipper);
             // this.orderRepository.save(order);
         }
         return "redirect:/staff/shipper/dashboard";
@@ -112,11 +112,11 @@ public class ShipperDashboardController {
         Pageable pageable = PageRequest.of(0, 50, Sort.by(Sort.Direction.DESC, "updatedAt"));
 
         var newOrders = this.orderRepository.findByStatusAndShipperIsNull(OrderStatus.PENDING, pageable);
-        var deliveringOrders = this.orderRepository.findByShipperAndStatus(shipper, OrderStatus.SHIPPING, pageable);
+        var deliveringOrders = this.orderRepository.findByShipperAndStatus(shipper, OrderStatus.DELIVERING, pageable);
         var historyStatuses = Arrays.asList(OrderStatus.COMPLETED, OrderStatus.CANCELLED);
         var historyOrders = this.orderRepository.findByShipperAndStatusIn(shipper, historyStatuses, pageable);
 
-        long deliveringCount = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.SHIPPING);
+        long deliveringCount = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.DELIVERING);
 
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);

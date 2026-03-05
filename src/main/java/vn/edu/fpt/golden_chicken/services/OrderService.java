@@ -168,38 +168,40 @@ public class OrderService {
     public void changeOrderStatus(Long id, String statusName, Staff shipper) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
         if (shipper != null) {
             order.setShipper(shipper);
         }
-        OrderStatus currentStatus = order.getStatus();
-        OrderStatus nextStatus;
 
-        try {
-            nextStatus = OrderStatus.valueOf(statusName);
-        } catch (IllegalArgumentException e) {
+        OrderStatus currentStatus = order.getStatus();
+        OrderStatus nextStatus = OrderStatus.safeValueOf(statusName);
+
+        if (nextStatus == null) {
             throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
-        if (currentStatus == OrderStatus.COMPLETED || currentStatus == OrderStatus.CANCELLED) {
-            throw new RuntimeException("Đơn hàng đã kết thúc (Completed/Cancelled), không thể thay đổi trạng thái!");
+        // 1. Nếu trạng thái không thay đổi thì return luôn
+        if (currentStatus == nextStatus) return;
+
+        // 2. Chặn nếu đơn hàng đã kết thúc
+        if (currentStatus == OrderStatus.DELIVERED ||
+                currentStatus == OrderStatus.CANCELLED ||
+                currentStatus == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
         }
 
-        if (currentStatus == OrderStatus.SHIPPING && nextStatus == OrderStatus.PENDING) {
-            throw new RuntimeException("Đơn hàng đang giao, không thể quay về trạng thái chờ xử lý!");
-        }
-
-        if (currentStatus == nextStatus) {
-            return;
-        }
-
+        // 4. Cập nhật trạng thái
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
-        if (nextStatus == OrderStatus.COMPLETED) {
+
+        // 5. Xử lý logic thanh toán tự động khi giao thành công
+        if (nextStatus == OrderStatus.DELIVERED) {
             order.setPaymentStatus(PaymentStatus.PAID);
         }
 
         var lastOrder = this.orderRepository.save(order);
 
+        // 6. Gửi Kafka thông báo (giữ nguyên logic cũ của bạn)
         if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
             OrderMessage message = new OrderMessage();
             message.setCustomerEmail(lastOrder.getCustomer().getUser().getEmail());
@@ -308,7 +310,7 @@ public class OrderService {
         return res;
     }
 
-    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, OrderStatus status)
+    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, String statusStr)
             throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email == null) {
@@ -322,27 +324,64 @@ public class OrderService {
         if (customer == null) {
             throw new PermissionException("Please Use Account Customer For This Service!");
         }
-        // if (status != OrderStatus.CANCELLED || status != OrderStatus.COMPLETED ||
-        // status != OrderStatus.PENDING
-        // || status != OrderStatus.SHIPPING) {
 
-        // }
-        Specification<Order> orderSpec = (r, q, c) -> {
-            return c.equal(r.get("customer"), customer);
-        };
-        // var lastStatus = status.toString();
-        if (status != null) {
-            var checkStatus = OrderStatus.safeValueOf(status.toString());
-            if (checkStatus != null) {
-                Specification<Order> orderStatus = (r, q, c) -> {
-                    return c.equal(r.get("status"), status);
-                };
-                orderSpec = orderSpec.and(orderStatus);
-                // var page = this.orderRepository.findAll(spec.and(orderSpec).and(orderStatus),
-                // pageable);
+        // Specification gốc: Lọc theo khách hàng hiện tại
+        Specification<Order> orderSpec = (r, q, c) -> c.equal(r.get("customer"), customer);
+
+        // Xử lý phân nhóm trạng thái
+        if (statusStr != null && !statusStr.isEmpty() && !statusStr.equalsIgnoreCase("ALL")) {
+            Specification<Order> statusGroupSpec;
+
+            switch (statusStr.toUpperCase()) {
+                case "WAITING":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.PENDING,
+                            OrderStatus.PREPARING,
+                            OrderStatus.READY_FOR_DELIVERY
+                    );
+                    break;
+
+                case "IN_PROGRESS": // Sửa từ DELIVERING thành IN_PROGRESS (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERING,
+                            OrderStatus.SHIPPER_ISSUE,
+                            OrderStatus.REASSIGNING_SHIPPER
+                    );
+                    break;
+
+                case "FINISHED": // Sửa từ DELIVERED thành FINISHED (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERED,
+                            OrderStatus.COMPLETED
+                    );
+                    break;
+
+                case "FAILED": // Sửa từ CANCELLED thành FAILED (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.CANCELLED,
+                            OrderStatus.DELIVERY_FAILED
+                    );
+                    break;
+
+                default:
+                    try {
+                        OrderStatus singleStatus = OrderStatus.valueOf(statusStr);
+                        statusGroupSpec = (r, q, c) -> c.equal(r.get("status"), singleStatus);
+                    } catch (IllegalArgumentException e) {
+                        statusGroupSpec = null;
+                    }
+                    break;
+            }
+
+            if (statusGroupSpec != null) {
+                orderSpec = orderSpec.and(statusGroupSpec);
             }
         }
+
+        // Thực hiện truy vấn với Specification tổng hợp
         var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
+
+        // Build kết quả trả về
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
@@ -350,6 +389,7 @@ public class OrderService {
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
+
         var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
         res.setResult(result);
 
