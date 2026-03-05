@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.turkraft.springfilter.boot.Filter;
 
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 
@@ -31,7 +31,7 @@ public class OrderController {
 
     @GetMapping
     public String table(Model model, @Filter Specification<Order> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.orderService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("meta", data.getMeta());
         model.addAttribute("orders", data.getResult());

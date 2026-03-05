@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Permission;
 import vn.edu.fpt.golden_chicken.domain.request.PermissionDTO;
 import vn.edu.fpt.golden_chicken.services.PermissionService;
@@ -40,7 +40,7 @@ public class PermissionController {
     public String getTablePage(
             Model model,
             @Filter Specification<Permission> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.permissionService.fecthAllWithPaginationDTO(spec, pageable);
         model.addAttribute("permissions", data.getResult());
         model.addAttribute("meta", data.getMeta());
@@ -97,7 +97,7 @@ public class PermissionController {
     @PostMapping("/import")
     public String importPermissions(@RequestParam("file") MultipartFile file,
             Model model,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws IOException, DataFormatException {
         try {
             this.permissionService.importPermissions(file);

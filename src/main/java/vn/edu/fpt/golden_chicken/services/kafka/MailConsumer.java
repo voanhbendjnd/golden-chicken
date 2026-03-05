@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.services.MailService;
@@ -36,7 +37,7 @@ public class MailConsumer {
     @KafkaListener(topics = "customer-account-topic", groupId = "email-group")
     public void listenOrderAndSendMailVerify(VerifyAccountMessage msg) {
         System.out.println(">>>> KAFKA ACCEPT REQUEST ORDER");
-        var otp = this.redis.opsForValue().get(msg.getEmail());
+        var otp = this.redis.opsForValue().get(DeclareConstant.USER_OTP + msg.getEmail());
         this.mailService.sendOTP(msg.getEmail(), "Verify Account", "mail/otp", msg.getEmail(), otp);
         System.out.println(">>> SEND MAIL SUCCESS");
 

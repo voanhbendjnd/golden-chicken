@@ -57,11 +57,6 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                     user.getStaff() != null && user.getStaff().getStaffType() != null
                             ? user.getStaff().getStaffType().name()
                             : null);
-            // if
-            // (user.getRole().getName().equalsIgnoreCase(DefineVariable.roleNameCustomer))
-            // {
-            // session.setAttribute("cartCount", 1);
-            // }
         }
 
     }

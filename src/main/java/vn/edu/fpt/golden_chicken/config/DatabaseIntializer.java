@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Permission;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
@@ -53,7 +53,8 @@ public class DatabaseIntializer implements CommandLineRunner {
             permissions.add(new Permission("IMPORT_PERMISSIONS", "/admin/permission/import", "POST", "PERMISSIONS"));
             permissions.add(new Permission("VIEW_PERMISSIONS", "/admin/permission", "GET", "PERMISSIONS"));
             permissions.add(new Permission("CREATE_PERMISSION", "/admin/permission/create", "GET,POST", "PERMISSIONS"));
-            permissions.add(new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
+            permissions
+                    .add(new Permission("UPDATE_PERMISSION", "/admin/permission/update/**", "POST,GET", "PERMISSIONS"));
             permissions.add(new Permission("DELETE_PERMISSION", "/admin/permission/delete/**", "POST", "PERMISSIONS"));
             permissions.add(new Permission("STAFF_PAGE", "/staff/**", "GET,POST", "STAFFS"));
             permissions.add(new Permission("STAFF_DASHBOARD", "/staff", "GET", "STAFFS"));
@@ -77,15 +78,15 @@ public class DatabaseIntializer implements CommandLineRunner {
 
             var roleAdmin = new Role();
             roleAdmin.setPermissions(this.permissionRepository.findAll());
-            roleAdmin.setName(DefineVariable.roleNameAdmin);
+            roleAdmin.setName(DeclareConstant.roleNameAdmin);
             roleAdmin.setDescription("Admin Golden Chicken");
 
             var roleCustomer = new Role();
-            roleCustomer.setName(DefineVariable.roleNameCustomer);
+            roleCustomer.setName(DeclareConstant.roleNameCustomer);
             roleCustomer.setDescription("Customer Golden Chicken");
 
             var roleStaff = new Role();
-            roleStaff.setName(DefineVariable.roleNameStaff);
+            roleStaff.setName(DeclareConstant.roleNameStaff);
             roleStaff.setDescription("Staff Golden Chicken");
             var staffPermissions = new ArrayList<Permission>();
             staffPermissions.add(staffPagePermission);
@@ -99,7 +100,7 @@ public class DatabaseIntializer implements CommandLineRunner {
             this.roleRepository.saveAll(roles);
         }
 
-        var existingStaffRole = this.roleRepository.findWithPermissionsByName(DefineVariable.roleNameStaff);
+        var existingStaffRole = this.roleRepository.findWithPermissionsByName(DeclareConstant.roleNameStaff);
         if (existingStaffRole != null) {
             var currentPermissions = existingStaffRole.getPermissions();
             if (currentPermissions == null) {
@@ -131,11 +132,11 @@ public class DatabaseIntializer implements CommandLineRunner {
             var users = new ArrayList<User>();
             var admin = new User();
             admin.setFullName("SUPER_ADMIN");
-            admin.setEmail(DefineVariable.email);
+            admin.setEmail(DeclareConstant.email);
             admin.setStatus(true);
-            admin.setPassword(this.passwordEncoder.encode(DefineVariable.password));
-            admin.setRole(this.roleRepository.findByName(DefineVariable.roleNameAdmin));
-            if (DefineVariable.roleNameAdmin.equals("ADMIN")) {
+            admin.setPassword(this.passwordEncoder.encode(DeclareConstant.password));
+            admin.setRole(this.roleRepository.findByName(DeclareConstant.roleNameAdmin));
+            if (DeclareConstant.roleNameAdmin.equals("ADMIN")) {
                 var staffAdmin = new Staff();
                 staffAdmin.setStaffType(StaffType.MANAGER);
                 staffAdmin.setStatus(StaffStatus.AVAILABLE);
@@ -147,9 +148,9 @@ public class DatabaseIntializer implements CommandLineRunner {
             staff.setFullName("SUPER_STAFF");
             staff.setEmail("mylndce190083@gmail.com");
             staff.setStatus(true);
-            staff.setPassword(this.passwordEncoder.encode(DefineVariable.password));
-            staff.setRole(this.roleRepository.findByName(DefineVariable.roleNameStaff));
-            if (DefineVariable.roleNameStaff.equals("STAFF")) {
+            staff.setPassword(this.passwordEncoder.encode(DeclareConstant.password));
+            staff.setRole(this.roleRepository.findByName(DeclareConstant.roleNameStaff));
+            if (DeclareConstant.roleNameStaff.equals("STAFF")) {
                 var superStaff = new Staff();
                 superStaff.setStaffType(StaffType.RECEPTIONIST);
                 superStaff.setStatus(StaffStatus.AVAILABLE);

@@ -15,7 +15,7 @@ import com.turkraft.springfilter.boot.Filter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
@@ -39,9 +39,9 @@ public class OrderDetailController {
 
     @GetMapping("/order-history")
     public String getOrderHistory(@RequestParam(required = false) OrderStatus status, Model model,
-                                  @Filter Specification<Order> spec,
-                                  // ĐỔI "updatedAt" THÀNH "id" ĐỂ ĐƠN HÀNG MỚI NHẤT LUÔN Ở ĐẦU
-                                  @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
+            @Filter Specification<Order> spec,
+            // ĐỔI "updatedAt" THÀNH "id" ĐỂ ĐƠN HÀNG MỚI NHẤT LUÔN Ở ĐẦU
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws PermissionException {
         var data = this.orderService.getOrderHistory(spec, pageable, status);
         model.addAttribute("data", data);

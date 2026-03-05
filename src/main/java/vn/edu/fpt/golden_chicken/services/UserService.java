@@ -25,11 +25,12 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.common.MyLibrary;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
+import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
@@ -63,7 +64,7 @@ public class UserService {
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID",
-                        request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
+                        request.getRoleId() != null ? request.getRoleId() : DeclareConstant.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
@@ -88,21 +89,21 @@ public class UserService {
 
     }
 
-    public void register(UserDTO request) {
+    public void register(RegisterDTO request) {
         var email = request.getEmail();
         if (this.userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException(email);
         }
-        var roleCustomer = this.roleRepository.findByName(DefineVariable.roleNameCustomer);
+        var roleCustomer = this.roleRepository.findByName(DeclareConstant.roleNameCustomer);
 
         if (roleCustomer != null) {
             var user = new User();
             user.setEmail(request.getEmail().toLowerCase());
-            user.setFullName(request.getFullName());
+            user.setFullName(request.getName());
             user.setStatus(true);
-            user.setPhone(user.getPhone());
+            // user.setPhone(user.getPhone());
             user.setRole(roleCustomer);
-            user.setPassword(this.passwordEncoder.encode(request.getPassword()));
+            user.setPassword(request.getPassword());
             var customer = new Customer();
             customer.setUser(user);
             user.setCustomer(customer);
@@ -110,7 +111,7 @@ public class UserService {
             // this.mailService.startOTP(email, this.generateOTP(user), email);
             // this.mailService.allowMailForUser(request.getFullName(), email);
         } else {
-            throw new ResourceNotFoundException("ROLE", DefineVariable.roleNameCustomer);
+            throw new ResourceNotFoundException("ROLE", DeclareConstant.roleNameCustomer);
         }
 
     }

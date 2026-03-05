@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,12 +22,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.MailService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisOTPService;
+import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 
 @Controller
 public class AuthController {
@@ -34,16 +37,20 @@ public class AuthController {
     private final UserRepository userRepository;
     private final MailService mailService;
     private final RedisOTPService redisOTPService;
+    private final RedisUserService redisUserService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     private KafkaTemplate<String, VerifyAccountMessage> verifyAccountKafka;
 
     public AuthController(MailService mailService, RedisOTPService redisOTPService, UserService userService,
-            UserRepository userRepository) {
+            UserRepository userRepository, RedisUserService redisUserService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.mailService = mailService;
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.redisOTPService = redisOTPService;
+        this.redisUserService = redisUserService;
     }
 
     @GetMapping("/login")
@@ -68,14 +75,16 @@ public class AuthController {
             bindingResult.rejectValue("email", "CONFLICT", "Email already exists!");
             return "client/auth/register";
         }
-        var session = request.getSession(true);
-        // var otp = this.userService.generateBase();
-        session.setAttribute("PENDING_USER", userRequest);
-        // session.setAttribute("OTP_CODE", otp);
-        session.setAttribute("OTP_EMAIL", userRequest.getEmail());
-        // session.setAttribute("OTP_EXPIRE", LocalDateTime.now().plusMinutes(5));
-        // this.mailService.startOTP(userRequest.getEmail(), otp);
-        return "redirect:/verify";
+        if (!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
+            bindingResult.rejectValue("password", "CONFLICT", "Password and confirm password not the same!");
+            return "client/auth/register";
+        }
+        var registerDTO = new RegisterDTO();
+        registerDTO.setEmail(userRequest.getEmail());
+        registerDTO.setPassword(this.passwordEncoder.encode(userRequest.getPassword()));
+        registerDTO.setName(userRequest.getFullName());
+        this.redisUserService.savePendingUserRegister(registerDTO);
+        return "redirect:/verify?email=" + userRequest.getEmail();
     }
 
     @GetMapping("/access-deny")
@@ -84,71 +93,35 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public String verifyPage(HttpServletRequest request) {
-        var session = request.getSession(true);
+    public String verifyPage(@RequestParam("email") String email, Model model) {
         var OTP = this.userService.generateBase();
-        session.setAttribute("OTP_CODE", OTP);
-        session.setAttribute("OTP_EXPIRE", LocalDateTime.now().plusMinutes(5));
-        var email = (String) request.getSession().getAttribute("OTP_EMAIL");
-        if (email == null || email.isEmpty()) {
-            return "redirect:/login";
-        }
+        model.addAttribute("email", email);
         this.redisOTPService.saveOTP(email, OTP);
-        // this.mailService.startOTP(email, OTP);
         var msg = new VerifyAccountMessage();
         msg.setDescription("Verify Account");
         msg.setCreatedAt(LocalDateTime.now());
         msg.setEmail(email);
-
-        // msg.setOtp(OTP);
         this.verifyAccountKafka.send("customer-account-topic", msg);
         return "client/auth/verify";
     }
 
     @PostMapping("/verify")
     @ResponseBody
-    public ResponseEntity<?> verify(@RequestBody Map<String, String> request, HttpSession session) {
+    public ResponseEntity<?> verify(@RequestBody Map<String, String> request) {
         String otp = request.get("otp");
         String email = request.get("email");
+        if (this.redisUserService.verifyAndCreateUser(email, otp)) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Registration successful!"));
 
-        String sOTP = (String) session.getAttribute("OTP_CODE");
-        String sEmail = (String) session.getAttribute("OTP_EMAIL");
-        LocalDateTime expire = (LocalDateTime) session.getAttribute("OTP_EXPIRE");
-        UserDTO pendingUser = (UserDTO) session.getAttribute("PENDING_USER");
-
-        if (sOTP == null || sEmail == null || expire == null || pendingUser == null) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("success", false, "message", "Session expired or invalid. Please register again."));
         }
-        if (LocalDateTime.now().isAfter(expire)) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "OTP has expired."));
-        }
-
-        if (sOTP.equals(otp) && sEmail.equalsIgnoreCase(email)) {
-            try {
-                this.userService.register(pendingUser);
-
-                session.removeAttribute("PENDING_USER");
-                session.removeAttribute("OTP_CODE");
-                session.removeAttribute("OTP_EMAIL");
-                session.removeAttribute("OTP_EXPIRE");
-
-                return ResponseEntity.ok(Map.of("success", true, "message", "Registration successful!"));
-            } catch (Exception e) {
-                return ResponseEntity.internalServerError()
-                        .body(Map.of("success", false, "message", "Error saving user: " + e.getMessage()));
-            }
-        }
-
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid OTP code."));
     }
 
-    // Session keys riêng cho forgot-password để tránh xung đột với register verify
     private static final String FP_EMAIL = "FP_EMAIL";
     private static final String FP_OTP = "FP_OTP";
-    private static final String FP_EXPIRE_AT = "FP_EXPIRE_AT"; // epoch seconds
+    private static final String FP_EXPIRE_AT = "FP_EXPIRE_AT";
     private static final String FP_VERIFIED = "FP_VERIFIED";
-    private static final long FP_TTL_SECONDS = 5 * 60; // 5 phút
+    private static final long FP_TTL_SECONDS = 5 * 60;
 
     @GetMapping("/forgot-password")
     public String forgotPasswordPage() {
