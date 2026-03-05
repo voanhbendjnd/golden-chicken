@@ -13,7 +13,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     boolean existsByEmail(String email);
 
-    User findByEmail(String email);
+    User findByEmailIgnoreCase(String email);
 
     @EntityGraph(attributePaths = { "role", "role.permissions", "staff" })
     @Query("select u from User u where lower(u.email) = lower(:email)")

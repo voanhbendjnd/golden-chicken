@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
@@ -55,6 +57,7 @@ public class UserService {
     CustomerRepository customerRepository;
     PasswordEncoder passwordEncoder;
     MailService mailService;
+    KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
 
     // @Transactional
     public void create(UserDTO request) {
@@ -175,7 +178,7 @@ public class UserService {
     }
 
     public User getByEmail(String email) {
-        return this.userRepository.findByEmail(email);
+        return this.userRepository.findByEmailIgnoreCase(email);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -307,7 +310,7 @@ public class UserService {
     private void clearOTP(User user) {
         user.setOneTimePassword(null);
         user.setOtpRequestedTime(null);
-        this.userRepository.save(user);
+        // this.userRepository.save(user);
     }
     // ====== ADD for Forgot Password (OTP) ======
 
@@ -328,16 +331,14 @@ public class UserService {
         }
 
         String normalizedEmail = email.trim().toLowerCase();
-        var user = this.userRepository.findByEmail(normalizedEmail);
+        var user = this.userRepository.findByEmailIgnoreCase(normalizedEmail);
 
         if (user == null) {
             throw new ResourceNotFoundException("Email", normalizedEmail);
         }
 
-        // encode + update
         user.setPassword(this.passwordEncoder.encode(rawPassword.trim()));
 
-        // clear OTP fields if your User entity has these fields
         try {
             user.setOneTimePassword(null);
             user.setOtpRequestedTime(null);
@@ -361,4 +362,23 @@ public class UserService {
         this.customerRepository.save(customer);
 
     }
+
+    @Transactional
+    public String generateOneTimePassword(String email) {
+        var user = this.userRepository.findByEmailIgnoreCase(email);
+        this.clearOTP(user);
+        var ran = new Random();
+        var otp = ran.nextInt(1000, 9999) + "";
+        var hashOtp = this.passwordEncoder.encode(otp);
+        user.setOneTimePassword(hashOtp);
+        user.setOtpRequestedTime(new Date());
+        this.userRepository.save(user);
+        var msg = new VerifyAccountMessage();
+        msg.setCreatedAt(LocalDateTime.now());
+        msg.setDescription("Reset password");
+        msg.setEmail(email);
+
+        return otp;
+    }
+
 }

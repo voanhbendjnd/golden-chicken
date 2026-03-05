@@ -123,7 +123,7 @@ public class CheckoutController {
             Model model) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email != null) {
-            var user = this.userRepository.findByEmail(email);
+            var user = this.userRepository.findByEmailIgnoreCase(email);
             if (user.getCustomer() == null) {
                 return "client/auth/access-deny";
             }

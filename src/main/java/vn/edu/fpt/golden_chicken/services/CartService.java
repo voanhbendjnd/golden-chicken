@@ -34,7 +34,7 @@ public class CartService {
     @Transactional
     public boolean addToCart(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             return false;
             // throw new ResourceNotFoundException("User Email", email);
@@ -69,7 +69,7 @@ public class CartService {
     public CartResponse getProductInCart() throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email != null && !email.isEmpty()) {
-            var user = this.userRepository.findByEmail(email);
+            var user = this.userRepository.findByEmailIgnoreCase(email);
             if (user != null) {
                 var customer = user.getCustomer();
                 if (customer != null) {
@@ -121,7 +121,7 @@ public class CartService {
 
     public void updateQuantity(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new ResourceNotFoundException("User Email", email);
         }
@@ -160,7 +160,7 @@ public class CartService {
         if (email == null || email.isEmpty()) {
             throw new ResourceNotFoundException("User Email", email);
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new ResourceNotFoundException("User Email", email);
         }

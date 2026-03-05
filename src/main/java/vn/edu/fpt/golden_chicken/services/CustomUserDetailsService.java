@@ -21,7 +21,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository.findByEmail(username.toLowerCase());
+        vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository
+                .findByEmailIgnoreCase(username.toLowerCase());
         if (user == null) {
             throw new UsernameNotFoundException("Not Found User With email: " + username);
         }

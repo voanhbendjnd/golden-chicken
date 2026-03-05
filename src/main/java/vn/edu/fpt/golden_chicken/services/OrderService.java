@@ -54,7 +54,8 @@ public class OrderService {
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
-        var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        var user = this.userRepository
+                .findByEmailIgnoreCase(SecurityContextHolder.getContext().getAuthentication().getName());
         var customer = user.getCustomer();
 
         if (customer == null) {
@@ -254,7 +255,7 @@ public class OrderService {
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }
@@ -314,7 +315,7 @@ public class OrderService {
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }
