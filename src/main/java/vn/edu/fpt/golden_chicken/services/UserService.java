@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,9 @@ import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
+import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
+import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -58,7 +59,9 @@ public class UserService {
     CustomerRepository customerRepository;
     PasswordEncoder passwordEncoder;
     MailService mailService;
-    KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
+    OrderRepository orderRepository;
+    CartRepository cartRepository;
+    // KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
 
     // @Transactional
     public void create(UserDTO request) {
@@ -175,8 +178,22 @@ public class UserService {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
 
-        // check staff
-        // check customer
+        if (user.getStaff() != null) {
+            var staff = user.getStaff();
+            if (this.orderRepository.existsByShipperId(staff.getId())) {
+                user.setStatus(false);
+                this.userRepository.save(user);
+                return;
+            }
+        } else if (user.getCustomer() != null) {
+            var customer = user.getCustomer();
+            if (this.orderRepository.existsByCustomerId(customer.getId())
+                    || this.cartRepository.existsByCustomerId(customer.getId())) {
+                user.setStatus(false);
+                this.userRepository.save(user);
+                return;
+            }
+        }
 
         this.userRepository.delete(user);
 
@@ -186,6 +203,7 @@ public class UserService {
         return this.userRepository.findByEmailIgnoreCase(email);
     }
 
+    @SuppressWarnings("null")
     @Transactional(rollbackFor = Exception.class)
     public void importUsers(MultipartFile file) throws IOException, DataFormatException {
         if (!file.getOriginalFilename().endsWith(".xlsx")) {

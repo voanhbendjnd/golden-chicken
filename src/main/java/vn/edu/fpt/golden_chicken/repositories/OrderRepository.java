@@ -18,33 +18,38 @@ import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 
 @Repository
+@SuppressWarnings("null")
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
-    @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
-    Page<Order> findAll(Specification<Order> spec, Pageable pageable);
+        boolean existsByCustomerId(Long id);
 
-    Page<Order> findByStatusAndShipperIsNull(OrderStatus status, Pageable pageable);
+        boolean existsByShipperId(Long id);
 
-    Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
+        @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
+        Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
-    Page<Order> findByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses, Pageable pageable);
+        Page<Order> findByStatusAndShipperIsNull(OrderStatus status, Pageable pageable);
 
-    long countByShipperAndStatus(Staff shipper, OrderStatus status);
+        Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
 
-    long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status,
-            java.time.LocalDateTime start, java.time.LocalDateTime end);
+        Page<Order> findByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses, Pageable pageable);
 
-    // total orders assigned to a shipper regardless of status
-    long countByShipper(Staff shipper);
+        long countByShipperAndStatus(Staff shipper, OrderStatus status);
 
-    @Query("select coalesce(sum(o.finalAmount),0) from Order o where o.shipper = ?1 and o.paymentMethod = ?2 and o.paymentStatus = ?3")
-    java.math.BigDecimal sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(Staff shipper,
-            PaymentMethod paymentMethod, PaymentStatus paymentStatus);
+        long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status,
+                        java.time.LocalDateTime start, java.time.LocalDateTime end);
 
-    @Query(value = "SELECT MONTH(o.updated_at) as month, SUM(o.final_amount) as revenue " +
-            "FROM orders o " +
-            "WHERE o.status = 'COMPLETED' " +
-            "AND YEAR(o.updated_at) = YEAR(GETDATE()) " +
-            "GROUP BY MONTH(o.updated_at) " +
-            "ORDER BY MONTH(o.updated_at)", nativeQuery = true)
-    List<Object[]> getMonthlyRevenueRaw();
+        // total orders assigned to a shipper regardless of status
+        long countByShipper(Staff shipper);
+
+        @Query("select coalesce(sum(o.finalAmount),0) from Order o where o.shipper = ?1 and o.paymentMethod = ?2 and o.paymentStatus = ?3")
+        java.math.BigDecimal sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(Staff shipper,
+                        PaymentMethod paymentMethod, PaymentStatus paymentStatus);
+
+        @Query(value = "SELECT MONTH(o.updated_at) as month, SUM(o.final_amount) as revenue " +
+                        "FROM orders o " +
+                        "WHERE o.status = 'COMPLETED' " +
+                        "AND YEAR(o.updated_at) = YEAR(GETDATE()) " +
+                        "GROUP BY MONTH(o.updated_at) " +
+                        "ORDER BY MONTH(o.updated_at)", nativeQuery = true)
+        List<Object[]> getMonthlyRevenueRaw();
 }

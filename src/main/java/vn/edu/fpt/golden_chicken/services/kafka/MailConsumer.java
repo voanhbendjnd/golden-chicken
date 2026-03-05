@@ -12,14 +12,12 @@ import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.services.MailService;
-import vn.edu.fpt.golden_chicken.services.redis.RedisOTPService;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class MailConsumer {
     MailService mailService;
-    RedisOTPService redisOTPService;
     StringRedisTemplate redis;
 
     @KafkaListener(topics = "order-chicken-topic", groupId = "email-group")

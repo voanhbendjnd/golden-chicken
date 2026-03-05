@@ -81,6 +81,7 @@ public class PermissionService {
         return res;
     }
 
+    @SuppressWarnings("resource")
     public void importPermissions(MultipartFile file) throws IOException, DataFormatException {
         var is = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(is);

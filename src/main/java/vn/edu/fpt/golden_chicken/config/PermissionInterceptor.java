@@ -24,6 +24,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         this.userRepository = userRepository;
     }
 
+    @SuppressWarnings("null")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object hanlder)
             throws Exception {

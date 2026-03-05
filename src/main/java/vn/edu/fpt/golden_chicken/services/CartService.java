@@ -26,6 +26,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@SuppressWarnings("unusend")
 public class CartService {
     UserRepository userRepository;
     CartRepository cartRepository;
@@ -131,9 +132,6 @@ public class CartService {
         var customer = user.getCustomer();
         // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), dto.productId());
-        if (cartItem == null) {
-            cartItem = new CartItem();
-        }
         if (dto.quantity() <= 0) {
             if (cartItem != null) {
                 this.cartRepository.delete(cartItem);
