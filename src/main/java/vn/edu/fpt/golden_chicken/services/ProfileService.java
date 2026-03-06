@@ -24,7 +24,7 @@ public class ProfileService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null)
             return null;
-        return userRepository.findByEmail(auth.getName().toLowerCase());
+        return userRepository.findByEmailIgnoreCase(auth.getName());
     }
 
     public ProfileUpdateDTO getProfileForm() {

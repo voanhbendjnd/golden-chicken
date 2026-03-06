@@ -183,14 +183,14 @@
             button.addEventListener('click', function () {
                 const form = this.closest('.delete-form');
                 Swal.fire({
-                    title: 'Are you sure delete?',
-                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    title: 'Bạn chắc chắn muốn xóa?',
+                    text: "Nếu tài khoản chứa có liên quan tới giỏ hàng và đơn hàng thì sẽ chuyển sang trạng thái inactive!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Hủy',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {

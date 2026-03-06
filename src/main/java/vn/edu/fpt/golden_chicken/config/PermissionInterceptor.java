@@ -24,6 +24,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         this.userRepository = userRepository;
     }
 
+    @SuppressWarnings("null")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object hanlder)
             throws Exception {
@@ -37,7 +38,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         var email = authentication.getName();
         String apiPath = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         var httpMethod = request.getMethod();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
 
         if (user != null) {
             var role = user.getRole();

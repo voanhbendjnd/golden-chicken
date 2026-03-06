@@ -26,26 +26,56 @@
                     <div class="col-12">
                         <div class="card shadow-sm">
                             <div class="card-header bg-white py-3">
-                                <h5 class="mb-0 text-primary"><i class="bi bi-cart-check me-2"></i>Danh sách đơn hàng vận hành</h5>
+                                <h5 class="mb-0 text-primary"><i class="bi bi-cart-check me-2"></i>Danh sách đơn hàng
+                                    vận hành</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
                                     <div class="col-md-8">
                                         <div class="input-group">
-                                            <select id="filterStatus" class="form-select" style="max-width: 200px;" onchange="handleSearch()">
+                                            <select id="filterStatus" class="form-select" style="max-width: 200px;"
+                                                    onchange="handleSearch()">
                                                 <option value="">-- Tất cả trạng thái --</option>
-                                                <option value="PENDING" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PENDING''')}">Pending (Chờ xác nhận)</option>
-                                                <option value="PREPARING" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PREPARING''')}">Preparing (Đang chuẩn bị)</option>
-                                                <option value="READY_FOR_DELIVERY" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''READY_FOR_DELIVERY''')}">Ready (Sẵn sàng giao)</option>
-                                                <option value="DELIVERING" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERING''')}">Delivering (Đang giao)</option>
-                                                <option value="SHIPPER_ISSUE" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''SHIPPER_ISSUE''')}">Shipper Issue (Sự cố)</option>
-                                                <option value="REASSIGNING_SHIPPER" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''REASSIGNING_SHIPPER''')}">Reassigning (Đang đổi shipper)</option>
-                                                <option value="DELIVERY_FAILED" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERY_FAILED''')}">Delivery Failed (Giao hụt)</option>
-                                                <option value="DELIVERED" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERED''')}">Delivered (Thành công)</option>
-                                                <option value="CANCELLED" th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''CANCELLED''')}">Cancelled (Đã hủy)</option>
+                                                <option value="PENDING"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PENDING''')}">
+                                                    Pending (Chờ xác nhận)
+                                                </option>
+                                                <option value="PREPARING"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PREPARING''')}">
+                                                    Preparing (Đang chuẩn bị)
+                                                </option>
+                                                <option value="READY_FOR_DELIVERY"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''READY_FOR_DELIVERY''')}">
+                                                    Ready (Sẵn sàng giao)
+                                                </option>
+                                                <option value="DELIVERING"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERING''')}">
+                                                    Delivering (Đang giao)
+                                                </option>
+                                                <option value="SHIPPER_ISSUE"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''SHIPPER_ISSUE''')}">
+                                                    Shipper Issue (Sự cố)
+                                                </option>
+                                                <option value="REASSIGNING_SHIPPER"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''REASSIGNING_SHIPPER''')}">
+                                                    Reassigning (Đang đổi shipper)
+                                                </option>
+                                                <option value="DELIVERY_FAILED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERY_FAILED''')}">
+                                                    Delivery Failed (Giao hụt)
+                                                </option>
+                                                <option value="DELIVERED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''DELIVERED''')}">
+                                                    Delivered (Thành công)
+                                                </option>
+                                                <option value="CANCELLED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''CANCELLED''')}">
+                                                    Cancelled (Đã hủy)
+                                                </option>
                                             </select>
 
-                                            <input type="text" id="searchName" class="form-control" placeholder="Tìm theo số điện thoại..." th:value="${searchName}">
+                                            <input type="text" id="searchName" class="form-control"
+                                                   placeholder="Tìm theo số điện thoại..." th:value="${searchName}">
 
                                             <button class="btn btn-primary" type="button" onclick="handleSearch()">
                                                 <i class="bi bi-search"></i> Tìm kiếm
@@ -70,15 +100,20 @@
                                         <tbody>
                                         <tr th:each="order : ${orders}">
                                             <td>
-                                                <a th:href="@{/staff/order/{id}(id=${order.id})}" th:text="'#' + ${order.id}" class="fw-bold text-decoration-none"></a>
+                                                <a th:href="@{/staff/order/{id}(id=${order.id})}"
+                                                   th:text="'#' + ${order.id}" class="fw-bold text-decoration-none"></a>
                                             </td>
                                             <td>
                                                 <div th:text="${order.name}"></div>
                                                 <small class="text-muted" th:text="${order.phone}"></small>
                                             </td>
-                                            <td class="fw-bold text-danger" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
+                                            <td class="fw-bold text-danger"
+                                                th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + 'đ'}"></td>
                                             <td>
-                                                <span class="badge" th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-warning text-dark'}" th:text="${order.paymentStatus}"></span>
+                                               <span class="badge"
+                                                     th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : (order.paymentStatus == 'REFUNDED' ? 'bg-refunded' : 'bg-warning text-dark')}"
+                                                     th:text="${order.paymentStatus}">
+                                               </span>
                                             </td>
                                             <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                                             <td>
@@ -94,7 +129,8 @@
                                                              (order.status.name() == 'SHIPPER_ISSUE' or order.status.name() == 'DELIVERY_FAILED') ? '#ffe5d0' : '#e2e3e5') +
                                                             '; color: #333;'}">
 
-                                                    <option th:value="${order.status.name()}" th:text="${order.status.name()}" selected></option>
+                                                    <option th:value="${order.status.name()}"
+                                                            th:text="${order.status.name()}" selected></option>
 
                                                     <th:block th:if="${order.status.name() == 'PENDING'}">
                                                         <option value="PREPARING">PREPARING (Chuẩn bị hàng)</option>
@@ -103,7 +139,9 @@
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'PREPARING'}">
-                                                        <option value="READY_FOR_DELIVERY">READY FOR DELIVERY (Sẵn sàng)</option>
+                                                        <option value="READY_FOR_DELIVERY">READY FOR DELIVERY (Sẵn
+                                                            sàng)
+                                                        </option>
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'READY_FOR_DELIVERY'}">
@@ -112,12 +150,18 @@
 
                                                     <th:block th:if="${order.status.name() == 'DELIVERING'}">
                                                         <option value="DELIVERED">DELIVERED (Thành công)</option>
-                                                        <option value="DELIVERY_FAILED">DELIVERY FAILED (Khách không nghe máy)</option>
-                                                        <option value="SHIPPER_ISSUE">SHIPPER ISSUE (Shipper gặp sự cố)</option>
+                                                        <option value="DELIVERY_FAILED">DELIVERY FAILED (Khách không
+                                                            nghe máy)
+                                                        </option>
+                                                        <option value="SHIPPER_ISSUE">SHIPPER ISSUE (Shipper gặp sự
+                                                            cố)
+                                                        </option>
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'SHIPPER_ISSUE'}">
-                                                        <option value="REASSIGNING_SHIPPER">REASSIGNING (Đổi shipper khác)</option>
+                                                        <option value="REASSIGNING_SHIPPER">REASSIGNING (Đổi shipper
+                                                            khác)
+                                                        </option>
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}">
@@ -125,7 +169,8 @@
                                                     </th:block>
 
                                                     <th:block th:if="${order.status.name() == 'DELIVERY_FAILED'}">
-                                                        <option value="DELIVERING">DELIVERING (Thử giao lại lần 2)</option>
+                                                        <option value="DELIVERING">DELIVERING (Thử giao lại lần 2)
+                                                        </option>
                                                         <option value="CANCELLED">CANCELLED (Hủy đơn)</option>
                                                     </th:block>
                                                 </select>
@@ -138,27 +183,33 @@
                                         <nav aria-label="Page navigation">
                                             <ul class="pagination">
                                                 <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
-                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trước</a>
+                                                    <a class="page-link shadow-none"
+                                                       th:href="@{/staff/order(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trước</a>
                                                 </li>
                                                 <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                                     th:class="|page-item ${meta.page == p ? 'active' : ''}|">
-                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${p}, size=${meta.pageSize}, filter=${param.filter})}" th:text="${p}"></a>
+                                                    <a class="page-link shadow-none"
+                                                       th:href="@{/staff/order(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
+                                                       th:text="${p}"></a>
                                                 </li>
                                                 <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
-                                                    <a class="page-link shadow-none" th:href="@{/staff/order(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Sau</a>
+                                                    <a class="page-link shadow-none"
+                                                       th:href="@{/staff/order(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Sau</a>
                                                 </li>
                                             </ul>
                                         </nav>
                                     </div>
                                 </div>
 
-                                <form id="updateStatusForm" th:action="@{/staff/order/update-status}" method="POST" style="display: none;">
+                                <form id="updateStatusForm" th:action="@{/staff/order/update-status}" method="POST"
+                                      style="display: none;">
                                     <input type="hidden" name="orderId" id="submitOrderId">
                                     <input type="hidden" name="status" id="submitStatus">
                                 </form>
 
                                 <div th:if="${orders == null or orders.isEmpty()}" class="text-center py-5">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-50">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80"
+                                         class="mb-3 opacity-50">
                                     <p class="text-muted">Không tìm thấy đơn hàng nào khớp với yêu cầu!</p>
                                 </div>
                             </div>

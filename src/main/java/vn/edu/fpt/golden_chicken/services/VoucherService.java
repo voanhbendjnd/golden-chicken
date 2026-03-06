@@ -198,7 +198,7 @@ public class VoucherService {
         }
         if (currentUser != null) {
             var customer = customerRepository.findById(currentUser.getId()).orElse(null);
-            points = customer.getPoint();
+            points = customer.getPoint() != null ? customer.getPoint() : 0;
         }
         return points;
     }

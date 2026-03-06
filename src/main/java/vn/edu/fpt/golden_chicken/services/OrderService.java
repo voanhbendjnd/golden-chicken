@@ -54,7 +54,8 @@ public class OrderService {
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
-        var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        var user = this.userRepository
+                .findByEmailIgnoreCase(SecurityContextHolder.getContext().getAuthentication().getName());
         var customer = user.getCustomer();
 
         if (customer == null) {
@@ -168,7 +169,7 @@ public class OrderService {
     public void cancelOrderByCustomer(Long id) throws PermissionException {
         // 1. Lấy thông tin user hiện tại từ SecurityContext
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
 
         // 2. Tìm đơn hàng và kiểm tra tồn tại
         var order = this.orderRepository.findById(id)
@@ -188,7 +189,9 @@ public class OrderService {
         order.setStatus(OrderStatus.CANCELLED);
 
         // 6. Cập nhật trạng thái thanh toán sang UNPAID (Yêu cầu của bạn)
-        order.setPaymentStatus(PaymentStatus.UNPAID);
+        if(order.getPaymentStatus().equals(PaymentStatus.PAID)) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
+        }
 
         order.setUpdatedAt(LocalDateTime.now());
 
@@ -218,6 +221,7 @@ public class OrderService {
         }
 
         OrderStatus currentStatus = order.getStatus();
+        PaymentStatus currentPayment = order.getPaymentStatus();
         OrderStatus nextStatus = OrderStatus.safeValueOf(statusName);
 
         if (nextStatus == null) {
@@ -241,6 +245,9 @@ public class OrderService {
         // 5. Xử lý logic thanh toán tự động khi giao thành công
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             order.setPaymentStatus(PaymentStatus.PAID);
+        }
+        if(currentPayment == PaymentStatus.PAID) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
         }
 
         var lastOrder = this.orderRepository.save(order);
@@ -302,7 +309,7 @@ public class OrderService {
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }
@@ -362,7 +369,7 @@ public class OrderService {
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }

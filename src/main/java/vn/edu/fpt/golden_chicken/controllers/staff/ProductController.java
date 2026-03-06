@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
@@ -54,7 +54,7 @@ public class ProductController {
 
     @GetMapping
     public String getProductTablePage(Model model,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @Filter Specification<Product> spec) {
         var data = this.productService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("meta", data.getMeta());

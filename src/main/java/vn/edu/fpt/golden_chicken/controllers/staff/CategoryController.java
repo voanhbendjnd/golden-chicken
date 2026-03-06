@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.turkraft.springfilter.boot.Filter;
 
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.request.CategoryDTO;
 import vn.edu.fpt.golden_chicken.services.CategoryService;
@@ -33,7 +33,7 @@ public class CategoryController {
     @GetMapping("")
     public String getTablePage(Model model,
             @Filter Specification<Category> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var res = this.categoryService.fetchWithPagination(spec, pageable);
         model.addAttribute("meta", res.getMeta());
         model.addAttribute("categories", res.getResult());

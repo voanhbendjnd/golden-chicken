@@ -34,4 +34,5 @@ public class UserDTO implements Serializable {
     String address;
     String district;
     String ward;
+    // String otp;
 }

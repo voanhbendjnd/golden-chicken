@@ -68,12 +68,13 @@
 
                                 <a class="btn-default btn-danger btn-order" style="text-decoration-line: none;"
                                     th:href="@{/checkout?id={id}(id=${product.id})}">
-                                    Buy Now
+                                    Mua ngay
                                 </a>
-                                <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
+                                <div class="product-card__action mt-3 d-flex gap-2 align-items-center"
+                                    th:if="${product.type.name() != 'MYSTERY'}">
                                     <button class="btn-default btn-warning flex-grow-1 btn-add-to-cart"
                                         th:data-id="${product.id}">
-                                        Add To Cart
+                                        Thêm vào giỏ hàng
                                     </button>
 
                                     <div class="input-group quantity-selector shadow-sm" style="width: 130px;">

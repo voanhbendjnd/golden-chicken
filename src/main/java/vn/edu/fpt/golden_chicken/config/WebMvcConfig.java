@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@SuppressWarnings({ "unused", "null" })
+
 public class WebMvcConfig implements WebMvcConfigurer {
     private final PermissionInterceptor permissionInterceptor;
 

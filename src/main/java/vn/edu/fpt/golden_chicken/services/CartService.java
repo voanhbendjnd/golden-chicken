@@ -26,6 +26,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@SuppressWarnings("unusend")
 public class CartService {
     UserRepository userRepository;
     CartRepository cartRepository;
@@ -34,7 +35,7 @@ public class CartService {
     @Transactional
     public boolean addToCart(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             return false;
             // throw new ResourceNotFoundException("User Email", email);
@@ -69,7 +70,7 @@ public class CartService {
     public CartResponse getProductInCart() throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email != null && !email.isEmpty()) {
-            var user = this.userRepository.findByEmail(email);
+            var user = this.userRepository.findByEmailIgnoreCase(email);
             if (user != null) {
                 var customer = user.getCustomer();
                 if (customer != null) {
@@ -121,7 +122,7 @@ public class CartService {
 
     public void updateQuantity(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new ResourceNotFoundException("User Email", email);
         }
@@ -131,9 +132,6 @@ public class CartService {
         var customer = user.getCustomer();
         // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), dto.productId());
-        if (cartItem == null) {
-            cartItem = new CartItem();
-        }
         if (dto.quantity() <= 0) {
             if (cartItem != null) {
                 this.cartRepository.delete(cartItem);
@@ -160,7 +158,7 @@ public class CartService {
         if (email == null || email.isEmpty()) {
             throw new ResourceNotFoundException("User Email", email);
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new ResourceNotFoundException("User Email", email);
         }

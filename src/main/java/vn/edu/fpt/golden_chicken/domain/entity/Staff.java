@@ -33,4 +33,5 @@ public class Staff implements Serializable {
     StaffStatus status;
     @Enumerated(EnumType.STRING)
     StaffType staffType;
+
 }

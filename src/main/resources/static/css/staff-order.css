@@ -39,3 +39,7 @@
 .bg-success { background-color: #d1e7dd; }
 .bg-failed { background-color: #f8d7da; }
 .bg-issue { background-color: #ffe5d0; }
+.bg-refunded {
+    background-color: #f8d7da !important; /* Màu đỏ nhạt của Bootstrap alert */
+    color: #842029 !important;            /* Chữ đỏ đậm cho dễ đọc */
+}
