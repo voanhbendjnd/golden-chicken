@@ -1,0 +1,28 @@
+services:
+  # 1. Redis bản gốc (nhẹ và dễ pull)
+  redis-chicken:
+    image: redis:alpine
+    container_name: redis-chicken
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # 2. Zookeeper
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+
+  # 3. Kafka
+  kafka-broker:
+    image: wurstmeister/kafka:latest
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "customer-account-topic:1:1"
+    depends_on:
+      - zookeeper
