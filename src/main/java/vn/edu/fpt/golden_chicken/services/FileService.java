@@ -21,6 +21,7 @@ import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class FileService {
     @Value("${djnd.upload-file.base-uri}")
     private String baseURI;

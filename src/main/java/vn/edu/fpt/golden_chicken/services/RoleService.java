@@ -89,6 +89,7 @@ public class RoleService {
         return this.roleRepository.findAll().stream().map(RoleConvert::toRoleRes).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("resource")
     public void importRoles(MultipartFile file) throws IOException, DataFormatException {
         var is = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(is);

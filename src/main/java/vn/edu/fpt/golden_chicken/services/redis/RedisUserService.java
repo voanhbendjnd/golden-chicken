@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
-import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
