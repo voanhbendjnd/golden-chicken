@@ -7,26 +7,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:content="${_csrf.token}" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <link rel="stylesheet" th:href="@{/css/base.css}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/menudjnd.css}">
     <script th:src="@{/js/menu.js}"></script>
-
     <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
-
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
 </head>
 
 <body>
 
     <!-- HEADER -->
-    <div th:replace="~{client/layout/header}"></div>
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
-    <section class="menu-page section">
+    <section class="menu-page section container">
         <div class="container-fluid py-4">
 
             <h1 class="menu-title text-center">THỰC ĐƠN</h1>
@@ -104,7 +99,7 @@
     </section>
 
     <!-- FOOTER -->
-    <div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
