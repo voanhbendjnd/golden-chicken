@@ -1,0 +1,191 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div class="container-fluid fixed-top">
+    <div class="container topbar d-none d-lg-block" style="background-color: #ffb524;">
+        <div class="d-flex justify-content-between">
+            <div class="top-info ps-2">
+                <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#"
+                        class="text-white">123 Street, New York</a></small>
+                <small class="me-3"><i class="fas fa-envelope me-2 text-secondary"></i><a href="#"
+                        class="text-white">Email@Example.com</a></small>
+            </div>
+            <div class="top-link pe-2">
+                <a href="#" class="text-white"><small class="text-white mx-2">Privacy Policy</small>/</a>
+                <a href="#" class="text-white"><small class="text-white mx-2">Terms of Use</small>/</a>
+                <a href="#" class="text-white"><small class="text-white ms-2">Sales and Refunds</small></a>
+            </div>
+        </div>
+    </div>
+    <div class="container px-0">
+        <nav class="navbar navbar-light bg-white navbar-expand-xl">
+            <a href="/" class="navbar-brand">
+                <h1 class="display-6" style="color: #ffb524">Golden Chicken</h1>
+            </a>
+            <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse">
+                <span class="fa fa-bars text-secondary"></span>
+            </button>
+            <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                <div class="navbar-nav mx-auto">
+                    <a href="/" class="nav-item nav-link active">Home</a>
+                    <li class="nav-item menu-dropdown">
+
+                        <a href="/menu" class="nav-link">
+                            Menu
+                        </a>
+
+                        <div class="mega-menu">
+
+                            <div class="mega-container">
+
+                                <div class="mega-item" th:each="c : ${menuCategories}">
+
+                                    <a th:href="@{'/menu'(cat=${c.anchor})}" class="mega-img">
+
+                                        <img th:src="@{/images/products/{f}(f=${c.img})}" th:alt="${c.name}">
+
+                                    </a>
+
+                                    <h6 th:text="${c.name}">Category</h6>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </li>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                            <a href="/cart" class="dropdown-item">Cart</a>
+                            <a href="chackout.html" class="dropdown-item">Chackout</a>
+                            <a href="testimonial.html" class="dropdown-item">Testimonial</a>
+                            <a href="404.html" class="dropdown-item">404 Page</a>
+                        </div>
+                    </div>
+                    <a href="contact.html" class="nav-item nav-link">Contact</a>
+                </div>
+                <div class="d-flex m-3 me-0">
+                    <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
+                        data-bs-toggle="modal" data-bs-target="#searchModal"><i
+                            class="fas fa-search text-secondary"></i></button>
+                    <a href="#" class="position-relative me-4 my-auto">
+                        <i class="fa fa-shopping-bag fa-2x"></i>
+                        <span
+                            class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                            style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
+                    </a>
+                    <a href="#" class="my-auto">
+                        <i class="fas fa-user fa-2x"></i>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<style>
+    /* dropdown container */
+    .menu-dropdown {
+        position: relative;
+    }
+
+    .mega-menu {
+        position: absolute;
+        top: 100%;
+
+        left: 50%;
+        transform: translateX(-50%) translateY(15px);
+
+        width: 1400px;
+        background: white;
+
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 30px 0;
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+    .menu-dropdown:hover .mega-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .mega-container {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+    }
+
+    /* category item */
+    .mega-item {
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .mega-item:hover {
+        transform: translateY(-5px);
+    }
+
+    /* image */
+    .mega-img img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .mega-item:hover img {
+        transform: scale(1.08);
+    }
+
+    /* title */
+    .mega-item h6 {
+        margin-top: 10px;
+        font-weight: 600;
+    }
+
+    .menu-list ul {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        /* 6 item mỗi hàng */
+        gap: 20px;
+        list-style: none;
+        padding: 20px;
+        margin: 0;
+    }
+
+    .menu-list {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+
+        background: #fff;
+        border-radius: 20px;
+        /* bo tròn */
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+        padding: 10px 0;
+        min-width: 900px;
+
+        overflow: hidden;
+    }
+
+    .menu-item {
+        text-align: center;
+    }
+
+    .menulist-img {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+    }
+</style>
