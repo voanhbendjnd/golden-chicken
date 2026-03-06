@@ -56,7 +56,9 @@ public class ProductService {
     public ResultPaginationDTO fetchAllWithPaginationHasCombo(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            return c.equal(categoryJoin.get("status"), true);
+            var r1 = c.equal(categoryJoin.get("status"), true);
+            var r2 = c.equal(r.get("active"), true);
+            return c.and(r1, r2);
         };
 
         var res = new ResultPaginationDTO();

@@ -1,4 +1,13 @@
 /*** Spinner Start ***/
+.btn-buy-now {
+    transition: all 0.3s ease;
+}
+
+.btn-buy-now:hover {
+    background-color: #dc3545;
+    color: white !important;
+    border-color: #da6200f8;
+}
 
 #spinner {
     opacity: 0;

@@ -11,6 +11,8 @@
     };
     spinner(0);
 
+    $(document).ready(function () {
+
 
     // Fixed Navbar
     $(window).scroll(function () {
@@ -145,6 +147,7 @@
             }
         }
         button.parent().parent().find('input').val(newVal);
+    });
     });
 
 })(jQuery);
