@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.domain.response;
 
+import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -11,20 +12,40 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResVoucher {
 
+    @NotNull(message = "Id is required")
     Long id;
+
+    @NotBlank(message = "Code is required")
     String code;
+
+    @NotBlank(message = "Name is required")
     String name;
+
+    @NotBlank(message = "Description is required")
     String description;
 
+    @NotNull(message = "Discount value is required")
     Integer discountValue;
+
+    @NotBlank(message = "Discount type is required")
     String discountType;
+
+    @NotNull(message = "Min order value is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Min order value must be >= 0")
     BigDecimal minOrderValue;
 
+    @NotNull(message = "Point cost is required")
+    @Min(value = 0, message = "Point cost must be >= 0")
     Integer pointCost;
+
+    @NotNull(message = "Exchangeable is required")
     Boolean exchangeable;
 
     String status;
 
+    @NotNull(message = "Start time is required")
     LocalDateTime startAt;
+
+    @NotNull(message = "End time is required")
     LocalDateTime endAt;
 }

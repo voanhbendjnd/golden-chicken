@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Verify OTP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d90429, #ef233c);
+            background-size: 200% 200%;
+            animation: gradientMove 12s ease infinite;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .wrapper {
+            width: 850px;
+            max-width: 95%;
+            display: flex;
+            border-radius: 35px;
+            overflow: hidden;
+            backdrop-filter: blur(30px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+            transition: 0.3s ease;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 60px 40px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .left-panel h2 { font-weight: 700; font-size: 32px; }
+        .left-panel p { opacity: 0.9; margin-top: 12px; }
+
+        .right-panel {
+            flex: 1.2;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.6);
+            border: none;
+            border-radius: 15px;
+            padding: 14px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .otp-input {
+            text-align: center;
+            letter-spacing: 10px;
+            font-weight: 800;
+            font-size: 22px;
+        }
+
+        .btn-danger {
+            border-radius: 15px;
+            background: linear-gradient(135deg, #d90429, #ef233c);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-outline-dark {
+            border-radius: 15px;
+            padding: 12px;
+            font-weight: 600;
+        }
+
+        .hint {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .back-link a {
+            text-decoration: none;
+            font-weight: 500;
+            color: #111;
+        }
+
+        @media(max-width: 768px) {
+            .wrapper { flex-direction: column; }
+            .left-panel { text-align: center; }
+            .otp-input { letter-spacing: 6px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="wrapper login-card">
+
+    <!-- LEFT -->
+    <div class="left-panel">
+        <h2>Verify OTP</h2>
+        <p>We’ve sent a 6-digit OTP to your email. Enter it below to continue.</p>
+
+        <!-- optional: show email -->
+        <p class="hint mt-3" th:if="${email != null}">
+            Email: <b th:text="${email}">example@email.com</b>
+        </p>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-panel">
+        <h3 class="text-center mb-4 fw-bold">Enter OTP</h3>
+
+        <div th:if="${message}" class="alert alert-success text-center">
+            <span th:text="${message}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger text-center">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Verify OTP -->
+        <form th:action="@{/verify-otp}" method="post" onsubmit="return validateOtp()">
+
+            <!-- hidden email (nếu bạn truyền email qua model) -->
+            <input type="hidden" name="email" th:value="${email}" />
+
+            <div class="form-floating mb-3">
+                <input class="form-control otp-input"
+                       id="otp"
+                       name="otp"
+                       inputmode="numeric"
+                       pattern="[0-9]{6}"
+                       maxlength="6"
+                       placeholder="OTP"
+                       required />
+                <label>6-digit OTP</label>
+            </div>
+
+            <div id="otp-error" class="mb-3 fw-semibold" style="color:#b00020;"></div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger">
+                    Verify OTP
+                </button>
+
+                <!-- Resend OTP -->
+                <button type="submit"
+                        class="btn btn-outline-dark"
+                        th:formaction="@{/forgot-password/resend}"
+                        formmethod="post">
+                    Resend OTP
+                </button>
+            </div>
+
+            <div class="back-link text-center mt-3">
+                <a th:href="@{/login}">← Back to Login</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    function validateOtp() {
+        const otp = document.getElementById("otp").value.trim();
+        const err = document.getElementById("otp-error");
+
+        if (!/^\d{6}$/.test(otp)) {
+            err.innerHTML = "OTP must be exactly 6 digits.";
+            return false;
+        }
+        err.innerHTML = "";
+        return true;
+    }
+
+    // only allow digits
+    const otpInput = document.getElementById("otp");
+    otpInput.addEventListener("input", () => {
+        otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+    });
+
+    // 3D tilt
+    const card = document.querySelector(".login-card");
+    card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / 30) * -1;
+        const rotateY = (x - centerX) / 30;
+
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+        card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
+    });
+</script>
+
+</body>
+</html>

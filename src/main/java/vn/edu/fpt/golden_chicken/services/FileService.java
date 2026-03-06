@@ -16,11 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class FileService {
     @Value("${djnd.upload-file.base-uri}")
     private String baseURI;
@@ -56,6 +57,21 @@ public class FileService {
         }
     }
 
+    public void deleteAvatarFile(String fileName, String targetFolder) {
+        if (!StringUtils.hasText(fileName))
+            return;
+
+        try {
+            Path sourcePath = Paths.get("src", "main", "resources", "static", targetFolder, fileName).toAbsolutePath();
+            Path runtimePath = Paths.get("target", "classes", "static", targetFolder, fileName).toAbsolutePath();
+
+            Files.deleteIfExists(sourcePath);
+            Files.deleteIfExists(runtimePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void initFolder(String folderName) throws URISyntaxException, IOException {
         var path = Paths.get(baseURI, folderName);
         if (!Files.exists(path)) {
@@ -67,7 +83,7 @@ public class FileService {
     }
 
     public String getLastNameFile(MultipartFile file) throws URISyntaxException, IOException {
-        var upPath = baseURI + DefineVariable.productFolder;
+        var upPath = baseURI + DeclareConstant.productFolder;
         var directory = Paths.get(upPath);
         Files.createDirectories(directory);
         var firstName = file.getOriginalFilename();

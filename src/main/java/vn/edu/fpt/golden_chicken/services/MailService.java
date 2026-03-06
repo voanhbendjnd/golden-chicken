@@ -35,22 +35,32 @@ public class MailService {
         this.sendNotice(email, "Registration successful", "mail/anu", email, name);
     }
 
-    public void allowMailUpdateOrderStatus(String email, String status, String id, String name) {
-        this.sendStatus(email, "Update Order Status", "mail/os", email, status, id, name);
-    }
-
     public void startOTP(String email, String otp) {
         this.sendOTP(email, "OTP Verify", "mail/otp", email, otp);
     }
 
-    @Async
-    public void sendOTP(String to, String subject, String tmp, String email, String otp) {
-        var ctx = new Context();
-        ctx.setVariable("email", email);
-        ctx.setVariable("otp", otp);
-        var at = new ArrayList<FileSystemResource>();
-        var contect = this.templateEngine.process(tmp, ctx);
-        this.sendEmailSync(to, subject, contect, false, true, at);
+    public void allowMailUpdateOrderStatus(String email, String status, String id, String name) {
+        this.sendStatus(email, "Update Order Status", "mail/os", email, status, id, name);
+    }
+
+    public void sendEmailSync(String to, String subject, String content, boolean isMultipart, boolean isHtml,
+            List<FileSystemResource> attachments) {
+        MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
+        try {
+            var msg = new MimeMessageHelper(mimeMessage, isMultipart, StandardCharsets.UTF_8.name());
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(content, isHtml);
+            if (isMultipart) {
+                for (var file : attachments) {
+                    msg.addInline(file.getFilename(), file);
+                }
+            }
+            this.javaMailSender.send(mimeMessage);
+        } catch (MailException | MessagingException e) {
+            System.out.println("ERROR WITH SEND EMAIL");
+            System.out.println("DESCRIPTION: " + e);
+        }
     }
 
     @Async
@@ -64,6 +74,16 @@ public class MailService {
         var at = new ArrayList<FileSystemResource>();
         var content = this.templateEngine.process(template, ctx);
         this.sendEmailSync(to, subject, content, false, true, at);
+    }
+
+    @Async
+    public void sendOTP(String to, String subject, String tmp, String email, String otp) {
+        var ctx = new Context();
+        ctx.setVariable("email", email);
+        ctx.setVariable("otp", otp);
+        var at = new ArrayList<FileSystemResource>();
+        var contect = this.templateEngine.process(tmp, ctx);
+        this.sendEmailSync(to, subject, contect, false, true, at);
     }
 
     @Async
@@ -88,26 +108,6 @@ public class MailService {
         var content = this.templateEngine.process(template, ctx);
         this.sendEmailSync(to, subject, content, false, true, at);
 
-    }
-
-    public void sendEmailSync(String to, String subject, String content, boolean isMultipart, boolean isHtml,
-            List<FileSystemResource> attachments) {
-        MimeMessage mimeMessage = this.javaMailSender.createMimeMessage();
-        try {
-            var msg = new MimeMessageHelper(mimeMessage, isMultipart, StandardCharsets.UTF_8.name());
-            msg.setTo(to);
-            msg.setSubject(subject);
-            msg.setText(content, isHtml);
-            if (isMultipart) {
-                for (var file : attachments) {
-                    msg.addInline(file.getFilename(), file);
-                }
-            }
-            this.javaMailSender.send(mimeMessage);
-        } catch (MailException | MessagingException e) {
-            System.out.println("ERROR WITH SEND EMAIL");
-            System.out.println("DESCRIPTION: " + e);
-        }
     }
 
 }

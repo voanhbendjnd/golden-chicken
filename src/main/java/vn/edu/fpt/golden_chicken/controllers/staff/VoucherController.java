@@ -1,11 +1,14 @@
 package vn.edu.fpt.golden_chicken.controllers.staff;
 
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
 
 @Controller
@@ -25,25 +28,34 @@ public class VoucherController {
 
     @PostMapping("/create")
     public String create(
-            @ModelAttribute("voucher") VoucherCreateDTO dto,
+            @Valid @ModelAttribute("voucher") VoucherCreateDTO dto,
+            BindingResult result,
             Model model) {
+
+        // 1. Lỗi validation DTO
+        if (result.hasErrors()) {
+            return "staff/voucher/create";
+        }
 
         try {
             service.createVoucher(dto);
             return "redirect:/staff/voucher/list";
+        } catch (IllegalArgumentException ex) {
 
-        } catch (IllegalArgumentException e) {
-
-            model.addAttribute("error", e.getMessage());
-            model.addAttribute("voucher", dto);
+            // Đưa message ra view
+            model.addAttribute("errorMessage", ex.getMessage());
 
             return "staff/voucher/create";
         }
     }
 
     @GetMapping("/list")
-    public String list(Model model) {
-        model.addAttribute("vouchers", service.getAll());
+    public String list(@RequestParam(name = "page", defaultValue = "0") int page,
+                       @RequestParam(name = "size", defaultValue = "5") int size,
+                       Model model) {
+        Page<ResVoucher> voucherPage = service.getAll(page, size);
+        model.addAttribute("vouchers", voucherPage);
+        model.addAttribute("currentPage", page);
         return "staff/voucher/list";
     }
 
@@ -64,24 +76,27 @@ public class VoucherController {
     @PostMapping("/edit/{id}")
     public String update(
             @PathVariable Long id,
-            @ModelAttribute("voucher") VoucherUpdateDTO dto,
-            BindingResult result) {
+            @Valid @ModelAttribute("voucher") VoucherUpdateDTO dto,
+            BindingResult result,
+            Model model) {
 
-        try {
-            service.updateVoucher(dto);
-        } catch (IllegalArgumentException e) {
-
-            result.rejectValue(
-                    "endAt",
-                    "error.endAt",
-                    e.getMessage()
-            );
-
+        // 1. Lỗi validation DTO
+        if (result.hasErrors()) {
             return "staff/voucher/edit";
         }
 
-        return "redirect:/staff/voucher/list";
+        try {
+            service.updateVoucher(dto);
+            return "redirect:/staff/voucher/list";
+        } catch (IllegalArgumentException ex) {
+
+            // Đưa message ra view
+            model.addAttribute("errorMessage", ex.getMessage());
+
+            return "staff/voucher/edit";
+        }
     }
+
 
     @GetMapping("/disable/{id}")
     public String disable(@PathVariable("id") Long id) {

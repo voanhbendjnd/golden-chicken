@@ -21,6 +21,7 @@ import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -32,19 +33,24 @@ public class CheckoutController {
     private final AddressServices addressServices;
     private final OrderService orderService;
     private final CartService cartService;
+    private final RevenueService revenueService;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService, UserRepository userRepository) {
+            OrderService orderService, CartService cartService, UserRepository userRepository,
+            RevenueService revenueService) {
         this.productService = productService;
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
+        this.revenueService = revenueService;
     }
 
     @GetMapping("/order")
     public String handleOrderFromCart(
-            @RequestParam(value = "ids", required = false) List<Long> ids, Model model) throws PermissionException {
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            Model model) throws PermissionException {
         var orderDTO = new OrderDTO();
         var details = new ArrayList<OrderDTO.OrderDetail>();
 
@@ -59,6 +65,11 @@ public class CheckoutController {
 
         if (cartItems == null || cartItems.isEmpty()) {
             return "redirect:/cart";
+        }
+        for (var x : cartItems) {
+            if (x.getQuantity() > 33 || x.getQuantity() < 1) {
+                return "redirect:/cart";
+            }
         }
 
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -83,14 +94,18 @@ public class CheckoutController {
         orderDTO.setFinalAmount(finalAmount);
         orderDTO.setPaymentMethod(PaymentMethod.COD);
 
-        var selectedAddress = addressServices.getDefaultAddress();
+        // Lấy địa chỉ vừa chọn hoặc địa chỉ mặc định
+        var selectedAddress = (addressId != null)
+                ? addressServices.findById(addressId)
+                : addressServices.getDefaultAddress();
+
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
@@ -108,7 +123,7 @@ public class CheckoutController {
             Model model) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email != null) {
-            var user = this.userRepository.findByEmail(email);
+            var user = this.userRepository.findByEmailIgnoreCase(email);
             if (user.getCustomer() == null) {
                 return "client/auth/access-deny";
             }
@@ -132,10 +147,10 @@ public class CheckoutController {
         if (selectedAddress != null) {
             orderDTO.setName(selectedAddress.getRecipientName());
             orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s, %s",
+            String fullAddress = String.format("%s, %s, %s",
                     selectedAddress.getSpecificAddress(),
                     selectedAddress.getWard(),
-                    selectedAddress.getDistrict(),
+                    // selectedAddress.getDistrict(),
                     selectedAddress.getCity());
             orderDTO.setAddress(fullAddress);
         }
@@ -145,7 +160,8 @@ public class CheckoutController {
         orderDTO.setShippingFee(shippingFee);
         orderDTO.setDiscountAmount(BigDecimal.ZERO);
         orderDTO.setFinalAmount(product.getPrice().add(shippingFee));
-        orderDTO.setPaymentMethod(PaymentMethod.COD); // Mặc định phương th
+        orderDTO.setPaymentMethod(PaymentMethod.COD);
+
         model.addAttribute("order", orderDTO);
         model.addAttribute("product", product);
         model.addAttribute("defaultAddress", selectedAddress);
@@ -155,21 +171,45 @@ public class CheckoutController {
 
     @GetMapping("/addresses")
     public String listAddressCheckout(
-            @RequestParam("productId") long productId,
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "productIds", required = false) String productIds,
             Model model) {
 
         var addresses = addressServices.getAllAddresses();
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
+        model.addAttribute("productIds", productIds);
 
-        return "client/address/listAddressCheckout";
+        // KIỂM TRA ĐIỀU KIỆN ĐỂ TRẢ VỀ ĐÚNG GIAO DIỆN
+        if (productId != null || (productIds != null && !productIds.isEmpty())) {
+            // Trả về trang giao diện chọn địa chỉ cho Checkout (có nút Xác nhận địa chỉ)
+            return "client/address/listAddressCheckout";
+        }
+
+        // Trả về trang quản lý địa chỉ cá nhân (hình số 6 bạn gửi)
+        return "client/address/addressBook";
     }
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
         var order = this.orderService.order(dto);
 
-        return "redirect:/";
+        if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
+            return "redirect:/payment/create?orderId=" + order.getId();
+        }
+        System.out.println(">>> TOTAL AMOUNT:" + this.revenueService.getTotalRevenue());
+        return "redirect:/checkout/payment-success";
+    }
+
+    @GetMapping("/revenue")
+    public String testPage() {
+        System.out.println(">>> Revenue: " + this.revenueService.getTotalRevenue());
+        return "redirect:/login";
+    }
+
+    @GetMapping("/payment-success")
+    public String successPage() {
+        return "client/payment/payment.success";
     }
 
 }

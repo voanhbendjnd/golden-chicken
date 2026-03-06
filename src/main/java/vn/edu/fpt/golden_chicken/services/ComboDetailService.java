@@ -72,7 +72,7 @@ public class ComboDetailService {
                 System.out.println("Cannot Delete File!");
             }
         });
-        var comboDetails = new ArrayList<ComboDetail>();
+        // var comboDetails = new ArrayList<ComboDetail>();
         if (dto.getId() != null) {
             this.comboDetailRepository.deleteByComboId(lastProduct.getId());
         }

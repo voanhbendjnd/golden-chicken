@@ -2,13 +2,16 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.domain.entity.CartItem;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
+import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
+import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -31,7 +35,6 @@ import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
-import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -39,15 +42,20 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class OrderService {
+    @Autowired
+    private KafkaTemplate<String, OrderMessage> kafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, ActionPointMessage> kafkaTemplatePoint;
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
-    MailService mailService;
-    CartRepository cartRepository;
+    CartService cartService;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
-        var user = this.userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        var user = this.userRepository
+                .findByEmailIgnoreCase(SecurityContextHolder.getContext().getAuthentication().getName());
         var customer = user.getCustomer();
 
         if (customer == null) {
@@ -63,6 +71,7 @@ public class OrderService {
         order.setPhone(dto.getPhone());
         order.setStatus(OrderStatus.PENDING);
         order.setCustomer(customer);
+        order.setUpdatedAt(LocalDateTime.now());
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
         var mpDetails = details.stream().collect(Collectors.toMap(x -> x.getId(), x -> x));
@@ -91,8 +100,9 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new CheckoutException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        customer
-                .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() : 0));
+        // customer
+        // .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() :
+        // 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
@@ -101,44 +111,29 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-        var listFromCart = new ArrayList<CartItem>();
-        if (dto.getItems().getFirst().getItemId() != null) {
-            var cartItems = this.cartRepository
-                    .findByIdIn(dto.getItems().stream().map(x -> x.getItemId()).collect(Collectors.toList()));
-            var mpCartItems = dto.getItems().stream()
-                    .collect(Collectors.toMap(x -> x.getItemId(), x -> x));
-            for (var x : cartItems) {
-                var qtyInCart = x.getQuantity();
-                if (qtyInCart <= 0) {
-                    throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
-                            + ") in cart less than or equal 0!");
-                }
-                var it = mpCartItems.get(x.getId());
-                if (it != null) {
-                    var lastQty = qtyInCart - it.getQuantity();
-                    if (lastQty < 0) {
-                        throw new CheckoutException("Quantity Product with Name (" + x.getProduct().getName()
-                                + ") in cart less than or equal 0!");
 
-                    } else if (lastQty == 0) {
-                        listFromCart.add(x);
-                    } else if (lastQty > 0) {
-                        x.setQuantity(lastQty);
-                    }
+        var actionMessage = new ActionPointMessage();
+        actionMessage.setAction("ADD");
+        actionMessage.setReason("ORDER #" + order.getId());
+        actionMessage.setChange(totalBonus);
+        actionMessage.setActionAt(LocalDateTime.now());
+        actionMessage.setUserId(user.getId());
 
-                } else {
-                    throw new ResourceNotFoundException("Cart Item ID", x.getId());
-                }
-            }
-            this.cartRepository.saveAll(cartItems);
-            if (!listFromCart.isEmpty() || listFromCart.size() != 0) {
-                this.cartRepository.deleteAll(listFromCart);
-            }
-        }
+        this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
+        OrderMessage message = new OrderMessage();
+        message.setCustomerEmail(user.getEmail());
+        message.setOrderId(order.getId());
+        message.setStatus(order.getStatus());
+        message.setTotalPrice(order.getFinalAmount());
+        message.setCustomerName(order.getName());
+        this.kafkaTemplate.send("order-chicken-topic", message);
+
+        this.cartService.cleanCartAfterCheckout(dto.getItems());
         this.productRepository.saveAll(details);
-        this.mailService.allowMailUpdateOrderStatus(user.getEmail(), newOrder.getStatus().toString(),
-                "#" + order.getId(), order.getName());
+        // this.mailService.allowMailUpdateOrderStatus(user.getEmail(),
+        // newOrder.getStatus().toString(),
+        // "#" + order.getId(), order.getName());
 
         return newOrder;
     }
@@ -170,31 +165,114 @@ public class OrderService {
         return res;
     }
 
-    public void changeOrderStatus(Long id, String status) {
-        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
-        switch (status) {
-            case "PENDING":
-                order.setStatus(OrderStatus.PENDING);
-                break;
-            case "SHIPPING":
-                order.setStatus(OrderStatus.SHIPPING);
-                break;
-            case "COMPLETED":
-                order.setStatus(OrderStatus.COMPLETED);
-                break;
-            case "CANCELLED":
-                order.setStatus(OrderStatus.CANCELLED);
-                break;
-            case "DELIVERED":
-                order.setStatus(OrderStatus.DELIVERED);
-                break;
-            default:
-                break;
+    @Transactional
+    public void cancelOrderByCustomer(Long id) throws PermissionException {
+        // 1. Lấy thông tin user hiện tại từ SecurityContext
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user = this.userRepository.findByEmailIgnoreCase(email);
+
+        // 2. Tìm đơn hàng và kiểm tra tồn tại
+        var order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
+        // 3. Kiểm tra quyền: Chỉ chính chủ đơn hàng mới được hủy
+        if (order.getCustomer() == null || !order.getCustomer().getUser().getEmail().equals(email)) {
+            throw new PermissionException("Bạn không có quyền hủy đơn hàng này!");
         }
 
-        var newOrder = this.orderRepository.save(order);
-        this.mailService.allowMailUpdateOrderStatus(order.getCustomer().getUser().getEmail(),
-                newOrder.getStatus().toString(), "#" + order.getId(), order.getName());
+        // 4. Kiểm tra điều kiện trạng thái: Chỉ được hủy khi đơn hàng đang PENDING
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Không thể hủy đơn hàng vì đơn đã được xử lý hoặc đã kết thúc!");
+        }
+
+        // 5. Cập nhật trạng thái đơn hàng sang CANCELLED
+        order.setStatus(OrderStatus.CANCELLED);
+
+        // 6. Cập nhật trạng thái thanh toán sang UNPAID (Yêu cầu của bạn)
+        if(order.getPaymentStatus().equals(PaymentStatus.PAID)) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
+        }
+
+        order.setUpdatedAt(LocalDateTime.now());
+
+        // 7. Lưu vào Database
+        var updatedOrder = this.orderRepository.save(order);
+
+        // 8. Gửi Kafka thông báo cho các dịch vụ khác (Email, Notify...)
+        OrderMessage message = new OrderMessage();
+        message.setCustomerEmail(email);
+        message.setOrderId(updatedOrder.getId());
+        message.setStatus(updatedOrder.getStatus());
+        message.setTotalPrice(updatedOrder.getFinalAmount());
+        message.setCustomerName(updatedOrder.getName());
+
+        this.kafkaTemplate.send("order-chicken-topic", message);
+
+        // (Tùy chọn) Gửi thêm message hoàn điểm tích lũy nếu bạn có tính năng dùng điểm để mua hàng
+    }
+
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName, Staff shipper) {
+        var order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
+        if (shipper != null) {
+            order.setShipper(shipper);
+        }
+
+        OrderStatus currentStatus = order.getStatus();
+        PaymentStatus currentPayment = order.getPaymentStatus();
+        OrderStatus nextStatus = OrderStatus.safeValueOf(statusName);
+
+        if (nextStatus == null) {
+            throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
+        }
+
+        // 1. Nếu trạng thái không thay đổi thì return luôn
+        if (currentStatus == nextStatus) return;
+
+        // 2. Chặn nếu đơn hàng đã kết thúc
+        if (currentStatus == OrderStatus.DELIVERED ||
+                currentStatus == OrderStatus.CANCELLED ||
+                currentStatus == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
+        }
+
+        // 4. Cập nhật trạng thái
+        order.setStatus(nextStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        // 5. Xử lý logic thanh toán tự động khi giao thành công
+        if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
+            order.setPaymentStatus(PaymentStatus.PAID);
+        }
+        if(currentPayment == PaymentStatus.PAID) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
+        }
+
+        var lastOrder = this.orderRepository.save(order);
+
+        // 6. Gửi Kafka thông báo (giữ nguyên logic cũ của bạn)
+        if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
+            OrderMessage message = new OrderMessage();
+            message.setCustomerEmail(lastOrder.getCustomer().getUser().getEmail());
+            message.setOrderId(lastOrder.getId());
+            message.setStatus(lastOrder.getStatus());
+            message.setTotalPrice(lastOrder.getFinalAmount());
+            message.setCustomerName(lastOrder.getName());
+            this.kafkaTemplate.send("order-chicken-topic", message);
+        }
+    }
+
+    public Order getOrderEntity(Long id) {
+        return this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+    }
+
+    public void updatePaymentStatus(Long orderId, PaymentStatus status) {
+        var order = this.orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
+        order.setPaymentStatus(status);
+        this.orderRepository.save(order);
     }
 
     public ResOrder findById(Long id) {
@@ -210,6 +288,8 @@ public class OrderService {
         res.setPhone(order.getPhone());
         res.setStatus(order.getStatus());
         res.setTotalPrice(order.getTotalProductPrice());
+        res.setFinalAmount(order.getFinalAmount());
+        res.setFeeShipping(order.getShippingFee());
         res.setUpdatedAt(order.getUpdatedAt());
         res.setItems(order.getOrderItems().stream().map(x -> {
             var detail = new ResOrder.OrderDetail();
@@ -229,7 +309,7 @@ public class OrderService {
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }
@@ -283,13 +363,13 @@ public class OrderService {
         return res;
     }
 
-    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, OrderStatus status)
+    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, String statusStr)
             throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email == null) {
             throw new PermissionException("You Do Not Have Permission!");
         }
-        var user = this.userRepository.findByEmail(email);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             throw new PermissionException("Not Found Account With Email " + email);
         }
@@ -297,27 +377,64 @@ public class OrderService {
         if (customer == null) {
             throw new PermissionException("Please Use Account Customer For This Service!");
         }
-        // if (status != OrderStatus.CANCELLED || status != OrderStatus.COMPLETED ||
-        // status != OrderStatus.PENDING
-        // || status != OrderStatus.SHIPPING) {
 
-        // }
-        Specification<Order> orderSpec = (r, q, c) -> {
-            return c.equal(r.get("customer"), customer);
-        };
-        // var lastStatus = status.toString();
-        if (status != null) {
-            var checkStatus = OrderStatus.safeValueOf(status.toString());
-            if (checkStatus != null) {
-                Specification<Order> orderStatus = (r, q, c) -> {
-                    return c.equal(r.get("status"), status);
-                };
-                orderSpec = orderSpec.and(orderStatus);
-                // var page = this.orderRepository.findAll(spec.and(orderSpec).and(orderStatus),
-                // pageable);
+        // Specification gốc: Lọc theo khách hàng hiện tại
+        Specification<Order> orderSpec = (r, q, c) -> c.equal(r.get("customer"), customer);
+
+        // Xử lý phân nhóm trạng thái
+        if (statusStr != null && !statusStr.isEmpty() && !statusStr.equalsIgnoreCase("ALL")) {
+            Specification<Order> statusGroupSpec;
+
+            switch (statusStr.toUpperCase()) {
+                case "WAITING":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.PENDING,
+                            OrderStatus.PREPARING,
+                            OrderStatus.READY_FOR_DELIVERY
+                    );
+                    break;
+
+                case "IN_PROGRESS": // Sửa từ DELIVERING thành IN_PROGRESS (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERING,
+                            OrderStatus.SHIPPER_ISSUE,
+                            OrderStatus.REASSIGNING_SHIPPER
+                    );
+                    break;
+
+                case "FINISHED": // Sửa từ DELIVERED thành FINISHED (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERED,
+                            OrderStatus.COMPLETED
+                    );
+                    break;
+
+                case "FAILED": // Sửa từ CANCELLED thành FAILED (khớp HTML)
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.CANCELLED,
+                            OrderStatus.DELIVERY_FAILED
+                    );
+                    break;
+
+                default:
+                    try {
+                        OrderStatus singleStatus = OrderStatus.valueOf(statusStr);
+                        statusGroupSpec = (r, q, c) -> c.equal(r.get("status"), singleStatus);
+                    } catch (IllegalArgumentException e) {
+                        statusGroupSpec = null;
+                    }
+                    break;
+            }
+
+            if (statusGroupSpec != null) {
+                orderSpec = orderSpec.and(statusGroupSpec);
             }
         }
+
+        // Thực hiện truy vấn với Specification tổng hợp
         var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
+
+        // Build kết quả trả về
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
@@ -325,6 +442,7 @@ public class OrderService {
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
+
         var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
         res.setResult(result);
 
@@ -332,22 +450,15 @@ public class OrderService {
     }
 
     public List<OrderStatisResponse> getOrderStatisticData() {
-        // Mảng tên tháng để hiển thị lên biểu đồ
-        String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        String[] monthLabels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-        // 1. Gọi Repository lấy dữ liệu đã được SUM và GROUP BY dưới DB
         List<Object[]> rawData = orderRepository.getMonthlyRevenueRaw();
 
-        // 2. Chuyển List<Object[]> thành Map<Integer, BigDecimal>
-        // Key là tháng (1-12), Value là tổng tiền
         Map<Integer, BigDecimal> statsMap = rawData.stream()
                 .collect(Collectors.toMap(
-                        row -> (Integer) row[0], // Tháng (kết quả của MONTH())
-                        row -> (BigDecimal) row[1] // Tổng doanh thu (kết quả của SUM())
-                ));
+                        row -> (Integer) row[0],
+                        row -> (BigDecimal) row[1]));
 
-        // 3. Khởi tạo danh sách kết quả đủ 12 tháng (điền 0 nếu tháng đó không có doanh
-        // thu)
         List<OrderStatisResponse> revenues = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
             String label = monthLabels[i - 1];

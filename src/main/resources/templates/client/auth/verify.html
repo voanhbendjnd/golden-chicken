@@ -93,7 +93,7 @@
 </head>
 
 <body>
-    <input type="hidden" id="user-email" th:value="${session.OTP_EMAIL}">
+    <!-- <input type="hidden" id="user-email" th:value="${session.OTP_EMAIL}"> -->
     <div class="otp-card">
         <h2>Verify OTP</h2>
         <p>Please enter code that was sent to your email</p>
@@ -108,7 +108,7 @@
         <button class="btn-verify" onclick="verifyOTP()">Xác nhận</button>
 
         <div class="resend">
-            Bạn không nhận được mã? <a href="/verify">Gửi lại</a>
+            Bạn không nhận được mã? <a th:href="@{/verify(email=${email})}">Gửi lại</a>
         </div>
         <div class="text-center">
             <a th:href="@{/register}" class="link-style">Need an account? Sign up</a>
@@ -138,14 +138,15 @@
         function verifyOTP() {
             let otp = "";
             inputs.forEach(input => otp += input.value);
-
-            const email = document.getElementById('user-email').value;
+            // Hàm lấy tham số từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
 
             fetch('/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
 
-                body: JSON.stringify({ otp: otp, email: email })
+                body: JSON.stringify({ otp: otp, email: emailFromUrl })
             }).then(res => {
                 if (res.ok) window.location.href = "/login?success";
                 else alert("Mã OTP không đúng hoặc đã hết hạn!");

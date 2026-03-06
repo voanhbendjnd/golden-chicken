@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResRole;
@@ -55,7 +55,7 @@ public class UserController {
     public String listUsers(Model model,
             @RequestParam(required = false) String fullName,
             @Filter Specification<User> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // If fullName parameter is provided, create a filter specification
         if (fullName != null && !fullName.trim().isEmpty()) {

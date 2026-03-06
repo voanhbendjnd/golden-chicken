@@ -1,0 +1,45 @@
+/* Định dạng cho bảng điều khiển trạng thái */
+.status-select {
+    min-width: 160px;
+    transition: all 0.3s ease;
+}
+
+/* Tối ưu hóa hiển thị bảng đơn hàng */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-bottom: 1px solid #edf2f9;
+    font-weight: bold;
+}
+
+/* Tùy chỉnh thanh cuộn cho bảng nếu quá dài */
+.table-responsive {
+    scrollbar-width: thin;
+}
+
+/* Badge trạng thái thanh toán */
+.badge {
+    font-weight: 600;
+    padding: 0.5em 0.75em;
+}
+
+/* Pagination căn giữa */
+.pagination {
+    margin-bottom: 0;
+}
+.bg-pending { background-color: #fff3cd; }
+.bg-delivering { background-color: #cff4fc; }
+.bg-success { background-color: #d1e7dd; }
+.bg-failed { background-color: #f8d7da; }
+.bg-issue { background-color: #ffe5d0; }
+.bg-refunded {
+    background-color: #f8d7da !important; /* Màu đỏ nhạt của Bootstrap alert */
+    color: #842029 !important;            /* Chữ đỏ đậm cho dễ đọc */
+}

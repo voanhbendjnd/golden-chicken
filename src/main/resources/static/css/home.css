@@ -4,6 +4,28 @@
     --witdh-img: 100%;
 }
 
+.header {
+    overflow: visible !important;
+}
+
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-item.children {
+    position: relative;
+}
+
+.navbar-item.children .menu-list {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    overflow: visible;
+    width: max-content;
+}
+
 @font-face {
     font-family: MergeBlack;
     src: url("../Font/MergeBlack.woff");

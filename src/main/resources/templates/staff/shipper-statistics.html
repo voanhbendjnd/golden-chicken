@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <head th:replace="~{common/head}"></head>
+    <title>Thống kê - Shipper</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div th:replace="~{staff/layout/header}"></div>
+
+    <main class="container py-4">
+        <h2 class="fw-bold mb-4">Thống kê giao hàng</h2>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Đơn đang giao</h6>
+                        <h3 class="mb-0" th:text="${deliveringCount}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Hoàn thành hôm nay</h6>
+                        <h3 class="mb-0" th:text="${deliveredToday}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Tổng hoàn thành</h6>
+                        <h3 class="mb-0" th:text="${totalDelivered}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Tổng đơn đã nhận</h6>
+                        <h3 class="mb-0" th:text="${totalAssigned}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-1">Tổng tiền COD đã thu</h6>
+                        <h3 class="mb-0 text-danger"
+                            th:text="${#numbers.formatDecimal(totalCodCollected,0,'COMMA',0,'POINT')} + '₫'">0₫</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Tổng quan đơn gần đây</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0" th:if="${!#lists.isEmpty(historyOrders)}">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng thu</th>
+                                <th>Trạng thái</th>
+                                <th>Cập nhật lúc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${historyOrders}">
+                                <td th:text="${order.id}"></td>
+                                <td th:text="${order.name}"></td>
+                                <td th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + '₫'">
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${order.status.name() == 'COMPLETED'}">
+                                        COMPLETED
+                                    </span>
+
+                                    <span class="badge bg-danger" th:if="${order.status.name() == 'CANCELLED'}">
+                                        CANCELLED
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${#lists.isEmpty(historyOrders)}" class="text-muted">
+                        Chưa có dữ liệu thống kê.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

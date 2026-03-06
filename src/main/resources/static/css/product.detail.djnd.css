@@ -1,0 +1,175 @@
+.header {
+    overflow: visible !important;
+}
+
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-item.children {
+    position: relative;
+}
+
+.navbar-item.children .menu-list {
+    position: absolute;
+    top: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    overflow: visible;
+    width: max-content;
+}
+
+/* ===== Liquid Glass Action Area ===== */
+
+.product-card__action .btn {
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.35s ease;
+    backdrop-filter: blur(10px);
+}
+
+/* Buy Now */
+.product-card__action .btn-warning {
+    background: linear-gradient(135deg, #ffc72c, #ffdf70);
+    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+}
+
+.product-card__action .btn-warning:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255, 193, 7, 0.5);
+}
+
+/* Add To Cart */
+.product-card__action .btn-danger {
+    background: linear-gradient(135deg, #e31837, #ff4d6d);
+    box-shadow: 0 8px 20px rgba(227, 24, 55, 0.4);
+}
+
+.product-card__action .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(227, 24, 55, 0.6);
+}
+
+/* Quantity Glass */
+.quantity-selector {
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+.quantity-selector .form-control {
+    border: none;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.quantity-selector .btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.quantity-selector .btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Flying image effect */
+.fly-img {
+    position: fixed;
+    z-index: 9999;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 20px;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(.65, -0.2, .25, 1.5);
+}
+
+:root {
+    --primary-color: #e31837;
+    /* Đỏ đặc trưng */
+    --secondary-color: #ffc72c;
+    /* Vàng đặc trưng */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Image Gallery */
+.product-img-main {
+    width: 100%;
+    height: 450px;
+    object-fit: contain;
+    background-color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.product-img-main:hover {
+    transform: scale(1.05);
+}
+
+.thumb-img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.thumb-img:hover,
+.thumb-img.active {
+    border-color: var(--primary-color);
+    opacity: 0.8;
+}
+
+/* Price & Details */
+.product-price {
+    font-size: 2rem;
+    color: var(--primary-color);
+    font-weight: 800;
+}
+
+.category-badge {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    padding: 5px 15px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+/* Quantity Input */
+.quantity-group {
+    width: 130px;
+}
+
+.quantity-input {
+    text-align: center;
+    border-left: 0;
+    border-right: 0;
+}
+
+/* Action Buttons */
+.btn-add-to-cart {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 12px 30px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-add-cart:hover {
+    background-color: #c4122d;
+    box-shadow: 0 5px 15px rgba(227, 24, 55, 0.3);
+}
+
+.description-box {
+    border-left: 4px solid var(--secondary-color);
+    padding-left: 15px;
+    color: #555;
+    line-height: 1.8;
+}

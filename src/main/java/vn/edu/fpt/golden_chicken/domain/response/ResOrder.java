@@ -20,6 +20,8 @@ public class ResOrder {
     String note;
 
     BigDecimal totalPrice;
+    BigDecimal feeShipping;
+    BigDecimal finalAmount;
     String paymentMethod;
     String paymentStatus;
 

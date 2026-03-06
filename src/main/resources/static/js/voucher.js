@@ -40,32 +40,32 @@ const value = document.getElementById("discountValue");
 const unit = document.getElementById("discountUnit");
 const hint = document.getElementById("discountHint");
 
-function updateDiscountUI() {
-    if (type.value === "PERCENT") {
+function updateDiscountUI(reset = false) {
 
+    if (type.value === "PERCENT") {
         value.max = 100;
         value.placeholder = "0 - 100";
         unit.textContent = "%";
         hint.textContent = "Enter percent (0 — 100)";
-
     } else if (type.value === "FIXED") {
-
         value.removeAttribute("max");
         value.placeholder = "Amount";
         unit.textContent = "VND";
         hint.textContent = "Enter amount in VND";
-
     } else {
-
         value.removeAttribute("max");
         unit.textContent = "";
         hint.textContent = "";
     }
 
-    value.value = ""; // reset khi đổi type để tránh nhầm
+    if (reset) {
+        value.value = "";
+    }
 }
+type.addEventListener("change", function () {
+    updateDiscountUI(true); // chỉ reset khi user đổi
+});
 
-type.addEventListener("change", updateDiscountUI);
-
-// chạy khi load lại form (edit hoặc validation fail)
-document.addEventListener("DOMContentLoaded", updateDiscountUI);
+document.addEventListener("DOMContentLoaded", function () {
+    updateDiscountUI(false); // load page thì không reset
+});

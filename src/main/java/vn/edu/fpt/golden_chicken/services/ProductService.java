@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.criteria.Join;
-import vn.edu.fpt.golden_chicken.controllers.client.AddressController;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,9 +36,9 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class ProductService {
 
-    AddressController addressController;
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
@@ -348,6 +347,9 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         var categoryName = product.getCategory().getName();
         var products = this.productRepository.findRelatedProducts(categoryName, id);
+        if (products.size() < 5) {
+            products.addAll(this.productRepository.findByTopSold());
+        }
         return products.stream().map(ProductConvert::toResProduct).toList();
     }
 

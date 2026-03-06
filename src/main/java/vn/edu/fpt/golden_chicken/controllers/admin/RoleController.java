@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
 import vn.edu.fpt.golden_chicken.domain.request.RoleDTO;
 import vn.edu.fpt.golden_chicken.services.PermissionService;
@@ -42,7 +42,7 @@ public class RoleController {
 
     @GetMapping
     public String listRole(Model model, @Filter Specification<Role> spec,
-            @PageableDefault(size = DefineVariable.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var data = this.roleService.fetchAllWithPagination(spec, pageable);
         model.addAttribute("roles", data.getResult());
         model.addAttribute("meta", data.getMeta());

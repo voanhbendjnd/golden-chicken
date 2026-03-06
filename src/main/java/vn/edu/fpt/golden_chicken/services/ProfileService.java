@@ -24,7 +24,7 @@ public class ProfileService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null)
             return null;
-        return userRepository.findByEmail(auth.getName().toLowerCase());
+        return userRepository.findByEmailIgnoreCase(auth.getName());
     }
 
     public ProfileUpdateDTO getProfileForm() {
@@ -76,12 +76,14 @@ public class ProfileService {
         userRepository.save(user);
     }
 
-    public void updateAvatar(String fileName) {
+    public String updateAvatar(String fileName) {
         User user = getCurrentUser();
         if (user == null || fileName == null || fileName.isEmpty())
-            return;
+            return null;
+        String oldAvatar = user.getAvatar();
         user.setAvatar(fileName);
         userRepository.save(user);
+        return oldAvatar;
     }
 
     public record ChangePasswordResult(boolean success, String message) {}

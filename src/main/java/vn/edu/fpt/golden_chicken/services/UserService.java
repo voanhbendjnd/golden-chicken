@@ -24,15 +24,19 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DefineVariable;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.common.MyLibrary;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
+import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
+import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
+import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -40,12 +44,14 @@ import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
+
     private final static String city_constant = "Thành Phố Cần Thơ";
     UserRepository userRepository;
     RoleRepository roleRepository;
@@ -53,12 +59,15 @@ public class UserService {
     CustomerRepository customerRepository;
     PasswordEncoder passwordEncoder;
     MailService mailService;
+    OrderRepository orderRepository;
+    CartRepository cartRepository;
+    // KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
 
     // @Transactional
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID",
-                        request.getRoleId() != null ? request.getRoleId() : DefineVariable.roleNameCustomer));
+                        request.getRoleId() != null ? request.getRoleId() : DeclareConstant.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
@@ -83,21 +92,21 @@ public class UserService {
 
     }
 
-    public void register(UserDTO request) {
+    public void register(RegisterDTO request) {
         var email = request.getEmail();
         if (this.userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException(email);
         }
-        var roleCustomer = this.roleRepository.findByName(DefineVariable.roleNameCustomer);
+        var roleCustomer = this.roleRepository.findByName(DeclareConstant.roleNameCustomer);
 
         if (roleCustomer != null) {
             var user = new User();
             user.setEmail(request.getEmail().toLowerCase());
-            user.setFullName(request.getFullName());
+            user.setFullName(request.getName());
             user.setStatus(true);
-            user.setPhone(user.getPhone());
+            // user.setPhone(user.getPhone());
             user.setRole(roleCustomer);
-            user.setPassword(this.passwordEncoder.encode(request.getPassword()));
+            user.setPassword(request.getPassword());
             var customer = new Customer();
             customer.setUser(user);
             user.setCustomer(customer);
@@ -105,7 +114,7 @@ public class UserService {
             // this.mailService.startOTP(email, this.generateOTP(user), email);
             // this.mailService.allowMailForUser(request.getFullName(), email);
         } else {
-            throw new ResourceNotFoundException("ROLE", DefineVariable.roleNameCustomer);
+            throw new ResourceNotFoundException("ROLE", DeclareConstant.roleNameCustomer);
         }
 
     }
@@ -168,14 +177,33 @@ public class UserService {
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
+
+        if (user.getStaff() != null) {
+            var staff = user.getStaff();
+            if (this.orderRepository.existsByShipperId(staff.getId())) {
+                user.setStatus(false);
+                this.userRepository.save(user);
+                return;
+            }
+        } else if (user.getCustomer() != null) {
+            var customer = user.getCustomer();
+            if (this.orderRepository.existsByCustomerId(customer.getId())
+                    || this.cartRepository.existsByCustomerId(customer.getId())) {
+                user.setStatus(false);
+                this.userRepository.save(user);
+                return;
+            }
+        }
+
         this.userRepository.delete(user);
 
     }
 
     public User getByEmail(String email) {
-        return this.userRepository.findByEmail(email);
+        return this.userRepository.findByEmailIgnoreCase(email);
     }
 
+    @SuppressWarnings("null")
     @Transactional(rollbackFor = Exception.class)
     public void importUsers(MultipartFile file) throws IOException, DataFormatException {
         if (!file.getOriginalFilename().endsWith(".xlsx")) {
@@ -209,8 +237,8 @@ public class UserService {
                     continue;
                 }
 
-                if (row.getCell(1) == null || row.getCell(2) == null ||
-                        row.getCell(3) == null || row.getCell(6) == null) {
+                if (row.getCell(1) == null || row.getCell(2) == null
+                        || row.getCell(3) == null || row.getCell(6) == null) {
                     throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
                 }
 
@@ -305,7 +333,75 @@ public class UserService {
     private void clearOTP(User user) {
         user.setOneTimePassword(null);
         user.setOtpRequestedTime(null);
+        // this.userRepository.save(user);
+    }
+    // ====== ADD for Forgot Password (OTP) ======
+
+    public boolean existsByEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        return this.userRepository.existsByEmail(email.trim().toLowerCase());
+    }
+
+    @Transactional
+    public void updatePasswordByEmail(String email, String rawPassword) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        var user = this.userRepository.findByEmailIgnoreCase(normalizedEmail);
+
+        if (user == null) {
+            throw new ResourceNotFoundException("Email", normalizedEmail);
+        }
+
+        user.setPassword(this.passwordEncoder.encode(rawPassword.trim()));
+
+        try {
+            user.setOneTimePassword(null);
+            user.setOtpRequestedTime(null);
+        } catch (Exception ignored) {
+        }
+
         this.userRepository.save(user);
+    }
+
+    public void updateCustomerPoint(Customer customer, Long point, boolean action) throws PermissionException {
+        var currentPoint = customer.getPoint() != null ? customer.getPoint() : 0;
+        if (action) {
+            customer.setPoint(currentPoint + point);
+        } else {
+            var lastPoint = currentPoint - point;
+            if (lastPoint <= 0) {
+                lastPoint = 0;
+            }
+            customer.setPoint(lastPoint);
+        }
+        this.customerRepository.save(customer);
+
+    }
+
+    @Transactional
+    public String generateOneTimePassword(String email) {
+        var user = this.userRepository.findByEmailIgnoreCase(email);
+        this.clearOTP(user);
+        var ran = new Random();
+        var otp = ran.nextInt(1000, 9999) + "";
+        var hashOtp = this.passwordEncoder.encode(otp);
+        user.setOneTimePassword(hashOtp);
+        user.setOtpRequestedTime(new Date());
+        this.userRepository.save(user);
+        var msg = new VerifyAccountMessage();
+        msg.setCreatedAt(LocalDateTime.now());
+        msg.setDescription("Reset password");
+        msg.setEmail(email);
+
+        return otp;
     }
 
 }
