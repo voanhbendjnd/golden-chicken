@@ -117,11 +117,11 @@
         <form method="post" th:action="@{/login}">
 
             <div th:if="${param.error != null}" class="alert alert-danger">
-                Invalid email or password.
+                Email hoặc mật khẩu không đúng!
             </div>
 
             <div th:if="${param.logout != null}" class="alert alert-success">
-                Logout successful!
+                Đăng xuất thành công!
             </div>
 
             <div class="mb-3">
