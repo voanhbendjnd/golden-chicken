@@ -16,8 +16,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
-import vn.edu.fpt.golden_chicken.common.ConfigPage;
-
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
@@ -40,10 +38,10 @@ public class OrderDetailController {
     // }
 
     @GetMapping("/order-history")
-    public String getOrderHistory(@RequestParam(required = false) String status,
-                                  Model model,
-                                  @Filter Specification<Order> spec,
-                                  @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
+    public String getOrderHistory(@RequestParam(required = false) OrderStatus status, Model model,
+            @Filter Specification<Order> spec,
+            // ĐỔI "updatedAt" THÀNH "id" ĐỂ ĐƠN HÀNG MỚI NHẤT LUÔN Ở ĐẦU
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws PermissionException {
 
         // TRUYỀN THẲNG chuỗi status (ví dụ: "DELIVERING", "CANCELLED") xuống Service

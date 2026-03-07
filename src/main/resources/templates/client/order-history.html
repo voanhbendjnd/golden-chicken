@@ -3,34 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <head th:replace="~{common/head}"></head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
-    <link th:href="@{/css/style.css}" rel="stylesheet">
-    <link th:href="@{/css/home.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <meta name="_csrf" th:content="${_csrf.token}" />
-    <link th:href="@{/css/base.css}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch sử đơn hàng</title>
     <style>
         :root {
-            --red:       #e31837;
-            --red-soft:  #fdf0f2;
-            --red-mid:   #fbd5db;
-            --dark:      #1a1a2e;
-            --gray-100:  #f5f6f8;
-            --gray-200:  #eaedf2;
-            --gray-400:  #9ba3b2;
-            --gray-600:  #5c6370;
-            --white:     #ffffff;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-md: 0 8px 28px rgba(0,0,0,0.10);
-            --radius-lg: 18px;
-            --radius-md: 12px;
-            --radius-pill: 999px;
-            --font: 'Be Vietnam Pro', sans-serif;
+            --primary-red: #ffb524;
+            --bg-light: #f8f9fa;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -426,67 +407,45 @@
             .total-price { font-size: 1.15rem; }
         }
     </style>
+    <link th:href="@{/css/pagination.css}" rel="stylesheet">
+
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
 </head>
 
 <body>
-<div th:replace="~{client/layout/header}"></div>
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
-<!-- PAGE HERO -->
-<div class="page-hero">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-7 col-md-6 mb-3 mb-md-0">
-                <h1>
-                    <span class="icon-wrap"><i class="fa-solid fa-clock-rotate-left"></i></span>
-                    Đơn hàng của tôi
-                </h1>
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4" style="padding-top: 120px;">
+            <h2 class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-warning"></i>Đơn hàng của tôi</h2>
+            <div class="mb-4 overflow-x-auto">
+                <div class="d-flex gap-2 pb-2" style="white-space: nowrap;">
+                    <a th:href="@{/order-history}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.status == null} ? 'btn-warning' : 'btn-outline-secondary'">
+                        Tất cả
+                    </a>
+
+                    <a th:href="@{/order-history?status=PENDING}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.status != null && param.status[0] == 'PENDING'} ? 'btn-warning' : 'btn-outline-secondary'">
+                        Chờ xác nhận
+                    </a>
+
+                    <a th:href="@{/order-history?status=SHIPPING}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.status != null && param.status[0] == 'SHIPPING'} ? 'btn-warning' : 'btn-outline-secondary'">
+                        Đang giao
+                    </a>
+                    <a th:href="@{/order-history?status=COMPLETED}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.status != null && param.status[0] == 'COMPLETED'} ? 'btn-warning' : 'btn-outline-secondary'">
+                        Hoàn thành
+                    </a>
+
+                    <a th:href="@{/order-history?status=CANCELLED}" class="btn btn-sm rounded-pill px-4"
+                        th:classappend="${param.status != null && param.status[0] == 'CANCELLED'} ? 'btn-warning' : 'btn-outline-secondary'">
+                        Đã hủy
+                    </a>
+                </div>
             </div>
-            <div class="col-lg-5 col-md-6 text-md-end">
-                <a th:href="@{/menu}" class="btn-shop">
-                    <i class="fa-solid fa-basket-shopping"></i> Tiếp tục mua sắm
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- FILTER BAR -->
-<div class="filter-bar">
-    <div class="container">
-        <div class="filter-scroll">
-            <a th:href="@{/order-history}" class="filter-tab"
-               th:classappend="${param.status == null} ? 'active' : ''">
-                <i class="fa-solid fa-border-all me-1"></i> Tất cả
-            </a>
-            <a th:href="@{/order-history(status='WAITING')}" class="filter-tab"
-               th:classappend="${param.status != null && param.status[0] == 'WAITING'} ? 'active' : ''">
-                <i class="fa-regular fa-clock me-1"></i> Chờ xác nhận
-            </a>
-            <a th:href="@{/order-history(status='IN_PROGRESS')}" class="filter-tab"
-               th:classappend="${param.status != null && param.status[0] == 'IN_PROGRESS'} ? 'active' : ''">
-                <i class="fa-solid fa-truck me-1"></i> Đang giao
-            </a>
-            <a th:href="@{/order-history(status='FINISHED')}" class="filter-tab"
-               th:classappend="${param.status != null && param.status[0] == 'FINISHED'} ? 'active' : ''">
-                <i class="fa-solid fa-circle-check me-1"></i> Đã giao
-            </a>
-            <a th:href="@{/order-history(status='FAILED')}" class="filter-tab"
-               th:classappend="${param.status != null && param.status[0] == 'FAILED'} ? 'active' : ''">
-                <i class="fa-solid fa-ban me-1"></i> Đã hủy
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="main-content">
-    <div class="container">
-
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(data.result)}" class="empty-state">
-            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" alt="Không có đơn hàng">
-            <h4>Không tìm thấy đơn hàng nào!</h4>
-            <p>Bạn chưa có đơn hàng nào trong mục này.</p>
+            <a th:href="@{/menu}" class="btn btn-outline-warning btn-sm rounded-pill">Tiếp tục mua sắm</a>
         </div>
 
         <!-- Order Cards -->
@@ -593,8 +552,7 @@
         </div>
 
     </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
 <script th:inline="javascript">
     function cancelOrder(orderId) {

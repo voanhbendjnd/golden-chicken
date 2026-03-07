@@ -53,6 +53,26 @@ public class ProductService {
         this.productRepository.save(product);
     }
 
+    public ResultPaginationDTO fetchAllWithPaginationHasCombo(Pageable pageable, Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var r1 = c.equal(categoryJoin.get("status"), true);
+            var r2 = c.equal(r.get("active"), true);
+            return c.and(r1, r2);
+        };
+
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        return res;
+    }
+
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");

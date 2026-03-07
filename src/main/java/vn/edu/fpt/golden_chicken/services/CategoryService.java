@@ -96,7 +96,7 @@ public class CategoryService {
     }
 
     public List<ResCategory> fetchAll() {
-        return this.categoryRepository.findAll().stream().map(x -> {
+        return this.categoryRepository.findAll().stream().filter(x -> x.getStatus() == true).map(x -> {
             var res = new ResCategory();
             res.setDescription(x.getDescription());
             res.setId(x.getId());

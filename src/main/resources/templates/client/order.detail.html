@@ -12,7 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <head th:replace="~{common/head}"></head>
+    <head th:replace="~{common/head}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+</head>
     <style>
         .order-container { padding-top: 50px; padding-bottom: 50px; }
 
@@ -39,10 +43,14 @@
         .order-id-highlight { color: #e31837; font-weight: 800; }
         .timeline-info { border-left: 2px dashed #dee2e6; padding-left: 20px; position: relative; }
     </style>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
 </head>
 
 <body class="bg-light">
-<div th:replace="~{client/layout/header}"></div>
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
 <div class="container order-container">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -212,8 +220,7 @@
             </div>
         </div>
     </div>
-</div>
-<div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
 <script th:inline="javascript">
     function cancelOrder(orderId) {
