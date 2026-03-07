@@ -34,19 +34,23 @@
                     <p>Bạn có chắc chắn muốn xóa địa chỉ này không?</p>
 
                     <div class="mb-3">
-                        <p><strong>Người nhận:</strong> <span th:text="${address.recipientName}">Name</span></p>
-                        <p><strong>SĐT:</strong> <span th:text="${address.recipientPhone}">Phone</span></p>
-                        <p>
-                            <strong>Địa chỉ:</strong>
-                            <span th:text="${address.specificAddress}"></span>,
-                            <span th:text="${address.ward}"></span>,
-                            <span th:text="${address.city}"></span>
-                        </p>
+                        <p><strong>Người nhận:</strong> <span th:text="${address.recipientName}"></span></p>
+                        <p><strong>SĐT:</strong> <span th:text="${address.recipientPhone}"></span></p>
+                        <p><strong>Địa chỉ:</strong> <span th:text="|${address.specificAddress}, ${address.ward}, ${address.city}|"></span></p>
                     </div>
 
                     <div class="d-flex gap-2">
-                        <a th:href="@{/addresses}" class="btn btn-secondary">Hủy</a>
+                        <th:block th:if="${productId != null or (productIds != null && productIds != '')}">
+                            <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds})}"
+                               class="btn btn-secondary">Hủy</a>
+                        </th:block>
+                        <th:block th:unless="${productId != null or (productIds != null && productIds != '')}">
+                            <a th:href="@{/addresses}" class="btn btn-secondary">Hủy</a>
+                        </th:block>
+
                         <form th:action="@{/addresses/{id}/delete(id=${address.id})}" method="post" class="m-0">
+                            <input type="hidden" name="productId" th:value="${productId}" />
+                            <input type="hidden" name="productIds" th:value="${productIds}" />
                             <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
                         </form>
                     </div>
