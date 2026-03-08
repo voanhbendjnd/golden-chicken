@@ -87,6 +87,15 @@ public class MailService {
     }
 
     @Async
+    public void sendSecurityLoginFailures(String to, String subject, String tmp, String email) {
+        var ctx = new Context();
+        ctx.setVariable("email", email);
+        var at = new ArrayList<FileSystemResource>();
+        var contect = this.templateEngine.process(tmp, ctx);
+        this.sendEmailSync(to, subject, contect, false, true, at);
+    }
+
+    @Async
     public void sendNotice(String to, String subject, String template, String email, String name) {
         var ctx = new Context();
         ctx.setVariable("name", name);

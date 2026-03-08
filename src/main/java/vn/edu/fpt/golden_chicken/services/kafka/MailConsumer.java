@@ -40,4 +40,10 @@ public class MailConsumer {
         System.out.println(">>> SEND MAIL SUCCESS");
 
     }
+
+    @KafkaListener(topics = "security-account-topic", groupId = "email-group")
+    public void listenLoginFailuresEvent(String email) {
+        this.mailService.sendSecurityLoginFailures(email, "Lock Account About 3 Minutes", "mail/ban", email);
+        System.out.println("SEND MAIL BAN SUCCESS!");
+    }
 }
