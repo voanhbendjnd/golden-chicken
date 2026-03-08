@@ -160,7 +160,8 @@ public class CartService {
         }
         var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
-            throw new ResourceNotFoundException("User Email", email);
+            return null;
+            // throw new ResourceNotFoundException("User Email", email);
         }
         var customer = user.getCustomer();
         if (customer == null) {

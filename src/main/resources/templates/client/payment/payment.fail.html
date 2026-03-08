@@ -50,7 +50,19 @@
             transform: scale(1.03);
         }
 
-
+        /* ===== CHECK ICON ===== */
+        .check-circle {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c853, #69f0ae);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 35px rgba(0, 200, 83, 0.5);
+            animation: pop 0.6s ease;
+        }
 
         .check-circle svg {
             width: 50px;
@@ -133,15 +145,12 @@
     <div class="success-card">
 
         <div class="check-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                class="bi bi-exclamation-circle" viewBox="0 0 24 24">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                <path
-                    d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z" />
             </svg>
         </div>
 
-        <h1 style="color: orangered">Thanh toán thất bại!</h1>
+        <h1 style="color: red;">Thanh toán thất bại!</h1>
         <p>Đặt hàng không thành công.</p>
 
         <div class="btn-group">

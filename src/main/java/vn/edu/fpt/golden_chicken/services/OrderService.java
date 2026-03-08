@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
@@ -76,7 +77,6 @@ public class OrderService {
         var details = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getProductId()).collect(Collectors.toList()));
         var mpDetails = details.stream().collect(Collectors.toMap(x -> x.getId(), x -> x));
-        long totalBonus = 0L;
         BigDecimal lastPriceProduct = BigDecimal.ZERO;
         for (var x : dto.getItems()) {
             var product = mpDetails.get(x.getProductId());
@@ -87,7 +87,6 @@ public class OrderService {
             BigDecimal itemPriceTotal = product.getPrice().multiply(quantity);
             lastPriceProduct = lastPriceProduct.add(itemPriceTotal);
             product.setSold(product.getSold() != null ? product.getSold() : 0 + x.getQuantity());
-            totalBonus += itemPriceTotal.divide(new BigDecimal("1000"), 0, RoundingMode.FLOOR).longValue();
             var orderItem = new OrderItem();
             orderItem.setFirstPrice(product.getPrice());
             orderItem.setOrder(order);
@@ -112,13 +111,6 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-
-        var actionMessage = new ActionPointMessage();
-        actionMessage.setAction("ADD");
-        actionMessage.setReason("ORDER #" + order.getId());
-        actionMessage.setChange(totalBonus);
-        actionMessage.setActionAt(LocalDateTime.now());
-        actionMessage.setUserId(user.getId());
 
         // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
@@ -233,7 +225,15 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
+            var actionMessage = new ActionPointMessage();
+            actionMessage.setAction(DeclareConstant.action_point_add);
+            actionMessage.setReason("ORDER #" + order.getId());
+            actionMessage.setChange(
+                    order.getTotalProductPrice().divide(new BigDecimal("1000"), 0, RoundingMode.FLOOR).longValue());
+            actionMessage.setActionAt(LocalDateTime.now());
+            actionMessage.setUserId(order.getCustomer().getId());
             order.setPaymentStatus(PaymentStatus.PAID);
+            this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
         }
         if (currentPayment == PaymentStatus.PAID) {
             order.setPaymentStatus(PaymentStatus.REFUNDED);

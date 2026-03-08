@@ -1,6 +1,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+
     <link rel="stylesheet" th:href="@{/css/header.djnd.css}">
 </head>
 <div class="container-fluid fixed-top">

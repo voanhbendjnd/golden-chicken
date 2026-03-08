@@ -105,6 +105,17 @@ public class MailService {
         this.sendEmailSync(to, subject, content, false, true, at);
     }
 
+    @Async
+    public void sendPoint(String to, String subject, String template, String email, String point, String currentPoint) {
+        var ctx = new Context();
+        ctx.setVariable("point", point);
+        ctx.setVariable("email", email);
+        ctx.setVariable("currentPoint", currentPoint);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(template, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+    }
+
     // turn on enalbleAsync in application
     @Async
     public void sendEmailAndPasswordForStaff(String to, String subject, String template, String email, String name,
