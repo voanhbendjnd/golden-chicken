@@ -47,4 +47,9 @@ public class VoucherUpdateDTO {
     Boolean exchangeable;
     String status;
 
+    @NotNull(message = "Quantity is required")
+    Integer quantity;
+
+    @NotBlank(message = "Voucher Type is required")
+    String voucherType;
 }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link th:href="@{/css/voucher-client.css}" rel="stylesheet">
+</head>
+<body>
+<h2 class="voucher-title">🎁 Chọn ưu đãi cho đơn hàng của bạn</h2>
+<div th:each="v : ${vouchers}" class="voucher-card">
+
+    <h3 th:text="${v.voucher.code}"></h3>
+
+    <p th:text="${v.voucher.name}"></p>
+
+    <small th:text="${v.voucher.description}"></small>
+
+    <a th:href="@{/checkout(id=${productId},voucherId=${v.id})}">
+        Chọn
+    </a>
+
+</div>
+</body>
+</html>
