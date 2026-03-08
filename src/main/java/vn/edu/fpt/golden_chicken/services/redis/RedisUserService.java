@@ -32,7 +32,7 @@ public class RedisUserService {
         }
     }
 
-    public int getNumberOfLoginFailures(String email) {
+    public Integer getNumberOfLoginFailures(String email) {
         var key = "LOGIN_FAIL:" + email;
         var value = this.stringRedisTemplate.opsForValue().get(key);
         return value == null ? 0 : Integer.parseInt(value);
@@ -73,5 +73,16 @@ public class RedisUserService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void lockAccount(String email) {
+        var key = "LOCK:" + email;
+        this.stringRedisTemplate.opsForValue().set(key, "LOCKED", 1, TimeUnit.MINUTES);
+        this.stringRedisTemplate.delete("LOGIN_FAIL:" + email);
+    }
+
+    public boolean isAccountLocked(String email) {
+        String key = "LOCK:" + email;
+        return Boolean.TRUE.equals(this.stringRedisTemplate.hasKey(key));
     }
 }

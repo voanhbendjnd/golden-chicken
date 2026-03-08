@@ -46,8 +46,8 @@ public class SecurityConfig {
      * Vị trí lấy thông tin User
      */
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
-        return new CustomUserDetailsService(userRepository);
+    public UserDetailsService userDetailsService(UserRepository userRepository, RedisUserService redisUserService) {
+        return new CustomUserDetailsService(userRepository, redisUserService);
     }
 
     /*
