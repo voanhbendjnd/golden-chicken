@@ -166,37 +166,74 @@ public class OrderService {
     }
 
     @Transactional
+    public void cancelOrderByCustomer(Long id) throws PermissionException {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        // var user = this.userRepository.findByEmailIgnoreCase(email);
+
+        var order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
+        if (order.getCustomer() == null || !order.getCustomer().getUser().getEmail().equals(email)) {
+            throw new PermissionException("Bạn không có quyền hủy đơn hàng này!");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Không thể hủy đơn hàng vì đơn đã được xử lý hoặc đã kết thúc!");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+
+        if (order.getPaymentStatus().equals(PaymentStatus.PAID)) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
+        }
+
+        order.setUpdatedAt(LocalDateTime.now());
+
+        var updatedOrder = this.orderRepository.save(order);
+
+        OrderMessage message = new OrderMessage();
+        message.setCustomerEmail(email);
+        message.setOrderId(updatedOrder.getId());
+        message.setStatus(updatedOrder.getStatus());
+        message.setTotalPrice(updatedOrder.getFinalAmount());
+        message.setCustomerName(updatedOrder.getName());
+        this.kafkaTemplate.send("order-chicken-topic", message);
+    }
+
+    @Transactional
     public void changeOrderStatus(Long id, String statusName, Staff shipper) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+
         if (shipper != null) {
             order.setShipper(shipper);
         }
-        OrderStatus currentStatus = order.getStatus();
-        OrderStatus nextStatus;
 
-        try {
-            nextStatus = OrderStatus.valueOf(statusName);
-        } catch (IllegalArgumentException e) {
+        OrderStatus currentStatus = order.getStatus();
+        PaymentStatus currentPayment = order.getPaymentStatus();
+        OrderStatus nextStatus = OrderStatus.safeValueOf(statusName);
+
+        if (nextStatus == null) {
             throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
-        if (currentStatus == OrderStatus.COMPLETED || currentStatus == OrderStatus.CANCELLED) {
-            throw new RuntimeException("Đơn hàng đã kết thúc (Completed/Cancelled), không thể thay đổi trạng thái!");
-        }
-
-        if (currentStatus == OrderStatus.SHIPPING && nextStatus == OrderStatus.PENDING) {
-            throw new RuntimeException("Đơn hàng đang giao, không thể quay về trạng thái chờ xử lý!");
-        }
-
-        if (currentStatus == nextStatus) {
+        if (currentStatus == nextStatus)
             return;
+
+        if (currentStatus == OrderStatus.DELIVERED ||
+                currentStatus == OrderStatus.CANCELLED ||
+                currentStatus == OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
         }
 
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
-        if (nextStatus == OrderStatus.COMPLETED) {
+
+        if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             order.setPaymentStatus(PaymentStatus.PAID);
+        }
+        if (currentPayment == PaymentStatus.PAID) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED);
         }
 
         var lastOrder = this.orderRepository.save(order);
@@ -236,6 +273,8 @@ public class OrderService {
         res.setPhone(order.getPhone());
         res.setStatus(order.getStatus());
         res.setTotalPrice(order.getTotalProductPrice());
+        res.setFinalAmount(order.getFinalAmount());
+        res.setFeeShipping(order.getShippingFee());
         res.setUpdatedAt(order.getUpdatedAt());
         res.setItems(order.getOrderItems().stream().map(x -> {
             var detail = new ResOrder.OrderDetail();
@@ -277,39 +316,10 @@ public class OrderService {
         res.setMeta(meta);
         var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
         res.setResult(result);
-        // if (page.getContent().isEmpty() || page.getContent().size() == 0) {
-        // throw new DataInvalidException("No Data!");
-        // }
-        // res.setResult(page.getContent().stream().map(order -> {
-        // var resOrder = new ResOrder();
-        // resOrder.setAddress(order.getShippingAddress());
-        // resOrder.setCreatedAt(order.getCreatedAt());
-        // resOrder.setId(order.getId());
-        // resOrder.setName(order.getName());
-        // resOrder.setNote(order.getNote());
-        // resOrder.setPaymentMethod(order.getPaymentMethod().toString());
-        // resOrder.setPaymentStatus(order.getPaymentStatus().toString());
-        // resOrder.setPhone(order.getPhone());
-        // resOrder.setStatus(order.getStatus());
-        // resOrder.setTotalPrice(order.getTotalProductPrice());
-        // resOrder.setUpdatedAt(order.getUpdatedAt());
-        // resOrder.setItems(order.getOrderItems().stream().filter(x -> x.getProduct()
-        // != null).map(x -> {
-        // var detail = new ResOrder.OrderDetail();
-        // detail.setId(x.getId());
-        // var product = x.getProduct();
-        // detail.setImg(product.getImageUrl());
-        // detail.setProductId(product.getId());
-        // detail.setPrice(product.getPrice());
-        // detail.setQuantity(x.getQuantity());
-        // return detail;
-        // }).toList());
-        // return resOrder;
-        // }).toList());
         return res;
     }
 
-    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, OrderStatus status)
+    public ResultPaginationDTO getOrderHistory(Specification<Order> spec, Pageable pageable, String statusStr)
             throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email == null) {
@@ -323,27 +333,56 @@ public class OrderService {
         if (customer == null) {
             throw new PermissionException("Please Use Account Customer For This Service!");
         }
-        // if (status != OrderStatus.CANCELLED || status != OrderStatus.COMPLETED ||
-        // status != OrderStatus.PENDING
-        // || status != OrderStatus.SHIPPING) {
 
-        // }
-        Specification<Order> orderSpec = (r, q, c) -> {
-            return c.equal(r.get("customer"), customer);
-        };
-        // var lastStatus = status.toString();
-        if (status != null) {
-            var checkStatus = OrderStatus.safeValueOf(status.toString());
-            if (checkStatus != null) {
-                Specification<Order> orderStatus = (r, q, c) -> {
-                    return c.equal(r.get("status"), status);
-                };
-                orderSpec = orderSpec.and(orderStatus);
-                // var page = this.orderRepository.findAll(spec.and(orderSpec).and(orderStatus),
-                // pageable);
+        Specification<Order> orderSpec = (r, q, c) -> c.equal(r.get("customer"), customer);
+
+        if (statusStr != null && !statusStr.isEmpty() && !statusStr.equalsIgnoreCase("ALL")) {
+            Specification<Order> statusGroupSpec;
+
+            switch (statusStr.toUpperCase()) {
+                case "WAITING":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.PENDING,
+                            OrderStatus.PREPARING,
+                            OrderStatus.READY_FOR_DELIVERY);
+                    break;
+
+                case "IN_PROGRESS":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERING,
+                            OrderStatus.SHIPPER_ISSUE,
+                            OrderStatus.REASSIGNING_SHIPPER);
+                    break;
+
+                case "FINISHED":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.DELIVERED,
+                            OrderStatus.COMPLETED);
+                    break;
+
+                case "FAILED":
+                    statusGroupSpec = (r, q, c) -> r.get("status").in(
+                            OrderStatus.CANCELLED,
+                            OrderStatus.DELIVERY_FAILED);
+                    break;
+
+                default:
+                    try {
+                        OrderStatus singleStatus = OrderStatus.valueOf(statusStr);
+                        statusGroupSpec = (r, q, c) -> c.equal(r.get("status"), singleStatus);
+                    } catch (IllegalArgumentException e) {
+                        statusGroupSpec = null;
+                    }
+                    break;
+            }
+
+            if (statusGroupSpec != null) {
+                orderSpec = orderSpec.and(statusGroupSpec);
             }
         }
+
         var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
+
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
@@ -351,6 +390,7 @@ public class OrderService {
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
+
         var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
         res.setResult(result);
 

@@ -22,24 +22,25 @@ import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
         boolean existsByCustomerId(Long id);
 
+        Page<Order> findByStatusAndShipperIsNull(OrderStatus status, Pageable pageable);
+
+        long countByShipper(Staff shipper);
+
         boolean existsByShipperId(Long id);
 
         @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
         Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
-        Page<Order> findByStatusAndShipperIsNull(OrderStatus status, Pageable pageable);
-
-        Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
-
         Page<Order> findByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses, Pageable pageable);
 
-        long countByShipperAndStatus(Staff shipper, OrderStatus status);
+        Page<Order> findByCustomerUserIdAndStatusIn(Long userId, List<OrderStatus> statuses, Pageable pageable);
+
+        Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
 
         long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status,
                         java.time.LocalDateTime start, java.time.LocalDateTime end);
 
-        // total orders assigned to a shipper regardless of status
-        long countByShipper(Staff shipper);
+        long countByShipperAndStatus(Staff shipper, OrderStatus status);
 
         @Query("select coalesce(sum(o.finalAmount),0) from Order o where o.shipper = ?1 and o.paymentMethod = ?2 and o.paymentStatus = ?3")
         java.math.BigDecimal sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(Staff shipper,

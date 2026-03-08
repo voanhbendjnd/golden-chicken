@@ -21,7 +21,7 @@ public class OrderConvert {
         resOrder.setPaymentStatus(order.getPaymentStatus().toString());
         resOrder.setPhone(order.getPhone());
         resOrder.setStatus(order.getStatus());
-        resOrder.setTotalPrice(order.getTotalProductPrice());
+        resOrder.setTotalPrice(order.getFinalAmount());
         resOrder.setUpdatedAt(order.getUpdatedAt());
         resOrder.setItems(order.getOrderItems().stream().map(OrderConvert::toDetail).filter(Objects::nonNull).toList());
         return resOrder;

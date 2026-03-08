@@ -5,18 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm địa chỉ mới</title>
-    <link rel="shortcut icon" th:href="@{/img/favicon_New.png}" type="image/x-icon">
-    <th:block th:replace="~{common/head}"></th:block>
-    <link th:href="@{/css/base.css}" rel="stylesheet">
-    <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/profileTest.css}" rel="stylesheet">
     <link th:href="@{/css/newAddress.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 </head>
 
 <body>
-    <div th:replace="~{client/layout/header}"></div>
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
-    <div class="page">
+    <div class="page" style="padding-top: 200px;">
         <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <main class="main">
@@ -29,17 +31,24 @@
                 <div class="section__body">
                     <form th:action="${isEdit} ? @{/addresses/update} : @{/addresses/new}" th:object="${addressForm}"
                         method="post">
+
+                        <input type="hidden" name="productId" th:value="${productId}" />
+                        <input type="hidden" name="productIds" th:value="${productIds}" />
+
                         <input type="hidden" th:field="*{id}" />
+
                         <div class="mb-3">
                             <label class="form-label">Họ tên người nhận</label>
-                            <input type="text" th:field="*{recipientName}" class="form-control" />
+                            <input type="text" th:field="*{recipientName}" class="form-control"
+                                placeholder="Nhập tên người nhận" />
                             <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('recipientName')}"
                                 th:errors="*{recipientName}"></div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Số điện thoại người nhận</label>
-                            <input type="text" th:field="*{recipientPhone}" class="form-control" />
+                            <input type="text" th:field="*{recipientPhone}" class="form-control"
+                                placeholder="Nhập số điện thoại" />
                             <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('recipientPhone')}"
                                 th:errors="*{recipientPhone}"></div>
                         </div>
@@ -52,7 +61,6 @@
                                 th:errors="*{specificAddress}"></div>
                         </div>
 
-
                         <div class="mb-3">
                             <label class="form-label">Phường/Xã</label>
                             <select th:field="*{ward}" class="form-control" th:attr="data-selected=*{ward}">
@@ -63,26 +71,42 @@
                         </div>
 
                         <div class="mb-3">
-                            <label>
-                                <input type="checkbox" th:field="*{isDefault}" />
-                                Đặt làm địa chỉ mặc định
+                            <label class="d-flex align-items-center gap-2">
+                                <input type="checkbox" th:field="*{isDefault}" style="width: 18px; height: 18px;" />
+                                <span>Đặt làm địa chỉ mặc định</span>
                             </label>
                         </div>
 
+
+
                         <div class="actions">
-                            <button type="submit" class="btn btn-success" th:text="${isEdit} ? 'Lưu' : 'Tạo mới'">
+                            <button type="submit" class="btn btn-success px-4"
+                                th:text="${isEdit} ? 'Cập nhật' : 'Tạo mới'">
                                 Tạo mới
                             </button>
 
-                            <a th:href="@{/addresses}" class="btn btn-outline-danger">Hủy</a>
+                            <th:block th:if="${productId != null or (productIds != null && productIds != '')}">
+                                <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds})}"
+                                    class="btn btn-outline-secondary">
+                                    Hủy
+                                </a>
+                            </th:block>
+
+                            <th:block th:unless="${productId != null or (productIds != null && productIds != '')}">
+                                <a th:href="@{/addresses}" class="btn btn-outline-danger">
+                                    Hủy
+                                </a>
+                            </th:block>
                         </div>
+
                     </form>
                 </div>
             </section>
         </main>
     </div>
 
-    <div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/address.js}"></script>
     <script th:src="@{/js/app.js}"></script>

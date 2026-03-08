@@ -36,4 +36,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("select p from Product p join fetch p.category where p.active = true")
     List<Product> findAllWithCategory();
+
 }

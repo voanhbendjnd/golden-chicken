@@ -2,42 +2,22 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
-    <head th:replace="~{common/head}"></head>
     <title>Golden Chicken - Checkout</title>
-    <link rel="stylesheet" th:href="@{/css/checkout.css}" />
-    <link rel="stylesheet" th:href="@{/css/Modal.css}" />
-    <style>
-        /* .btn-order-submit:hover {
-            background: #c1142d !important;
-        } */
-
-        .btn-order-submit:disabled {
-            background: #ccc !important;
-            cursor: not-allowed;
-        }
-
-        input[type="radio"]:checked+span {
-            color: #e31837;
-            font-weight: bold;
-        }
-    </style>
+    <!-- <link rel="stylesheet" th:href="@{/css/checkout.css}" /> -->
+    <!-- <link rel="stylesheet" th:href="@{/css/Modal.css}" /> -->
     <meta name="_csrf" th:content="${_csrf.token}" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <link th:href="@{/css/home.css}" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="shortcut icon" th:href="@{/img/favicon.png}" type="image/x-icon">
-    <link th:href="@{/css/base.css}" rel="stylesheet">
-    <link th:href="@{/css/style.css}" rel="stylesheet">
-    <link th:href="@{/css/profileTest.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
-    <div th:replace="~{client/layout/header}"></div>
-    <div class="container-default" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-        <h1 class="text-center my-4" style="color: #e31837; font-weight: bold;">HOÀN TẤT THANH TOÁN</h1>
-        <a th:href="@{/cart}" class="btn btn-danger" style="height: 30px; margin-bottom: 10px;">Back to cart</a>
+    <div th:replace="~{client/layout/header.djnd}"></div>
+    <div class="container-default" style="max-width: 1200px; margin: 0 auto; padding: 20px; padding-top: 150px;">
+        <h1 class="text-center my-4" style="color:#ffb524; font-weight: bold;">HOÀN TẤT THANH TOÁN</h1>
+        <!-- <a th:href="@{/cart}" class="btn btn-danger" style="height: 30px; margin-bottom: 10px;">Back to cart</a> -->
 
         <form th:action="@{/checkout/order}" th:object="${order}" method="post">
             <div class="checkout-layout" style="display: flex; gap: 30px; align-items: flex-start;">
@@ -45,7 +25,7 @@
                 <div class="checkout-left"
                     style="flex: 2; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee;">
                     <h3
-                        style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #e31837; display: inline-block;">
+                        style="color: #ffb524; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #ffb524; display: inline-block;">
                         THÔNG TIN NHẬN HÀNG
                     </h3>
 
@@ -71,13 +51,13 @@
 
                         <div class="mt-2">
                             <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id})}"
-                                style="color: #e31837; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
                             </a>
 
                             <a th:if="${product == null}"
                                 th:href="@{/checkout/addresses(productIds=${#strings.listJoin(order.items.![productId], ',')})}"
-                                style="color: #e31837; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
                             </a>
                         </div>
@@ -108,7 +88,7 @@
 
                 <div class="checkout-right"
                     style="flex: 1; background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee; position: sticky; top: 20px;">
-                    <h3 style="color: #e31837; font-size: 1.2rem; margin-bottom: 20px;">CHI TIẾT ĐƠN HÀNG</h3>
+                    <h3 style="color:#ffb524; font-size: 1.2rem; margin-bottom: 20px;">CHI TIẾT ĐƠN HÀNG</h3>
 
                     <div th:if="${product != null}">
                         <div class="product-mini-list border-bottom pb-3 mb-3">
@@ -180,7 +160,7 @@
                     </div>
 
                     <button type="submit" class="btn-order-submit" th:disabled="${defaultAddress == null}"
-                        style="width: 100%; background: #e31837; color: #fff; border: none; padding: 15px; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
+                        style="width: 100%; background: #ffb524; color: #fff; border: none; padding: 15px; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer;">
                         XÁC NHẬN THANH TOÁN
                     </button>
                 </div>
@@ -189,7 +169,7 @@
         </form>
         <script th:src="@{/js/checkout.js}"></script>
     </div>
-    <div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 </body>
 
 </html>

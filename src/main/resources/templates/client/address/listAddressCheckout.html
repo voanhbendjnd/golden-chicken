@@ -4,38 +4,54 @@
 <head>
     <meta charset="utf-8">
     <title>Chọn địa chỉ giao hàng</title>
-
-    <th:block th:replace="~{common/head}"></th:block>
-
-    <link th:href="@{/css/base.css}" rel="stylesheet">
-    <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/list-address-checkout.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
 </head>
 
 <body>
 
-    <div th:replace="~{client/layout/header}"></div>
+    <div th:replace="~{client/layout/header.djnd}"></div>
     <div class="checkout-container">
-        <div class="page-checkout-address">
+        <div class="page-checkout-address" style="padding-top: 120px;">
             <h1 class="addr-title">📍 CHỌN ĐỊA CHỈ GIAO HÀNG</h1>
 
             <div th:each="a : ${addresses}" class="address-card">
                 <div class="address-info">
-                    <div class="name" th:text="${a.recipientName}"></div>
+                    <div class="name">
+                        <span th:text="${a.recipientName}"></span>
+
+                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds})}"
+                           class="ms-2 text-primary" title="Chỉnh sửa">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+
+                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds})}"
+                           class="ms-2 text-danger">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
                     <div>
                         <span th:text="${a.specificAddress}"></span>,
                         <span th:text="${a.ward}"></span>,
-                        <!-- <span th:text="${a.district}"></span>, -->
                         <span th:text="${a.city}"></span>
                     </div>
                     <div>📞 <span th:text="${a.recipientPhone}"></span></div>
                 </div>
-
                 <input class="address-radio" type="radio" name="addressId" th:value="${a.id}" required>
             </div>
 
             <div class="address-actions">
-                <a th:href="@{/addresses/new}" class="btn btn-success btn-add">
+                <a th:href="@{/addresses/new(
+                productId=${productId},
+                productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null}
+       )}"
+                   class="btn btn-success btn-add">
                     Thêm địa chỉ mới
                 </a>
 
@@ -54,24 +70,34 @@
                 }
 
                 const addressId = selectedRadio.value;
-                const productId = [[${ productId }]];
-                const productIds = [[${ productIds }]];
+                // Thymeleaf sẽ render productId là số hoặc null, productIds là chuỗi hoặc null
+                const productId = [[${productId}]];
+                const productIds = [[${productIds}]]; // Lúc này là String "1,2,3"
 
                 let url = "";
-                if (productId != null) {
+
+                // 1. Trường hợp mua ngay (Buy Now)
+                if (productId != null && productId !== '') {
                     url = `/checkout?id=${productId}&addressId=${addressId}`;
-                } else if (productIds != null && productIds.length > 0) {
-                    const idsQuery = productIds.map(id => `ids=${id}`).join('&');
+                }
+                // 2. Trường hợp mua từ giỏ hàng (Cart)
+                else if (productIds != null && productIds !== '') {
+                    // Vì productIds đã là chuỗi "1,2,3", ta cần biến nó thành ?ids=1&ids=2&ids=3
+                    const idsArray = productIds.split(',');
+                    const idsQuery = idsArray.map(id => `ids=${id}`).join('&');
                     url = `/checkout/order?${idsQuery}&addressId=${addressId}`;
-                } else {
+                }
+                // 3. Trường hợp dự phòng
+                else {
                     url = `/checkout/order?addressId=${addressId}`;
                 }
 
+                console.log("Redirecting to:", url); // Kiểm tra log nếu vẫn không nhảy
                 window.location.href = url;
             }
         </script>
     </div>
-    <div th:replace="~{client/layout/footer}"></div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
 </body>
 

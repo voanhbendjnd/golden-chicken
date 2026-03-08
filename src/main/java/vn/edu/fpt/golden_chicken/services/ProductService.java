@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,66 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         product.setActive(!product.getActive());
         this.productRepository.save(product);
+    }
+
+    public ResultPaginationDTO fetchAllWithPaginationNewProduct(Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var r1 = c.equal(categoryJoin.get("status"), true);
+            var r2 = c.equal(r.get("active"), true);
+            return c.and(r1, r2);
+        };
+        var pageable = PageRequest.of(0, 5, Sort.by("id").descending());
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        return res;
+    }
+
+    public ResultPaginationDTO fetchAllWithPaginationBestSeller(Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var r1 = c.equal(categoryJoin.get("status"), true);
+            var r2 = c.equal(r.get("active"), true);
+            return c.and(r1, r2);
+        };
+        var pageable = PageRequest.of(0, 10, Sort.by("sold").descending());
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        return res;
+    }
+
+    public ResultPaginationDTO fetchAllWithPaginationHasCombo(Pageable pageable, Specification<Product> spec) {
+        Specification<Product> ps = (r, q, c) -> {
+            Join<Product, Category> categoryJoin = r.join("category");
+            var r1 = c.equal(categoryJoin.get("status"), true);
+            var r2 = c.equal(r.get("active"), true);
+            return c.and(r1, r2);
+        };
+
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(ProductConvert::toResProduct).collect(Collectors.toList()));
+        return res;
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
