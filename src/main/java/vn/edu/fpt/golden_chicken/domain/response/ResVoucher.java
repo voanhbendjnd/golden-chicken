@@ -48,4 +48,10 @@ public class ResVoucher {
 
     @NotNull(message = "End time is required")
     LocalDateTime endAt;
+
+    @NotNull(message = "Quantity is required")
+    Integer quantity ;
+
+    @NotBlank(message = "Voucher Type is required")
+    String voucherType ;
 }
