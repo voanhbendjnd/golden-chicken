@@ -64,9 +64,11 @@
                     </div>
 
                     <div class="mt-4">
-                        <label class="fw-bold mb-2">Ghi chú</label>
-                        <textarea th:field="*{note}" class="form-control" rows="3" placeholder="Ghi chú cho đơn hàng"
-                            style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px;"></textarea>
+                        <label class="fw-bold mb-2">Ghi chú (Tối đa 250 ký tự)</label>
+                        <textarea th:field="*{note}" class="form-control" rows="3"
+                                  placeholder="Ghi chú cho đơn hàng"
+                                  maxlength="250"
+                                  style="width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 10px;"></textarea>
                     </div>
 
                     <div class="mt-4">
