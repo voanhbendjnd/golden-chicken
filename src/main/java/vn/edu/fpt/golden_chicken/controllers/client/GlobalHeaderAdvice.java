@@ -15,6 +15,7 @@ public class GlobalHeaderAdvice {
 
     private final CategoryService categoryService;
     private final ProductService productService;
+    private final CartService cartService;
 
     @ModelAttribute
     public void addMenuNav(Model model) {
@@ -60,7 +61,8 @@ public class GlobalHeaderAdvice {
                     img,
                     anchor));
         }
-
+        var totalItemCart = this.cartService.sumCart();
+        model.addAttribute("sumCart", totalItemCart != null ? totalItemCart : 0);
         model.addAttribute("menuCategories", menuCategories);
     }
 
