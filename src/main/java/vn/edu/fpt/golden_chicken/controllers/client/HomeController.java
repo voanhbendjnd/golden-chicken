@@ -44,10 +44,14 @@ public class HomeController {
         model.addAttribute("combos", combos.getResult());
         model.addAttribute("newProducts", newProducts.getResult());
         List<ResProduct> bestSellerLists = (List<ResProduct>) bestSeller.getResult();
-        var bestFirst = bestSellerLists.subList(0, 6);
-        var bestSecond = bestSellerLists.subList(6, bestSellerLists.size());
-        model.addAttribute("firstBestSellers", bestFirst);
 
+        int size = bestSellerLists.size();
+        int limit = Math.min(size, 6);
+
+        var bestFirst = bestSellerLists.subList(0, limit);
+        var bestSecond = bestSellerLists.subList(limit, size);
+
+        model.addAttribute("firstBestSellers", bestFirst);
         model.addAttribute("secondBestSellers", bestSecond);
         return "client/home.djnd";
     }
