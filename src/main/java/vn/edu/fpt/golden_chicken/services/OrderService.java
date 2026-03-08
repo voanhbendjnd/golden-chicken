@@ -32,6 +32,7 @@ import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
@@ -119,15 +120,17 @@ public class OrderService {
         actionMessage.setActionAt(LocalDateTime.now());
         actionMessage.setUserId(user.getId());
 
-        this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
+        // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
-        OrderMessage message = new OrderMessage();
-        message.setCustomerEmail(user.getEmail());
-        message.setOrderId(order.getId());
-        message.setStatus(order.getStatus());
-        message.setTotalPrice(order.getFinalAmount());
-        message.setCustomerName(order.getName());
-        this.kafkaTemplate.send("order-chicken-topic", message);
+        if (dto.getPaymentMethod() == PaymentMethod.COD) {
+            OrderMessage message = new OrderMessage();
+            message.setCustomerEmail(user.getEmail());
+            message.setOrderId(newOrder.getId());
+            message.setStatus(newOrder.getStatus());
+            message.setTotalPrice(newOrder.getFinalAmount());
+            message.setCustomerName(newOrder.getName());
+            this.kafkaTemplate.send("order-chicken-topic", message);
+        }
 
         this.cartService.cleanCartAfterCheckout(dto.getItems());
         this.productRepository.saveAll(details);
@@ -258,6 +261,17 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
         order.setPaymentStatus(status);
         this.orderRepository.save(order);
+
+        if (status == PaymentStatus.PAID) {
+            var user = order.getCustomer().getUser();
+            OrderMessage message = new OrderMessage();
+            message.setCustomerEmail(user.getEmail());
+            message.setOrderId(order.getId());
+            message.setStatus(order.getStatus());
+            message.setTotalPrice(order.getFinalAmount());
+            message.setCustomerName(order.getName());
+            this.kafkaTemplate.send("order-chicken-topic", message);
+        }
     }
 
     public ResOrder findById(Long id) {
@@ -415,5 +429,17 @@ public class OrderService {
         }
 
         return revenues;
+    }
+
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        var order = this.orderRepository.findById(orderId).orElse(null);
+        if (order == null)
+            return;
+
+        if (order.getPaymentStatus() == PaymentStatus.UNPAID
+                && order.getStatus() == OrderStatus.PENDING) {
+            this.orderRepository.delete(order);
+        }
     }
 }

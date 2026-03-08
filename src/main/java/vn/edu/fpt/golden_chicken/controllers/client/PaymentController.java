@@ -99,12 +99,17 @@ public class PaymentController {
             model.addAttribute("bankCode", bankCode);
             model.addAttribute("transactionNo", transactionNo);
             model.addAttribute("payDate", payDate);
+            return "client/payment/payment.success";
         } else {
+            String msg = "24".equals(responseCode)
+                    ? "Bạn đã hủy giao dịch thanh toán."
+                    : "Thanh toán thất bại. Mã lỗi: " + responseCode;
             model.addAttribute("success", false);
-            model.addAttribute("message", "Thanh toán thất bại hoặc đã bị hủy. Mã lỗi: " + responseCode);
+            model.addAttribute("message", msg);
             model.addAttribute("orderId", orderId);
+            orderService.deleteOrder(orderId);
+            return "client/payment/result";
         }
-        return "client/payment/payment.success";
     }
 
     private String getClientIp(HttpServletRequest request) {
