@@ -22,6 +22,7 @@ import org.springframework.session.security.web.authentication.SpringSessionReme
 import jakarta.servlet.DispatcherType;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.CustomUserDetailsService;
+import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -42,7 +43,7 @@ public class SecurityConfig {
     }
 
     /*
-         * Vị trí lấy thông tin User
+     * Vị trí lấy thông tin User
      */
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
@@ -50,7 +51,7 @@ public class SecurityConfig {
     }
 
     /*
-         * So sánh passowrd truyền về
+     * So sánh passowrd truyền về
      */
     @Bean
     public DaoAuthenticationProvider authProvider(PasswordEncoder passwordEncoder,
@@ -73,7 +74,7 @@ public class SecurityConfig {
     }
 
     /*
-         * Tự động trả về trang khớp với role người đó
+     * Tự động trả về trang khớp với role người đó
      */
     @Bean
     public AuthenticationSuccessHandler customSuccessHandler() {
@@ -94,64 +95,63 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         String[] whiteList = {
-            "/",
-            "/home",
-            "/login",
-            "/register",
-            "/forgot-password", 
-            "/forgot-password/**",
-            "/verify-otp", 
-            "/reset-password",
-            "/css/**",
-            "/js/**",
-            "/images/**",
-            "/img/**",
-            "/client/**",
-            "/favicon.ico",
-            "/fonts/**",
-            "/menu/**",
-            "/payment/**",
-            "/verify/**"
+                "/",
+                "/home",
+                "/login",
+                "/register",
+                "/forgot-password",
+                "/forgot-password/**",
+                "/verify-otp",
+                "/reset-password",
+                "/css/**",
+                "/js/**",
+                "/images/**",
+                "/img/**",
+                "/client/**",
+                "/favicon.ico",
+                "/fonts/**",
+                "/menu/**",
+                "/payment/**",
+                "/verify/**"
 
         };
         http
                 .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-                )
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll())
                 .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(whiteList).permitAll()
-                .requestMatchers("/favicon.ico").permitAll()
-                // chuyển sang trang jsp không bị chặn
-                .dispatcherTypeMatchers(DispatcherType.FORWARD,
-                        DispatcherType.INCLUDE)
-                .permitAll()
-                // .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                // .requestMatchers(HttpMethod.POST, "/product/**")
-                // .hasAnyRole("ADMIN", "STAFF")
-                // .requestMatchers("/admin/**").hasRole("ADMIN")
-                // .requestMatchers("/staff/**").hasRole("STAFF")
-                // còn lại thì phải login mới vô được
-                .anyRequest().authenticated())
+                        .requestMatchers(whiteList).permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
+                        // chuyển sang trang jsp không bị chặn
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD,
+                                DispatcherType.INCLUDE)
+                        .permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
+                        // .requestMatchers(HttpMethod.POST, "/product/**")
+                        // .hasAnyRole("ADMIN", "STAFF")
+                        // .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // .requestMatchers("/staff/**").hasRole("STAFF")
+                        // còn lại thì phải login mới vô được
+                        .anyRequest().authenticated())
                 .sessionManagement((sessionManagement) -> sessionManagement
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                // Sửa dòng này: Cho phép Spring quản lý việc đổi Session ID linh hoạt
-                // hơn
-                .sessionFixation().migrateSession()
-                .invalidSessionUrl("/login?invalid")
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-                .sessionRegistry(sessionRegistry()))
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        // Sửa dòng này: Cho phép Spring quản lý việc đổi Session ID linh hoạt
+                        // hơn
+                        .sessionFixation().migrateSession()
+                        .invalidSessionUrl("/login?invalid")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                        .sessionRegistry(sessionRegistry()))
                 .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
                 .rememberMe(r -> r.rememberMeServices(rememberMeServices()))
                 .formLogin(formLogin -> formLogin
-                .loginPage("/login")
-                .failureUrl("/login?error")
-                .successHandler(customSuccessHandler())
-                .permitAll())
+                        .loginPage("/login")
+                        .failureUrl("/login?error")
+                        .successHandler(customSuccessHandler())
+                        .permitAll())
                 .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
         return http.build();
     }

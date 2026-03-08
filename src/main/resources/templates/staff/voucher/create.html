@@ -59,7 +59,18 @@
                  th:errors="*{discountType}">
             </div>
         </div>
-
+        <div class="form-group">
+            <label>Voucher Type</label>
+            <select th:field="*{voucherType}" >
+                <option value="">-- Select voucher type --</option>
+                <option value="PRODUCT">PRODUCT</option>
+                <option value="SHIPPING">SHIPPING</option>
+            </select>
+            <div class="field-error"
+                 th:if="${#fields.hasErrors('voucherType')}"
+                 th:errors="*{voucherType}">
+            </div>
+        </div>
         <div class="form-group">
             <label>Discount Value</label>
 
@@ -102,6 +113,16 @@
             <div class="field-error"
                  th:if="${#fields.hasErrors('pointCost')}"
                  th:errors="*{pointCost}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number"
+                   th:field="*{quantity}"
+                   min="0"/>
+            <div class="field-error"
+                 th:if="${#fields.hasErrors('quantity')}"
+                 th:errors="*{quantity}">
             </div>
         </div>
         <div class="checkbox-group">

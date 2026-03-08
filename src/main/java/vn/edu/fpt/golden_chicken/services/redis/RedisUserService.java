@@ -24,6 +24,24 @@ public class RedisUserService {
     ObjectMapper objectMapper;
     UserService userService;
 
+    public void saveNumberOfLoginFailures(String email) {
+        String key = "LOGIN_FAIL:" + email;
+        Long currentFailures = this.stringRedisTemplate.opsForValue().increment(key);
+        if (currentFailures != null && currentFailures == 1) {
+            this.stringRedisTemplate.expire(key, 10, TimeUnit.MINUTES);
+        }
+    }
+
+    public int getNumberOfLoginFailures(String email) {
+        var key = "LOGIN_FAIL:" + email;
+        var value = this.stringRedisTemplate.opsForValue().get(key);
+        return value == null ? 0 : Integer.parseInt(value);
+    }
+
+    public void resetLoginFailures(String email) {
+        this.stringRedisTemplate.delete("LOGIN_FAIL:" + email);
+    }
+
     public void savePendingUserRegister(RegisterDTO dto) {
         try {
             // change object to json type

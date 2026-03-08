@@ -35,4 +35,11 @@ public class GlobalExceptionHandler {
         return "error/checkout-error";
     }
 
+    @ExceptionHandler(value = {
+            AccountBanException.class
+    })
+    public String handleAccountBanException(AccountBanException ae) {
+        return "error/account.ban";
+    }
+
 }

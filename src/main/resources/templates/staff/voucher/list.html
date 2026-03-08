@@ -21,7 +21,13 @@
 
 
                 <h2 class="page-title">Voucher List</h2>
+                <div th:if="${success}" class="alert alert-success">
+                    <span th:text="${success}"></span>
+                </div>
 
+                <div th:if="${error}" class="alert alert-danger">
+                    <span th:text="${error}"></span>
+                </div>
                 <div class="action-bar">
                     <a class="btn btn-primary" th:href="@{/staff/voucher/create}">
                         + Create new voucher
@@ -35,6 +41,7 @@
                             <th>Code</th>
                             <th>Name</th>
                             <th>Status</th>
+                            <th>Quantity</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -48,6 +55,7 @@
                                     th:text="${v.status}">
                                 </span>
                             </td>
+                            <td th:text="${v.quantity}"></td>
                             <td class="action-col">
                                 <a class="link view" th:href="@{/staff/voucher/detail/{id}(id=${v.id})}">
                                     View

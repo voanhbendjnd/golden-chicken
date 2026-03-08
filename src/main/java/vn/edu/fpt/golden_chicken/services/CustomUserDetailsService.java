@@ -22,11 +22,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         vn.edu.fpt.golden_chicken.domain.entity.User user = this.userRepository
-                .findByEmailIgnoreCase(username.toLowerCase());
+                .findByEmailIgnoreCaseAndStatus(username.toLowerCase(), true);
         if (user == null) {
             throw new UsernameNotFoundException("Not Found User With email: " + username);
         }
-
         return new User(
                 user.getEmail().toLowerCase(),
                 user.getPassword(),

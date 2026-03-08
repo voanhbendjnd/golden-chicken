@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
+import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
+import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
-import vn.edu.fpt.golden_chicken.services.AddressServices;
-import vn.edu.fpt.golden_chicken.services.CartService;
-import vn.edu.fpt.golden_chicken.services.OrderService;
-import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.services.*;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -34,16 +34,24 @@ public class CheckoutController {
     private final OrderService orderService;
     private final CartService cartService;
     private final RevenueService revenueService;
+    // them moi
+    private final ProfileService profileService;
+    private final VoucherService voucherService;
+    private final CustomerVoucherRepository customerVoucherRepository;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService, UserRepository userRepository,
-            RevenueService revenueService) {
+                              OrderService orderService, CartService cartService, UserRepository userRepository,
+                              RevenueService revenueService, ProfileService profileService, VoucherService voucherService,
+                              CustomerVoucherRepository customerVoucherRepository) {
         this.productService = productService;
         this.userRepository = userRepository;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
         this.revenueService = revenueService;
+        this.profileService = profileService;
+        this.voucherService = voucherService;
+        this.customerVoucherRepository = customerVoucherRepository;
     }
 
     @GetMapping("/order")
@@ -119,6 +127,7 @@ public class CheckoutController {
     @GetMapping
     public String handleCheckout(
             @RequestParam("id") long productId,
+            @RequestParam(required = false) Long voucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -165,6 +174,85 @@ public class CheckoutController {
         model.addAttribute("order", orderDTO);
         model.addAttribute("product", product);
         model.addAttribute("defaultAddress", selectedAddress);
+        // áp dụng voucher
+        var currentUser = profileService.getCurrentUser();
+
+        List<CustomerVoucher> vouchers =
+                voucherService.getCustomerVouchers(currentUser.getId());
+
+        model.addAttribute("vouchers", vouchers);
+        // voucher đã chọn và xử lý voucher
+        if (voucherId != null) {
+            CustomerVoucher selected =
+                    customerVoucherRepository.findById(voucherId).orElse(null);
+
+            if (selected != null) {
+
+                Voucher voucher = selected.getVoucher();
+                BigDecimal productPrice = orderDTO.getTotalProductPrice();
+
+                // kiểm tra điều kiện đơn tối thiểu
+                if (voucher.getMinOrderValue() != null &&
+                        productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+
+                    model.addAttribute("voucherError",
+                            "Đơn hàng chưa đủ điều kiện để dùng voucher này");
+
+                } else {
+
+                    BigDecimal discount = BigDecimal.ZERO;
+
+                    if ("FIXED".equals(voucher.getDiscountType())) {
+
+                        discount = BigDecimal.valueOf(voucher.getDiscountValue());
+
+                    } else if ("PERCENT".equals(voucher.getDiscountType())) {
+
+                        discount = productPrice
+                                .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
+                                .divide(BigDecimal.valueOf(100));
+                    }
+
+                    // Không cho giảm quá tiền sản phẩm
+                    if (discount.compareTo(productPrice) > 0) {
+                        discount = productPrice;
+                    }
+
+
+                    // xử lý loại voucher (PRODUCT / SHIPPING)
+                    if ("SHIPPING".equals(voucher.getVoucherType())) {
+
+                        BigDecimal shippingDiscount = discount;
+
+                        // không giảm quá tiền ship
+                        if (shippingDiscount.compareTo(shippingFee) > 0) {
+                            shippingDiscount = shippingFee;
+                        }
+
+                        orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
+
+                        BigDecimal finalAmount = productPrice
+                                .add(orderDTO.getShippingFee());
+
+                        orderDTO.setFinalAmount(finalAmount);
+
+                    } else {
+
+                        // PRODUCT voucher
+                        orderDTO.setDiscountAmount(discount);
+
+                        BigDecimal finalAmount = productPrice
+                                .add(orderDTO.getShippingFee())
+                                .subtract(discount);
+
+                        orderDTO.setFinalAmount(finalAmount);
+                    }
+
+                    model.addAttribute("selectedVoucher", selected);
+                }
+            }
+        }
+
 
         return "client/checkout";
     }
@@ -212,4 +300,20 @@ public class CheckoutController {
         return "client/payment/payment.success";
     }
 
+    // chuyển sang trang chọn voucher
+    @GetMapping("/vouchers")
+    public String chooseVoucher(
+            @RequestParam("id") Long productId,
+            Model model) {
+
+        var currentUser = profileService.getCurrentUser();
+
+        List<CustomerVoucher> vouchers =
+                voucherService.getCustomerVouchers(currentUser.getId());
+
+        model.addAttribute("vouchers", vouchers);
+        model.addAttribute("productId", productId);
+
+        return "client/voucher-select";
+    }
 }

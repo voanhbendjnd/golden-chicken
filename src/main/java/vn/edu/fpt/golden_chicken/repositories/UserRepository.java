@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     User findByEmailIgnoreCase(String email);
 
+    User findByEmailIgnoreCaseAndStatus(String email, boolean status);
+
     @EntityGraph(attributePaths = { "role", "role.permissions", "staff" })
     @Query("select u from User u where lower(u.email) = lower(:email)")
     User findByEmailWithRolePermissions(@Param("email") String email);

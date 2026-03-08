@@ -49,6 +49,7 @@ public class VoucherService {
             res.setId(v.getId());
             res.setCode(v.getCode());
             res.setName(v.getName());
+            res.setQuantity(v.getQuantity() != null ? v.getQuantity() : 0);
             res.setStatus(v.getStatus());
             return res;
         });
@@ -68,6 +69,8 @@ public class VoucherService {
         res.setPointCost(v.getPointCost());
         res.setExchangeable(v.isExchangeable());
         res.setStatus(v.getStatus());
+        res.setQuantity(v.getQuantity() != null ? v.getQuantity() : 0);
+        res.setVoucherType(v.getVoucherType());
         res.setStartAt(v.getStartAt());
         res.setEndAt(v.getEndAt());
         return res;
@@ -91,6 +94,8 @@ public class VoucherService {
         v.setStartAt(dto.getStartAt());
         v.setEndAt(dto.getEndAt());
         v.setExchangeable(dto.getExchangeable());
+        v.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 0);
+        v.setVoucherType(dto.getVoucherType());
         v.setStatus("DISABLED");
 
         if (v.getEndAt().isBefore(v.getStartAt())
@@ -105,6 +110,10 @@ public class VoucherService {
         if (Boolean.TRUE.equals(dto.getExchangeable())
                 && (dto.getPointCost() == null || dto.getPointCost() <= 0)) {
             throw new IllegalArgumentException("Point cost must be greater than 0");
+        }
+        // validate business rule
+        if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
+            throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
         }
 
         repo.save(v);
@@ -123,6 +132,8 @@ public class VoucherService {
         v.setPointCost(dto.getPointCost());
         v.setStartAt(dto.getStartAt());
         v.setEndAt(dto.getEndAt());
+        v.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 0);
+        v.setVoucherType(dto.getVoucherType());
         v.setStatus(dto.getStatus());
         v.setExchangeable(dto.getExchangeable());
 
@@ -138,6 +149,10 @@ public class VoucherService {
         if (Boolean.TRUE.equals(dto.getExchangeable())
                 && (dto.getPointCost() == null || dto.getPointCost() <= 0))
             throw new IllegalArgumentException("Point cost must be greater than 0");
+        // validate business rule
+        if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
+            throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
+        }
         repo.save(v);
     }
 
@@ -172,6 +187,9 @@ public class VoucherService {
         res.setDiscountType(voucher.getDiscountType());
         res.setMinOrderValue(voucher.getMinOrderValue());
         res.setPointCost(voucher.getPointCost());
+        // new update
+        res.setQuantity(voucher.getQuantity() != null ? voucher.getQuantity() : 0);
+        res.setVoucherType(voucher.getVoucherType());
         res.setStartAt(voucher.getStartAt());
         res.setEndAt(voucher.getEndAt());
         return res;
@@ -224,6 +242,9 @@ public class VoucherService {
         if (!"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
             throw new IllegalArgumentException("Voucher không còn hoạt động.");
         }
+        if (voucher.getQuantity() == null || voucher.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Voucher đã hết lượt đổi.");
+        }
         if (!voucher.isExchangeable()) {
             throw new IllegalArgumentException("Voucher không hỗ trợ đổi điểm.");
         }
@@ -250,6 +271,16 @@ public class VoucherService {
         cv.setUsedAt(null);
 
         customerVoucherRepository.save(cv);
+        var qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+        // trừ quantity
+        voucher.setQuantity(qty - 1);
+
+        // nếu hết thì disable
+        if (qty <= 0) {
+            voucher.setStatus("DISABLED");
+        }
+
+        repo.save(voucher);
         customerRepository.save(customer);
     }
 
@@ -327,5 +358,12 @@ public class VoucherService {
         if (!toUpdate.isEmpty()) {
             customerVoucherRepository.saveAll(toUpdate);
         }
+    }
+
+    // mới, ap dung voucher
+    public List<CustomerVoucher> getCustomerVouchers(Long customerId) {
+        return customerVoucherRepository.findByCustomer_IdAndStatus(
+                customerId,
+                StatusVoucher.AVAILABLE);
     }
 }

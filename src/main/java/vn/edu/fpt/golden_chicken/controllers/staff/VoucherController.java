@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
@@ -105,8 +106,15 @@ public class VoucherController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteVoucher(@PathVariable("id") Long id) {
-        service.deleteVoucher(id);
+    public String deleteVoucher(@PathVariable("id") Long id,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            service.deleteVoucher(id);
+            redirectAttributes.addFlashAttribute("success", "Xóa voucher thành công");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
         return "redirect:/staff/voucher/list";
     }
 
