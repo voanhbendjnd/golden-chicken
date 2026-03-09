@@ -41,8 +41,11 @@ public class PointConsumer {
                 var user = this.userRepository.findById(msg.getUserId()).orElseThrow(
                                 () -> new ResourceNotFoundException(
                                                 "User with ID (" + msg.getUserId() + " ) not found!"));
+                var actionChage = msg.getAction().equalsIgnoreCase(DeclareConstant.action_point_add)
+                                ? "Bạn vừa nhận được thêm " + msg.getChange() + " điểm"
+                                : "Bạn vừa dùng " + msg.getChange() + " điểm";
                 this.mailService.sendPoint(user.getEmail(), "Point Account", "mail/bonus.point", user.getEmail(),
-                                msg.getChange() + "", user.getCustomer().getPoint() + "");
+                                actionChage, user.getCustomer().getPoint() + "");
                 System.out.println(">>>> SET EVENT POINT SUCCESS <<<<");
         }
 }
