@@ -1,6 +1,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+
     <link rel="stylesheet" th:href="@{/css/header.djnd.css}">
 </head>
 <div class="container-fluid fixed-top">
@@ -78,7 +80,8 @@
                         <i class="fa fa-shopping-bag fa-2x" style="color: #ffb524;"></i>
                         <span
                             class="position-absolute rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                            style="top: -5px; left: 15px; height: 20px; min-width: 20px; background-color: #ffb524; color: white !important;">3</span>
+                            style="top: -5px; left: 15px; height: 20px; min-width: 20px; background-color: #ffb524; color: white !important;"
+                            th:text="${sumCart}">3</span>
                     </a>
                     <div class="nav-item dropdown">
                         <a href="/profile" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">

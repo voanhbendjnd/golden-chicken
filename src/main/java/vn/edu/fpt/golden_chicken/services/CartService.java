@@ -153,18 +153,19 @@ public class CartService {
         this.cartRepository.save(cartItem);
     }
 
-    public int sumCart() {
+    public Integer sumCart() {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email == null || email.isEmpty()) {
             throw new ResourceNotFoundException("User Email", email);
         }
         var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
-            throw new ResourceNotFoundException("User Email", email);
+            return null;
+            // throw new ResourceNotFoundException("User Email", email);
         }
         var customer = user.getCustomer();
         if (customer == null) {
-            throw new ResourceNotFoundException("User Email", email);
+            return null;
         }
         var cartItems = customer.getCartItems();
         if (cartItems == null) {

@@ -44,6 +44,10 @@
                                                         th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''PREPARING''')}">
                                                     Preparing (Đang chuẩn bị)
                                                 </option>
+                                                <option value="COMPLETED"
+                                                        th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''COMPLETED''')}">
+                                                    Completed (Đã nhận hàng)
+                                                </option>
                                                 <option value="READY_FOR_DELIVERY"
                                                         th:selected="${param.filter != null && #strings.contains(param.filter, 'status : ''READY_FOR_DELIVERY''')}">
                                                     Ready (Sẵn sàng giao)
@@ -119,7 +123,10 @@
                                             <td>
                                                 <select class="form-select form-select-sm status-select fw-bold"
                                                         th:onchange="'updateStatus(this, ' + ${order.id} + ')'"
-                                                        th:disabled="${order.status.name() == 'DELIVERED' or order.status.name() == 'COMPLETED' or order.status.name() == 'CANCELLED'}"
+                                                        th:disabled="${order.status.name() == 'DELIVERED'
+                                                        or order.status.name() == 'COMPLETED'
+                                                        or order.status.name() == 'CANCELLED'
+                                                        or order.status.name()== 'READY_FOR_DELIVERY'}"
                                                         th:style="${'background-color: ' +
                                                             (order.status.name() == 'PENDING' ? '#fff3cd' :
                                                              order.status.name() == 'DELIVERING' ? '#cff4fc' :
@@ -144,9 +151,9 @@
                                                         </option>
                                                     </th:block>
 
-                                                    <th:block th:if="${order.status.name() == 'READY_FOR_DELIVERY'}">
-                                                        <option value="DELIVERING">DELIVERING (Bắt đầu giao)</option>
-                                                    </th:block>
+<!--                                                    <th:block th:if="${order.status.name() == 'READY_FOR_DELIVERY'}">-->
+<!--                                                        <option value="DELIVERING">DELIVERING (Bắt đầu giao)</option>-->
+<!--                                                    </th:block>-->
 
                                                     <th:block th:if="${order.status.name() == 'DELIVERING'}">
                                                         <option value="DELIVERED">DELIVERED (Thành công)</option>

@@ -10,5 +10,7 @@ public class DeclareConstant {
     public static final String productFolder = "products";
     public final static String PENDING_USER = "PENDING_USER:";
     public final static String USER_OTP = "USER_OTP:";
+    public final static String action_point_add = "ADD";
+    public final static String action_point_diff = "REDUCE";
 
 }
