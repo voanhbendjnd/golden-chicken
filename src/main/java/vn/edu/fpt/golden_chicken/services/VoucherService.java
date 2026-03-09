@@ -145,11 +145,11 @@ public class VoucherService {
                 && dto.getDiscountValue() > 100) {
             throw new IllegalArgumentException("Percent cannot exceed 100");
         }
-        // nếu exchangeable = true thì pointCost phải > 0
+   
         if (Boolean.TRUE.equals(dto.getExchangeable())
                 && (dto.getPointCost() == null || dto.getPointCost() <= 0))
             throw new IllegalArgumentException("Point cost must be greater than 0");
-        // validate business rule
+ 
         if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
             throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
         }
@@ -174,7 +174,7 @@ public class VoucherService {
         if (isUsed) {
             throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
         }
-        repo.delete(voucher); // HARD DELETE
+        repo.delete(voucher); 
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
@@ -272,10 +272,10 @@ public class VoucherService {
 
         customerVoucherRepository.save(cv);
         var qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        // trừ quantity
+
         voucher.setQuantity(qty - 1);
 
-        // nếu hết thì disable
+ 
         if (qty <= 0) {
             voucher.setStatus("DISABLED");
         }
@@ -289,13 +289,24 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-        // update voucher status
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
             return new ArrayList<>();
 
         return customerVoucherRepository.findByCustomer(customer);
+    }
+
+    public List<CustomerVoucher> getMyVouchersWithoutExpired() {
+        List<CustomerVoucher> result = new ArrayList<>();
+    
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() != StatusVoucher.EXPIRED) {
+                result.add(voucher);
+            }
+        }
+    
+        return result;
     }
 
     public List<CustomerVoucher> getRedeemHistory() {
@@ -360,7 +371,7 @@ public class VoucherService {
         }
     }
 
-    // mới, ap dung voucher
+  
     public List<CustomerVoucher> getCustomerVouchers(Long customerId) {
         return customerVoucherRepository.findByCustomer_IdAndStatus(
                 customerId,
