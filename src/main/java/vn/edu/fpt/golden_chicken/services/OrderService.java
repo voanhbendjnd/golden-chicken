@@ -293,6 +293,7 @@ public class OrderService {
         res.setItems(order.getOrderItems().stream().map(x -> {
             var detail = new ResOrder.OrderDetail();
             detail.setId(x.getId());
+            detail.setName(x.getProduct().getName());
             detail.setImg(x.getProduct().getImageUrl());
             detail.setProductId(x.getProduct().getId());
             detail.setPrice(x.getProduct().getPrice());
