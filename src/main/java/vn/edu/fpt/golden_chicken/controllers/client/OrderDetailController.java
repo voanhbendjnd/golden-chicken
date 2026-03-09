@@ -18,7 +18,6 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.services.OrderService;
-import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Controller
@@ -38,9 +37,9 @@ public class OrderDetailController {
     // }
 
     @GetMapping("/order-history")
-    public String getOrderHistory(@RequestParam(required = false) OrderStatus status, Model model,
+    public String getOrderHistory(@RequestParam(required = false) String status,
+            Model model,
             @Filter Specification<Order> spec,
-            // ĐỔI "updatedAt" THÀNH "id" ĐỂ ĐƠN HÀNG MỚI NHẤT LUÔN Ở ĐẦU
             @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws PermissionException {
 
@@ -57,9 +56,11 @@ public class OrderDetailController {
         model.addAttribute("order", this.orderService.findById(id));
         return "client/order.detail";
     }
+
     @GetMapping("/order/cancel/{id}")
     public String handleCancel(@PathVariable Long id) throws PermissionException {
         orderService.cancelOrderByCustomer(id);
         return "redirect:/order-history?successCancel";
     }
 }
+

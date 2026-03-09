@@ -167,48 +167,37 @@ public class OrderService {
 
     @Transactional
     public void cancelOrderByCustomer(Long id) throws PermissionException {
-        // 1. Lấy thông tin user hiện tại từ SecurityContext
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = this.userRepository.findByEmailIgnoreCase(email);
+        // var user = this.userRepository.findByEmailIgnoreCase(email);
 
-        // 2. Tìm đơn hàng và kiểm tra tồn tại
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
 
-        // 3. Kiểm tra quyền: Chỉ chính chủ đơn hàng mới được hủy
         if (order.getCustomer() == null || !order.getCustomer().getUser().getEmail().equals(email)) {
             throw new PermissionException("Bạn không có quyền hủy đơn hàng này!");
         }
 
-        // 4. Kiểm tra điều kiện trạng thái: Chỉ được hủy khi đơn hàng đang PENDING
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new RuntimeException("Không thể hủy đơn hàng vì đơn đã được xử lý hoặc đã kết thúc!");
         }
 
-        // 5. Cập nhật trạng thái đơn hàng sang CANCELLED
         order.setStatus(OrderStatus.CANCELLED);
 
-        // 6. Cập nhật trạng thái thanh toán sang UNPAID (Yêu cầu của bạn)
-        if(order.getPaymentStatus().equals(PaymentStatus.PAID)) {
+        if (order.getPaymentStatus().equals(PaymentStatus.PAID)) {
             order.setPaymentStatus(PaymentStatus.REFUNDED);
         }
 
         order.setUpdatedAt(LocalDateTime.now());
 
-        // 7. Lưu vào Database
         var updatedOrder = this.orderRepository.save(order);
 
-        // 8. Gửi Kafka thông báo cho các dịch vụ khác (Email, Notify...)
         OrderMessage message = new OrderMessage();
         message.setCustomerEmail(email);
         message.setOrderId(updatedOrder.getId());
         message.setStatus(updatedOrder.getStatus());
         message.setTotalPrice(updatedOrder.getFinalAmount());
         message.setCustomerName(updatedOrder.getName());
-
         this.kafkaTemplate.send("order-chicken-topic", message);
-
-        // (Tùy chọn) Gửi thêm message hoàn điểm tích lũy nếu bạn có tính năng dùng điểm để mua hàng
     }
 
     @Transactional
@@ -228,31 +217,27 @@ public class OrderService {
             throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
-        // 1. Nếu trạng thái không thay đổi thì return luôn
-        if (currentStatus == nextStatus) return;
+        if (currentStatus == nextStatus)
+            return;
 
-        // 2. Chặn nếu đơn hàng đã kết thúc
         if (currentStatus == OrderStatus.DELIVERED ||
                 currentStatus == OrderStatus.CANCELLED ||
                 currentStatus == OrderStatus.COMPLETED) {
             throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
         }
 
-        // 4. Cập nhật trạng thái
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
 
-        // 5. Xử lý logic thanh toán tự động khi giao thành công
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             order.setPaymentStatus(PaymentStatus.PAID);
         }
-        if(currentPayment == PaymentStatus.PAID) {
+        if (currentPayment == PaymentStatus.PAID) {
             order.setPaymentStatus(PaymentStatus.REFUNDED);
         }
 
         var lastOrder = this.orderRepository.save(order);
 
-        // 6. Gửi Kafka thông báo (giữ nguyên logic cũ của bạn)
         if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
             OrderMessage message = new OrderMessage();
             message.setCustomerEmail(lastOrder.getCustomer().getUser().getEmail());
@@ -331,35 +316,6 @@ public class OrderService {
         res.setMeta(meta);
         var result = page.getContent().stream().map(OrderConvert::toResOrder).toList();
         res.setResult(result);
-        // if (page.getContent().isEmpty() || page.getContent().size() == 0) {
-        // throw new DataInvalidException("No Data!");
-        // }
-        // res.setResult(page.getContent().stream().map(order -> {
-        // var resOrder = new ResOrder();
-        // resOrder.setAddress(order.getShippingAddress());
-        // resOrder.setCreatedAt(order.getCreatedAt());
-        // resOrder.setId(order.getId());
-        // resOrder.setName(order.getName());
-        // resOrder.setNote(order.getNote());
-        // resOrder.setPaymentMethod(order.getPaymentMethod().toString());
-        // resOrder.setPaymentStatus(order.getPaymentStatus().toString());
-        // resOrder.setPhone(order.getPhone());
-        // resOrder.setStatus(order.getStatus());
-        // resOrder.setTotalPrice(order.getTotalProductPrice());
-        // resOrder.setUpdatedAt(order.getUpdatedAt());
-        // resOrder.setItems(order.getOrderItems().stream().filter(x -> x.getProduct()
-        // != null).map(x -> {
-        // var detail = new ResOrder.OrderDetail();
-        // detail.setId(x.getId());
-        // var product = x.getProduct();
-        // detail.setImg(product.getImageUrl());
-        // detail.setProductId(product.getId());
-        // detail.setPrice(product.getPrice());
-        // detail.setQuantity(x.getQuantity());
-        // return detail;
-        // }).toList());
-        // return resOrder;
-        // }).toList());
         return res;
     }
 
@@ -378,10 +334,8 @@ public class OrderService {
             throw new PermissionException("Please Use Account Customer For This Service!");
         }
 
-        // Specification gốc: Lọc theo khách hàng hiện tại
         Specification<Order> orderSpec = (r, q, c) -> c.equal(r.get("customer"), customer);
 
-        // Xử lý phân nhóm trạng thái
         if (statusStr != null && !statusStr.isEmpty() && !statusStr.equalsIgnoreCase("ALL")) {
             Specification<Order> statusGroupSpec;
 
@@ -390,30 +344,26 @@ public class OrderService {
                     statusGroupSpec = (r, q, c) -> r.get("status").in(
                             OrderStatus.PENDING,
                             OrderStatus.PREPARING,
-                            OrderStatus.READY_FOR_DELIVERY
-                    );
+                            OrderStatus.READY_FOR_DELIVERY);
                     break;
 
-                case "IN_PROGRESS": // Sửa từ DELIVERING thành IN_PROGRESS (khớp HTML)
+                case "IN_PROGRESS":
                     statusGroupSpec = (r, q, c) -> r.get("status").in(
                             OrderStatus.DELIVERING,
                             OrderStatus.SHIPPER_ISSUE,
-                            OrderStatus.REASSIGNING_SHIPPER
-                    );
+                            OrderStatus.REASSIGNING_SHIPPER);
                     break;
 
-                case "FINISHED": // Sửa từ DELIVERED thành FINISHED (khớp HTML)
+                case "FINISHED":
                     statusGroupSpec = (r, q, c) -> r.get("status").in(
                             OrderStatus.DELIVERED,
-                            OrderStatus.COMPLETED
-                    );
+                            OrderStatus.COMPLETED);
                     break;
 
-                case "FAILED": // Sửa từ CANCELLED thành FAILED (khớp HTML)
+                case "FAILED":
                     statusGroupSpec = (r, q, c) -> r.get("status").in(
                             OrderStatus.CANCELLED,
-                            OrderStatus.DELIVERY_FAILED
-                    );
+                            OrderStatus.DELIVERY_FAILED);
                     break;
 
                 default:
@@ -431,10 +381,8 @@ public class OrderService {
             }
         }
 
-        // Thực hiện truy vấn với Specification tổng hợp
         var page = this.orderRepository.findAll(spec.and(orderSpec), pageable);
 
-        // Build kết quả trả về
         var res = new ResultPaginationDTO();
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
@@ -450,7 +398,7 @@ public class OrderService {
     }
 
     public List<OrderStatisResponse> getOrderStatisticData() {
-        String[] monthLabels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
         List<Object[]> rawData = orderRepository.getMonthlyRevenueRaw();
 

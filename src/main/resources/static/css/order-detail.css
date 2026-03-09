@@ -1,0 +1,56 @@
+.product-img {
+    width: 30px !important;
+    height: 30px !important;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: 0.3s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.product-img:hover {
+    transform: scale(1.08);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    font-size: 16px;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 3px;
+}
+
+.info-value {
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.note-box {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    font-style: italic;
+    color: #666;
+}
+
+.payment-box {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.total-price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #dc3545;
+}
