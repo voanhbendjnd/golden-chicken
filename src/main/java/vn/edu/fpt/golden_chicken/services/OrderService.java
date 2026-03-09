@@ -235,7 +235,7 @@ public class OrderService {
             order.setPaymentStatus(PaymentStatus.PAID);
             this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
         }
-        if (currentPayment == PaymentStatus.PAID) {
+        if (nextStatus == OrderStatus.CANCELLED && currentPayment == PaymentStatus.PAID) {
             order.setPaymentStatus(PaymentStatus.REFUNDED);
         }
 
