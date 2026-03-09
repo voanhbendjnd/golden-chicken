@@ -117,7 +117,12 @@
         <form method="post" th:action="@{/login}">
 
             <div th:if="${param.error != null}" class="alert alert-danger">
-                Email hoặc mật khẩu không đúng!
+                <span
+                    th:if="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked!'}">Tài
+                    khoản của bạn đã bị khóa do nhập sai nhiều lần! Vui lòng thử lại sau.</span>
+                <span
+                    th:unless="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked!'}">Email
+                    hoặc mật khẩu không đúng!</span>
             </div>
 
             <div th:if="${param.logout != null}" class="alert alert-success">
