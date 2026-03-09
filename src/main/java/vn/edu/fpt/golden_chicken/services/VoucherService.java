@@ -6,19 +6,25 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
 import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +37,7 @@ public class VoucherService {
     ProfileService profileService;
     CustomerRepository customerRepository;
     CustomerVoucherRepository customerVoucherRepository;
+    KafkaTemplate<String, ActionPointMessage> kafkaTemplatePoint;
 
     // @Transactional
     // public Page<Artist> getAllArtist(int page,int size){
@@ -261,8 +268,15 @@ public class VoucherService {
         if (currentPoints < voucher.getPointCost()) {
             throw new IllegalArgumentException("Không đủ điểm để đổi voucher.");
         }
+        var actionMessage = new ActionPointMessage();
+        actionMessage.setAction(DeclareConstant.action_point_diff);
+        actionMessage.setReason("Get voucher with name: " + voucher.getName());
+        actionMessage.setChange(voucher.getPointCost().longValue());
+        actionMessage.setActionAt(LocalDateTime.now());
+        actionMessage.setUserId(customer.getId());
+        this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
-        customer.setPoint(currentPoints - voucher.getPointCost());
+        // customer.setPoint(currentPoints - voucher.getPointCost());
 
         CustomerVoucher cv = new CustomerVoucher();
         cv.setCustomer(customer);

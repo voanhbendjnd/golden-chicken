@@ -1,0 +1,74 @@
+:root{
+--shipper-red:#e31837;
+}
+
+/* HEADER */
+
+.shipper-header{
+background:linear-gradient(90deg,#c40000,#ff1a1a);
+padding:14px 0;
+box-shadow:0 4px 14px rgba(0,0,0,0.15);
+}
+
+/* LOGO */
+
+.navbar-brand{
+font-size:20px;
+}
+
+/* MENU */
+
+.shipper-link{
+color:white !important;
+font-weight:500;
+position:relative;
+padding-bottom:6px;
+transition:0.3s;
+}
+
+.shipper-link:hover{
+color:#ffd700 !important;
+}
+
+/* underline animation */
+
+.shipper-link::after{
+content:"";
+position:absolute;
+left:0;
+bottom:0;
+width:0;
+height:2px;
+background:#ffd700;
+transition:0.3s;
+}
+
+.shipper-link:hover::after{
+width:100%;
+}
+
+.shipper-link.active::after{
+width:100%;
+}
+
+/* USER */
+
+.username{
+color:white;
+font-weight:600;
+}
+
+/* BUTTON */
+
+.btn-outline-light{
+border-radius:20px;
+}
+
+.btn-light{
+border-radius:20px;
+font-weight:600;
+}
+
+.navbar-toggler:focus{
+box-shadow:none;
+}

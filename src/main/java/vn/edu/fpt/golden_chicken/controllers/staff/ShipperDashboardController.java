@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,6 +36,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ShipperDashboardController {
+
     OrderRepository orderRepository;
     StaffRepository staffRepository;
     UserService userService;
@@ -86,11 +88,11 @@ public class ShipperDashboardController {
             return "redirect:/staff";
         }
         Order order = this.orderService.getOrderEntity(orderId);
-        if (order.getShipper() == null && order.getStatus() == OrderStatus.PENDING) {
+        if (order.getShipper() == null && order.getStatus() == OrderStatus.READY_FOR_DELIVERY) {
             order.setShipper(shipper);
-            // order.setStatus(OrderStatus.SHIPPING);
+
             this.orderService.changeOrderStatus(orderId, OrderStatus.DELIVERING.name(), shipper);
-            // this.orderRepository.save(order);
+
         }
         return "redirect:/staff/shipper/dashboard";
     }
@@ -111,10 +113,10 @@ public class ShipperDashboardController {
     private void loadCommonData(Model model, Staff shipper) {
         Pageable pageable = PageRequest.of(0, 50, Sort.by(Sort.Direction.DESC, "updatedAt"));
 
-        var newOrders = this.orderRepository.findByStatusAndShipperIsNull(OrderStatus.PENDING, pageable);
+        var newOrders = this.orderRepository.findByStatusAndShipperIsNull(OrderStatus.READY_FOR_DELIVERY, pageable);
 
         var deliveringOrders = this.orderRepository.findByShipperAndStatus(shipper, OrderStatus.DELIVERING, pageable);
-        var historyStatuses = Arrays.asList(OrderStatus.COMPLETED, OrderStatus.CANCELLED);
+        var historyStatuses = Arrays.asList(OrderStatus.DELIVERED, OrderStatus.CANCELLED);
         var historyOrders = this.orderRepository.findByShipperAndStatusIn(shipper, historyStatuses, pageable);
 
         long deliveringCount = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.DELIVERING);
@@ -122,9 +124,9 @@ public class ShipperDashboardController {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
         long deliveredToday = this.orderRepository.countByShipperAndStatusAndUpdatedAtBetween(shipper,
-                OrderStatus.COMPLETED, startOfDay, endOfDay);
+                OrderStatus.DELIVERED, startOfDay, endOfDay);
 
-        long totalDelivered = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.COMPLETED);
+        long totalDelivered = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.DELIVERED);
 
         BigDecimal totalCodCollected = this.orderRepository
                 .sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(shipper, PaymentMethod.COD,
@@ -153,4 +155,26 @@ public class ShipperDashboardController {
         }
         return this.staffRepository.findById(user.getStaff().getId()).orElse(null);
     }
+
+   @GetMapping("/order/fragment/{id}")
+    public String orderDetail(@PathVariable("id") Long id, Model model) {
+
+        Staff shipper = getCurrentShipper();
+        if (shipper == null) {
+            return "redirect:/staff";
+        }
+
+        Order order = orderService.getOrderEntity(id);
+
+        // bảo mật: shipper chỉ xem đơn của mình
+         if (order.getShipper() != null
+                 && !order.getShipper().getId().equals(shipper.getId())) {
+             return "redirect:/staff/shipper/dashboard";
+         }
+
+        model.addAttribute("order", orderService.findById(id));
+        
+       return "staff/order/detail-fragment :: orderDetail"; 
+    }
+
 }

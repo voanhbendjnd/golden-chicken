@@ -1,24 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Use Voucher</title>
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/css/voucher-client.css}" rel="stylesheet">
 </head>
+
 <body>
-<h2 class="voucher-title">🎁 Chọn ưu đãi cho đơn hàng của bạn</h2>
-<div th:each="v : ${vouchers}" class="voucher-card">
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
-    <h3 th:text="${v.voucher.code}"></h3>
+    <main style="padding-top:120px;" class="container">
+        <h2 class="voucher-title text-center mb-4">Chọn ưu đãi cho đơn hàng của bạn</h2>
 
-    <p th:text="${v.voucher.name}"></p>
+        <div class="row">
+            <div th:each="v : ${vouchers}" class="col-md-4 mb-4">
 
-    <small th:text="${v.voucher.description}"></small>
+                <div class="voucher-card p-3 text-center border rounded">
 
-    <a th:href="@{/checkout(id=${productId},voucherId=${v.id})}">
-        Chọn
-    </a>
+                    <h3 th:text="${v.voucher.code}"></h3>
 
-</div>
+                    <p th:text="${v.voucher.name}"></p>
+
+                    <small th:text="${v.voucher.description}"></small>
+
+                    <div class="mt-3">
+                        <a class="btn btn-primary" th:href="@{/checkout(id=${productId},voucherId=${v.id})}">
+                            Chọn
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{client/layout/footer.djnd}"></div>
+
 </body>
+
 </html>

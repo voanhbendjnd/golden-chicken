@@ -73,6 +73,10 @@
                                     th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + '₫'">0₫
                                 </div>
                             </div>
+                            <button class="btn btn-outline-primary btn-sm"
+                                th:onclick="'showOrderDetail(' + ${order.id} + ')'">
+                                Xem chi tiết
+                            </button>
                             <a class="btn btn-outline-secondary btn-sm"
                                 th:href="'https://www.google.com/maps/search/?api=1&query=' + ${#strings.replace(order.shippingAddress,' ','+')}"
                                 target="_blank">
@@ -119,7 +123,86 @@
             </table>
         </div>
     </main>
-
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailLabel">Chi tiết đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailBody">
+                    <!-- content injected dynamically -->
+                </div>
+                <div class="modal-footer" id="modalActionContainer">
+                    <!-- accept/cancel actions inserted here when needed -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailLabel">Chi tiết đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="orderDetailBody">
+                    <!-- content injected dynamically -->
+                </div>
+                <div class="modal-footer" id="modalActionContainer">
+                    <!-- accept/cancel actions inserted here when needed -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+<script>
+    var pendingForm = null;
+
+    function showOrderDetail(orderId, showAccept = false, formElement = null) {
+
+        fetch('/staff/shipper/order/fragment/' + orderId)
+            .then(res => res.text())
+
+            .then(html => {
+
+                document.getElementById('orderDetailBody').innerHTML = html;
+
+                var actionContainer = document.getElementById('modalActionContainer');
+                actionContainer.innerHTML = '';
+
+                if (showAccept && formElement) {
+
+                    pendingForm = formElement;
+
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-warning';
+                    btn.innerText = 'Nhận đơn';
+
+                    btn.onclick = function () {
+                        if (pendingForm) pendingForm.submit();
+                    };
+
+                    actionContainer.appendChild(btn);
+
+                } else {
+                    pendingForm = null;
+                }
+
+                var modal = new bootstrap.Modal(
+                    document.getElementById('orderDetailModal')
+                );
+
+                modal.show();
+
+            })
+
+            .catch(err => {
+                console.error('Failed to load order detail', err);
+                alert('Không thể tải thông tin đơn hàng. Vui lòng thử lại.');
+            });
+    }
+</script>
 
 </html>
