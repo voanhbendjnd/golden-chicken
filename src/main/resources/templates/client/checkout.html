@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
     <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link th:href="@{/css/voucher-client.css}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
@@ -144,11 +145,18 @@
                                 th:text="${#numbers.formatDecimal(order.shippingFee,0,'COMMA',0,'POINT') + 'đ'}"></span>
                             <input type="hidden" th:field="*{shippingFee}" />
                         </div>
+                        <!-- chọn voucher -->
+                        <a th:href="@{/checkout/vouchers(id=${product.id})}">
+                            Chọn voucher
+                        </a>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
                             <span>Giảm giá</span>
                             <span
                                 th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT') + 'đ'}"></span>
                             <input type="hidden" th:field="*{discountAmount}" />
+                        </div>
+                        <div th:if="${voucherError}" style="color:red;">
+                            <span th:text="${voucherError}"></span>
                         </div>
 
                         <div class="total-box"
