@@ -29,7 +29,6 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -54,7 +53,6 @@ public class OrderService {
     ProductRepository productRepository;
     OrderRepository orderRepository;
     CartService cartService;
-    CustomerRepository customerRepository;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
@@ -115,12 +113,8 @@ public class OrderService {
         var newOrder = this.orderRepository.save(order);
 
         // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
-        if (dto.getPaymentMethod() == PaymentMethod.COD) {
-            if (totalBonus > 0) {
-                customer.setPoint((customer.getPoint() != null ? customer.getPoint() : 0L) + totalBonus);
-                this.customerRepository.save(customer);
-            }
 
+        if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
             message.setCustomerEmail(user.getEmail());
             message.setOrderId(newOrder.getId());
@@ -265,8 +259,6 @@ public class OrderService {
     public void updatePaymentStatus(Long orderId, PaymentStatus status) {
         var order = this.orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
-
-        var currentPaymentStatus = order.getPaymentStatus();
         order.setPaymentStatus(status);
         this.orderRepository.save(order);
 
@@ -279,21 +271,6 @@ public class OrderService {
             message.setTotalPrice(order.getFinalAmount());
             message.setCustomerName(order.getName());
             this.kafkaTemplate.send("order-chicken-topic", message);
-
-            if (currentPaymentStatus != PaymentStatus.PAID && order.getCustomer() != null) {
-                long bonus = 0L;
-                if (order.getTotalProductPrice() != null) {
-                    bonus = order.getTotalProductPrice()
-                            .divide(new BigDecimal("1000"), 0, RoundingMode.FLOOR)
-                            .longValue();
-                }
-
-                if (bonus > 0) {
-                    var customer = order.getCustomer();
-                    customer.setPoint((customer.getPoint() != null ? customer.getPoint() : 0L) + bonus);
-                    this.customerRepository.save(customer);
-                }
-            }
         }
     }
 
