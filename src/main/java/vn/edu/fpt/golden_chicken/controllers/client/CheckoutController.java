@@ -141,7 +141,6 @@ public class CheckoutController {
         var selectedAddress = (addressId != null)
                 ? addressServices.findById(addressId)
                 : addressServices.getDefaultAddress();
-
         if (selectedAddress != null) {
 
             orderDTO.setName(selectedAddress.getRecipientName());
@@ -250,7 +249,6 @@ public class CheckoutController {
 
         return "client/checkout";
     }
-
     @GetMapping("/addresses")
     public String listAddressCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
@@ -297,16 +295,21 @@ public class CheckoutController {
     // chuyển sang trang chọn voucher
     @GetMapping("/vouchers")
     public String chooseVoucher(
-            @RequestParam("id") Long productId,
+            @RequestParam(value = "id", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> productIds,
             Model model) {
 
         var currentUser = profileService.getCurrentUser();
 
+        // Lấy danh sách voucher của khách hàng
         List<CustomerVoucher> vouchers =
                 voucherService.getCustomerVouchers(currentUser.getId());
 
         model.addAttribute("vouchers", vouchers);
+
+        // Truyền lại thông tin sản phẩm để khi chọn xong voucher biết đường quay về trang checkout đúng
         model.addAttribute("productId", productId);
+        model.addAttribute("productIds", productIds);
 
         return "client/voucher-select";
     }
