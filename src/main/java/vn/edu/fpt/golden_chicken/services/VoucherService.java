@@ -179,7 +179,7 @@ public class VoucherService {
         if (isUsed) {
             throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
         }
-        repo.delete(voucher); // HARD DELETE
+        repo.delete(voucher); 
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
@@ -192,7 +192,7 @@ public class VoucherService {
         res.setDiscountType(voucher.getDiscountType());
         res.setMinOrderValue(voucher.getMinOrderValue());
         res.setPointCost(voucher.getPointCost());
-        // new update
+  
         res.setQuantity(voucher.getQuantity() != null ? voucher.getQuantity() : 0);
         res.setVoucherType(voucher.getVoucherType());
         res.setStartAt(voucher.getStartAt());
@@ -210,6 +210,18 @@ public class VoucherService {
         }
         return resVouchers;
 
+    }
+
+    public List<CustomerVoucher> getMyVouchersWithoutExpired() {
+        List<CustomerVoucher> result = new ArrayList<>();
+    
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() != StatusVoucher.EXPIRED) {
+                result.add(voucher);
+            }
+        }
+    
+        return result;
     }
 
     public long getPoints() throws PermissionException {

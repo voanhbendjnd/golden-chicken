@@ -22,7 +22,7 @@ public class ClientVoucherController {
     public String listVoucher(Model model) throws PermissionException {
         long points = voucherService.getPoints();
         var vouchers = voucherService.getListVoucherForExchange();
-        var myVouchers = voucherService.getMyVouchers();
+        var myVouchers = voucherService.getMyVouchersWithoutExpired();
 
         model.addAttribute("points", points);
         model.addAttribute("vouchers", vouchers);
@@ -39,7 +39,7 @@ public class ClientVoucherController {
     @GetMapping("/vouchers/myVouchers")
     public String myVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
-        model.addAttribute("myVouchers", voucherService.getMyVouchers());
+        model.addAttribute("myVouchers", voucherService.getMyVouchersWithoutExpired());
         return "client/voucher/myVouchers";
     }
 
@@ -53,7 +53,7 @@ public class ClientVoucherController {
     @GetMapping("/list-vouchers")
     public String listAllVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
-        model.addAttribute("myVouchers", voucherService.getMyVouchers());
+        model.addAttribute("myVouchers", voucherService.getMyVouchersWithoutExpired());
         model.addAttribute("systemVouchers", voucherService.getListVoucherForExchange());
         return "client/voucher/listAllVouchers";
     }
