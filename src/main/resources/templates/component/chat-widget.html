@@ -1,0 +1,472 @@
+<div th:fragment="chat-widget" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <!-- Chat Widget HTML -->
+    <div sec:authorize="isAuthenticated()">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+        <style>
+            #gc-chat-btn {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background-color: #ffb524;
+                color: white;
+                text-align: center;
+                line-height: 60px;
+                font-size: 24px;
+                cursor: pointer;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 9999;
+                transition: transform 0.2s;
+            }
+
+            #gc-chat-btn:hover {
+                transform: scale(1.1);
+            }
+
+            #gc-chat-panel {
+                position: fixed;
+                bottom: 90px;
+                right: 20px;
+                width: 350px;
+                height: 450px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                display: none;
+                flex-direction: column;
+                z-index: 9999;
+                overflow: hidden;
+            }
+
+            .gc-chat-header {
+                background-color: #ffb524;
+                color: white;
+                padding: 15px;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+            }
+
+            .gc-chat-header .title-container {
+                flex-grow: 1;
+                display: flex;
+                align-items: center;
+            }
+
+            .gc-chat-body {
+                flex-grow: 1;
+                padding: 15px;
+                overflow-y: auto;
+                background: #fdfdfd;
+                font-family: sans-serif;
+            }
+
+            .gc-chat-footer {
+                padding: 10px;
+                border-top: 1px solid #ddd;
+                display: flex;
+                background: #fff;
+            }
+
+            .gc-chat-footer input {
+                flex-grow: 1;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 20px;
+                margin-right: 8px;
+                outline: none;
+            }
+
+            .gc-chat-footer button {
+                background-color: #ffb524;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .gc-msg {
+                margin-bottom: 10px;
+                padding: 10px 14px;
+                border-radius: 18px;
+                max-width: 80%;
+                clear: both;
+                word-wrap: break-word;
+                font-size: 14px;
+            }
+
+            .gc-msg.sent {
+                background-color: #ffefcb;
+                float: right;
+                border-bottom-right-radius: 4px;
+            }
+
+            .gc-msg.received {
+                background-color: #e9ecef;
+                float: left;
+                border-bottom-left-radius: 4px;
+            }
+
+            .gc-close-chat {
+                cursor: pointer;
+                font-size: 20px;
+            }
+
+            .gc-back-chat {
+                cursor: pointer;
+                margin-right: 15px;
+                display: none;
+            }
+
+            #gc-chat-badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                background: red;
+                color: white;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+                line-height: 20px;
+                display: none;
+            }
+
+            .gc-user-item {
+                padding: 12px 15px;
+                border-bottom: 1px solid #f0f0f0;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: #333;
+                font-size: 15px;
+            }
+
+            .gc-user-item:hover {
+                background-color: #f9f9f9;
+            }
+
+            .gc-unread-badge {
+                background: red;
+                color: white;
+                border-radius: 50%;
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+                line-height: 22px;
+                text-align: center;
+                display: inline-block;
+            }
+
+            /* Custom scrollbar */
+            .gc-chat-body::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .gc-chat-body::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+        </style>
+
+        <div id="gc-chat-btn" onclick="toggleGCChat()">
+            <i class="fas fa-comments" style="margin-top: 18px;"></i>
+            <span id="gc-chat-badge">0</span>
+        </div>
+
+        <div id="gc-chat-panel">
+            <div class="gc-chat-header">
+                <div class="title-container">
+                    <span class="gc-back-chat" id="gc-chat-back-btn" onclick="goBackToList()"><i
+                            class="fas fa-arrow-left"></i></span>
+                    <span id="gc-chat-title">Hỗ trợ trực tuyến</span>
+                </div>
+                <span class="gc-close-chat" onclick="toggleGCChat()">&times;</span>
+            </div>
+
+            <div class="gc-chat-body" id="gc-user-list" style="display:none; padding:0;">
+                <!-- User list dynamically appended -->
+            </div>
+
+            <div class="gc-chat-body" id="gc-chat-body">
+                <div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Kết nối thành công!
+                </div>
+            </div>
+
+            <div class="gc-chat-footer" id="gc-chat-footer">
+                <input type="hidden" id="gc-current-recipient" value="STAFF">
+                <input type="text" id="gc-chat-input" placeholder="Nhập tin nhắn..."
+                    onkeypress="if(event.key === 'Enter') sendGCChatMessage()">
+                <button onclick="sendGCChatMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            var gcStompClient = null;
+            var gcCurrentUser = /*[[${#authentication.name}]]*/ 'anonymous';
+            var gcIsStaff = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
+
+            var chatHistory = {}; // email -> { unread: 0, messages: [] }
+            var activeChat = gcIsStaff ? null : 'STAFF';
+            var totalUnread = 0;
+
+            document.addEventListener("DOMContentLoaded", function () {
+                if (gcIsStaff) {
+                    document.getElementById('gc-user-list').style.display = 'block';
+                    document.getElementById('gc-chat-body').style.display = 'none';
+                    document.getElementById('gc-chat-footer').style.display = 'none';
+                    document.getElementById('gc-chat-title').innerText = "Danh sách khách hàng";
+                    // Load partners from Redis
+                    fetch('/api/chat/partners?user=STAFF')
+                        .then(res => res.json())
+                        .then(partners => {
+                            if (partners && partners.length > 0) {
+                                partners.forEach(partner => {
+                                    if (partner !== gcCurrentUser && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
+                                        if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
+                                    }
+                                });
+                                renderUserList();
+                            }
+                        })
+                        .catch(err => console.error("Error loading partners:", err));
+                } else {
+                    document.getElementById('gc-chat-title').innerText = "Chăm sóc khách hàng";
+                    chatHistory['STAFF'] = { unread: 0, messages: [], historyLoaded: false };
+                    // Preload history for customer
+                    fetchHistoryForPartner('STAFF');
+                }
+
+                var socket = new SockJS('/ws-chat');
+                gcStompClient = Stomp.over(socket);
+                gcStompClient.debug = null;
+
+                gcStompClient.connect({}, function (frame) {
+                    if (gcIsStaff) {
+                        gcStompClient.subscribe('/topic/staffChat', function (response) {
+                            var message = JSON.parse(response.body);
+                            handleIncomingMessage(message.senderId, message.content, 'received', message.senderId);
+                        });
+                    } else {
+                        gcStompClient.subscribe('/user/queue/messages', function (response) {
+                            var message = JSON.parse(response.body);
+                            handleIncomingMessage('STAFF', message.content, 'received', 'Golden Chicken');
+                        });
+                    }
+                }, function (error) {
+                    console.log("Chat error: " + error);
+                });
+            });
+
+            function fetchHistoryForPartner(partner, callback) {
+                if (chatHistory[partner] && chatHistory[partner].historyLoaded) {
+                    if (callback) callback();
+                    return;
+                }
+
+                var u1 = gcIsStaff ? partner : gcCurrentUser;
+                var u2 = gcIsStaff ? gcCurrentUser : 'STAFF';
+
+                fetch(`/api/chat/history?user1=${u1}&user2=${u2}`)
+                    .then(res => res.json())
+                    .then(messages => {
+                        if (messages && messages.length > 0) {
+                            var loadedMsgs = [];
+                            messages.forEach(msg => {
+                                var type = msg.senderId === gcCurrentUser ? 'sent' : 'received';
+                                var senderName = msg.senderId === gcCurrentUser ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
+                                loadedMsgs.push({ content: msg.content, type: type, senderName: senderName });
+                            });
+                            if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [] };
+                            chatHistory[partner].messages = loadedMsgs.concat(chatHistory[partner].messages);
+                        }
+                        if (chatHistory[partner]) chatHistory[partner].historyLoaded = true;
+                        if (callback) callback();
+                    })
+                    .catch(err => console.error("Could not load history for " + partner, err));
+            }
+
+            function handleIncomingMessage(partner, content, type, senderName) {
+                if (!chatHistory[partner]) {
+                    chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
+                }
+                chatHistory[partner].messages.push({ content: content, type: type, senderName: senderName });
+
+                var panelOpen = (document.getElementById('gc-chat-panel').style.display === 'flex');
+
+                if (activeChat === partner && panelOpen) {
+                    // Currently viewing this chat
+                    appendMessageDOM(content, type, senderName);
+                } else {
+                    // Not viewing this chat OR panel is closed
+                    chatHistory[partner].unread++;
+                    totalUnread++;
+                    updateGlobalBadge();
+                    if (gcIsStaff && !activeChat) {
+                        renderUserList();
+                    }
+                }
+            }
+
+            function updateGlobalBadge() {
+                var badge = document.getElementById('gc-chat-badge');
+                if (totalUnread > 0) {
+                    badge.innerText = totalUnread;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            function toggleGCChat() {
+                var panel = document.getElementById('gc-chat-panel');
+                if (panel.style.display === 'flex') {
+                    panel.style.display = 'none';
+                } else {
+                    panel.style.display = 'flex';
+                    if (gcIsStaff && activeChat) {
+                        openChatWith(activeChat);
+                    } else if (!gcIsStaff) {
+                        openChatWith('STAFF');
+                    }
+                    scrollGCChatToBottom();
+                }
+            }
+
+            function openChatWith(partner) {
+                activeChat = partner;
+
+                // reset unread for this partner
+                if (chatHistory[partner]) {
+                    totalUnread -= chatHistory[partner].unread;
+                    if (totalUnread < 0) totalUnread = 0;
+                    chatHistory[partner].unread = 0;
+                    updateGlobalBadge();
+                } else {
+                    chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
+                }
+
+                if (gcIsStaff) {
+                    document.getElementById('gc-user-list').style.display = 'none';
+                    document.getElementById('gc-chat-body').style.display = 'block';
+                    document.getElementById('gc-chat-footer').style.display = 'flex';
+                    document.getElementById('gc-chat-back-btn').style.display = 'inline';
+                    document.getElementById('gc-chat-title').innerText = partner.split('@')[0];
+                    document.getElementById('gc-current-recipient').value = partner;
+                }
+
+                var chatBody = document.getElementById('gc-chat-body');
+                chatBody.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Đang tải...</div>';
+
+                var renderMsgs = function () {
+                    chatBody.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Kết nối thành công!</div>';
+                    chatHistory[partner].messages.forEach(function (msg) {
+                        appendMessageDOM(msg.content, msg.type, msg.senderName);
+                    });
+                    scrollGCChatToBottom();
+                };
+
+                fetchHistoryForPartner(partner, renderMsgs);
+            }
+
+            function goBackToList() {
+                activeChat = null;
+                document.getElementById('gc-user-list').style.display = 'block';
+                document.getElementById('gc-chat-body').style.display = 'none';
+                document.getElementById('gc-chat-footer').style.display = 'none';
+                document.getElementById('gc-chat-back-btn').style.display = 'none';
+                document.getElementById('gc-chat-title').innerText = "Danh sách khách hàng";
+                renderUserList();
+            }
+
+            function renderUserList() {
+                var listDom = document.getElementById('gc-user-list');
+                listDom.innerHTML = '';
+
+                var partners = Object.keys(chatHistory);
+                if (partners.length === 0) {
+                    listDom.innerHTML = '<div style="text-align:center; padding: 20px; color:#999; font-size:14px;">Chưa có đoạn chat nào.</div>';
+                    return;
+                }
+
+                // Sort partners by latest message if desired, but object keys are ok for now
+                partners.forEach(function (partner) {
+                    var data = chatHistory[partner];
+                    var item = document.createElement('div');
+                    item.className = 'gc-user-item';
+                    item.onclick = function () { openChatWith(partner); };
+
+                    var nameSpan = document.createElement('span');
+                    nameSpan.style.fontWeight = data.unread > 0 ? 'bold' : 'normal';
+                    nameSpan.innerText = partner.split('@')[0];
+
+                    var rightDiv = document.createElement('div');
+                    if (data.unread > 0) {
+                        var bdg = document.createElement('span');
+                        bdg.className = 'gc-unread-badge';
+                        bdg.innerText = data.unread;
+                        rightDiv.appendChild(bdg);
+                    } else {
+                        rightDiv.innerHTML = '<i class="fas fa-chevron-right" style="color:#ccc;"></i>';
+                    }
+
+                    item.appendChild(nameSpan);
+                    item.appendChild(rightDiv);
+                    listDom.appendChild(item);
+                });
+            }
+
+            function sendGCChatMessage() {
+                var input = document.getElementById('gc-chat-input');
+                var content = input.value.trim();
+                if (content && gcStompClient) {
+                    var recipient = gcIsStaff ? document.getElementById('gc-current-recipient').value : 'STAFF';
+
+                    var chatMessage = {
+                        senderId: gcCurrentUser,
+                        recipientId: recipient,
+                        content: content
+                    };
+
+                    gcStompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+
+                    handleIncomingMessage(recipient, content, 'sent', 'Tôi');
+                    input.value = '';
+                }
+            }
+
+            function appendMessageDOM(content, type, senderName) {
+                var chatBody = document.getElementById('gc-chat-body');
+                var msgDiv = document.createElement('div');
+                msgDiv.className = 'gc-msg ' + type;
+
+                if (type === 'received' && !gcIsStaff) {
+                    msgDiv.innerHTML = `<div style="font-size:11px; color:#888; margin-bottom:4px;">` + senderName + `</div>` + content;
+                } else {
+                    msgDiv.innerHTML = content;
+                }
+
+                chatBody.appendChild(msgDiv);
+
+                var cbDiv = document.createElement('div');
+                cbDiv.style.clear = 'both';
+                chatBody.appendChild(cbDiv);
+
+                scrollGCChatToBottom();
+            }
+
+            function scrollGCChatToBottom() {
+                var chatBody = document.getElementById('gc-chat-body');
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        </script>
+    </div>
+</div>

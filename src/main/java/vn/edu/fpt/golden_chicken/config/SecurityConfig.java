@@ -112,7 +112,8 @@ public class SecurityConfig {
                 "/fonts/**",
                 "/menu/**",
                 "/payment/**",
-                "/verify/**"
+                "/verify/**",
+                "/ws-chat/**"
 
         };
         http
