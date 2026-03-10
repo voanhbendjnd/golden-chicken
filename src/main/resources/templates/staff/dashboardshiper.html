@@ -133,16 +133,14 @@
 
                             <div class="order-footer mt-3 d-flex gap-2">
 
-                             <form th:action="@{/staff/shipper/order/accept}" method="post" class="flex-fill">
-        <input type="hidden" name="orderId" th:value="${order.id}" />
-
-        <button type="button"
-                class="btn btn-warning flex-fill fw-bold"
-                th:onclick="|showOrderAddress(${order.id}, this.closest('form'))|">
-            Nhận đơn giao hàng
-        </button>
-    </form>
-
+                                
+                                <form th:action="@{/staff/shipper/order/accept}" method="post" class="flex-fill">
+                                    <input type="hidden" name="orderId" th:value="${order.id}" />
+                                    <button type="button" class="btn btn-warning flex-fill fw-bold"
+                                        th:onclick="'showOrderDetail(' + ${order.id} + ', true, this.closest(\'form\'))'">Nhận
+                                        đơn giao
+                                        hàng</button>
+                                </form>
 
                             </div>
 
@@ -450,38 +448,6 @@
 
                 </div>
             </div>
-            <div class="modal fade" id="orderModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title fw-bold">Thông tin đơn giao</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-
-                <div class="mb-3">
-                    <label class="fw-bold">Địa chỉ giao hàng</label>
-                    <input type="text" id="orderAddress" class="form-control" readonly>
-                </div>
-
-                <div class="mb-3">
-                    <label class="fw-bold">Tổng tiền</label>
-                    <input type="text" id="orderTotal" class="form-control" readonly>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button id="confirmBtn" class="btn btn-success fw-bold">
-                    Xác nhận nhận đơn
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
         </div>
         <form id="cancelForm" th:action="@{/staff/shipper/order/update-status}" method="post">
 
@@ -553,25 +519,7 @@
                         console.error('Failed to load order detail', err);
                         alert('Không thể tải thông tin đơn hàng. Vui lòng thử lại.');
                     });
-                    
             }
-            function showOrderAddress(id, form) {
-
-    let address = document.getElementById("address-" + id).innerText;
-    let total = document.getElementById("total-" + id).innerText;
-
-    document.getElementById("orderAddress").value = address;
-    document.getElementById("orderTotal").value = total;
-
-    document.getElementById("confirmBtn").onclick = function () {
-        form.submit();
-    };
-
-    let modal = new bootstrap.Modal(document.getElementById("orderModal"));
-    modal.show();
-}
-            
-            
         </script>
         <script>
 
