@@ -63,7 +63,7 @@
                         return;
                     }
 
-                    window.location.href = '/checkout/order?ids=' + selectedIds.join(',');
+                    window.location.href = '/checkout?ids=' + selectedIds.join(',');
                 };
 
                 const selectAll = document.getElementById('select-all');

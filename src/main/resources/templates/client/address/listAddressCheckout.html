@@ -78,18 +78,18 @@
 
                 // 1. Trường hợp mua ngay (Buy Now)
                 if (productId != null && productId !== '') {
-                    url = `/checkout?id=${productId}&addressId=${addressId}`;
+                    url = `/checkout?productId=${productId}&addressId=${addressId}`;
                 }
                 // 2. Trường hợp mua từ giỏ hàng (Cart)
                 else if (productIds != null && productIds !== '') {
                     // Vì productIds đã là chuỗi "1,2,3", ta cần biến nó thành ?ids=1&ids=2&ids=3
                     const idsArray = productIds.split(',');
                     const idsQuery = idsArray.map(id => `ids=${id}`).join('&');
-                    url = `/checkout/order?${idsQuery}&addressId=${addressId}`;
+                    url = `/checkout?${idsQuery}&addressId=${addressId}`;
                 }
                 // 3. Trường hợp dự phòng
                 else {
-                    url = `/checkout/order?addressId=${addressId}`;
+                    url = `/checkout?addressId=${addressId}`;
                 }
 
                 console.log("Redirecting to:", url); // Kiểm tra log nếu vẫn không nhảy
