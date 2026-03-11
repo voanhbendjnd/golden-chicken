@@ -127,8 +127,17 @@ public class UserService {
 
     }
 
-    public void registerSuccess(User user) {
+    public String getMaskedCustomerName(String fullName) {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            return "Khách ẩn danh";
+        }
 
+        fullName = fullName.trim();
+        int length = fullName.length();
+        if (length <= 2) {
+            return fullName.charAt(0) + "***";
+        }
+        return fullName.charAt(0) + "***" + fullName.substring(length - 1);
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<User> spec) {

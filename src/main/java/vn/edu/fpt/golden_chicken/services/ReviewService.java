@@ -7,21 +7,28 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.criteria.Join;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Customer;
+import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.Review;
 import vn.edu.fpt.golden_chicken.domain.request.ReviewDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResReview;
+import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -96,6 +103,37 @@ public class ReviewService {
         review.setProduct(product);
         orderItem.setIsReview(true);
         this.reviewRepository.save(review);
+
+    }
+
+    public ResultPaginationDTO fetchAllReviewWithProduct(Specification<Review> spec, Pageable pageable,
+            Long productId) {
+        Specification<Review> ps = (r, q, c) -> {
+            Join<Review, Product> productJoin = r.join("product");
+            var p1 = c.equal(productJoin.get("id"), productId);
+            // var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED);
+            return c.and(p1);
+        };
+        var res = new ResultPaginationDTO();
+        var page = this.reviewRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var meta = new ResultPaginationDTO.Meta();
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(x -> {
+            var resReview = new ResReview();
+            resReview.setName(this.userService.getMaskedCustomerName(x.getCustomer().getUser().getFullName()));
+            resReview.setComment(x.getComment());
+            resReview.setRating(x.getRating());
+            resReview.setMediaUrls(x.getMediaUrls());
+            resReview.setCreatedAt(x.getCreatedAt());
+            resReview.setUpdatedAt(x.getUpdatedAt());
+            resReview.setId(x.getId());
+            return resReview;
+        }).toList());
+        return res;
 
     }
 

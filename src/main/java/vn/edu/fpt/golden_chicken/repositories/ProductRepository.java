@@ -2,6 +2,10 @@ package vn.edu.fpt.golden_chicken.repositories;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +16,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 
 @Repository
+@SuppressWarnings("null")
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByIdIn(List<Long> ids);
 
@@ -36,5 +41,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("select p from Product p join fetch p.category where p.active = true")
     List<Product> findAllWithCategory();
+
+    // @EntityGraph(attributePaths = { "reviews" })
+    // Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 
 }

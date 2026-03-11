@@ -102,6 +102,50 @@
             </div>
         </div>
 
+        <div class="review-section" id="reviewSection">
+            <div class="review-section-title">ĐÁNH GIÁ SẢN PHẨM</div>
+
+            <div class="review-summary" id="reviewSummary" style="display:none!important;">
+                <div class="review-avg-score">
+                    <div class="review-avg-number" id="reviewAvgNumber">0.0</div>
+                    <div class="review-avg-stars" id="reviewAvgStars">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i>
+                    </div>
+                    <div class="review-avg-count" id="reviewAvgCount">0 đánh giá</div>
+                </div>
+                <div class="review-filter-pills" id="reviewFilterPills">
+                    <span class="review-filter-pill active" data-rating="0">Tất cả</span>
+                    <span class="review-filter-pill" data-rating="5">5 ★</span>
+                    <span class="review-filter-pill" data-rating="4">4 ★</span>
+                    <span class="review-filter-pill" data-rating="3">3 ★</span>
+                    <span class="review-filter-pill" data-rating="2">2 ★</span>
+                    <span class="review-filter-pill" data-rating="1">1 ★</span>
+                </div>
+            </div>
+
+            <div id="reviewList"></div>
+
+            <div class="review-loading" id="reviewLoading" style="display:none;">
+                <i class="fa fa-spinner fa-spin me-2"></i>Đang tải đánh giá...
+            </div>
+
+            <button class="btn-load-more-reviews" id="btnLoadMoreReviews" style="display:none;">
+                Xem thêm đánh giá
+            </button>
+        </div>
+
+        <div class="modal fade" id="reviewMediaModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="modalMediaContent"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-5 pt-5 border-top">
             <h3 class="fw-bold mb-4 text-center text-md-start" style="color: #202124; letter-spacing: -0.5px;">
                 CÓ THỂ BẠN SẼ THÍCH
@@ -186,11 +230,211 @@
     </div>
     <div th:replace="~{client/layout/footer.djnd}"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        (function () {
+            /* ─── Config ─────────────────────────────────── */
+            const PRODUCT_ID = /*[[${product.id}]]*/ 0;
+            const PAGE_SIZE = 5;
+            const MEDIA_BASE = '/images/reviews/';
+
+            /* ─── State ──────────────────────────────────── */
+            let currentPage = 1;
+            let totalPages = 1;
+            let isLoading = false;
+            let activeRating = 0;   // 0 = all
+
+            /* ─── DOM refs ───────────────────────────────── */
+            const reviewList = document.getElementById('reviewList');
+            const reviewLoading = document.getElementById('reviewLoading');
+            const btnLoadMore = document.getElementById('btnLoadMoreReviews');
+            const reviewSummary = document.getElementById('reviewSummary');
+            const avgNumber = document.getElementById('reviewAvgNumber');
+            const avgStars = document.getElementById('reviewAvgStars');
+            const avgCount = document.getElementById('reviewAvgCount');
+            const filterPills = document.querySelectorAll('.review-filter-pill');
+            const reviewMediaModal = document.getElementById('reviewMediaModal');
+            const bsModal = new bootstrap.Modal(reviewMediaModal);
+            const modalContent = document.getElementById('modalMediaContent');
+
+            /* ─── Helpers ────────────────────────────────── */
+            function starsHtml(rating) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    html += `<i class="fa fa-star ${i <= rating ? 'filled' : ''}"></i>`;
+                }
+                return html;
+            }
+
+            function avgStarsHtml(avg) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (avg >= i) {
+                        html += `<i class="fa fa-star" style="color:#ffc107"></i>`;
+                    } else if (avg >= i - 0.5) {
+                        html += `<i class="fa fa-star-half-alt" style="color:#ffc107"></i>`;
+                    } else {
+                        html += `<i class="fa fa-star" style="color:#e0e0e0"></i>`;
+                    }
+                }
+                return html;
+            }
+
+            function formatDate(val) {
+                if (!val) return '';
+                try {
+                    let d;
+                    if (Array.isArray(val)) {
+                        d = new Date(val[0], val[1] - 1, val[2], val[3] || 0, val[4] || 0, val[5] || 0);
+                    } else {
+                        d = new Date(val);
+                    }
+                    return d.toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                        // second: '2-digit' // (Mở comment dòng này nếu bạn muốn hiện cả giây nhé)
+                    });
+                } catch (e) { return ''; }
+            }
+
+            function isVideo(url) {
+                return url && url.toLowerCase().endsWith('.mp4');
+            }
+
+            function mediaThumbHtml(url) {
+                const src = MEDIA_BASE + url;
+                if (isVideo(url)) {
+                    return `<div class="review-video-thumb" onclick="openReviewMedia('${src}', true)">
+                            <video src="${src}" preload="metadata" muted></video>
+                            <div class="play-icon"><i class="fa fa-play-circle"></i></div>
+                        </div>`;
+                } else {
+                    return `<img class="review-media-thumb" src="${src}" alt="Anh danh gia"
+                             onclick="openReviewMedia('${src}', false)">`;
+                }
+            }
+
+            function renderReviewCard(r) {
+                const mediaPart = (r.mediaUrls && r.mediaUrls.length > 0)
+                    ? `<div class="review-media-list">${r.mediaUrls.map(mediaThumbHtml).join('')}</div>`
+                    : '';
+                const commentPart = (r.comment && r.comment.trim())
+                    ? `<div class="review-comment">${r.comment}</div>`
+                    : `<div class="review-no-comment">Khach hang khong de lai nhan xet.</div>`;
+
+                return `<div class="review-card">
+                        <div class="review-avatar"><i class="fa fa-user"></i></div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" style="font-size:0.92rem;">${r.name}</div>
+                            <div class="review-meta">${formatDate(r.createdAt)}</div>
+                            <div class="review-stars">${starsHtml(r.rating)}</div>
+                            ${commentPart}
+                            ${mediaPart}
+                        </div>
+                    </div>`;
+            }
+
+            /* ─── Open media lightbox ─────────────────────── */
+            window.openReviewMedia = function (src, isVid) {
+                modalContent.innerHTML = isVid
+                    ? `<video src="${src}" controls autoplay style="max-width:100%;max-height:75vh;border-radius:8px;"></video>`
+                    : `<img src="${src}" alt="media" style="max-width:100%;max-height:75vh;border-radius:8px;object-fit:contain;">`;
+                bsModal.show();
+            };
+
+            reviewMediaModal.addEventListener('hide.bs.modal', function () {
+                modalContent.innerHTML = '';
+            });
+
+            /* ─── Fetch reviews ──────────────────────────── */
+            function buildUrl(page) {
+                let url = `/product/review?productId=${PRODUCT_ID}&page=${page - 1}&size=${PAGE_SIZE}&sort=updatedAt,desc`;
+                if (activeRating > 0) url += `&filter=rating:${activeRating}`;
+                return url;
+            }
+
+            function fetchReviews(page, append) {
+                if (isLoading) return;
+                isLoading = true;
+                reviewLoading.style.display = 'block';
+                btnLoadMore.style.display = 'none';
+
+                fetch(buildUrl(page), {
+                    method: 'GET'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        isLoading = false;
+                        reviewLoading.style.display = 'none';
+
+                        const meta = data.meta || {};
+                        const result = data.result || [];
+
+                        totalPages = meta.pages || 1;
+                        currentPage = meta.page || page;
+
+                        if (!append && activeRating === 0 && meta.total > 0) {
+                            const ratings = result.map(r => r.rating);
+                            const avg = ratings.length
+                                ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+                                : '0.0';
+                            avgNumber.textContent = avg;
+                            avgStars.innerHTML = avgStarsHtml(parseFloat(avg));
+                            avgCount.textContent = `${meta.total} danh gia`;
+                            reviewSummary.style.display = '';
+                            reviewSummary.style.removeProperty('display');
+                            reviewSummary.setAttribute('style', 'display:flex!important;');
+                        }
+
+                        if (!append) {
+                            reviewList.innerHTML = '';
+                        }
+
+                        if (result.length === 0 && !append) {
+                            reviewList.innerHTML = `<div class="review-empty">
+                        <i class="fa fa-comment-slash"></i>
+                        Chua co danh gia nao cho san pham nay.
+                    </div>`;
+                        } else {
+                            result.forEach(r => {
+                                reviewList.insertAdjacentHTML('beforeend', renderReviewCard(r));
+                            });
+                        }
+
+                        btnLoadMore.style.display = (currentPage < totalPages) ? 'block' : 'none';
+                    })
+                    .catch(() => {
+                        isLoading = false;
+                        reviewLoading.style.display = 'none';
+                        if (!append) {
+                            reviewList.innerHTML = `<div class="review-empty">
+                        <i class="fa fa-exclamation-circle"></i>
+                        Khong the tai danh gia. Vui long thu lai sau.
+                    </div>`;
+                        }
+                    });
+            }
+
+            btnLoadMore.addEventListener('click', function () {
+                fetchReviews(currentPage + 1, true);
+            });
+
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function () {
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    activeRating = parseInt(this.dataset.rating, 10);
+                    currentPage = 1;
+                    fetchReviews(1, false);
+                });
+            });
+
+            fetchReviews(1, false);
+        })();
+    </script>
 </body>
 
 </html>
