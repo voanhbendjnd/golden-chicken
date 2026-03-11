@@ -397,7 +397,7 @@ public class ProductService {
         var categoryName = product.getCategory().getName();
         var products = this.productRepository.findRelatedProducts(categoryName, id);
         if (products.size() < 5) {
-            products.addAll(this.productRepository.findByTopSold());
+            products.addAll(this.productRepository.findByTopSold(id));
         }
         return products.stream().map(ProductConvert::toResProduct).toList();
     }
@@ -427,7 +427,5 @@ public class ProductService {
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
-
-
 
 }

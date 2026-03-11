@@ -42,9 +42,9 @@ public class ReviewController {
 
     @PostMapping("/submit")
     public String review(@ModelAttribute("review") ReviewDTO dto, @RequestParam("files") List<MultipartFile> files,
-            @RequestParam("orderItemId") Long orderItemId)
+            @RequestParam("orderItemId") Long orderItemId, Model model)
             throws IOException, URISyntaxException, PermissionException {
-        this.reviewService.reviewOrder(dto, files, orderItemId);
-        return "redirect:/home";
+        model.addAttribute("productId", this.reviewService.reviewOrder(dto, files, orderItemId));
+        return "client/review.success";
     }
 }

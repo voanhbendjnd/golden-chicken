@@ -107,7 +107,7 @@
                             <div class="item-name"><span th:text="${item.name}"></span></div>
                             <div class="item-qty"><i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i> <span
                                     th:text="${item.quantity}">1</span> sản phẩm</div>
-                            <form th:action="@{/review/init}" method="post"
+                            <form th:action="@{/review/init}" method="post" th:unless="${item.isReview}"
                                 style="display:inline; margin: 0; padding: 0;">
                                 <input type="hidden" name="orderItemId" th:value="${item.id}" />
 

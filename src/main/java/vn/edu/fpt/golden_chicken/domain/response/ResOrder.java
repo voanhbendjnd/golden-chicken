@@ -39,6 +39,8 @@ public class ResOrder {
         Integer quantity;
         BigDecimal price;
         String img;
+        Boolean isReview;
+
     }
 
     Long customerId;

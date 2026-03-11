@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
 
 @Getter
 @Setter
@@ -17,5 +18,6 @@ public class ResReview {
     List<String> mediaUrls;
     String comment;
     Integer rating;
+    ReviewStatus reviewStatus;
     LocalDateTime createdAt, updatedAt;
 }

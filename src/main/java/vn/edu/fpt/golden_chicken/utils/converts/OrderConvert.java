@@ -34,7 +34,7 @@ public class OrderConvert {
             return null;
         }
         var res = new ResOrder.OrderDetail();
-
+        res.setIsReview(item.getIsReview());
         res.setId(item.getId());
         res.setImg(product.getImageUrl());
         res.setName(product.getName());

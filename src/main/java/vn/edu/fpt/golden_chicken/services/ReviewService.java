@@ -47,7 +47,7 @@ public class ReviewService {
     OrderItemRepository orderItemRepository;
     FileService fileService;
 
-    public void reviewOrder(ReviewDTO dto, List<MultipartFile> files, Long orderItemId)
+    public Long reviewOrder(ReviewDTO dto, List<MultipartFile> files, Long orderItemId)
             throws IOException, URISyntaxException, PermissionException {
         var user = this.userService.getUserInContext();
         if (user == null) {
@@ -67,11 +67,11 @@ public class ReviewService {
             }
 
         }
-        self.saveReview(dto, customer, mediaUrls, orderItemId);
+        return self.saveReview(dto, customer, mediaUrls, orderItemId);
     }
 
     @Transactional
-    public void saveReview(ReviewDTO dto, Customer customer, List<String> mediaUrls, Long orderItemId)
+    public Long saveReview(ReviewDTO dto, Customer customer, List<String> mediaUrls, Long orderItemId)
             throws PermissionException {
         var orderItem = this.orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new DataInvalidException("Product not exists!"));
@@ -103,6 +103,7 @@ public class ReviewService {
         review.setProduct(product);
         orderItem.setIsReview(true);
         this.reviewRepository.save(review);
+        return product.getId();
 
     }
 
@@ -130,6 +131,7 @@ public class ReviewService {
             resReview.setMediaUrls(x.getMediaUrls());
             resReview.setCreatedAt(x.getCreatedAt());
             resReview.setUpdatedAt(x.getUpdatedAt());
+            resReview.setReviewStatus(x.getReviewStatus());
             resReview.setId(x.getId());
             return resReview;
         }).toList());

@@ -235,18 +235,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
         (function () {
-            /* ─── Config ─────────────────────────────────── */
             const PRODUCT_ID = /*[[${product.id}]]*/ 0;
             const PAGE_SIZE = 5;
             const MEDIA_BASE = '/images/reviews/';
 
-            /* ─── State ──────────────────────────────────── */
             let currentPage = 1;
             let totalPages = 1;
             let isLoading = false;
             let activeRating = 0;   // 0 = all
 
-            /* ─── DOM refs ───────────────────────────────── */
             const reviewList = document.getElementById('reviewList');
             const reviewLoading = document.getElementById('reviewLoading');
             const btnLoadMore = document.getElementById('btnLoadMoreReviews');
@@ -385,7 +382,7 @@
                                 : '0.0';
                             avgNumber.textContent = avg;
                             avgStars.innerHTML = avgStarsHtml(parseFloat(avg));
-                            avgCount.textContent = `${meta.total} danh gia`;
+                            avgCount.textContent = `${meta.total} đánh giá`;
                             reviewSummary.style.display = '';
                             reviewSummary.style.removeProperty('display');
                             reviewSummary.setAttribute('style', 'display:flex!important;');
@@ -398,7 +395,7 @@
                         if (result.length === 0 && !append) {
                             reviewList.innerHTML = `<div class="review-empty">
                         <i class="fa fa-comment-slash"></i>
-                        Chua co danh gia nao cho san pham nay.
+                        Chưa có đánh giá nào cho sản phẩm này
                     </div>`;
                         } else {
                             result.forEach(r => {
@@ -414,7 +411,7 @@
                         if (!append) {
                             reviewList.innerHTML = `<div class="review-empty">
                         <i class="fa fa-exclamation-circle"></i>
-                        Khong the tai danh gia. Vui long thu lai sau.
+                        Không thể tải đánh giá, hãy thử lại sau.
                     </div>`;
                         }
                     });
