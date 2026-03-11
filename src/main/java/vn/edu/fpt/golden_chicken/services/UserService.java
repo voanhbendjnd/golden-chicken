@@ -63,6 +63,14 @@ public class UserService {
     CartRepository cartRepository;
     // KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
 
+    public User getUserInContext() {
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email == null) {
+            return null;
+        }
+        return this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+    }
+
     // @Transactional
     public void create(UserDTO request) {
         var role = this.roleRepository.findById(request.getRoleId())
@@ -335,7 +343,6 @@ public class UserService {
         user.setOtpRequestedTime(null);
         // this.userRepository.save(user);
     }
-    // ====== ADD for Forgot Password (OTP) ======
 
     public boolean existsByEmail(String email) {
         if (email == null) {

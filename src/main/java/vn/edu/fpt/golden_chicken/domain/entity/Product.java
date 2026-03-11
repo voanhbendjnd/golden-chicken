@@ -62,4 +62,6 @@ public class Product {
     Integer sold;
     @OneToMany(mappedBy = "product")
     List<CartItem> cartItems;
+    @OneToMany(mappedBy = "product")
+    List<Review> reviews;
 }

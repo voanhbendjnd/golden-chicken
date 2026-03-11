@@ -37,7 +37,7 @@ public class OrderConvert {
 
         res.setId(item.getId());
         res.setImg(product.getImageUrl());
-        res.setName(order.getName());
+        res.setName(product.getName());
         res.setPrice(product.getPrice());
         res.setProductId(product.getId());
         res.setQuantity(item.getQuantity());

@@ -103,9 +103,18 @@
                     <div th:each="item : ${order.items}" class="order-item-row">
                         <img th:src="@{'/images/products/' + ${item.img}}" class="order-item-img" alt="Sản phẩm">
                         <div class="flex-grow-1">
-                            <div class="item-name">Sản phẩm #<span th:text="${item.productId}"></span></div>
+                            <div class="item-name"><span th:text="${item.name}"></span></div>
                             <div class="item-qty"><i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i> <span
                                     th:text="${item.quantity}">1</span> sản phẩm</div>
+                            <form th:action="@{/review/init}" method="post"
+                                style="display:inline; margin: 0; padding: 0;">
+                                <input type="hidden" name="orderItemId" th:value="${item.id}" />
+
+                                <button type="submit" class="btn btn-danger"
+                                    style="border: none; background: none; cursor: pointer; text-decoration: underline;">
+                                    Đánh giá sản phẩm
+                                </button>
+                            </form>
                         </div>
                         <div class="item-price"
                             th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></div>

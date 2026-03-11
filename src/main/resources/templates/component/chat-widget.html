@@ -166,7 +166,6 @@
                 display: inline-block;
             }
 
-            /* Custom scrollbar */
             .gc-chat-body::-webkit-scrollbar {
                 width: 6px;
             }
@@ -214,7 +213,7 @@
             var gcCurrentUser = /*[[${#authentication.name}]]*/ 'anonymous';
             var gcIsStaff = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
 
-            var chatHistory = {}; // email -> { unread: 0, messages: [] }
+            var chatHistory = {};
             var activeChat = gcIsStaff ? null : 'STAFF';
             var totalUnread = 0;
 
@@ -303,10 +302,8 @@
                 var panelOpen = (document.getElementById('gc-chat-panel').style.display === 'flex');
 
                 if (activeChat === partner && panelOpen) {
-                    // Currently viewing this chat
                     appendMessageDOM(content, type, senderName);
                 } else {
-                    // Not viewing this chat OR panel is closed
                     chatHistory[partner].unread++;
                     totalUnread++;
                     updateGlobalBadge();
@@ -344,7 +341,6 @@
             function openChatWith(partner) {
                 activeChat = partner;
 
-                // reset unread for this partner
                 if (chatHistory[partner]) {
                     totalUnread -= chatHistory[partner].unread;
                     if (totalUnread < 0) totalUnread = 0;
@@ -397,7 +393,6 @@
                     return;
                 }
 
-                // Sort partners by latest message if desired, but object keys are ok for now
                 partners.forEach(function (partner) {
                     var data = chatHistory[partner];
                     var item = document.createElement('div');
