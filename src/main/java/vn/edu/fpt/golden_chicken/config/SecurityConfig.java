@@ -105,6 +105,7 @@ public class SecurityConfig {
                 "/reset-password",
                 "/css/**",
                 "/js/**",
+                "/lib/**",
                 "/images/**",
                 "/img/**",
                 "/client/**",
@@ -113,7 +114,8 @@ public class SecurityConfig {
                 "/menu/**",
                 "/payment/**",
                 "/verify/**",
-                "/ws-chat/**"
+                "/ws-chat/**",
+                "/product/**"
 
         };
         http

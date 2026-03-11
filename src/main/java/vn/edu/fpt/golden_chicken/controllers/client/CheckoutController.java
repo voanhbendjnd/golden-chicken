@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +18,6 @@ import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
-import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.*;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
@@ -28,23 +26,20 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 @Controller
 @RequestMapping("/checkout")
 public class CheckoutController {
-    private final UserRepository userRepository;
     private final ProductService productService;
     private final AddressServices addressServices;
     private final OrderService orderService;
     private final CartService cartService;
     private final RevenueService revenueService;
-    // them moi
     private final ProfileService profileService;
     private final VoucherService voucherService;
     private final CustomerVoucherRepository customerVoucherRepository;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
-                              OrderService orderService, CartService cartService, UserRepository userRepository,
-                              RevenueService revenueService, ProfileService profileService, VoucherService voucherService,
-                              CustomerVoucherRepository customerVoucherRepository) {
+            OrderService orderService, CartService cartService,
+            RevenueService revenueService, ProfileService profileService, VoucherService voucherService,
+            CustomerVoucherRepository customerVoucherRepository) {
         this.productService = productService;
-        this.userRepository = userRepository;
         this.orderService = orderService;
         this.addressServices = addressServices;
         this.cartService = cartService;
@@ -54,144 +49,116 @@ public class CheckoutController {
         this.customerVoucherRepository = customerVoucherRepository;
     }
 
-    @GetMapping("/order")
-    public String handleOrderFromCart(
+    @GetMapping
+    public String handleCheckout(
+            @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "voucherId", required = false) Long voucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
-        var orderDTO = new OrderDTO();
-        var details = new ArrayList<OrderDTO.OrderDetail>();
 
-        CartResponse response = this.cartService.getProductInCart();
-        if (response.getItems() == null) {
-            return "redirect:/cart";
+        OrderDTO orderDTO = new OrderDTO();
+        List<OrderDTO.OrderDetail> details = new ArrayList<>();
+        BigDecimal totalPrice = BigDecimal.ZERO;
+
+        if (productId != null) {
+
+            ResProduct product = productService.findById(productId);
+            if (product == null) {
+                return "redirect:/home";
+            }
+
+            OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
+            detail.setProductId(product.getId());
+            detail.setQuantity(1);
+
+            details.add(detail);
+
+            totalPrice = product.getPrice();
+
+            model.addAttribute("product", product);
         }
 
-        var cartItems = response.getItems().stream()
-                .filter(item -> ids == null || ids.contains(item.getProductId()))
-                .toList();
+        else if (ids != null && !ids.isEmpty()) {
 
-        if (cartItems == null || cartItems.isEmpty()) {
-            return "redirect:/cart";
-        }
-        for (var x : cartItems) {
-            if (x.getQuantity() > 33 || x.getQuantity() < 1) {
+            CartResponse response = cartService.getProductInCart();
+
+            if (response.getItems() == null) {
                 return "redirect:/cart";
             }
+
+            var cartItems = response.getItems().stream()
+                    .filter(item -> ids.contains(item.getProductId()))
+                    .toList();
+
+            if (cartItems.isEmpty()) {
+                return "redirect:/cart";
+            }
+
+            for (var x : cartItems) {
+
+                if (x.getQuantity() > 33 || x.getQuantity() < 1) {
+                    return "redirect:/cart";
+                }
+
+                OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
+                detail.setItemId(x.getItemId());
+                detail.setProductId(x.getProductId());
+                detail.setQuantity(x.getQuantity());
+
+                totalPrice = totalPrice.add(
+                        x.getPrice().multiply(new BigDecimal(x.getQuantity())));
+
+                details.add(detail);
+            }
+
+            model.addAttribute("cartItems", cartItems);
         }
 
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (var x : cartItems) {
-            var detail = new OrderDTO.OrderDetail();
-            detail.setItemId(x.getItemId());
-            detail.setProductId(x.getProductId());
-            detail.setQuantity(x.getQuantity());
+        else {
+            return "redirect:/cart";
+        }
 
-            totalPrice = totalPrice.add(x.getPrice().multiply(new BigDecimal(x.getQuantity())));
-            details.add(detail);
+        var selectedAddress = (addressId != null)
+                ? addressServices.findById(addressId)
+                : addressServices.getDefaultAddress();
+        if (selectedAddress != null) {
+
+            orderDTO.setName(selectedAddress.getRecipientName());
+            orderDTO.setPhone(selectedAddress.getRecipientPhone());
+
+            String fullAddress = String.format("%s, %s, %s",
+                    selectedAddress.getSpecificAddress(),
+                    selectedAddress.getWard(),
+                    selectedAddress.getCity());
+
+            orderDTO.setAddress(fullAddress);
         }
 
         BigDecimal shippingFee = new BigDecimal("15000");
-        BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal finalAmount = totalPrice.add(shippingFee).subtract(discount);
 
         orderDTO.setItems(details);
         orderDTO.setTotalProductPrice(totalPrice);
         orderDTO.setShippingFee(shippingFee);
-        orderDTO.setDiscountAmount(discount);
-        orderDTO.setFinalAmount(finalAmount);
-        orderDTO.setPaymentMethod(PaymentMethod.COD);
-
-        // Lấy địa chỉ vừa chọn hoặc địa chỉ mặc định
-        var selectedAddress = (addressId != null)
-                ? addressServices.findById(addressId)
-                : addressServices.getDefaultAddress();
-
-        if (selectedAddress != null) {
-            orderDTO.setName(selectedAddress.getRecipientName());
-            orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s",
-                    selectedAddress.getSpecificAddress(),
-                    selectedAddress.getWard(),
-                    // selectedAddress.getDistrict(),
-                    selectedAddress.getCity());
-            orderDTO.setAddress(fullAddress);
-        }
-
-        model.addAttribute("cartItems", cartItems);
-        model.addAttribute("order", orderDTO);
-        model.addAttribute("defaultAddress", selectedAddress);
-        return "client/checkout";
-    }
-
-    @GetMapping
-    public String handleCheckout(
-            @RequestParam("id") long productId,
-            @RequestParam(required = false) Long voucherId,
-            @RequestParam(value = "addressId", required = false) Long addressId,
-            Model model) {
-        var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (email != null) {
-            var user = this.userRepository.findByEmailIgnoreCase(email);
-            if (user.getCustomer() == null) {
-                return "client/auth/access-deny";
-            }
-        }
-        ResProduct product = productService.findById(productId);
-
-        var selectedAddress = (addressId != null)
-                ? addressServices.findById(addressId)
-                : addressServices.getDefaultAddress();
-
-        if (product == null) {
-            return "redirect:/home";
-        }
-        OrderDTO orderDTO = new OrderDTO();
-
-        OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
-        detail.setProductId(product.getId());
-        detail.setQuantity(1);
-        orderDTO.setItems(List.of(detail));
-
-        if (selectedAddress != null) {
-            orderDTO.setName(selectedAddress.getRecipientName());
-            orderDTO.setPhone(selectedAddress.getRecipientPhone());
-            String fullAddress = String.format("%s, %s, %s",
-                    selectedAddress.getSpecificAddress(),
-                    selectedAddress.getWard(),
-                    // selectedAddress.getDistrict(),
-                    selectedAddress.getCity());
-            orderDTO.setAddress(fullAddress);
-        }
-
-        BigDecimal shippingFee = new BigDecimal("15000");
-        orderDTO.setTotalProductPrice(product.getPrice());
-        orderDTO.setShippingFee(shippingFee);
         orderDTO.setDiscountAmount(BigDecimal.ZERO);
-        orderDTO.setFinalAmount(product.getPrice().add(shippingFee));
+        orderDTO.setFinalAmount(totalPrice.add(shippingFee));
         orderDTO.setPaymentMethod(PaymentMethod.COD);
 
-        model.addAttribute("order", orderDTO);
-        model.addAttribute("product", product);
-        model.addAttribute("defaultAddress", selectedAddress);
-        // áp dụng voucher
         var currentUser = profileService.getCurrentUser();
 
-        List<CustomerVoucher> vouchers =
-                voucherService.getCustomerVouchers(currentUser.getId());
+        List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
         model.addAttribute("vouchers", vouchers);
-        // voucher đã chọn và xử lý voucher
+
         if (voucherId != null) {
-            CustomerVoucher selected =
-                    customerVoucherRepository.findById(voucherId).orElse(null);
+
+            CustomerVoucher selected = customerVoucherRepository.findById(voucherId).orElse(null);
 
             if (selected != null) {
 
                 Voucher voucher = selected.getVoucher();
                 BigDecimal productPrice = orderDTO.getTotalProductPrice();
 
-                // kiểm tra điều kiện đơn tối thiểu
                 if (voucher.getMinOrderValue() != null &&
                         productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
 
@@ -213,18 +180,14 @@ public class CheckoutController {
                                 .divide(BigDecimal.valueOf(100));
                     }
 
-                    // Không cho giảm quá tiền sản phẩm
                     if (discount.compareTo(productPrice) > 0) {
                         discount = productPrice;
                     }
 
-
-                    // xử lý loại voucher (PRODUCT / SHIPPING)
                     if ("SHIPPING".equals(voucher.getVoucherType())) {
 
                         BigDecimal shippingDiscount = discount;
 
-                        // không giảm quá tiền ship
                         if (shippingDiscount.compareTo(shippingFee) > 0) {
                             shippingDiscount = shippingFee;
                         }
@@ -238,7 +201,6 @@ public class CheckoutController {
 
                     } else {
 
-                        // PRODUCT voucher
                         orderDTO.setDiscountAmount(discount);
 
                         BigDecimal finalAmount = productPrice
@@ -253,6 +215,8 @@ public class CheckoutController {
             }
         }
 
+        model.addAttribute("order", orderDTO);
+        model.addAttribute("defaultAddress", selectedAddress);
 
         return "client/checkout";
     }
@@ -268,13 +232,10 @@ public class CheckoutController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
 
-        // KIỂM TRA ĐIỀU KIỆN ĐỂ TRẢ VỀ ĐÚNG GIAO DIỆN
         if (productId != null || (productIds != null && !productIds.isEmpty())) {
-            // Trả về trang giao diện chọn địa chỉ cho Checkout (có nút Xác nhận địa chỉ)
             return "client/address/listAddressCheckout";
         }
 
-        // Trả về trang quản lý địa chỉ cá nhân (hình số 6 bạn gửi)
         return "client/address/addressBook";
     }
 
@@ -300,19 +261,20 @@ public class CheckoutController {
         return "client/payment/payment.success";
     }
 
-    // chuyển sang trang chọn voucher
     @GetMapping("/vouchers")
     public String chooseVoucher(
-            @RequestParam("id") Long productId,
+            @RequestParam(value = "id", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> productIds,
             Model model) {
 
         var currentUser = profileService.getCurrentUser();
 
-        List<CustomerVoucher> vouchers =
-                voucherService.getCustomerVouchers(currentUser.getId());
+        List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
         model.addAttribute("vouchers", vouchers);
+
         model.addAttribute("productId", productId);
+        model.addAttribute("productIds", productIds);
 
         return "client/voucher-select";
     }

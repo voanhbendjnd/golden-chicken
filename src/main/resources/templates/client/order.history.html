@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch sử đơn hàng</title>
     <link th:href="@{/css/order.history.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <link th:href="@{/css/pagination.css}" rel="stylesheet">
 
@@ -103,9 +104,17 @@
                     <div th:each="item : ${order.items}" class="order-item-row">
                         <img th:src="@{'/images/products/' + ${item.img}}" class="order-item-img" alt="Sản phẩm">
                         <div class="flex-grow-1">
-                            <div class="item-name">Sản phẩm #<span th:text="${item.productId}"></span></div>
+                            <div class="item-name"><span th:text="${item.name}"></span></div>
                             <div class="item-qty"><i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i> <span
                                     th:text="${item.quantity}">1</span> sản phẩm</div>
+                            <form th:action="@{/review/init}" method="post" th:unless="${item.isReview}"
+                                style="display:inline; margin: 0; padding: 0;">
+                                <input type="hidden" name="orderItemId" th:value="${item.id}" />
+
+                                <button type="submit" class="btn btn-"
+                                    th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}">
+                                    <i class="bi bi-pencil"></i></button>
+                            </form>
                         </div>
                         <div class="item-price"
                             th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></div>
