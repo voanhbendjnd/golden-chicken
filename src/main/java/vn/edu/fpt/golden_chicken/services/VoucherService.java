@@ -206,21 +206,25 @@ public class VoucherService {
 
         List<ResVoucher> resVouchers = new ArrayList<>();
         for (Voucher voucher : vouchers) {
+            int quantity = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+            if (quantity <= 0) {
+                continue;
+            }
             resVouchers.add(toResVoucher(voucher));
         }
         return resVouchers;
 
     }
 
-    public List<CustomerVoucher> getMyVouchersWithoutExpired() {
+    public List<CustomerVoucher> getMyVouchersAvailableOnly() {
         List<CustomerVoucher> result = new ArrayList<>();
-    
+
         for (CustomerVoucher voucher : getMyVouchers()) {
-            if (voucher.getStatus() != StatusVoucher.EXPIRED) {
+            if (voucher.getStatus() == StatusVoucher.AVAILABLE) {
                 result.add(voucher);
             }
         }
-    
+
         return result;
     }
 
@@ -296,11 +300,12 @@ public class VoucherService {
 
         customerVoucherRepository.save(cv);
         var qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        // trừ quantity
-        voucher.setQuantity(qty - 1);
+        int newQty = qty - 1;
 
-        // nếu hết thì disable
-        if (qty <= 0) {
+        voucher.setQuantity(newQty);
+
+ 
+        if (newQty <= 0) {
             voucher.setStatus("DISABLED");
         }
 
