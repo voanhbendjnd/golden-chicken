@@ -114,8 +114,7 @@ public class SecurityConfig {
                 "/menu/**",
                 "/payment/**",
                 "/verify/**",
-                "/ws-chat/**",
-                "/product/**"
+                "/ws-chat/**"
 
         };
         http
