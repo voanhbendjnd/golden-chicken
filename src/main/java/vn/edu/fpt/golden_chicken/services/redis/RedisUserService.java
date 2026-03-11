@@ -136,7 +136,7 @@ public class RedisUserService {
             String jsonMessage = objectMapper.writeValueAsString(message);
             this.stringRedisTemplate.opsForList().rightPush(key, jsonMessage);
             this.stringRedisTemplate.opsForList().trim(key, 0, 49);
-            this.stringRedisTemplate.expire(key, 2, TimeUnit.HOURS);
+            this.stringRedisTemplate.expire(key, 2, TimeUnit.MINUTES);
 
             // Theo dõi các khách hàng đang nhắn tin với STAFF
             String customerId = "STAFF".equals(message.getRecipientId()) ? message.getSenderId()
@@ -144,7 +144,7 @@ public class RedisUserService {
             if (!"STAFF".equals(customerId)) {
                 this.stringRedisTemplate.opsForSet().add("CHAT:PARTNERS:STAFF", customerId);
                 // Giữ danh sách trong 2 giờ
-                this.stringRedisTemplate.expire("CHAT:PARTNERS:STAFF", 2, TimeUnit.HOURS);
+                this.stringRedisTemplate.expire("CHAT:PARTNERS:STAFF", 2, TimeUnit.MINUTES);
             }
 
         } catch (JsonProcessingException e) {
