@@ -20,11 +20,9 @@ import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
-import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

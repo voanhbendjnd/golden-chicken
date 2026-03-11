@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <title>Golden Chicken Chat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #chat-box {
+            width: 400px;
+            height: 300px;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .sent {
+            background: #e3f2fd;
+            text-align: right;
+        }
+
+        .received {
+            background: #f1f8e9;
+            text-align: left;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🐔 Golden Chicken Real-time Chat</h2>
+
+    <div class="input-group">
+        <input type="text" id="myId" placeholder="ID của bạn (VD: 1)">
+        <button onclick="connect()">Kết nối</button>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="recipientId" placeholder="ID người nhận (VD: 2)">
+    </div>
+
+    <div id="chat-box"></div>
+
+    <div class="input-group">
+        <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." style="width: 300px;">
+        <button onclick="sendMessage()">Gửi</button>
+    </div>
+
+    <script>
+        var stompClient = null;
+
+        function connect() {
+            var myId = document.getElementById('myId').value;
+            if (!myId) { alert("Vui lòng nhập ID của bạn!"); return; }
+
+            // Kết nối tới endpoint /ws-chat trong Spring Boot
+            var socket = new SockJS('http://localhost:8080/ws-chat');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+
+                // Đăng ký nhận tin nhắn riêng cho tôi
+                stompClient.subscribe('/user/' + myId + '/queue/messages', function (response) {
+                    var message = JSON.parse(response.body);
+                    displayMessage(message, 'received');
+                });
+
+                alert("Đã kết nối WebSocket thành công!");
+            }, function (error) {
+                alert("Lỗi kết nối: " + error);
+            });
+        }
+
+        function sendMessage() {
+            var myId = document.getElementById('myId').value;
+            var recipientId = document.getElementById('recipientId').value;
+            var content = document.getElementById('messageInput').value;
+
+            if (stompClient && content && recipientId) {
+                var chatMessage = {
+                    senderId: myId,
+                    recipientId: recipientId,
+                    content: content,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Gửi tới @MessageMapping("/chat.sendMessage") trong Controller
+                stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+
+                // Hiển thị ngay lên màn hình của mình
+                displayMessage(chatMessage, 'sent');
+                document.getElementById('messageInput').value = '';
+            }
+        }
+
+        function displayMessage(message, type) {
+            var chatBox = document.getElementById('chat-box');
+            var msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + type;
+            msgDiv.innerHTML = `<strong>${type === 'sent' ? 'Bạn' : 'Người ấy'}:</strong> ${message.content}`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
