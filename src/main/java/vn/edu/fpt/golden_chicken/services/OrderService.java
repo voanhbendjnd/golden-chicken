@@ -274,6 +274,7 @@ public class OrderService {
         }
     }
 
+    @Transactional
     public ResOrder findById(Long id) {
         var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
         var res = new ResOrder();

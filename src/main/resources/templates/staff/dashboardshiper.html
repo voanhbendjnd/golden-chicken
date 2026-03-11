@@ -106,11 +106,7 @@
 
                             </div>
 
-                            <div class="mb-1">
-                                <i class="fa-solid fa-user text-secondary me-1"></i>
-                                <span th:text="${order.name}"></span>
-                            </div>
-
+                        
                             <div class="mb-1">
                                 <i class="fa-solid fa-location-dot text-danger me-1"></i>
                                 <span th:text="${order.shippingAddress}"></span>
@@ -478,7 +474,12 @@
 
             function showOrderDetail(orderId, showAccept = false, formElement = null) {
 
-                fetch('/staff/shipper/order/fragment/' + orderId)
+                var url = '/staff/shipper/order/fragment/' + orderId;
+                if (showAccept) {
+                    url += '?addressOnly=true';
+                }
+
+                fetch(url)
                     .then(res => res.text())
 
                     .then(html => {

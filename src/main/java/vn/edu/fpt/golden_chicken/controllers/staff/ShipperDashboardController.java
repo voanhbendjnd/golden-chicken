@@ -157,7 +157,9 @@ public class ShipperDashboardController {
     }
 
    @GetMapping("/order/fragment/{id}")
-    public String orderDetail(@PathVariable("id") Long id, Model model) {
+    public String orderDetail(@PathVariable("id") Long id,
+        @RequestParam(name = "addressOnly", defaultValue = "false") boolean addressOnly,
+        Model model) {
 
         Staff shipper = getCurrentShipper();
         if (shipper == null) {
@@ -173,6 +175,7 @@ public class ShipperDashboardController {
          }
 
         model.addAttribute("order", orderService.findById(id));
+        model.addAttribute("addressOnly", addressOnly);
         
        return "staff/order/detail-fragment :: orderDetail"; 
     }

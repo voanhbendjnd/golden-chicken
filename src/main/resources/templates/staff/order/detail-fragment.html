@@ -7,9 +7,21 @@
 <!-- fragment containing full order details -->
 <div th:fragment="orderDetail (order)">
 
+    <div class="card shadow-sm" th:if="${addressOnly}">
+        <div class="card-header bg-white fw-bold">
+            Địa chỉ giao hàng
+        </div>
+        <div class="card-body">
+            <div class="mb-1">
+                <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                <span th:text="${#strings.isEmpty(order.address) ? 'Chưa có địa chỉ giao hàng' : order.address}">
+                    123 Street
+                </span>
+            </div>
+        </div>
+    </div>
 
-
-    <div class="row g-4">
+    <div class="row g-4" th:if="${!addressOnly}">
 
         <!-- LEFT SIDE -->
         <div class="col-lg-8">
@@ -204,7 +216,5 @@
         </div>
 
     </div>
-
-</div>
 
 </div>
