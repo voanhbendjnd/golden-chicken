@@ -126,7 +126,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(whiteList).permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
-                        // chuyển sang trang jsp không bị chặn
                         .dispatcherTypeMatchers(DispatcherType.FORWARD,
                                 DispatcherType.INCLUDE)
                         .permitAll()
@@ -139,8 +138,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement((sessionManagement) -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        // Sửa dòng này: Cho phép Spring quản lý việc đổi Session ID linh hoạt
-                        // hơn
                         .sessionFixation().migrateSession()
                         .invalidSessionUrl("/login?invalid")
                         .maximumSessions(1)
@@ -156,6 +153,4 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
         return http.build();
     }
-
-    // end security
 }
