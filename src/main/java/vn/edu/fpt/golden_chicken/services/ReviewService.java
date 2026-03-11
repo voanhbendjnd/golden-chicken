@@ -111,8 +111,8 @@ public class ReviewService {
         Specification<Review> ps = (r, q, c) -> {
             Join<Review, Product> productJoin = r.join("product");
             var p1 = c.equal(productJoin.get("id"), productId);
-            // var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED);
-            return c.and(p1);
+            var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED.toString());
+            return c.and(p1, p2);
         };
         var res = new ResultPaginationDTO();
         var page = this.reviewRepository.findAll(Specification.where(spec).and(ps), pageable);

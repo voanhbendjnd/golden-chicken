@@ -4,14 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Đánh giá sản phẩm - Golden Chicken</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+    <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .review-container {
             max-width: 600px;
             margin: 40px auto;
             padding: 20px;
-            border: 1px solid #ddd;
+            /* border: 1px solid #ddd; */
             border-radius: 8px;
             font-family: Arial, sans-serif;
         }
@@ -62,7 +65,6 @@
             transition: color 0.2s;
         }
 
-        /* Đổi màu vàng khi hover hoặc khi được checked */
         .star-rating label:hover,
         .star-rating label:hover~label,
         .star-rating input[type="radio"]:checked~label {
@@ -95,8 +97,9 @@
 </head>
 
 <body>
+    <div th:replace="~{client/layout/header.djnd}"></div>
 
-    <div class="review-container">
+    <div class="review-container" style="padding-top: 150px; margin-top: 30px;">
         <h2>Đánh giá sản phẩm</h2>
 
         <div class="product-info">
@@ -137,7 +140,7 @@
             </div>
 
             <div class="form-group">
-                <label for="files"><strong>Thêm hình ảnh / video (Tối đa 5 file):</strong></label>
+                <label for="files"><strong>Thêm hình ảnh / video (Tối đa 5 mục):</strong></label>
                 <br>
                 <input type="file" id="files" name="files" multiple accept="image/*,video/*"
                     style="margin-top: 10px;" />
@@ -146,6 +149,7 @@
             <button type="submit" class="btn-submit">Hoàn Thành Đánh Giá</button>
         </form>
     </div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
 </body>
 

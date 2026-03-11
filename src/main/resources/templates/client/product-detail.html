@@ -70,21 +70,23 @@
                         <div class="d-grid gap-2 d-md-flex">
 
                             <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                <a class="btn btn-warning" style="text-decoration-line: none;"
+                                <a class="btn btn-danger" style="text-decoration-line: none;"
                                     th:href="@{/checkout?id={id}(id=${product.id})}">
                                     Mua Ngay
                                 </a>
-                                <button class="btn btn-danger add-to-cart" th:data-id="${product.id}">
-                                    Thêm vào giỏ
+                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}">
+                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>
                                 </button>
 
-                                <div class="input-group quantity-selector shadow-sm" style="width: 100px;">
-                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
-                                    <input type="number" class="form-control text-center input-qty" value="1" min="1"
-                                        max="33" th:id="'qty-' + ${product.id}">
-                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
-                                </div>
+
                             </div>
+
+                        </div>
+                        <div class="input-group quantity-selector shadow-sm" style="margin-top: 20px; width: 20%;">
+                            <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                            <input type="number" class="form-control text-center input-qty" value="1" min="1" max="33"
+                                th:id="'qty-' + ${product.id}">
+                            <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
                         </div>
                     </div>
 
