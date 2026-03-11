@@ -12,11 +12,8 @@
             Địa chỉ giao hàng
         </div>
         <div class="card-body">
-            <div class="mb-1">
-                <i class="fa-solid fa-location-dot text-danger me-1"></i>
-                <span th:text="${#strings.isEmpty(order.address) ? 'Chưa có địa chỉ giao hàng' : order.address}">
-                    123 Street
-                </span>
+            <div class="info-value" th:text="${order.address}">
+                123 Street
             </div>
         </div>
     </div>
@@ -94,6 +91,11 @@
 
                         <div class="text-warning fst-italic"
                             th:text="${#strings.isEmpty(order.note) ? 'Không có ghi chú.' : order.note}">
+                        </div>
+
+                        <div class="mt-3" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                            <div class="fw-semibold mb-1 text-danger">Lý do giao hàng thất bại</div>
+                            <div class="text-danger-emphasis" th:text="${order.deliveryFailedReason}"></div>
                         </div>
                     </div>
 
@@ -216,5 +218,7 @@
         </div>
 
     </div>
+
+</div>
 
 </div>

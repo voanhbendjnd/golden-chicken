@@ -98,14 +98,16 @@ public class ShipperDashboardController {
     }
 
     @PostMapping("/order/update-status")
-    public String updateOrderStatus(@RequestParam("orderId") Long orderId, @RequestParam("status") String status) {
+    public String updateOrderStatus(@RequestParam("orderId") Long orderId,
+            @RequestParam("status") String status,
+            @RequestParam(name = "reason", required = false) String reason) {
         Staff shipper = getCurrentShipper();
         if (shipper == null) {
             return "redirect:/staff";
         }
         Order order = this.orderService.getOrderEntity(orderId);
         if (order.getShipper() != null && order.getShipper().getId().equals(shipper.getId())) {
-            this.orderService.changeOrderStatus(orderId, status, shipper);
+            this.orderService.changeOrderStatus(orderId, status, shipper, reason);
         }
         return "redirect:/staff/shipper/dashboard";
     }
@@ -116,7 +118,7 @@ public class ShipperDashboardController {
         var newOrders = this.orderRepository.findByStatusAndShipperIsNull(OrderStatus.READY_FOR_DELIVERY, pageable);
 
         var deliveringOrders = this.orderRepository.findByShipperAndStatus(shipper, OrderStatus.DELIVERING, pageable);
-        var historyStatuses = Arrays.asList(OrderStatus.DELIVERED, OrderStatus.CANCELLED);
+        var historyStatuses = Arrays.asList(OrderStatus.DELIVERED, OrderStatus.DELIVERY_FAILED, OrderStatus.CANCELLED);
         var historyOrders = this.orderRepository.findByShipperAndStatusIn(shipper, historyStatuses, pageable);
 
         long deliveringCount = this.orderRepository.countByShipperAndStatus(shipper, OrderStatus.DELIVERING);

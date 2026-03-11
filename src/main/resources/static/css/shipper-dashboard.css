@@ -118,6 +118,11 @@ body{
     color:#c82333;
 }
 
+.badge-cancelled{
+    background:#f5f5f5;
+    color:#6c757d;
+}
+
 /* confirm modal */
 .confirm-card{
     border-radius:16px;

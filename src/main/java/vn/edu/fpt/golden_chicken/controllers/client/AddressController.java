@@ -3,6 +3,7 @@ package vn.edu.fpt.golden_chicken.controllers.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResAddress;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
 
 @Controller
+@PreAuthorize("hasRole('CUSTOMER')")
 public class AddressController {
 
     private final AddressServices addressServices;

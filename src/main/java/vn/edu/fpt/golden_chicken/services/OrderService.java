@@ -149,6 +149,7 @@ public class OrderService {
             order.setName(x.getName());
             order.setPhone(x.getPhone());
             order.setNote(x.getNote());
+            order.setDeliveryFailedReason(x.getDeliveryFailedReason());
             order.setTotalPrice(x.getFinalAmount());
             order.setPaymentMethod(x.getPaymentMethod().toString());
             order.setPaymentStatus(x.getPaymentStatus().toString());
@@ -197,6 +198,11 @@ public class OrderService {
 
     @Transactional
     public void changeOrderStatus(Long id, String statusName, Staff shipper) {
+        this.changeOrderStatus(id, statusName, shipper, null);
+    }
+
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName, Staff shipper, String reason) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
 
@@ -223,6 +229,17 @@ public class OrderService {
 
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
+
+        String normalizedReason = reason == null ? null : reason.trim();
+        if (normalizedReason != null && normalizedReason.isEmpty()) {
+            normalizedReason = null;
+        }
+
+        if (nextStatus == OrderStatus.DELIVERY_FAILED) {
+            order.setDeliveryFailedReason(normalizedReason);
+        } else {
+            order.setDeliveryFailedReason(null);
+        }
 
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             var actionMessage = new ActionPointMessage();
@@ -283,6 +300,7 @@ public class OrderService {
         res.setId(order.getId());
         res.setName(order.getName());
         res.setNote(order.getNote());
+        res.setDeliveryFailedReason(order.getDeliveryFailedReason());
         res.setPaymentMethod(order.getPaymentMethod().toString());
         res.setPaymentStatus(order.getPaymentStatus().toString());
         res.setPhone(order.getPhone());

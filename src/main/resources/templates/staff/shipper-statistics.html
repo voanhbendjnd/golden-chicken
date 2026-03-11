@@ -79,13 +79,22 @@
                                 <td th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + '₫'">
                                 </td>
                                 <td>
-                                    <span class="badge bg-success" th:if="${order.status.name() == 'COMPLETED'}">
+                                    <span class="badge bg-success" th:if="${order.status.name() == 'DELIVERED'}">
+                                        Giao thành công
+                                    </span>
+                                    <span class="badge bg-warning text-dark" th:if="${order.status.name() == 'COMPLETED'}">
                                         COMPLETED
                                     </span>
-
-                                    <span class="badge bg-danger" th:if="${order.status.name() == 'CANCELLED'}">
-                                        CANCELLED
+                                    <span class="badge bg-danger" th:if="${order.status.name() == 'DELIVERY_FAILED'}">
+                                        Giao thất bại
                                     </span>
+                                    <span class="badge bg-secondary" th:if="${order.status.name() == 'CANCELLED'}">
+                                        Đã hủy
+                                    </span>
+                                    <div class="mt-1 small text-danger" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                        <span th:text="${order.deliveryFailedReason}"></span>
+                                    </div>
                                 </td>
                                 <td th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></td>
                             </tr>
