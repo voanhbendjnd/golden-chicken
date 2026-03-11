@@ -126,6 +126,8 @@ public class CheckoutController {
                 details.add(detail);
             }
 
+
+
             displayItems = cartItems;
             model.addAttribute("cartItems", cartItems);
         }
