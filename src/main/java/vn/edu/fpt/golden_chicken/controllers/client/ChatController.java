@@ -20,8 +20,6 @@ public class ChatController {
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage) {
         chatMessage.setTimestamp(LocalDateTime.now().toString());
-
-        // Đẩy tin nhắn lên Kafka, KafkaChatConsumer sẽ xử lý lưu Redis và gửi WebSocket
         this.kafkaTemplate.send("chat-topic", chatMessage);
     }
 }

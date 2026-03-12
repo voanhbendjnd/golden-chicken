@@ -27,7 +27,7 @@ public class AuthenticationEvents {
         var count = this.redisUserService.getNumberOfLoginFailures(username) != null
                 ? this.redisUserService.getNumberOfLoginFailures(username)
                 : 0;
-        if (count >= 2) {
+        if (count >= 5) {
             this.redisUserService.lockAccount(username);
             System.out.println("Account with email " + username + " status locked!");
             this.securityMail.send("security-account-topic", username);

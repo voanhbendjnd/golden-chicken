@@ -34,10 +34,10 @@ public class OrderConvert {
             return null;
         }
         var res = new ResOrder.OrderDetail();
-
+        res.setIsReview(item.getIsReview());
         res.setId(item.getId());
         res.setImg(product.getImageUrl());
-        res.setName(order.getName());
+        res.setName(product.getName());
         res.setPrice(product.getPrice());
         res.setProductId(product.getId());
         res.setQuantity(item.getQuantity());

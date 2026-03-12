@@ -110,18 +110,26 @@
 
                         if (response.ok) {
                             Swal.fire({
-                                tilte: 'Success',
+                                title: 'Success',
                                 text: 'Add to cart success',
                                 icon: 'success',
+                                showCancelButton: true,
+                                confirmButtonText: 'Go to cart',
+                                cancelButtonText: 'Stay here',
+                                reverseButtons: true,
                                 showClass: {
                                     popup: 'animate__animated animate__fadeInDown'
                                 },
                                 hideClass: {
                                     popup: 'animate__animated animate__fadeOutUp'
                                 }
-                            })
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/cart';
+                                }
+                            });
                         } else if (response.status === 403) {
-                            alert('Vui lòng đăng nhập với tài khoản khách hàng!');
+                            alert('Vui lòng đăng nhập với tài khoản khách hàng để sử dụng giỏ hàng!');
                         } else {
                             alert('Có lỗi xảy ra, vui lòng thử lại.');
                         }

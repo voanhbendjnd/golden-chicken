@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.Join;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
@@ -163,7 +164,7 @@ public class ProductService {
                 throw new IOException("File Invalid");
 
             }
-            product.setImageUrl(this.fileService.getLastNameFile(file));
+            product.setImageUrl(this.fileService.getLastNameFile(file, DeclareConstant.productFolder));
 
         }
 
@@ -181,7 +182,7 @@ public class ProductService {
                 }
                 var productImg = new ProductImage();
                 productImg.setProduct(product);
-                productImg.setImageUrl(this.fileService.getLastNameFile(x));
+                productImg.setImageUrl(this.fileService.getLastNameFile(x, DeclareConstant.productFolder));
                 imgs.add(productImg);
             }
             product.setProductImages(imgs);
@@ -190,20 +191,6 @@ public class ProductService {
         product.setIsDelete(false);
         this.productRepository.save(product);
 
-    }
-
-    public boolean validFile(MultipartFile file) {
-        var allowedExtensions = Set.of(".jpg", ".png", ".jpeg");
-        var fileName = file.getOriginalFilename();
-        var lastDoIndex = fileName.lastIndexOf(".");
-        if (lastDoIndex == -1) {
-            return false;
-        }
-        var ext = fileName.substring(lastDoIndex).toLowerCase();
-        if (!allowedExtensions.contains(ext)) {
-            return false;
-        }
-        return true;
     }
 
     public void handleGalleryUpdate(Product product, List<MultipartFile> newFiles, List<String> remainNames,
@@ -222,8 +209,8 @@ public class ProductService {
             for (var x : newFiles) {
                 if (x != null && !x.isEmpty() && x.getOriginalFilename() != null
                         && !x.getOriginalFilename().isBlank()) {
-                    this.validFile(x);
-                    var lastName = this.fileService.getLastNameFile(x);
+                    this.fileService.validFile(x);
+                    var lastName = this.fileService.getLastNameFile(x, DeclareConstant.productFolder);
                     var newImg = new ProductImage();
                     newImg.setImageUrl(lastName);
                     newImg.setProduct(product);
@@ -247,14 +234,14 @@ public class ProductService {
         var product = this.productRepository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.getId()));
         if (file != null && !file.isEmpty()) {
-            if (!this.validFile(file)) {
+            if (!this.fileService.validFile(file)) {
                 throw new IOException("File Invalid");
             }
 
             if (product.getImageUrl() != null) {
                 filesToDelete.add(product.getImageUrl());
             }
-            product.setImageUrl(this.fileService.getLastNameFile(file));
+            product.setImageUrl(this.fileService.getLastNameFile(file, DeclareConstant.productFolder));
         }
         this.handleGalleryUpdate(product, files, dto.getImgs(), filesToDelete);
         product.setCategory(category);
@@ -410,7 +397,7 @@ public class ProductService {
         var categoryName = product.getCategory().getName();
         var products = this.productRepository.findRelatedProducts(categoryName, id);
         if (products.size() < 5) {
-            products.addAll(this.productRepository.findByTopSold());
+            products.addAll(this.productRepository.findByTopSold(id));
         }
         return products.stream().map(ProductConvert::toResProduct).toList();
     }

@@ -37,6 +37,8 @@ public class Customer implements Serializable {
     List<CartItem> cartItems;
     @OneToMany(mappedBy = "customer")
     List<CustomerVoucher> customerVouchers;
+    @OneToMany(mappedBy = "customer")
+    List<Review> reviews;
 
     public void addCartItem(CartItem item) {
         if (this.cartItems == null) {
