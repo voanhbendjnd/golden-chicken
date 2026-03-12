@@ -41,7 +41,6 @@ public class RedisUserService {
         return "CHAT:HISTORY:" + first + ":" + second;
     }
 
-    // get list id staff chated
     public Set<String> getChatPartners(String user) {
         return this.stringRedisTemplate.opsForSet().members("CHAT:PARTNERS:" + user);
     }
@@ -87,7 +86,6 @@ public class RedisUserService {
 
     public void savePendingUserRegister(RegisterDTO dto) {
         try {
-            // change object to json type
             var jsonUser = this.objectMapper.writeValueAsString(dto);
             this.stringRedisTemplate.opsForValue().set(DeclareConstant.PENDING_USER + dto.getEmail(), jsonUser, 10,
                     TimeUnit.MINUTES);
@@ -136,19 +134,16 @@ public class RedisUserService {
             String jsonMessage = objectMapper.writeValueAsString(message);
             this.stringRedisTemplate.opsForList().rightPush(key, jsonMessage);
             this.stringRedisTemplate.opsForList().trim(key, 0, 49);
-            this.stringRedisTemplate.expire(key, 2, TimeUnit.MINUTES);
+            this.stringRedisTemplate.expire(key, 2, TimeUnit.HOURS);
 
-            // Theo dõi các khách hàng đang nhắn tin với STAFF
             String customerId = "STAFF".equals(message.getRecipientId()) ? message.getSenderId()
                     : message.getRecipientId();
             if (!"STAFF".equals(customerId)) {
                 this.stringRedisTemplate.opsForSet().add("CHAT:PARTNERS:STAFF", customerId);
-                // Giữ danh sách trong 2 giờ
-                this.stringRedisTemplate.expire("CHAT:PARTNERS:STAFF", 2, TimeUnit.MINUTES);
+                this.stringRedisTemplate.expire("CHAT:PARTNERS:STAFF", 2, TimeUnit.HOURS);
             }
 
         } catch (JsonProcessingException e) {
-            // Log lỗi nếu không parse được JSON
             System.err.println("Lỗi parse tin nhắn: " + e.getMessage());
         }
     }

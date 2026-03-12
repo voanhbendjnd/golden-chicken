@@ -212,8 +212,10 @@
             var gcStompClient = null;
             var gcCurrentUser = /*[[${#authentication.name}]]*/ 'anonymous';
             var gcIsStaff = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
+            var sessionRole = /*[[${session.roleName}]]*/ 'GUEST';
+            var authName = /*[[${#authentication.name}]]*/ 'anonymous';
 
-            var chatHistory = {};
+            var gcCurrentUser2 = (sessionRole === 'ADMIN' || sessionRole === 'STAFF') ? 'STAFF' : authName; var chatHistory = {};
             var activeChat = gcIsStaff ? null : 'STAFF';
             var totalUnread = 0;
 
@@ -271,9 +273,10 @@
                     return;
                 }
 
-                var u1 = gcIsStaff ? partner : gcCurrentUser;
-                var u2 = gcIsStaff ? gcCurrentUser : 'STAFF';
-
+                // var u1 = gcIsStaff ? 'STAFF' : gcCurrentUser;
+                // var u2 = gcIsStaff ? 'STAFF' : gcCurrentUser;
+                var u1 = gcIsStaff ? partner : gcCurrentUser2;
+                var u2 = gcIsStaff ? gcCurrentUser2 : 'STAFF';
                 fetch(`/api/chat/history?user1=${u1}&user2=${u2}`)
                     .then(res => res.json())
                     .then(messages => {
@@ -426,7 +429,7 @@
                     var recipient = gcIsStaff ? document.getElementById('gc-current-recipient').value : 'STAFF';
 
                     var chatMessage = {
-                        senderId: gcCurrentUser,
+                        senderId: gcCurrentUser2,
                         recipientId: recipient,
                         content: content
                     };
