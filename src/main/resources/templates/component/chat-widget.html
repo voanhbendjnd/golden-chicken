@@ -231,7 +231,7 @@
                         .then(partners => {
                             if (partners && partners.length > 0) {
                                 partners.forEach(partner => {
-                                    if (partner !== gcCurrentUser && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
+                                    if (partner !== gcCurrentUser2 && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
                                         if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
                                     }
                                 });
@@ -283,8 +283,8 @@
                         if (messages && messages.length > 0) {
                             var loadedMsgs = [];
                             messages.forEach(msg => {
-                                var type = msg.senderId === gcCurrentUser ? 'sent' : 'received';
-                                var senderName = msg.senderId === gcCurrentUser ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
+                                var type = msg.senderId === gcCurrentUser2 ? 'sent' : 'received';
+                                var senderName = msg.senderId === gcCurrentUser2 ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
                                 loadedMsgs.push({ content: msg.content, type: type, senderName: senderName });
                             });
                             if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [] };
