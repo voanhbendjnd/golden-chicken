@@ -207,6 +207,19 @@
 #searchModal .modal-content {
     background: rgba(255, 255, 255, .8);
 }
+
+/* Suggestion dropdown: consistent spacing */
+.suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.suggestion-item:hover {
+    background: rgba(255, 181, 36, 0.12);
+}
 /* Đẩy khung modal search xuống dưới 80px so với mép trên */
 
 #modalSuggestionBox {

@@ -19,6 +19,9 @@ public class ResOrder {
     String phone;
     String note;
 
+    String shipperName;
+    String shipperPhone;
+
     BigDecimal totalPrice;
     BigDecimal feeShipping;
     BigDecimal finalAmount;

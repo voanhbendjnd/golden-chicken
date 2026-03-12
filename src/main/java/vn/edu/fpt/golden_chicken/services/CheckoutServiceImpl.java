@@ -7,8 +7,10 @@ import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
+import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
+import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -23,6 +25,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     private final ProductService productService;
     private final CartService cartService;
+    private final OrderService orderService;
     private final AddressServices addressServices;
     private final VoucherService voucherService;
     private final ProfileService profileService;
@@ -32,6 +35,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     public CheckoutResponse buildCheckout(
             Long productId,
             List<Long> ids,
+            Long orderId,
             Long voucherId,
             Long addressId) throws PermissionException {
 
@@ -43,8 +47,46 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         Map<String, Object> model = response.getModel();
 
+        // ===== CHECKOUT FROM ORDER (Mua lại) =====
+        if (orderId != null) {
+
+            ResOrder resOrder = orderService.findById(orderId);
+            var currentUser = profileService.getCurrentUser();
+            if (currentUser == null || currentUser.getCustomer() == null) {
+                response.setRedirect("redirect:/login");
+                return response;
+            }
+            if (resOrder.getCustomerId() == null || !resOrder.getCustomerId().equals(currentUser.getCustomer().getId())) {
+                response.setRedirect("redirect:/order-history");
+                return response;
+            }
+            if (resOrder.getStatus() != OrderStatus.COMPLETED && resOrder.getStatus() != OrderStatus.DELIVERED) {
+                response.setRedirect("redirect:/order-history");
+                return response;
+            }
+
+            List<CartResponse.CartItemDTO> cartItemsForDisplay = new ArrayList<>();
+            for (var item : resOrder.getItems()) {
+                OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
+                detail.setProductId(item.getProductId());
+                detail.setQuantity(item.getQuantity());
+                details.add(detail);
+                BigDecimal subTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                totalPrice = totalPrice.add(subTotal);
+
+                CartResponse.CartItemDTO displayItem = new CartResponse.CartItemDTO();
+                displayItem.setProductId(item.getProductId());
+                displayItem.setProductName(item.getName());
+                displayItem.setProductImg(item.getImg());
+                displayItem.setQuantity(item.getQuantity());
+                displayItem.setPrice(item.getPrice());
+                displayItem.setSubTotal(subTotal);
+                cartItemsForDisplay.add(displayItem);
+            }
+            model.put("cartItems", cartItemsForDisplay);
+        }
         // ===== CHECKOUT FROM PRODUCT =====
-        if (productId != null) {
+        else if (productId != null) {
 
             ResProduct product = productService.findById(productId);
 

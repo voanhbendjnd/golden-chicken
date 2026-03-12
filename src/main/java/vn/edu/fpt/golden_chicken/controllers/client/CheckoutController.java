@@ -56,12 +56,13 @@ public class CheckoutController {
     public String handleCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "orderId", required = false) Long orderId,
             @RequestParam(value = "voucherId", required = false) Long voucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
 
         CheckoutResponse response =
-                checkoutService.buildCheckout(productId, ids, voucherId, addressId);
+                checkoutService.buildCheckout(productId, ids, orderId, voucherId, addressId);
 
         if (response.getRedirect() != null) {
             return response.getRedirect();

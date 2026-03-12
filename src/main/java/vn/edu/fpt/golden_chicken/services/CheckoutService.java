@@ -10,6 +10,7 @@ public interface CheckoutService {
     CheckoutResponse buildCheckout(
             Long productId,
             List<Long> ids,
+            Long orderId,
             Long voucherId,
             Long addressId) throws PermissionException;
 
