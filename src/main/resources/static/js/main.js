@@ -1,3 +1,51 @@
+/* --- Autocomplete Search Logic --- */
+$(document).ready(function () {
+    const $searchInput = $('#modalSearchInput');
+    const $suggestionBox = $('#modalSuggestionBox');
+
+    $searchInput.on('input', function () {
+        const query = $(this).val().trim();
+
+        // Bước 1: Kiểm tra độ dài từ khóa (ít nhất 1 từ)
+        if (query.length < 1) {
+            $suggestionBox.addClass('d-none');
+            return;
+        }
+
+        // Bước 2: Gọi API trả về JSON
+        fetch(`/api/products/suggestions?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    let html = '';
+                    data.forEach(product => {
+                        // Highlight từ khóa khớp
+                        const regex = new RegExp(`(${query})`, 'gi');
+                        const highlightedName = product.name.replace(regex, '<b>$1</b>');
+
+                        html += `
+                            <div class="suggestion-item" onclick="window.location.href='/product/${product.id}'">
+                                <i class="fa fa-search"></i>
+                                <span>${highlightedName}</span>
+                            </div>
+                        `;
+                    });
+                    $suggestionBox.html(html).removeClass('d-none');
+                } else {
+                    $suggestionBox.addClass('d-none');
+                }
+            })
+            .catch(error => console.error('Error fetching suggestions:', error));
+    });
+
+    // Bước 3: Đóng hộp gợi ý khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$searchInput.is(e.target) && !$suggestionBox.is(e.target) && $suggestionBox.has(e.target).length === 0) {
+            $suggestionBox.addClass('d-none');
+        }
+    });
+});
+
 (function ($) {
     "use strict";
 

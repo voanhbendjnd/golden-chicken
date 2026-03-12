@@ -74,18 +74,24 @@
 
 
     <!-- Modal Search Start -->
-    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="searchModal" data-bs-focus="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content rounded-0">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Search by keyword</h5>
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="exampleModalLabel">Tìm kiếm tại Golden Chicken</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body d-flex align-items-center">
-                    <div class="input-group w-75 mx-auto d-flex">
-                        <input type="search" class="form-control p-3" placeholder="keywords"
-                            aria-describedby="search-icon-1">
-                        <span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span>
+                <div class="modal-body d-flex justify-content-center">
+                    <div class="w-75 position-relative" style="height: 60px;">
+                        <div class="input-group">
+                            <input type="search" id="modalSearchInput" class="form-control p-3 border-end-0"
+                                   placeholder="Bạn muốn ăn gì hôm nay?" autocomplete="off">
+                            <span class="input-group-text bg-white p-3 border-start-0"><i class="fa fa-search"></i></span>
+                        </div>
+
+                        <div id="modalSuggestionBox" class="position-absolute w-100 shadow-sm d-none"
+                             style="top: 100%; left: 0; z-index: 9999; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,36 +108,31 @@
                     <h4 class="mb-3 text-secondary">100% Organic Foods</h4>
                     <h1 class="mb-5 display-3 text-secondary" style="color:#ffb224">Gà Rán & Đồ Ăn Nhanh</h1>
                     <div class="position-relative mx-auto">
-                        <input class="form-control border-2 border-secondary w-75 py-3 px-4 rounded-pill" type="number"
-                            placeholder="Search">
+                        <input class="form-control border-2 border-secondary w-75 py-3 px-4 rounded-pill"
+                               type="text"
+                               placeholder="Nhập món ăn bạn muốn tìm...">
                         <button type="submit"
-                            class="btn btn-secondary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100"
-                            style="top: 0; right: 25%; background-color: #ffb524;">Submit Now</button>
+                                class="btn btn-secondary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100"
+                                style="top: 0; right: 25%; background-color: #ffb524;">Submit Now</button>
                     </div>
                 </div>
                 <div class="col-md-12 col-lg-5">
                     <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
                         <div class="carousel-inner" role="listbox">
                             <div class="carousel-item active rounded">
-                                <img src="img/sliderbanner3.jpeg" class="img-fluid w-100 h-100 bg-secondary rounded"
-                                    alt="First slide">
+                                <img src="img/sliderbanner3.jpeg" class="img-fluid w-100 h-100 bg-secondary rounded" alt="First slide">
                                 <a href="#" class="btn px-4 py-2 text-white rounded">Gà giòn</a>
                             </div>
                             <div class="carousel-item rounded">
-                                <img src="img/sliderbanner2.jpeg" class="img-fluid w-100 h-100 rounded"
-                                    alt="Second slide">
+                                <img src="img/sliderbanner2.jpeg" class="img-fluid w-100 h-100 rounded" alt="Second slide">
                                 <a href="#" class="btn px-4 py-2 text-white rounded">Gà sốt</a>
                             </div>
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselId"
-                            data-bs-slide="prev">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselId" data-bs-slide="prev">
                             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselId"
-                            data-bs-slide="next">
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselId" data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
                         </button>
                     </div>
                 </div>
