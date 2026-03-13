@@ -69,7 +69,7 @@ public class ComboDetailService {
         var lastProduct = this.productRepository.save(product);
         filesToDelete.forEach(x -> {
             try {
-                this.fileService.deleteFile(x);
+                this.fileService.deleteFile(DeclareConstant.productFolder, x);
             } catch (IOException e) {
                 System.out.println("Cannot Delete File!");
             }

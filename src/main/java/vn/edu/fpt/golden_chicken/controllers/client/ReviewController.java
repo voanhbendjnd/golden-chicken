@@ -26,12 +26,14 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 @RequestMapping("/review")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+
 public class ReviewController {
     ReviewService reviewService;
     OrderItemRepository orderItemRepository;
 
     @PostMapping("/init")
-    public String reviewProductPage(Model model, @RequestParam("orderItemId") Long orderItemId) {
+    public String reviewProductPage(Model model,
+            @RequestParam(value = "orderItemId", required = true) Long orderItemId) {
         var orderItem = this.orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new DataInvalidException("Product Not Found!"));
         model.addAttribute("product", ProductConvert.toResProduct(orderItem.getProduct()));
@@ -44,7 +46,19 @@ public class ReviewController {
     public String review(@ModelAttribute("review") ReviewDTO dto, @RequestParam("files") List<MultipartFile> files,
             @RequestParam("orderItemId") Long orderItemId, Model model)
             throws IOException, URISyntaxException, PermissionException {
-        model.addAttribute("productId", this.reviewService.reviewOrder(dto, files, orderItemId));
-        return "client/review.success";
+        var response = this.reviewService.reviewOrder(dto, files, orderItemId);
+        var ss = response.split("_");
+        var productId = "";
+        for (var x : ss) {
+            productId = x;
+        }
+        System.out.println(">>>>> KEY: " + productId);
+        model.addAttribute("productId", productId);
+        if (response.startsWith("success")) {
+            return "client/review.success";
+        } else {
+            return "client/review.fail";
+        }
+
     }
 }

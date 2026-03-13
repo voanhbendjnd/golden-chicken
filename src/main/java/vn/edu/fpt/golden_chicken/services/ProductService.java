@@ -253,7 +253,7 @@ public class ProductService {
         this.productRepository.save(product);
         filesToDelete.forEach(x -> {
             try {
-                this.fileService.deleteFile(x);
+                this.fileService.deleteFile(DeclareConstant.productFolder, x);
             } catch (IOException e) {
                 System.out.println("Cannot Delete File!");
             }

@@ -4,7 +4,6 @@
 <head>
 
     <head th:replace="~{common/head}"></head>
-
     <title>Create User Page</title>
 </head>
 
@@ -16,18 +15,19 @@
                     <div class="card-header bg-primary text-white">
                         <h3 class="text-center mb-0">Create New User</h3>
                     </div>
+
                     <div class="card-body">
                         <form th:action="@{/admin/user/create}" method="post" th:object="${newUser}">
 
                             <div class="mb-3">
-                                <label class="form-label ">Email</label>
+                                <label class="form-label">Email</label>
                                 <input type="email" class="form-control" th:field="*{email}" required />
                                 <div th:if="${#fields.hasErrors('email')}" class="text-danger small"
                                     th:errors="*{email}"></div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label ">Full Name</label>
+                                <label class="form-label">Full Name</label>
                                 <input type="text" class="form-control" th:field="*{fullName}" required />
                                 <div th:if="${#fields.hasErrors('fullName')}" class="text-danger small"
                                     th:errors="*{fullName}"></div>
@@ -35,22 +35,28 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label ">Password</label>
-                                    <input type="password" class="form-control" th:field="*{password}" required />
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" th:field="*{password}" id="password"
+                                        required />
                                     <div th:if="${#fields.hasErrors('password')}" class="text-danger small"
                                         th:errors="*{password}"></div>
                                 </div>
+
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label ">Confirm Password</label>
+                                    <label class="form-label">Confirm Password</label>
                                     <input type="password" class="form-control" th:field="*{confirmPassword}"
-                                        required />
+                                        id="confirmPassword" required />
+
                                     <div th:if="${#fields.hasErrors('confirmPassword')}" class="text-danger small"
                                         th:errors="*{confirmPassword}"></div>
+
+                                    <!-- lỗi JS -->
+                                    <div id="passwordError" class="text-danger small"></div>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label ">Role</label>
+                                <label class="form-label">Role</label>
                                 <select id="roleSelect" name="roleId" class="form-select" required>
                                     <option value="">Select Role</option>
                                     <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}">
@@ -59,7 +65,7 @@
                             </div>
 
                             <div id="staffTypeGroup" class="mb-3" style="display: none;">
-                                <label class="form-label ">Staff Type</label>
+                                <label class="form-label">Staff Type</label>
                                 <select th:field="*{staffType}" class="form-select">
                                     <option value="RECEPTIONIST">Receptionist</option>
                                     <option value="SHIPPER">Shipper</option>
@@ -68,7 +74,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label ">Status</label>
+                                <label class="form-label">Status</label>
                                 <select th:field="*{status}" class="form-select">
                                     <option value="true">Active</option>
                                     <option value="false">Inactive</option>
@@ -81,6 +87,7 @@
                                 <a th:href="@{/admin/user}" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary px-4">Create User</button>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -88,28 +95,58 @@
         </div>
     </div>
 
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             const roleSelect = document.getElementById("roleSelect");
             const staffTypeGroup = document.getElementById("staffTypeGroup");
+
+            const password = document.getElementById("password");
+            const confirmPassword = document.getElementById("confirmPassword");
+            const form = document.querySelector("form");
+            const errorDiv = document.getElementById("passwordError");
 
             function toggleFieldsByRole() {
                 if (!roleSelect) return;
                 const selectedOption = roleSelect.options[roleSelect.selectedIndex];
                 const selectedText = selectedOption ? selectedOption.text.toUpperCase() : "";
 
-                // Hiện staffType nếu chọn Staff hoặc Admin
                 if (selectedText.includes("STAFF")) {
                     staffTypeGroup.style.display = "block";
                 } else {
                     staffTypeGroup.style.display = "none";
                 }
             }
+
             roleSelect.addEventListener("change", toggleFieldsByRole);
             toggleFieldsByRole();
+
+
+            function checkPasswordMatch() {
+                if (password.value !== confirmPassword.value) {
+                    errorDiv.textContent = "Password and Confirm Password do not match!";
+                    return false;
+                } else {
+                    errorDiv.textContent = "";
+                    return true;
+                }
+            }
+
+            confirmPassword.addEventListener("keyup", checkPasswordMatch);
+            password.addEventListener("keyup", checkPasswordMatch);
+
+            form.addEventListener("submit", function (e) {
+                if (!checkPasswordMatch()) {
+                    e.preventDefault();
+                }
+            });
+
         });
     </script>
+
 </body>
 
 </html>

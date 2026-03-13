@@ -64,6 +64,18 @@ public class MailService {
     }
 
     @Async
+    public void sendMailViolateWordAfterReview(String to, String subject, String tmp, String email, String productName,
+            String record) {
+        var ctx = new Context();
+        ctx.setVariable("email", email);
+        ctx.setVariable("productName", productName);
+        ctx.setVariable("record", record);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(tmp, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+    }
+
+    @Async
     public void sendStatus(String to, String subject, String template, String email, String status, String id,
             String name) {
         var ctx = new Context();
@@ -116,7 +128,7 @@ public class MailService {
         this.sendEmailSync(to, subject, content, false, true, at);
     }
 
-    // turn on enalbleAsync in application
+    // turn on enalbleAsync in application!!!!!!!!!!
     @Async
     public void sendEmailAndPasswordForStaff(String to, String subject, String template, String email, String name,
             String password) {

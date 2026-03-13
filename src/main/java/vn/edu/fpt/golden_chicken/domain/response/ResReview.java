@@ -13,6 +13,7 @@ import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResReview {
+    Long customerId;
     String name;
     Long id;
     List<String> mediaUrls;
@@ -20,4 +21,5 @@ public class ResReview {
     Integer rating;
     ReviewStatus reviewStatus;
     LocalDateTime createdAt, updatedAt;
+    Boolean isUpdate;
 }

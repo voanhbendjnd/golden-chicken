@@ -57,21 +57,6 @@ public class User implements Serializable {
     @JoinColumn(name = "role_id")
     Role role;
 
-    String oneTimePassword;
-    Date otpRequestedTime;
-
-    public boolean isOTPRequired() {
-        if (this.getOneTimePassword() == null) {
-            return false;
-        }
-        long currentTime = System.currentTimeMillis();
-        long otpRequestTime = this.otpRequestedTime.getTime();
-        if (otpRequestTime + OTP_VALID_DURATION < currentTime) {
-            return false;
-        }
-        return true;
-    }
-
     @PrePersist
     public void handleBeforeCreateAt() {
         this.createdAt = LocalDateTime.now();

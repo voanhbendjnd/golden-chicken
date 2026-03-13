@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${subject}">Violate Review</title>
+    <style type="text/css">
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .wrapper {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .otp-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #888888;
+        }
+
+        @media screen and (max-width: 600px) {
+            .wrapper {
+                width: 95% !important;
+            }
+
+            .content,
+            .otp-code {
+                font-size: 14px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="wrapper">
+                    <tr>
+                        <td class="header">
+                            <h1>Đánh giá của bạn dùng từ ngữ không hợp lệ</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content">
+                            <p>Cảnh báo lần thứ <span th:text="${record}">100</span> !</p>
+                            <p>Xin chào, <span th:text="${email}">Customer@gmail.com</span></p>
+                            <p>Đánh giá của bạn vi phạm tiêu chuẩn cộng đồng của chúng tôi.</p>
+                            <p>Đánh giá của bạn sẽ không được đưa lên trang.</p>
+                            <p>Bạn có thể và phần review của sản phẩm <span th:text="${productName}">Golden</span> để
+                                sửa lại phần đánh giá.</p>
+                            <p>Nếu bạn vi phạm quá 5 lần thì bạn sẽ bị khóa tài khoản!</p>
+                        </td>
+                    </tr>
+                    <tr>
+
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>&copy; <span th:text="${#dates.year(#dates.createNow())}"></span> Golden Chicken.
+                                All
+                                Rights Reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

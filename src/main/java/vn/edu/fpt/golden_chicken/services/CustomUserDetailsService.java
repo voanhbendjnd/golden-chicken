@@ -30,6 +30,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (this.redisUserService.isAccountLocked(username)) {
             throw new LockedException("Account has locked!");
         }
+        if (this.redisUserService.isAccountLockedWhenReview(username)) {
+            throw new LockedException("Account has locked when review!");
+
+        }
         if (user == null) {
             throw new UsernameNotFoundException("Not Found User With email: " + username);
         }

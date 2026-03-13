@@ -99,12 +99,19 @@ public class FileService {
         return lastName;
     }
 
-    public void deleteFile(String fileName) throws IOException {
+    // public void deleteFile(String folder, String fileName) throws IOException {
+    // if (fileName != null && !fileName.isEmpty()) {
+    // var path = Paths.get(baseURI + folder + fileName);
+    // Files.deleteIfExists(path);
+    // }
+    // return;
+    // }
+
+    public void deleteFile(String folder, String fileName) throws IOException {
         if (fileName != null && !fileName.isEmpty()) {
-            var path = Paths.get(baseURI + fileName);
+            var path = Paths.get(baseURI, folder, fileName);
             Files.deleteIfExists(path);
         }
-        return;
     }
 
     public boolean validFile(MultipartFile file) {

@@ -3,7 +3,6 @@ package vn.edu.fpt.golden_chicken.services;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -15,12 +14,16 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,7 +36,7 @@ import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResUser;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
+import vn.edu.fpt.golden_chicken.domain.response.UserMessage;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
@@ -43,6 +46,7 @@ import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
@@ -50,18 +54,37 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@SuppressWarnings("null")
+
 public class UserService {
 
-    private final static String city_constant = "Thành Phố Cần Thơ";
     UserRepository userRepository;
     RoleRepository roleRepository;
     StaffRepository staffRepository;
     CustomerRepository customerRepository;
     PasswordEncoder passwordEncoder;
-    MailService mailService;
     OrderRepository orderRepository;
     CartRepository cartRepository;
+    KafkaTemplate<String, UserMessage> kafkaUserMessage;
+
     // KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
+    public void forceLogoutCurrentUser() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+
+                request.getSession().invalidate();
+            }
+
+            SecurityContextHolder.clearContext();
+
+            System.out.println("Đã ép người dùng hiện tại đăng xuất thành công!");
+        } catch (Exception e) {
+            System.out.println("Lỗi khi force logout: " + e.getMessage());
+        }
+    }
 
     public User getUserInContext() {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -78,6 +101,9 @@ public class UserService {
                         request.getRoleId() != null ? request.getRoleId() : DeclareConstant.roleNameCustomer));
         var user = UserConvert.toUser(request);
         user.setRole(role);
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new DataInvalidException("Password and confirm password not the same!");
+        }
         user.setPassword(this.passwordEncoder.encode(request.getPassword()));
         this.userRepository.save(user);
         if (role.getName().equals("STAFF")) {
@@ -89,14 +115,17 @@ public class UserService {
         } else if (role.getName().equals("CUSTOMER")) {
             var customer = new Customer();
             customer.setUser(user);
-            if (request.getAddress() != null && !request.getAddress().isEmpty()) {
-                customer.setAddress(request.getAddress() + ", " + request.getWard() + ", " + request.getDistrict()
-                        + ", " + city_constant);
-            }
-
             this.customerRepository.save(customer);
         }
-        this.mailService.configBeforeSendForStaff(request.getFullName(), request.getEmail(), request.getPassword());
+        var userMsg = new UserMessage();
+        userMsg.setReason("Staff create new account");
+        userMsg.setEmail(request.getEmail());
+        userMsg.setName(request.getFullName());
+        userMsg.setPassword(request.getPassword());
+        userMsg.setSendAt(LocalDateTime.now());
+        this.kafkaUserMessage.send("create-account-topic", userMsg);
+        // this.mailService.configBeforeSendForStaff(request.getFullName(),
+        // request.getEmail(), request.getPassword());
 
     }
 
@@ -316,7 +345,14 @@ public class UserService {
                 this.userRepository.saveAll(users);
                 mpAcc.forEach((user, password) -> {
                     CompletableFuture.runAsync(() -> {
-                        this.mailService.configBeforeSendForStaff(user.getFullName(), user.getEmail(), password);
+                        var userMsg = new UserMessage();
+                        userMsg.setEmail(user.getEmail());
+                        userMsg.setName(user.getFullName());
+                        userMsg.setReason("Staff create new account");
+                        userMsg.setPassword(password);
+                        this.kafkaUserMessage.send("create-account-topic", userMsg);
+                        // this.mailService.configBeforeSendForStaff(user.getFullName(),
+                        // user.getEmail(), password);
                     });
                 });
             }
@@ -330,27 +366,10 @@ public class UserService {
         return this.userRepository.countCustomer();
     }
 
-    public String generateOTP(User user) {
-        this.clearOTP(user);
-        var ran = new Random();
-        var code = ran.nextInt(1000, 9999) + "";
-        var encodeOTP = this.passwordEncoder.encode(code);
-        user.setPassword(encodeOTP);
-        user.setOtpRequestedTime(new Date());
-        this.userRepository.save(user);
-        return code;
-    }
-
     public String generateBase() {
         var ran = new Random();
         var code = ran.nextInt(1000, 9999) + "";
         return code;
-    }
-
-    private void clearOTP(User user) {
-        user.setOneTimePassword(null);
-        user.setOtpRequestedTime(null);
-        // this.userRepository.save(user);
     }
 
     public boolean existsByEmail(String email) {
@@ -358,33 +377,6 @@ public class UserService {
             return false;
         }
         return this.userRepository.existsByEmail(email.trim().toLowerCase());
-    }
-
-    @Transactional
-    public void updatePasswordByEmail(String email, String rawPassword) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
-        }
-        if (rawPassword == null || rawPassword.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password is required");
-        }
-
-        String normalizedEmail = email.trim().toLowerCase();
-        var user = this.userRepository.findByEmailIgnoreCase(normalizedEmail);
-
-        if (user == null) {
-            throw new ResourceNotFoundException("Email", normalizedEmail);
-        }
-
-        user.setPassword(this.passwordEncoder.encode(rawPassword.trim()));
-
-        try {
-            user.setOneTimePassword(null);
-            user.setOtpRequestedTime(null);
-        } catch (Exception ignored) {
-        }
-
-        this.userRepository.save(user);
     }
 
     public void updateCustomerPoint(Customer customer, Long point, boolean action) throws PermissionException {
@@ -400,24 +392,6 @@ public class UserService {
         }
         this.customerRepository.save(customer);
 
-    }
-
-    @Transactional
-    public String generateOneTimePassword(String email) {
-        var user = this.userRepository.findByEmailIgnoreCase(email);
-        this.clearOTP(user);
-        var ran = new Random();
-        var otp = ran.nextInt(1000, 9999) + "";
-        var hashOtp = this.passwordEncoder.encode(otp);
-        user.setOneTimePassword(hashOtp);
-        user.setOtpRequestedTime(new Date());
-        this.userRepository.save(user);
-        var msg = new VerifyAccountMessage();
-        msg.setCreatedAt(LocalDateTime.now());
-        msg.setDescription("Reset password");
-        msg.setEmail(email);
-
-        return otp;
     }
 
 }

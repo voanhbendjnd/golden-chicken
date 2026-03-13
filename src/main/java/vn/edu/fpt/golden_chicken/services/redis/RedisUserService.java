@@ -29,6 +29,10 @@ public class RedisUserService {
     StringRedisTemplate stringRedisTemplate;
     ObjectMapper objectMapper;
     UserService userService;
+    private static String KEY_LOGIN_FAILURES = "LOGIN_FAIL:";
+    private static String KEY_CHAT_HISTORY = "CHAT:HISTORY:";
+    private static String KEY_CHAT_PARTNERS = "CHAT:PARTNERS:";
+    private static String KEY_VIOLATE = "VIOLATE_REVIEW:";
 
     private String getChatKey(String id1, String id2) {
         String first = id1 != null ? id1 : "";
@@ -38,11 +42,11 @@ public class RedisUserService {
             first = second;
             second = temp;
         }
-        return "CHAT:HISTORY:" + first + ":" + second;
+        return KEY_CHAT_HISTORY + first + ":" + second;
     }
 
     public Set<String> getChatPartners(String user) {
-        return this.stringRedisTemplate.opsForSet().members("CHAT:PARTNERS:" + user);
+        return this.stringRedisTemplate.opsForSet().members(KEY_CHAT_PARTNERS + user);
     }
 
     public List<ChatMessage> getChatHistory(String user1, String user2) {
@@ -67,21 +71,36 @@ public class RedisUserService {
     }
 
     public void saveNumberOfLoginFailures(String email) {
-        String key = "LOGIN_FAIL:" + email;
+        String key = KEY_LOGIN_FAILURES + email;
         Long currentFailures = this.stringRedisTemplate.opsForValue().increment(key);
         if (currentFailures != null && currentFailures == 1) {
             this.stringRedisTemplate.expire(key, 10, TimeUnit.MINUTES);
         }
     }
 
+    public void saveRecordViolateCustomer(String email) {
+        var key = KEY_VIOLATE + email;
+        Long currentViolate = this.stringRedisTemplate.opsForValue().increment(key);
+        if (currentViolate != null && currentViolate == 1) {
+            // set 1 week : demo set 10 minutes
+            this.stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
+        }
+    }
+
     public Integer getNumberOfLoginFailures(String email) {
-        var key = "LOGIN_FAIL:" + email;
+        var key = KEY_LOGIN_FAILURES + email;
+        var value = this.stringRedisTemplate.opsForValue().get(key);
+        return value == null ? 0 : Integer.parseInt(value);
+    }
+
+    public Integer getRecordOfViolate(String email) {
+        var key = KEY_VIOLATE + email;
         var value = this.stringRedisTemplate.opsForValue().get(key);
         return value == null ? 0 : Integer.parseInt(value);
     }
 
     public void resetLoginFailures(String email) {
-        this.stringRedisTemplate.delete("LOGIN_FAIL:" + email);
+        this.stringRedisTemplate.delete(KEY_LOGIN_FAILURES + email);
     }
 
     public void savePendingUserRegister(RegisterDTO dto) {
@@ -116,10 +135,35 @@ public class RedisUserService {
         }
     }
 
+    public void saveKeyOTPForgotPassword(String email, String otp) {
+        var key = "FORGOT_PASSWORD:" + email;
+        this.stringRedisTemplate.opsForValue().set(key, otp, 5, TimeUnit.MINUTES);
+    }
+
+    public String getKeyOTPForgotPassword(String email) {
+        var key = "FORGOT_PASSWORD:" + email;
+        return this.stringRedisTemplate.opsForValue().get(key);
+    }
+
+    public void deleteOTPGorgotPassword(String email) {
+        this.stringRedisTemplate.delete("FORGOT_PASSWORD:" + email);
+    }
+
+    public void lockAccountVilote(String email) {
+        var key = "LOCK_VIOLATE:" + email;
+        this.stringRedisTemplate.opsForValue().set(key, "LOCKED", 1, TimeUnit.MINUTES);
+        this.stringRedisTemplate.delete(KEY_VIOLATE + "email");
+    }
+
+    public boolean isAccountLockedWhenReview(String email) {
+        var key = "LOCK_VIOLATE:" + email;
+        return Boolean.TRUE.equals(this.stringRedisTemplate.hasKey(key));
+    }
+
     public void lockAccount(String email) {
         var key = "LOCK:" + email;
         this.stringRedisTemplate.opsForValue().set(key, "LOCKED", 1, TimeUnit.MINUTES);
-        this.stringRedisTemplate.delete("LOGIN_FAIL:" + email);
+        this.stringRedisTemplate.delete(KEY_LOGIN_FAILURES + email);
     }
 
     public boolean isAccountLocked(String email) {
@@ -147,4 +191,5 @@ public class RedisUserService {
             System.err.println("Lỗi parse tin nhắn: " + e.getMessage());
         }
     }
+
 }

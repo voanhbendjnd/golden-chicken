@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -51,8 +52,8 @@ public class Review {
     Customer customer;
     @Convert(converter = StringListConverter.class)
     @Column(name = "media_urls", columnDefinition = "NVARCHAR(MAX)")
-    List<String> mediaUrls;
-
+    List<String> mediaUrls = new ArrayList<>();
+    Boolean isUpdate = Boolean.FALSE;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     @Enumerated(EnumType.STRING)

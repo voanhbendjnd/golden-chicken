@@ -119,9 +119,12 @@
             <div th:if="${param.error != null}" class="alert alert-danger">
                 <span
                     th:if="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked!'}">Tài
-                    khoản của bạn đã bị khóa do nhập sai nhiều lần! Vui lòng thử lại sau.</span>
+                    khoản của bạn đã bị khóa do nhập sai nhiều lần! Vui lòng thử lại sau!</span>
                 <span
-                    th:unless="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked!'}">Email
+                    th:if="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked when review!'}">Tài
+                    khoản của bạn đã bị khóa do dùng từ ngữ vi phạm tiêu chuẩn cộng đồng!</span>
+                <span
+                    th:unless="${session != null and session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked!' or session.SPRING_SECURITY_LAST_EXCEPTION.message == 'Account has locked when review!'}">Email
                     hoặc mật khẩu không đúng!</span>
             </div>
 
