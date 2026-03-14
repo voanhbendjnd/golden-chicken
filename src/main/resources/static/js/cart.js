@@ -101,12 +101,25 @@
 
                 if (!itemData) {
                     if (itemRow) itemRow.remove();
-                    if (cart.items.length === 0) location.reload();
+                    
+                    if (cart.items.length === 0) {
+                        const emptyCart = document.getElementById('empty-cart');
+                        const cartContent = document.getElementById('cart-content');
+                        if (emptyCart) emptyCart.classList.remove('d-none');
+                        if (cartContent) cartContent.classList.add('d-none');
+                    }
                 } else {
                     document.getElementById('qty-' + updatedId).value = itemData.quantity;
                     const subtotal = document.getElementById('subtotal-' + updatedId);
                     subtotal.innerText = new Intl.NumberFormat('vi-VN').format(itemData.price * itemData.quantity) + '₫';
                 }
+                
+                // Cập nhật số lượng trên header nếu có
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    cartCount.innerText = cart.totalQuantity || cart.items.length;
+                }
+                
                 calculateFinalTotal();
             }
 

@@ -24,13 +24,13 @@
         <div class="container" style="padding-top: 120px;">
             <h4 class="mb-4 fw-bold"><i class="fa-solid fa-basket-shopping me-2"></i>GIỎ HÀNG CỦA BẠN</h4>
 
-            <div th:if="${#lists.isEmpty(cart.items)}" class="text-center py-5 bg-white shadow-sm rounded">
+            <div id="empty-cart" th:class="${#lists.isEmpty(cart.items)} ? 'text-center py-5 bg-white shadow-sm rounded' : 'text-center py-5 bg-white shadow-sm rounded d-none'">
                 <i class="fa-solid fa-cart-shopping fa-5x text-muted mb-3"></i>
                 <h5 class="text-secondary">Giỏ hàng của bạn đang trống!</h5>
                 <a th:href="@{/menu}" class="btn btn-danger btn-lg px-5 mt-2">XEM THỰC ĐƠN NGAY</a>
             </div>
 
-            <div th:unless="${#lists.isEmpty(cart.items)}">
+            <div id="cart-content" th:class="${#lists.isEmpty(cart.items)} ? 'd-none' : ''">
                 <div
                     class="cart-table-header d-none d-md-flex bg-white p-3 mb-2 shadow-sm rounded fw-bold align-items-center">
                     <div style="width: 5%;" class="text-center">

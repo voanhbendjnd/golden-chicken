@@ -88,14 +88,12 @@ public class ProfileController {
             @RequestParam String confirmPassword,
             Model model) {
 
-        // ✅ 1) Check mật khẩu cũ trước: sai -> dừng ngay, focus vào old
         if (!profileService.checkOldPassword(oldPassword)) {
             model.addAttribute("errorOld", "Mật khẩu cũ không đúng.");
             model.addAttribute("focusField", "old");
             return "change-password";
         }
 
-        // ✅ 2) Old đúng rồi mới check new/confirm
         if (newPassword == null || newPassword.isBlank()) {
             model.addAttribute("errorNew", "Vui lòng nhập mật khẩu mới.");
             model.addAttribute("focusField", "new");
@@ -114,18 +112,16 @@ public class ProfileController {
             return "change-password";
         }
 
-        // ✅ 3) Gọi service đổi mật khẩu (service sẽ check length >= 6, v.v.)
         var result = profileService.changePassword(oldPassword, newPassword);
 
         if (!result.success()) {
-            // phân loại focus cho hợp lý
             String msg = result.message() == null ? "Đổi mật khẩu thất bại." : result.message();
             model.addAttribute("error", msg);
 
             String lower = msg.toLowerCase();
             if (lower.contains("cũ")) {
-                model.addAttribute("focusField", "old"); 
-            }else {
+                model.addAttribute("focusField", "old");
+            } else {
                 model.addAttribute("focusField", "new");
             }
 

@@ -120,6 +120,7 @@ public class CartService {
         throw new PermissionException("You must be login for this service!");
     }
 
+    @Transactional
     public void updateQuantity(CartDTO dto) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = this.userRepository.findByEmailIgnoreCase(email);
@@ -134,6 +135,7 @@ public class CartService {
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), dto.productId());
         if (dto.quantity() <= 0) {
             if (cartItem != null) {
+                customer.getCartItems().removeIf(item -> item.getId().equals(cartItem.getId()));
                 this.cartRepository.delete(cartItem);
             }
             return;
@@ -141,7 +143,6 @@ public class CartService {
         if (cartItem == null) {
             var product = this.productRepository.findById(dto.productId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.productId()));
-            cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setCustomer(customer);
             cartItem.setQuantity(dto.quantity());
