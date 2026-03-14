@@ -2,9 +2,12 @@ package vn.edu.fpt.golden_chicken.controllers.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.response.ProductSearchSuggestionDTO;
 import vn.edu.fpt.golden_chicken.services.ProductService;
 
@@ -12,13 +15,13 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
-public class ProductRestController {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class SearchController {
 
-    @Autowired
-    private ProductService productService;
+    ProductService productService;
 
-    @GetMapping("/suggestions")
+    @GetMapping("/product/suggestions")
     public List<ProductSearchSuggestionDTO> getSuggestions(@RequestParam String query) {
         if (query == null || query.trim().length() < 1)
             return Collections.emptyList();

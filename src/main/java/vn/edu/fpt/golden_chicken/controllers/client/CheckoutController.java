@@ -1,7 +1,5 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -12,13 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
-import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
-import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
-import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
-import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.services.*;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
@@ -26,31 +23,15 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Controller
 @RequestMapping("/checkout")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CheckoutController {
-    private final ProductService productService;
-    private final AddressServices addressServices;
-    private final OrderService orderService;
-    private final CartService cartService;
-    private final RevenueService revenueService;
-    private final ProfileService profileService;
-    private final VoucherService voucherService;
-    private final CustomerVoucherRepository customerVoucherRepository;
-    private final CheckoutService checkoutService;
-
-    public CheckoutController(ProductService productService, AddressServices addressServices,
-            OrderService orderService, CartService cartService,
-            RevenueService revenueService, ProfileService profileService, VoucherService voucherService,
-            CustomerVoucherRepository customerVoucherRepository, CheckoutService checkoutService) {
-        this.productService = productService;
-        this.orderService = orderService;
-        this.addressServices = addressServices;
-        this.cartService = cartService;
-        this.revenueService = revenueService;
-        this.profileService = profileService;
-        this.voucherService = voucherService;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.checkoutService = checkoutService;
-    }
+    AddressServices addressServices;
+    OrderService orderService;
+    RevenueService revenueService;
+    ProfileService profileService;
+    VoucherService voucherService;
+    CheckoutService checkoutService;
 
     @GetMapping
     public String handleCheckout(
@@ -61,8 +42,7 @@ public class CheckoutController {
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
 
-        CheckoutResponse response =
-                checkoutService.buildCheckout(productId, ids, orderId, voucherId, addressId);
+        CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, voucherId, addressId);
 
         if (response.getRedirect() != null) {
             return response.getRedirect();

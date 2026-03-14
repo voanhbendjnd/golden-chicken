@@ -24,7 +24,7 @@ $(document).ready(function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             // Bước 2: Gọi API trả về JSON
-            fetch(`/api/products/suggestions?query=${encodeURIComponent(query)}`)
+            fetch(`/product/suggestions?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.length > 0) {
@@ -93,7 +93,7 @@ $(document).ready(function () {
 
             clearTimeout(heroDebounceTimer);
             heroDebounceTimer = setTimeout(() => {
-                fetch(`/api/products/suggestions?query=${encodeURIComponent(query)}`)
+                fetch(`/product/suggestions?query=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.length > 0) {
