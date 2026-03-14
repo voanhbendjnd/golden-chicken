@@ -142,4 +142,14 @@ public class MailService {
 
     }
 
+    @Async
+    public void recoverPasswordSuccess(String to, String subject, String template, String email) {
+        Context ctx = new Context();
+        ctx.setVariable("email", email);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(template, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+
+    }
+
 }

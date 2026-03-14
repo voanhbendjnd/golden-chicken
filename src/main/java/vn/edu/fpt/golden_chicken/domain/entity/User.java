@@ -56,6 +56,7 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
+    Boolean updatePassword = false;
 
     @PrePersist
     public void handleBeforeCreateAt() {

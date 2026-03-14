@@ -66,6 +66,7 @@ public class UserService {
     OrderRepository orderRepository;
     CartRepository cartRepository;
     KafkaTemplate<String, UserMessage> kafkaUserMessage;
+    KafkaTemplate<String, String> kafkaRecoverPwMessage;
 
     // KafkaTemplate<String, VerifyAccountMessage> msgVerifyAccount;
     public void forceLogoutCurrentUser() {
@@ -131,7 +132,7 @@ public class UserService {
 
     public void register(RegisterDTO request) {
         var email = request.getEmail();
-        if (this.userRepository.existsByEmail(email)) {
+        if (this.userRepository.existsByEmailIgnoreCase(email)) {
             throw new EmailAlreadyExistsException(email);
         }
         var roleCustomer = this.roleRepository.findByName(DeclareConstant.roleNameCustomer);
@@ -376,7 +377,7 @@ public class UserService {
         if (email == null) {
             return false;
         }
-        return this.userRepository.existsByEmail(email.trim().toLowerCase());
+        return this.userRepository.existsByEmailIgnoreCase(email.trim().toLowerCase());
     }
 
     public void updateCustomerPoint(Customer customer, Long point, boolean action) throws PermissionException {
@@ -392,6 +393,25 @@ public class UserService {
         }
         this.customerRepository.save(customer);
 
+    }
+
+    public void allowUpdatePassword(String email) {
+        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        user.setUpdatePassword(true);
+        this.userRepository.save(user);
+    }
+
+    public void changePassword(String email, String password) {
+        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        user.setPassword(this.passwordEncoder.encode(password));
+        user.setUpdatePassword(false);
+        this.userRepository.save(user);
+        this.kafkaRecoverPwMessage.send("state-account-topic", user.getEmail());
+    }
+
+    public boolean getAllowChangePassword(String email) {
+        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        return user.getUpdatePassword() ? true : false;
     }
 
 }

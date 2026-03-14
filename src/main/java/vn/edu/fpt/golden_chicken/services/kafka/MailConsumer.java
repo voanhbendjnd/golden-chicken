@@ -43,6 +43,15 @@ public class MailConsumer {
 
     }
 
+    @KafkaListener(topics = "forgot-password-account-topic", groupId = "email-group")
+    public void listenOrderAndSendMailVerifyForgotPassword(VerifyAccountMessage msg) {
+        System.out.println(">>>> KAFKA ACCEPT REQUEST ORDER");
+        var otp = this.redis.opsForValue().get("FORGOT_PASSWORD:" + msg.getEmail());
+        this.mailService.sendOTP(msg.getEmail(), "Verify Account", "mail/otp", msg.getEmail(), otp);
+        System.out.println(">>> SEND MAIL SUCCESS");
+
+    }
+
     @KafkaListener(topics = "security-account-topic", groupId = "email-group")
     public void listenLoginFailuresEvent(String email) {
         this.mailService.sendSecurityLoginFailures(email, "Lock Account About 3 Minutes", "mail/ban", email);
@@ -68,6 +77,13 @@ public class MailConsumer {
         this.mailService.sendEmailAndPasswordForStaff(msg.getEmail(), "Create account success!", "mail/sas",
                 msg.getEmail(), msg.getName(), msg.getPassword());
         System.out.println("SEND MAIL CREATE SUCCESS!");
+
+    }
+
+    @KafkaListener(topics = "state-account-topic", groupId = "email-group")
+    public void allowUserStateAccount(String email) {
+        this.mailService.recoverPasswordSuccess(email, "Recover Password", "mail/recover.password", email);
+        System.out.println("SEND MAIL RECOVER UPDATE SUCCESS!");
 
     }
 }

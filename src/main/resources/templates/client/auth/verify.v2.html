@@ -148,7 +148,7 @@
         <button class="btn-verify" onclick="verifyOTP()">Xác nhận</button>
 
         <div class="resend">
-            Bạn không nhận được mã? <a th:href="@{/verify(email=${email})}">Gửi lại</a>
+            Bạn không nhận được mã? <a th:href="@{/verify-v2(email=${email})}">Gửi lại</a>
         </div>
         <div class="resend">
             <a th:href="@{/register}" class="link-style">Bạn chưa có tài khoản? Đăng ký</a>
@@ -182,13 +182,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const emailFromUrl = urlParams.get('email');
 
-            fetch('/verify', {
+            fetch('/verify-v2', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
 
                 body: JSON.stringify({ otp: otp, email: emailFromUrl })
             }).then(res => {
-                if (res.ok) window.location.href = "/login?success";
+                if (res.ok) window.location.href = "/update-password-v2";
                 else alert("Mã OTP không đúng hoặc đã hết hạn!");
             });
         }
