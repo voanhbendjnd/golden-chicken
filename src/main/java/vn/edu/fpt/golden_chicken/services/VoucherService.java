@@ -394,6 +394,7 @@ public class VoucherService {
     }
 
     public List<CustomerVoucher> getCustomerVouchers(Long customerId) {
+        refreshVoucherStatuses();
         return customerVoucherRepository.findByCustomer_IdAndStatus(
                 customerId,
                 StatusVoucher.AVAILABLE);

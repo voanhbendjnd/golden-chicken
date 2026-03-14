@@ -48,11 +48,12 @@
 
         checkboxes.forEach(cb => {
             const type = cb.dataset.type;
-            const shouldDisable = selectedByType[type] && !cb.checked;
+            const disabledByMin = cb.dataset.minDisabled === 'true';
+            const shouldDisable = disabledByMin || (selectedByType[type] && !cb.checked);
             cb.disabled = shouldDisable;
             const card = cb.closest('.voucher-card');
             if (card) {
-                card.style.opacity = shouldDisable ? '0.5' : '1';
+                card.classList.toggle('voucher-disabled', shouldDisable);
             }
         });
     }
