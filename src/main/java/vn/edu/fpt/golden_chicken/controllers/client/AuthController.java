@@ -272,7 +272,7 @@ public class AuthController {
         }
 
         // Update password (encode inside UserService)
-        this.userService.updatePasswordByEmail(email, password);
+        // this.userService.updatePasswordByEmail(email, password);
 
         // clear flow session
         clearForgotSession(session);
