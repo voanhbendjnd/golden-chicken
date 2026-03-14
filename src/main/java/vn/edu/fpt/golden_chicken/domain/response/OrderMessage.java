@@ -22,5 +22,6 @@ public class OrderMessage implements Serializable {
     private String customerName;
     private OrderStatus status;
     private BigDecimal totalPrice;
+    private String reason;
 
 }

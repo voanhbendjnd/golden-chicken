@@ -121,6 +121,7 @@ public class OrderService {
             message.setStatus(newOrder.getStatus());
             message.setTotalPrice(newOrder.getFinalAmount());
             message.setCustomerName(newOrder.getName());
+            message.setReason(newOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
 
@@ -193,6 +194,7 @@ public class OrderService {
         message.setStatus(updatedOrder.getStatus());
         message.setTotalPrice(updatedOrder.getFinalAmount());
         message.setCustomerName(updatedOrder.getName());
+        message.setReason(updatedOrder.getDeliveryFailedReason());
         this.kafkaTemplate.send("order-chicken-topic", message);
     }
 
@@ -235,7 +237,7 @@ public class OrderService {
             normalizedReason = null;
         }
 
-        if (nextStatus == OrderStatus.DELIVERY_FAILED) {
+        if (nextStatus == OrderStatus.DELIVERY_FAILED || nextStatus == OrderStatus.SHIPPER_ISSUE) {
             order.setDeliveryFailedReason(normalizedReason);
         } else {
             order.setDeliveryFailedReason(null);
@@ -265,6 +267,7 @@ public class OrderService {
             message.setStatus(lastOrder.getStatus());
             message.setTotalPrice(lastOrder.getFinalAmount());
             message.setCustomerName(lastOrder.getName());
+            message.setReason(lastOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }
@@ -287,6 +290,7 @@ public class OrderService {
             message.setStatus(order.getStatus());
             message.setTotalPrice(order.getFinalAmount());
             message.setCustomerName(order.getName());
+            message.setReason(order.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }

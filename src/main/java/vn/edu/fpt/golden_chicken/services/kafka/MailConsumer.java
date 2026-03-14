@@ -12,6 +12,7 @@ import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.services.MailService;
+import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -24,9 +25,26 @@ public class MailConsumer {
     public void listenOrderAndSendMail(OrderMessage msg) {
         System.out.println(">>>> KAFKA ACCEPT REQUEST ORDER");
 
-        this.mailService.sendStatus(msg.getCustomerEmail(), "Confirm Order With ID #" + msg.getOrderId(), "mail/os",
-                msg.getCustomerEmail(), msg.getStatus().name(), String.valueOf(msg.getOrderId()),
-                msg.getCustomerName());
+        if (msg.getStatus() == OrderStatus.SHIPPER_ISSUE || msg.getStatus() == OrderStatus.DELIVERY_FAILED) {
+            this.mailService.sendStatus(
+                    msg.getCustomerEmail(),
+                    "Delivery Problem Update - Order #" + msg.getOrderId(),
+                    "mail/os",
+                    msg.getCustomerEmail(),
+                    msg.getStatus().name(),
+                    String.valueOf(msg.getOrderId()),
+                    msg.getCustomerName(),
+                    msg.getReason());
+        } else {
+            this.mailService.sendStatus(
+                    msg.getCustomerEmail(),
+                    "Confirm Order With ID #" + msg.getOrderId(),
+                    "mail/os",
+                    msg.getCustomerEmail(),
+                    msg.getStatus().name(),
+                    String.valueOf(msg.getOrderId()),
+                    msg.getCustomerName());
+        }
 
         System.out.println(">>> SEND MAIL SUCCESS");
 
