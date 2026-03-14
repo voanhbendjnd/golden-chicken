@@ -16,6 +16,7 @@ import vn.edu.fpt.golden_chicken.domain.entity.Category;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
 import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ProductSearchSuggestionDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.*;
@@ -44,9 +45,13 @@ public class ProductService {
     OrderItemRepository orderItemRepository;
     ComboDetailRepository comboDetailRepository;
 
-    public List<Product> searchByName(String name) {
-        // Sử dụng hàm bạn vừa thêm vào Repository lúc nãy
-        return productRepository.findByNameContainingIgnoreCaseAndActiveTrue(name);
+    /** Tìm sản phẩm theo tên, chỉ trả sản phẩm active và category đang hoạt động. Trả DTO. */
+    public List<ProductSearchSuggestionDTO> searchByName(String name) {
+        var products = productRepository.findByNameContainingIgnoreCaseAndActiveTrueAndCategory_StatusTrue(name);
+        return products.stream()
+                .limit(8)
+                .map(p -> new ProductSearchSuggestionDTO(p.getId(), p.getName()))
+                .collect(Collectors.toList());
     }
     public void updateStatus(Long id) {
         var product = this.productRepository.findById(id)
@@ -285,7 +290,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ResProduct> getAllActiveForMenu() {
-        return this.productRepository.findByActiveTrue().stream()
+        return this.productRepository.findByActiveTrueAndCategoryStatusTrue().stream()
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }
