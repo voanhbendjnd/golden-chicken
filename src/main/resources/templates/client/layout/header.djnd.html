@@ -4,6 +4,10 @@
     <meta name="_csrf" th:content="${_csrf.token}" />
 
     <link rel="stylesheet" th:href="@{/css/header.djnd.css}">
+
+    <!-- Global scripts for header search & effects -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
 </head>
 <div class="container-fluid fixed-top">
     <div class="container topbar d-none d-lg-block" style="background-color: #ffb524;">
@@ -129,20 +133,74 @@
     </div>
 </div>
 
+<!-- Modal Search Start (global) -->
+<div class="modal fade" id="searchModal" data-bs-focus="false" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content rounded-0">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Tìm kiếm tại Golden Chicken</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center">
+                <div class="input-group w-75 position-relative d-flex flex-column" style="height: 60px;">
+                    <div class="d-flex w-100">
+                        <input type="search" id="modalSearchInput" class="form-control p-3"
+                            placeholder="Bạn muốn ăn gì hôm nay?" aria-describedby="search-icon-1" autocomplete="off">
+                        <button id="modalSearchSubmit" type="button" class="input-group-text p-3"
+                            style="cursor:pointer; background:white; border-left:0;">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <div id="modalSuggestionBox" class="position-absolute w-100 shadow-sm d-none"
+                        style="top: 100%; z-index: 9999; background: white; border: 1px solid #ddd; border-top: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Search End -->
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
         const currentPath = window.location.pathname;
-
         const navLinks = document.querySelectorAll(".navbar .nav-link");
 
         navLinks.forEach(link => {
             const href = link.getAttribute("href");
-
             if (href && currentPath === href) {
                 link.classList.add("active");
             }
         });
+    });
 
+    // Search in header modal without jQuery (works on all pages)
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("modalSearchInput");
+        const btn = document.getElementById("modalSearchSubmit");
+
+        function goToMenu() {
+            if (!input) return;
+            const q = (input.value || "").trim();
+            if (!q) return;
+            window.location.href = "/menu?q=" + encodeURIComponent(q);
+        }
+
+        if (input) {
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    goToMenu();
+                }
+            });
+        }
+
+        if (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                goToMenu();
+            });
+        }
     });
 </script>

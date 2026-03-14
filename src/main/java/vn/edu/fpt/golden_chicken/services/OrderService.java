@@ -286,6 +286,12 @@ public class OrderService {
         res.setPaymentStatus(order.getPaymentStatus().toString());
         res.setPhone(order.getPhone());
         res.setStatus(order.getStatus());
+        if (order.getShipper() != null && order.getShipper().getUser() != null) {
+            var shipperUser = order.getShipper().getUser();
+            res.setShipperName(shipperUser.getFullName());
+            res.setShipperPhone(shipperUser.getPhone());
+        }
+        res.setCustomerId(order.getCustomer() != null ? order.getCustomer().getId() : null);
         res.setTotalPrice(order.getTotalProductPrice());
         res.setFinalAmount(order.getFinalAmount());
         res.setFeeShipping(order.getShippingFee());

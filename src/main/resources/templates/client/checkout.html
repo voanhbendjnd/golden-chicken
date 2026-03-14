@@ -18,7 +18,7 @@
     <div th:replace="~{client/layout/header.djnd}"></div>
     <div class="container-default" style="max-width: 1200px; margin: 0 auto; padding: 20px; padding-top: 150px;">
         <h1 class="text-center my-4" style="color:#ffb524; font-weight: bold;">HOÀN TẤT THANH TOÁN</h1>
-        <!-- <a th:href="@{/cart}" class="btn btn-danger" style="height: 30px; margin-bottom: 10px;">Back to cart</a> -->
+         <a th:href="@{/cart}" class="btn btn-danger" style="height: 30px; margin-bottom: 10px;">Đi tới giỏ hàng</a>
 
         <form th:action="@{/checkout/order}" th:object="${order}" method="post">
             <div class="checkout-layout" style="display: flex; gap: 30px; align-items: flex-start;">

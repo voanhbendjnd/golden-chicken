@@ -103,6 +103,7 @@ public class MenuController {
     @GetMapping
     public String getMenuPageOptimal(Model model,
             @RequestParam(name = "cat", required = false) String cat,
+            @RequestParam(name = "q", required = false) String q,
             @Filter Specification<Product> spec,
             @PageableDefault(size = 20) Pageable pageable) {
 
@@ -113,6 +114,15 @@ public class MenuController {
             categoriesName = List.of();
         if (products == null)
             products = List.of();
+
+        final String rawQuery = q == null ? "" : q.trim();
+        final String normalizedQuery = normalizeForSearch(rawQuery);
+        if (!normalizedQuery.isBlank()) {
+            products = products.stream()
+                    .filter(p -> p != null && p.getName() != null
+                            && normalizeForSearch(p.getName()).contains(normalizedQuery))
+                    .toList();
+        }
         Map<String, List<ResProduct>> productsByCatName = products.stream()
                 .filter(p -> p != null && p.getCategory() != null && p.getCategory().getName() != null)
                 .collect(Collectors.groupingBy(p -> p.getCategory().getName().trim(), LinkedHashMap::new,
@@ -151,6 +161,7 @@ public class MenuController {
         model.addAttribute("categoryProductList", categoryProductList);
         model.addAttribute("products", products);
         model.addAttribute("selectedCat", cat);
+        model.addAttribute("searchQuery", rawQuery);
         return "client/menu";
     }
 
@@ -210,6 +221,14 @@ public class MenuController {
                 .trim()
                 .replaceAll("\\s+", "-");
         return s;
+    }
+
+    private String normalizeForSearch(String input) {
+        if (input == null)
+            return "";
+        String s = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return s.toLowerCase().trim();
     }
 
     @GetMapping("/ga-gion")
