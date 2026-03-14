@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.VNPayService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
@@ -28,6 +29,7 @@ public class PaymentController {
 
     VNPayService vnPayService;
     OrderService orderService;
+    CartService cartService;
 
     /**
      * Tạo URL thanh toán VNPay và redirect
@@ -59,7 +61,7 @@ public class PaymentController {
     @GetMapping("/vnpay-return")
     public String vnpayReturn(
             HttpServletRequest request,
-            Model model) {
+            Model model) throws PermissionException {
         boolean valid = vnPayService.verifyReturnUrl(request);
         String orderIdStr = request.getParameter("vnp_TxnRef");
         String responseCode = request.getParameter("vnp_ResponseCode");
@@ -99,6 +101,8 @@ public class PaymentController {
             model.addAttribute("bankCode", bankCode);
             model.addAttribute("transactionNo", transactionNo);
             model.addAttribute("payDate", payDate);
+            // get order item from order
+            this.cartService.cleanCartAfterCheckout(this.orderService.getItemsDTOByOrderID(orderId));
             return "client/payment/payment.success";
         } else {
             String msg = "24".equals(responseCode)

@@ -32,6 +32,7 @@ public class CheckoutController {
     ProfileService profileService;
     VoucherService voucherService;
     CheckoutService checkoutService;
+    UserService userService;
 
     @GetMapping
     public String handleCheckout(
@@ -41,7 +42,10 @@ public class CheckoutController {
             @RequestParam(value = "voucherId", required = false) Long voucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
-
+        var user = this.userService.getUserInContext();
+        if (user.getCustomer() == null) {
+            throw new PermissionException("You do not have permission!");
+        }
         CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, voucherId, addressId);
 
         if (response.getRedirect() != null) {

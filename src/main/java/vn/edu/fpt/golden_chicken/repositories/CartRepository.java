@@ -17,4 +17,6 @@ public interface CartRepository extends JpaRepository<CartItem, Long>, JpaSpecif
     boolean existsByCustomerId(Long id);
 
     CartItem findByCustomerIdAndProductId(Long customerId, Long productId);
+
+    List<CartItem> findByCustomerIdAndProductIdIn(Long customerId, List<Long> productIds);
 }

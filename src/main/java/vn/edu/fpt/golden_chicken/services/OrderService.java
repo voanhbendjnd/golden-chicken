@@ -15,6 +15,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
@@ -53,6 +55,8 @@ public class OrderService {
     ProductRepository productRepository;
     OrderRepository orderRepository;
     CartService cartService;
+    UserService userService;
+    CartRepository cartRepository;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
@@ -86,7 +90,8 @@ public class OrderService {
             BigDecimal quantity = new BigDecimal(x.getQuantity());
             BigDecimal itemPriceTotal = product.getPrice().multiply(quantity);
             lastPriceProduct = lastPriceProduct.add(itemPriceTotal);
-            product.setSold(product.getSold() != null ? product.getSold() : 0 + x.getQuantity());
+            // product.setSold((product.getSold() != null ? product.getSold() : 0) +
+            // x.getQuantity());
             var orderItem = new OrderItem();
             orderItem.setFirstPrice(product.getPrice());
             orderItem.setOrder(order);
@@ -122,15 +127,46 @@ public class OrderService {
             message.setTotalPrice(newOrder.getFinalAmount());
             message.setCustomerName(newOrder.getName());
             this.kafkaTemplate.send("order-chicken-topic", message);
+            this.cartService.cleanCartAfterCheckout(dto.getItems());
         }
 
-        this.cartService.cleanCartAfterCheckout(dto.getItems());
-        this.productRepository.saveAll(details);
-        // this.mailService.allowMailUpdateOrderStatus(user.getEmail(),
-        // newOrder.getStatus().toString(),
-        // "#" + order.getId(), order.getName());
+        // this.productRepository.saveAll(details);
 
         return newOrder;
+    }
+
+    public List<OrderDTO.OrderDetail> getItemsDTOByOrderID(Long orderId) throws PermissionException {
+        var user = this.userService.getUserInContext();
+        var customer = user.getCustomer();
+        if (customer == null) {
+            throw new PermissionException("You do not have permission!");
+        }
+        var order = this.orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
+        var orderItems = order.getOrderItems();
+        if (orderItems.isEmpty()) {
+            return new ArrayList<>();
+        }
+        var customerId = customer.getId();
+        var resList = new ArrayList<OrderDTO.OrderDetail>();
+        var cartItems = this.cartRepository.findByCustomerIdAndProductIdIn(customerId,
+                orderItems.stream().map(x -> x.getProduct().getId()).toList());
+        var mapCartItems = cartItems.stream()
+                .collect(Collectors.toMap(x -> x.getProduct().getId(), x -> x.getId(), (c1, c2) -> c1));
+
+        for (var x : orderItems) {
+            var productId = x.getProduct().getId();
+            var cartItemId = mapCartItems.get(productId);
+            if (cartItemId != null) {
+                var res = new OrderDTO.OrderDetail();
+                res.setItemId(cartItemId);
+                res.setProductId(productId);
+                res.setQuantity(x.getQuantity());
+                resList.add(res);
+            }
+
+        }
+        return resList;
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Order> spec, Pageable pageable) {
@@ -233,6 +269,17 @@ public class OrderService {
             actionMessage.setActionAt(LocalDateTime.now());
             actionMessage.setUserId(order.getCustomer().getId());
             order.setPaymentStatus(PaymentStatus.PAID);
+            var items = order.getOrderItems();
+            var products = this.productRepository.findByIdIn(items.stream().map(x -> x.getProduct().getId()).toList());
+            var mpItems = items.stream().collect(Collectors.toMap(x -> x.getProduct().getId(), x -> x.getQuantity()));
+            for (var x : products) {
+                var quantity = mpItems.get(x.getId());
+                if (quantity != null) {
+                    var currentQty = x.getSold() != null ? x.getSold() : 0;
+                    x.setSold(currentQty + quantity);
+                }
+            }
+            this.productRepository.saveAll(products);
             this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
         }
         if (nextStatus == OrderStatus.CANCELLED && currentPayment == PaymentStatus.PAID) {
