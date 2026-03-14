@@ -1,3 +1,141 @@
+/* --- Autocomplete Search Logic --- */
+$(document).ready(function () {
+    const $searchInput = $('#modalSearchInput');
+    const $suggestionBox = $('#modalSuggestionBox');
+    const $submitBtn = $('#modalSearchSubmit');
+
+    let debounceTimer = null;
+
+    function goToMenuSearch(raw) {
+        const q = (raw || '').trim();
+        if (!q) return;
+        window.location.href = `/menu?q=${encodeURIComponent(q)}`;
+    }
+
+    $searchInput.on('input', function () {
+        const query = $(this).val().trim();
+
+        // Bước 1: Kiểm tra độ dài từ khóa (ít nhất 1 từ)
+        if (query.length < 1) {
+            $suggestionBox.addClass('d-none');
+            return;
+        }
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            // Bước 2: Gọi API trả về JSON
+            fetch(`/api/products/suggestions?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        let html = '';
+                        data.forEach(product => {
+                            // Highlight từ khóa khớp
+                            const regex = new RegExp(`(${query})`, 'gi');
+                            const highlightedName = product.name.replace(regex, '<b>$1</b>');
+
+                            html += `
+                                <div class="suggestion-item" onclick="window.location.href='/product/${product.id}'">
+                                    <i class="fa fa-search"></i>
+                                    <span>${highlightedName}</span>
+                                </div>
+                            `;
+                        });
+                        $suggestionBox.html(html).removeClass('d-none');
+                    } else {
+                        $suggestionBox.addClass('d-none');
+                    }
+                })
+                .catch(error => console.error('Error fetching suggestions:', error));
+        }, 150);
+    });
+
+    $searchInput.on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            goToMenuSearch($searchInput.val());
+        }
+    });
+
+    $submitBtn.on('click', function () {
+        goToMenuSearch($searchInput.val());
+    });
+
+    // Bước 3: Đóng hộp gợi ý khi click ra ngoài
+    $(document).on('click', function (e) {
+        if (!$searchInput.is(e.target) && !$suggestionBox.is(e.target) && $suggestionBox.has(e.target).length === 0) {
+            $suggestionBox.addClass('d-none');
+        }
+    });
+});
+
+/* --- Home hero search: Enter/bấm tìm => sang menu và lọc --- */
+$(document).ready(function () {
+    const $heroInput = $('#heroSearchInput');
+    const $heroSuggestionBox = $('#heroSuggestionBox');
+    const $heroSubmit = $('#heroSearchSubmit');
+
+    let heroDebounceTimer = null;
+
+    function goToMenuSearch(raw) {
+        const q = (raw || '').trim();
+        if (!q) return;
+        window.location.href = `/menu?q=${encodeURIComponent(q)}`;
+    }
+
+    if ($heroInput.length) {
+        $heroInput.on('input', function () {
+            const query = $(this).val().trim();
+            if (query.length < 1) {
+                $heroSuggestionBox.addClass('d-none');
+                return;
+            }
+
+            clearTimeout(heroDebounceTimer);
+            heroDebounceTimer = setTimeout(() => {
+                fetch(`/api/products/suggestions?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            let html = '';
+                            data.forEach(product => {
+                                const regex = new RegExp(`(${query})`, 'gi');
+                                const highlightedName = product.name.replace(regex, '<b>$1</b>');
+                                html += `
+                                    <div class="suggestion-item" onclick="window.location.href='/product/${product.id}'">
+                                        <i class="fa fa-search"></i>
+                                        <span>${highlightedName}</span>
+                                    </div>
+                                `;
+                            });
+                            $heroSuggestionBox.html(html).removeClass('d-none');
+                        } else {
+                            $heroSuggestionBox.addClass('d-none');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching hero suggestions:', error));
+            }, 150);
+        });
+
+        $heroInput.on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                goToMenuSearch($heroInput.val());
+            }
+        });
+
+        $heroSubmit.on('click', function () {
+            goToMenuSearch($heroInput.val());
+        });
+
+        $(document).on('click', function (e) {
+            if (!$heroInput.is(e.target) && !$heroSuggestionBox.is(e.target) && $heroSuggestionBox.has(e.target).length === 0) {
+                $heroSuggestionBox.addClass('d-none');
+            }
+        });
+    }
+});
+
 (function ($) {
     "use strict";
 

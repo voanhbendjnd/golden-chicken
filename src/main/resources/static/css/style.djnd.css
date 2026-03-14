@@ -1,3 +1,25 @@
+/* Style cho danh sách gợi ý */
+.suggestion-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+    background-color: #fff9f0; /* Màu vàng nhạt đặc trưng */
+}
+
+.suggestion-item i {
+    color: #ccc;
+    margin-right: 15px;
+}
+
+.suggestion-item b {
+    color: #ffb224; /* Tô đậm phần từ khóa khớp */
+}
 /*** Spinner Start ***/
 .btn-buy-now {
     transition: all 0.3s ease;
@@ -186,6 +208,26 @@
     background: rgba(255, 255, 255, .8);
 }
 
+/* Suggestion dropdown: consistent spacing */
+.suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.suggestion-item:hover {
+    background: rgba(255, 181, 36, 0.12);
+}
+/* Đẩy khung modal search xuống dưới 80px so với mép trên */
+
+#modalSuggestionBox {
+    position: absolute;
+    top: 100%;          /* nằm sát ngay dưới input-group */
+    left: 0;
+    right: 0;
+}
 /*** Navbar End ***/
 
 /*** Hero Header ***/

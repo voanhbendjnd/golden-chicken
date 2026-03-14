@@ -147,12 +147,32 @@
                             </div>
                         </div>
 
-
-
                     </div>
 
                 </div>
 
+            </div>
+
+            <!-- SHIPPER INFO (fragment for shipper dashboard) -->
+            <div class="card shadow-sm mt-3"
+                 th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
+                <div class="card-header bg-white fw-bold">
+                    Assigned Shipper
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="info-label">Shipper Name</label>
+                            <div class="info-value" th:text="${order.shipperName}">Nguyen Van A</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="info-label">Shipper Phone</label>
+                            <a th:href="'tel:' + ${order.shipperPhone}"
+                               class="info-value text-decoration-none"
+                               th:text="${order.shipperPhone}">0900000000</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
