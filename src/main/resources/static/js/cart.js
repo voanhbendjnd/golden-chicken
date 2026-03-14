@@ -101,12 +101,22 @@
 
                 if (!itemData) {
                     if (itemRow) itemRow.remove();
-                    if (cart.items.length === 0) location.reload();
+                    if (cart.items.length === 0) {
+                        location.reload();
+                        return;
+                    }
                 } else {
                     document.getElementById('qty-' + updatedId).value = itemData.quantity;
                     const subtotal = document.getElementById('subtotal-' + updatedId);
                     subtotal.innerText = new Intl.NumberFormat('vi-VN').format(itemData.price * itemData.quantity) + '₫';
                 }
+
+                // Cập nhật số lượng trên header
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    cartCount.innerText = cart.totalQuantity;
+                }
+
                 calculateFinalTotal();
             }
 
