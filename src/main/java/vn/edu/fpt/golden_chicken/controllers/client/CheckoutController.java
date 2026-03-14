@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
-import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
-import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
-import vn.edu.fpt.golden_chicken.services.*;
+import vn.edu.fpt.golden_chicken.services.AddressServices;
+import vn.edu.fpt.golden_chicken.services.CartService;
+import vn.edu.fpt.golden_chicken.services.OrderService;
+import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.services.ProfileService;
+import vn.edu.fpt.golden_chicken.services.VoucherService;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -33,12 +36,10 @@ public class CheckoutController {
     private final RevenueService revenueService;
     private final ProfileService profileService;
     private final VoucherService voucherService;
-    private final CustomerVoucherRepository customerVoucherRepository;
 
     public CheckoutController(ProductService productService, AddressServices addressServices,
             OrderService orderService, CartService cartService,
-            RevenueService revenueService, ProfileService profileService, VoucherService voucherService,
-            CustomerVoucherRepository customerVoucherRepository) {
+            RevenueService revenueService, ProfileService profileService, VoucherService voucherService) {
         this.productService = productService;
         this.orderService = orderService;
         this.addressServices = addressServices;
@@ -46,14 +47,14 @@ public class CheckoutController {
         this.revenueService = revenueService;
         this.profileService = profileService;
         this.voucherService = voucherService;
-        this.customerVoucherRepository = customerVoucherRepository;
     }
 
     @GetMapping
     public String handleCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
-            @RequestParam(value = "voucherId", required = false) Long voucherId,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
 
@@ -150,69 +151,10 @@ public class CheckoutController {
 
         model.addAttribute("vouchers", vouchers);
 
-        if (voucherId != null) {
-
-            CustomerVoucher selected = customerVoucherRepository.findById(voucherId).orElse(null);
-
-            if (selected != null) {
-
-                Voucher voucher = selected.getVoucher();
-                BigDecimal productPrice = orderDTO.getTotalProductPrice();
-
-                if (voucher.getMinOrderValue() != null &&
-                        productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
-
-                    model.addAttribute("voucherError",
-                            "Đơn hàng chưa đủ điều kiện để dùng voucher này");
-
-                } else {
-
-                    BigDecimal discount = BigDecimal.ZERO;
-
-                    if ("FIXED".equals(voucher.getDiscountType())) {
-
-                        discount = BigDecimal.valueOf(voucher.getDiscountValue());
-
-                    } else if ("PERCENT".equals(voucher.getDiscountType())) {
-
-                        discount = productPrice
-                                .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
-                                .divide(BigDecimal.valueOf(100));
-                    }
-
-                    if (discount.compareTo(productPrice) > 0) {
-                        discount = productPrice;
-                    }
-
-                    if ("SHIPPING".equals(voucher.getVoucherType())) {
-
-                        BigDecimal shippingDiscount = discount;
-
-                        if (shippingDiscount.compareTo(shippingFee) > 0) {
-                            shippingDiscount = shippingFee;
-                        }
-
-                        orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
-
-                        BigDecimal finalAmount = productPrice
-                                .add(orderDTO.getShippingFee());
-
-                        orderDTO.setFinalAmount(finalAmount);
-
-                    } else {
-
-                        orderDTO.setDiscountAmount(discount);
-
-                        BigDecimal finalAmount = productPrice
-                                .add(orderDTO.getShippingFee())
-                                .subtract(discount);
-
-                        orderDTO.setFinalAmount(finalAmount);
-                    }
-
-                    model.addAttribute("selectedVoucher", selected);
-                }
-            }
+        if (productVoucherId != null || shippingVoucherId != null) {
+            voucherService.applyVouchersToOrder(productVoucherId, shippingVoucherId, orderDTO, shippingFee, model);
+            orderDTO.setProductVoucherId(productVoucherId);
+            orderDTO.setShippingVoucherId(shippingVoucherId);
         }
 
         model.addAttribute("order", orderDTO);
@@ -220,6 +162,7 @@ public class CheckoutController {
 
         return "client/checkout";
     }
+
 
     @GetMapping("/addresses")
     public String listAddressCheckout(
@@ -241,6 +184,9 @@ public class CheckoutController {
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
+        if (dto.getProductVoucherId() == null && dto.getShippingVoucherId() == null) {
+            dto.setDiscountAmount(BigDecimal.ZERO);
+        }
         var order = this.orderService.order(dto);
 
         if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
@@ -265,17 +211,71 @@ public class CheckoutController {
     public String chooseVoucher(
             @RequestParam(value = "id", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> productIds,
-            Model model) {
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "9") int size,
+            Model model) throws PermissionException {
 
         var currentUser = profileService.getCurrentUser();
-
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
-        model.addAttribute("vouchers", vouchers);
+        BigDecimal orderTotal = calculateOrderTotal(productId, productIds);
+        final BigDecimal orderTotalFinal = orderTotal;
+
+        List<CustomerVoucher> allVouchers = vouchers;
+
+        int total = allVouchers.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
+        int fromIndex = Math.max(0, (currentPage - 1) * size);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
+
+        model.addAttribute("vouchers", pageVouchers);
+        model.addAttribute("orderTotal", orderTotalFinal);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("size", size);
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
 
         return "client/voucher-select";
+    }
+
+    private BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
+        if (productId != null) {
+            var product = productService.findById(productId);
+            return product != null ? product.getPrice() : BigDecimal.ZERO;
+        }
+        if (productIds != null && !productIds.isEmpty()) {
+            var cart = cartService.getProductInCart();
+            BigDecimal total = BigDecimal.ZERO;
+            if (cart.getItems() != null) {
+                for (var item : cart.getItems()) {
+                    if (productIds.contains(item.getProductId())) {
+                        total = total.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+                    }
+                }
+            }
+            return total;
+        }
+        return BigDecimal.ZERO;
+    }
+
+    @PostMapping("/apply-vouchers")
+    public String applyVouchers(
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
+            @RequestParam(value = "voucherCode", required = false) String voucherCode,
+            Model model) throws PermissionException {
+        var selection = voucherService.resolveVoucherSelection(profileService.getCurrentUser(), voucherIds, voucherCode,
+                model);
+        if (!selection.isValid()) {
+            return handleCheckout(productId, ids, null, null, null, model);
+        }
+
+        return handleCheckout(productId, ids, selection.getProductVoucherId(), selection.getShippingVoucherId(), null,
+                model);
     }
 }

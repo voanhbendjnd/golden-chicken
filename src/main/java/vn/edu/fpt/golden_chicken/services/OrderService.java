@@ -29,9 +29,11 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
@@ -52,6 +54,8 @@ public class OrderService {
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
+    CustomerVoucherRepository customerVoucherRepository;
+    VoucherRepository voucherRepository;
     CartService cartService;
 
     @Transactional
@@ -111,6 +115,8 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
+        markVoucherUsed(dto.getProductVoucherId(), newOrder);
+        markVoucherUsed(dto.getShippingVoucherId(), newOrder);
 
         // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
@@ -131,6 +137,29 @@ public class OrderService {
         // "#" + order.getId(), order.getName());
 
         return newOrder;
+    }
+
+    private void markVoucherUsed(Long voucherId, Order newOrder) {
+        if (voucherId == null) {
+            return;
+        }
+        var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
+        if (customerVoucher == null || customerVoucher.getVoucher() == null) {
+            return;
+        }
+        customerVoucher.setStatus(vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher.USED);
+        customerVoucher.setUsedAt(LocalDateTime.now());
+        customerVoucher.setOrder(newOrder);
+        customerVoucherRepository.save(customerVoucher);
+
+        var voucher = customerVoucher.getVoucher();
+        int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+        int newQty = qty - 1;
+        voucher.setQuantity(newQty);
+        if (newQty <= 0) {
+            voucher.setStatus("DISABLED");
+        }
+        voucherRepository.save(voucher);
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Order> spec, Pageable pageable) {

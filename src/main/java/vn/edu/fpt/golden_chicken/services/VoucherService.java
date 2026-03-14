@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
+import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
+import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
@@ -23,6 +25,9 @@ import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
+import org.springframework.ui.Model;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,7 +184,7 @@ public class VoucherService {
         if (isUsed) {
             throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
         }
-        repo.delete(voucher); 
+        repo.delete(voucher);
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
@@ -192,7 +197,7 @@ public class VoucherService {
         res.setDiscountType(voucher.getDiscountType());
         res.setMinOrderValue(voucher.getMinOrderValue());
         res.setPointCost(voucher.getPointCost());
-  
+
         res.setQuantity(voucher.getQuantity() != null ? voucher.getQuantity() : 0);
         res.setVoucherType(voucher.getVoucherType());
         res.setStartAt(voucher.getStartAt());
@@ -304,7 +309,6 @@ public class VoucherService {
 
         voucher.setQuantity(newQty);
 
- 
         if (newQty <= 0) {
             voucher.setStatus("DISABLED");
         }
@@ -389,10 +393,175 @@ public class VoucherService {
         }
     }
 
-    // mới, ap dung voucher
     public List<CustomerVoucher> getCustomerVouchers(Long customerId) {
         return customerVoucherRepository.findByCustomer_IdAndStatus(
                 customerId,
                 StatusVoucher.AVAILABLE);
+    }
+
+    public void applyVouchersToOrder(
+            Long productVoucherId,
+            Long shippingVoucherId,
+            OrderDTO orderDTO,
+            BigDecimal shippingFee,
+            Model model) {
+        BigDecimal productPrice = orderDTO.getTotalProductPrice();
+        BigDecimal productDiscount = BigDecimal.ZERO;
+        BigDecimal shippingDiscount = BigDecimal.ZERO;
+
+        CustomerVoucher productVoucher = null;
+        CustomerVoucher shippingVoucher = null;
+
+        if (productVoucherId != null) {
+            productVoucher = customerVoucherRepository.findById(productVoucherId).orElse(null);
+        }
+        if (shippingVoucherId != null) {
+            shippingVoucher = customerVoucherRepository.findById(shippingVoucherId).orElse(null);
+        }
+
+        if (productVoucher != null) {
+            Voucher voucher = productVoucher.getVoucher();
+            BigDecimal discount = calculateDiscount(voucher, productPrice, model);
+            if (discount != null) {
+                productDiscount = discount;
+            }
+        }
+
+        if (shippingVoucher != null) {
+            Voucher voucher = shippingVoucher.getVoucher();
+            BigDecimal discount = calculateDiscount(voucher, productPrice, model);
+            if (discount != null) {
+                shippingDiscount = discount.min(shippingFee);
+            }
+        }
+
+        orderDTO.setDiscountAmount(productDiscount);
+        orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
+        orderDTO.setFinalAmount(productPrice.add(orderDTO.getShippingFee()).subtract(productDiscount));
+
+        model.addAttribute("selectedProductVoucher", productVoucher);
+        model.addAttribute("selectedShippingVoucher", shippingVoucher);
+    }
+
+    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal productPrice, Model model) {
+        if (voucher == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (voucher.getMinOrderValue() != null && productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+            model.addAttribute("voucherError", "Đơn hàng chưa đủ điều kiện để dùng voucher này");
+            return null;
+        }
+
+        BigDecimal discount = BigDecimal.ZERO;
+        if ("FIXED".equals(voucher.getDiscountType())) {
+            discount = BigDecimal.valueOf(voucher.getDiscountValue());
+        } else if ("PERCENT".equals(voucher.getDiscountType())) {
+            discount = productPrice
+                    .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
+                    .divide(BigDecimal.valueOf(100));
+        }
+
+        if (discount.compareTo(productPrice) > 0) {
+            discount = productPrice;
+        }
+
+        return discount;
+    }
+
+    public VoucherSelection resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode,
+            Model model) {
+        VoucherSelection selection = new VoucherSelection();
+        if (currentUser == null) {
+            model.addAttribute("voucherError", "Bạn cần đăng nhập.");
+            selection.setValid(false);
+            return selection;
+        }
+
+        Long productVoucherId = null;
+        Long shippingVoucherId = null;
+
+        if (voucherCode != null && !voucherCode.isBlank()) {
+            var customerVoucher = customerVoucherRepository
+                    .findFirstByCustomer_IdAndVoucher_CodeAndStatusOrderByIdDesc(
+                            currentUser.getId(), voucherCode, StatusVoucher.AVAILABLE);
+            if (customerVoucher == null) {
+                model.addAttribute("voucherError", "Mã voucher không hợp lệ.");
+                selection.setValid(false);
+                return selection;
+            }
+            if (customerVoucher.getVoucher() != null
+                    && customerVoucher.getVoucher().getCode() != null
+                    && !customerVoucher.getVoucher().getCode().equals(voucherCode)) {
+                model.addAttribute("voucherError", "Mã voucher không hợp lệ.");
+                selection.setValid(false);
+                return selection;
+            }
+            var voucherType = customerVoucher.getVoucher() != null
+                    ? customerVoucher.getVoucher().getVoucherType()
+                    : null;
+            if ("PRODUCT".equalsIgnoreCase(voucherType)) {
+                productVoucherId = customerVoucher.getId();
+            } else if ("SHIPPING".equalsIgnoreCase(voucherType)) {
+                shippingVoucherId = customerVoucher.getId();
+            } else {
+                model.addAttribute("voucherError", "Loại voucher không hợp lệ.");
+                selection.setValid(false);
+                return selection;
+            }
+        }
+
+        if (voucherIds != null) {
+            for (Long voucherId : voucherIds) {
+                if (voucherId == null) {
+                    continue;
+                }
+                var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
+                if (customerVoucher == null || customerVoucher.getVoucher() == null) {
+                    continue;
+                }
+                var voucherType = customerVoucher.getVoucher().getVoucherType();
+                if ("PRODUCT".equalsIgnoreCase(voucherType) && productVoucherId == null) {
+                    productVoucherId = voucherId;
+                } else if ("SHIPPING".equalsIgnoreCase(voucherType) && shippingVoucherId == null) {
+                    shippingVoucherId = voucherId;
+                }
+            }
+        }
+
+        selection.setProductVoucherId(productVoucherId);
+        selection.setShippingVoucherId(shippingVoucherId);
+        selection.setValid(true);
+        return selection;
+    }
+
+    public static class VoucherSelection {
+        private Long productVoucherId;
+        private Long shippingVoucherId;
+        private boolean valid;
+
+        public Long getProductVoucherId() {
+            return productVoucherId;
+        }
+
+        public void setProductVoucherId(Long productVoucherId) {
+            this.productVoucherId = productVoucherId;
+        }
+
+        public Long getShippingVoucherId() {
+            return shippingVoucherId;
+        }
+
+        public void setShippingVoucherId(Long shippingVoucherId) {
+            this.shippingVoucherId = shippingVoucherId;
+        }
+
+        public boolean isValid() {
+            return valid;
+        }
+
+        public void setValid(boolean valid) {
+            this.valid = valid;
+        }
     }
 }
