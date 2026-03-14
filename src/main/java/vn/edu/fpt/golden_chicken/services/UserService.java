@@ -250,7 +250,6 @@ public class UserService {
         return this.userRepository.findByEmailIgnoreCase(email);
     }
 
-    @SuppressWarnings("null")
     @Transactional(rollbackFor = Exception.class)
     public void importUsers(MultipartFile file) throws IOException, DataFormatException {
         if (!file.getOriginalFilename().endsWith(".xlsx")) {

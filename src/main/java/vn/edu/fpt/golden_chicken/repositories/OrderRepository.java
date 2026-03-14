@@ -24,6 +24,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
         Page<Order> findByStatusAndShipperIsNull(OrderStatus status, Pageable pageable);
 
+        Page<Order> findByStatusAndShipperNot(OrderStatus status, Staff shipper, Pageable pageable);
+
         long countByShipper(Staff shipper);
 
         boolean existsByShipperId(Long id);
@@ -41,6 +43,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         java.time.LocalDateTime start, java.time.LocalDateTime end);
 
         long countByShipperAndStatus(Staff shipper, OrderStatus status);
+
+        long countByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses);
 
         @Query("select coalesce(sum(o.finalAmount),0) from Order o where o.shipper = ?1 and o.paymentMethod = ?2 and o.paymentStatus = ?3")
         java.math.BigDecimal sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(Staff shipper,

@@ -15,7 +15,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -105,9 +104,6 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new CheckoutException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        // customer
-        // .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() :
-        // 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
@@ -117,8 +113,6 @@ public class OrderService {
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
 
-        // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
-
         if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
             message.setCustomerEmail(user.getEmail());
@@ -126,11 +120,10 @@ public class OrderService {
             message.setStatus(newOrder.getStatus());
             message.setTotalPrice(newOrder.getFinalAmount());
             message.setCustomerName(newOrder.getName());
+            message.setReason(newOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
             this.cartService.cleanCartAfterCheckout(dto.getItems());
         }
-
-        // this.productRepository.saveAll(details);
 
         return newOrder;
     }
@@ -185,6 +178,7 @@ public class OrderService {
             order.setName(x.getName());
             order.setPhone(x.getPhone());
             order.setNote(x.getNote());
+            order.setDeliveryFailedReason(x.getDeliveryFailedReason());
             order.setTotalPrice(x.getFinalAmount());
             order.setPaymentMethod(x.getPaymentMethod().toString());
             order.setPaymentStatus(x.getPaymentStatus().toString());
@@ -199,7 +193,6 @@ public class OrderService {
     @Transactional
     public void cancelOrderByCustomer(Long id) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        // var user = this.userRepository.findByEmailIgnoreCase(email);
 
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
@@ -228,11 +221,17 @@ public class OrderService {
         message.setStatus(updatedOrder.getStatus());
         message.setTotalPrice(updatedOrder.getFinalAmount());
         message.setCustomerName(updatedOrder.getName());
+        message.setReason(updatedOrder.getDeliveryFailedReason());
         this.kafkaTemplate.send("order-chicken-topic", message);
     }
 
     @Transactional
     public void changeOrderStatus(Long id, String statusName, Staff shipper) {
+        this.changeOrderStatus(id, statusName, shipper, null);
+    }
+
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName, Staff shipper, String reason) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
 
@@ -259,6 +258,17 @@ public class OrderService {
 
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
+
+        String normalizedReason = reason == null ? null : reason.trim();
+        if (normalizedReason != null && normalizedReason.isEmpty()) {
+            normalizedReason = null;
+        }
+
+        if (nextStatus == OrderStatus.DELIVERY_FAILED || nextStatus == OrderStatus.SHIPPER_ISSUE) {
+            order.setDeliveryFailedReason(normalizedReason);
+        } else {
+            order.setDeliveryFailedReason(null);
+        }
 
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             var actionMessage = new ActionPointMessage();
@@ -295,6 +305,7 @@ public class OrderService {
             message.setStatus(lastOrder.getStatus());
             message.setTotalPrice(lastOrder.getFinalAmount());
             message.setCustomerName(lastOrder.getName());
+            message.setReason(lastOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }
@@ -317,10 +328,12 @@ public class OrderService {
             message.setStatus(order.getStatus());
             message.setTotalPrice(order.getFinalAmount());
             message.setCustomerName(order.getName());
+            message.setReason(order.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }
 
+    @Transactional
     public ResOrder findById(Long id) {
         var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
         var res = new ResOrder();
@@ -329,6 +342,7 @@ public class OrderService {
         res.setId(order.getId());
         res.setName(order.getName());
         res.setNote(order.getNote());
+        res.setDeliveryFailedReason(order.getDeliveryFailedReason());
         res.setPaymentMethod(order.getPaymentMethod().toString());
         res.setPaymentStatus(order.getPaymentStatus().toString());
         res.setPhone(order.getPhone());

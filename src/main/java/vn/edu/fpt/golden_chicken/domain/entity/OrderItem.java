@@ -2,7 +2,6 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.math.BigDecimal;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
