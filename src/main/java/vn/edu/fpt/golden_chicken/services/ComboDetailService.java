@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.ComboDetail;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.request.ComboDTO;
@@ -47,7 +48,8 @@ public class ComboDetailService {
         // check img file
         if (file != null && !file.isEmpty()) {
             // check file
-            if (!this.productService.validFile(file)) {
+
+            if (!this.fileService.validFile(file)) {
                 throw new IOException("File Invalid");
             }
 
@@ -55,7 +57,7 @@ public class ComboDetailService {
                 filesToDelete.add(product.getImageUrl());
             }
             // save new file
-            product.setImageUrl(this.fileService.getLastNameFile(file));
+            product.setImageUrl(this.fileService.getLastNameFile(file, DeclareConstant.productFolder));
         }
         this.productService.handleGalleryUpdate(product, files, dto.getImgs(), filesToDelete);
         product.setCategory(category);
@@ -67,7 +69,7 @@ public class ComboDetailService {
         var lastProduct = this.productRepository.save(product);
         filesToDelete.forEach(x -> {
             try {
-                this.fileService.deleteFile(x);
+                this.fileService.deleteFile(DeclareConstant.productFolder, x);
             } catch (IOException e) {
                 System.out.println("Cannot Delete File!");
             }

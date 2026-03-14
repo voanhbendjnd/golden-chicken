@@ -28,6 +28,7 @@ import vn.edu.fpt.golden_chicken.services.PermissionService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Controller
+
 @RequestMapping("/admin/permission")
 public class PermissionController {
     private final PermissionService permissionService;

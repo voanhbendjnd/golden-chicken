@@ -22,6 +22,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+
 public class CategoryService {
     CategoryRepository categoryRepository;
     ProductRepository productRepository;

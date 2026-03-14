@@ -166,7 +166,6 @@
                 display: inline-block;
             }
 
-            /* Custom scrollbar */
             .gc-chat-body::-webkit-scrollbar {
                 width: 6px;
             }
@@ -213,8 +212,10 @@
             var gcStompClient = null;
             var gcCurrentUser = /*[[${#authentication.name}]]*/ 'anonymous';
             var gcIsStaff = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
+            var sessionRole = /*[[${session.roleName}]]*/ 'GUEST';
+            var authName = /*[[${#authentication.name}]]*/ 'anonymous';
 
-            var chatHistory = {}; // email -> { unread: 0, messages: [] }
+            var gcCurrentUser2 = (sessionRole === 'ADMIN' || sessionRole === 'STAFF') ? 'STAFF' : authName; var chatHistory = {};
             var activeChat = gcIsStaff ? null : 'STAFF';
             var totalUnread = 0;
 
@@ -230,7 +231,7 @@
                         .then(partners => {
                             if (partners && partners.length > 0) {
                                 partners.forEach(partner => {
-                                    if (partner !== gcCurrentUser && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
+                                    if (partner !== gcCurrentUser2 && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
                                         if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
                                     }
                                 });
@@ -272,17 +273,18 @@
                     return;
                 }
 
-                var u1 = gcIsStaff ? partner : gcCurrentUser;
-                var u2 = gcIsStaff ? gcCurrentUser : 'STAFF';
-
+                // var u1 = gcIsStaff ? 'STAFF' : gcCurrentUser;
+                // var u2 = gcIsStaff ? 'STAFF' : gcCurrentUser;
+                var u1 = gcIsStaff ? partner : gcCurrentUser2;
+                var u2 = gcIsStaff ? gcCurrentUser2 : 'STAFF';
                 fetch(`/api/chat/history?user1=${u1}&user2=${u2}`)
                     .then(res => res.json())
                     .then(messages => {
                         if (messages && messages.length > 0) {
                             var loadedMsgs = [];
                             messages.forEach(msg => {
-                                var type = msg.senderId === gcCurrentUser ? 'sent' : 'received';
-                                var senderName = msg.senderId === gcCurrentUser ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
+                                var type = msg.senderId === gcCurrentUser2 ? 'sent' : 'received';
+                                var senderName = msg.senderId === gcCurrentUser2 ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
                                 loadedMsgs.push({ content: msg.content, type: type, senderName: senderName });
                             });
                             if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [] };
@@ -303,10 +305,8 @@
                 var panelOpen = (document.getElementById('gc-chat-panel').style.display === 'flex');
 
                 if (activeChat === partner && panelOpen) {
-                    // Currently viewing this chat
                     appendMessageDOM(content, type, senderName);
                 } else {
-                    // Not viewing this chat OR panel is closed
                     chatHistory[partner].unread++;
                     totalUnread++;
                     updateGlobalBadge();
@@ -344,7 +344,6 @@
             function openChatWith(partner) {
                 activeChat = partner;
 
-                // reset unread for this partner
                 if (chatHistory[partner]) {
                     totalUnread -= chatHistory[partner].unread;
                     if (totalUnread < 0) totalUnread = 0;
@@ -397,7 +396,6 @@
                     return;
                 }
 
-                // Sort partners by latest message if desired, but object keys are ok for now
                 partners.forEach(function (partner) {
                     var data = chatHistory[partner];
                     var item = document.createElement('div');
@@ -431,7 +429,7 @@
                     var recipient = gcIsStaff ? document.getElementById('gc-current-recipient').value : 'STAFF';
 
                     var chatMessage = {
-                        senderId: gcCurrentUser,
+                        senderId: gcCurrentUser2,
                         recipientId: recipient,
                         content: content
                     };

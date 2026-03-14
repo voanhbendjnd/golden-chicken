@@ -70,21 +70,23 @@
                         <div class="d-grid gap-2 d-md-flex">
 
                             <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                <a class="btn btn-warning" style="text-decoration-line: none;"
+                                <a class="btn btn-danger" style="text-decoration-line: none;"
                                     th:href="@{/checkout?id={id}(id=${product.id})}">
                                     Mua Ngay
                                 </a>
-                                <button class="btn btn-danger add-to-cart" th:data-id="${product.id}">
-                                    Thêm vào giỏ
+                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}">
+                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>
                                 </button>
 
-                                <div class="input-group quantity-selector shadow-sm" style="width: 100px;">
-                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
-                                    <input type="number" class="form-control text-center input-qty" value="1" min="1"
-                                        max="33" th:id="'qty-' + ${product.id}">
-                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
-                                </div>
+
                             </div>
+
+                        </div>
+                        <div class="input-group quantity-selector shadow-sm" style="margin-top: 20px; width: 20%;">
+                            <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                            <input type="number" class="form-control text-center input-qty" value="1" min="1" max="33"
+                                th:id="'qty-' + ${product.id}">
+                            <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
                         </div>
                     </div>
 
@@ -98,6 +100,93 @@
                     <div class="small text-muted">
                         <p>Giao hàng nhanh trong 30 phút tại khu vực của bạn.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="review-section" id="reviewSection">
+            <div class="review-section-title">ĐÁNH GIÁ SẢN PHẨM</div>
+
+            <div class="review-summary" id="reviewSummary" style="display:none!important;">
+                <div class="review-avg-score">
+                    <div class="review-avg-number" id="reviewAvgNumber">0.0</div>
+                    <div class="review-avg-stars" id="reviewAvgStars">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i>
+                    </div>
+                    <div class="review-avg-count" id="reviewAvgCount">0 đánh giá</div>
+                </div>
+                <div class="review-filter-pills" id="reviewFilterPills">
+                    <span class="review-filter-pill active" data-rating="0">Tất cả</span>
+                    <span class="review-filter-pill" data-rating="5">5 ★</span>
+                    <span class="review-filter-pill" data-rating="4">4 ★</span>
+                    <span class="review-filter-pill" data-rating="3">3 ★</span>
+                    <span class="review-filter-pill" data-rating="2">2 ★</span>
+                    <span class="review-filter-pill" data-rating="1">1 ★</span>
+                </div>
+            </div>
+
+            <div id="reviewList"></div>
+
+            <div class="review-loading" id="reviewLoading" style="display:none;">
+                <i class="fa fa-spinner fa-spin me-2"></i>Đang tải đánh giá...
+            </div>
+
+            <button class="btn-load-more-reviews" id="btnLoadMoreReviews" style="display:none;">
+                Xem thêm đánh giá
+            </button>
+        </div>
+
+        <div class="modal fade" id="reviewMediaModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="modalMediaContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="reviewEditModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form id="reviewEditForm" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Chỉnh sửa bình luận</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" id="editReviewId">
+
+                            <div class="mb-3">
+                                <label class="form-label">Đánh giá (1-5 sao)</label>
+                                <input id="editReviewRating" name="rating" type="number" min="1" max="5"
+                                    class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nội dung</label>
+                                <textarea id="editReviewComment" name="comment" class="form-control"
+                                    rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Hình ảnh/Video đã tải lên</label>
+                                <div id="editReviewOldFiles" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                <small class="text-muted">Nhấn vào dấu X để xóa file cũ</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Tải lên file mới</label>
+                                <input id="editReviewNewFiles" name="files" type="file" multiple class="form-control"
+                                    accept="image/*,video/mp4">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary" id="btnSubmitEditReview">Lưu thay đổi</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -186,11 +275,345 @@
     </div>
     <div th:replace="~{client/layout/footer.djnd}"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        (function () {
+            const PRODUCT_ID = /*[[${product.id}]]*/ 0;
+            const CURRENT_USER_ROLE = /*[[${currentUserRole}]]*/ '';
+            const CURRENT_CUSTOMER_ID = /*[[${currentCustomerId}]]*/ null;
+            const PAGE_SIZE = 5;
+            const MEDIA_BASE = '/images/reviews/';
+
+            let currentPage = 1;
+            let totalPages = 1;
+            let isLoading = false;
+            let activeRating = 0;   // 0 = all
+
+            const reviewList = document.getElementById('reviewList');
+            const reviewLoading = document.getElementById('reviewLoading');
+            const btnLoadMore = document.getElementById('btnLoadMoreReviews');
+            const reviewSummary = document.getElementById('reviewSummary');
+            const avgNumber = document.getElementById('reviewAvgNumber');
+            const avgStars = document.getElementById('reviewAvgStars');
+            const avgCount = document.getElementById('reviewAvgCount');
+            const filterPills = document.querySelectorAll('.review-filter-pill');
+            const reviewMediaModal = document.getElementById('reviewMediaModal');
+            const bsModal = new bootstrap.Modal(reviewMediaModal);
+            const modalContent = document.getElementById('modalMediaContent');
+
+            const reviewEditModalEl = document.getElementById('reviewEditModal');
+            const bsEditModal = new bootstrap.Modal(reviewEditModalEl);
+            let editOldFilesList = [];
+
+            /* ─── Helpers ────────────────────────────────── */
+            function starsHtml(rating) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    html += `<i class="fa fa-star ${i <= rating ? 'filled' : ''}"></i>`;
+                }
+                return html;
+            }
+
+            function avgStarsHtml(avg) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (avg >= i) {
+                        html += `<i class="fa fa-star" style="color:#ffc107"></i>`;
+                    } else if (avg >= i - 0.5) {
+                        html += `<i class="fa fa-star-half-alt" style="color:#ffc107"></i>`;
+                    } else {
+                        html += `<i class="fa fa-star" style="color:#e0e0e0"></i>`;
+                    }
+                }
+                return html;
+            }
+
+            function formatDate(val) {
+                if (!val) return '';
+                try {
+                    let d;
+                    if (Array.isArray(val)) {
+                        d = new Date(val[0], val[1] - 1, val[2], val[3] || 0, val[4] || 0, val[5] || 0);
+                    } else {
+                        d = new Date(val);
+                    }
+                    return d.toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                        // second: '2-digit' // (Mở comment dòng này nếu bạn muốn hiện cả giây nhé)
+                    });
+                } catch (e) { return ''; }
+            }
+
+            function isVideo(url) {
+                return url && url.toLowerCase().endsWith('.mp4');
+            }
+
+            function mediaThumbHtml(url) {
+                const src = MEDIA_BASE + url;
+                if (isVideo(url)) {
+                    return `<div class="review-video-thumb" onclick="openReviewMedia('${src}', true)">
+                            <video src="${src}" preload="metadata" muted></video>
+                            <div class="play-icon"><i class="fa fa-play-circle"></i></div>
+                        </div>`;
+                } else {
+                    return `<img class="review-media-thumb" src="${src}" alt="Anh danh gia"
+                             onclick="openReviewMedia('${src}', false)">`;
+                }
+            }
+
+            function renderReviewCard(r) {
+                const mediaPart = (r.mediaUrls && r.mediaUrls.length > 0)
+                    ? `<div class="review-media-list">${r.mediaUrls.map(mediaThumbHtml).join('')}</div>`
+                    : '';
+                const commentPart = (r.comment && r.comment.trim())
+                    ? `<div class="review-comment">${r.comment}</div>`
+                    : `<div class="review-no-comment">Khách hàng không để lại nhận xét.</div>`;
+
+                const isUpdateLabel = r.isUpdate ? `<span>Đã chỉnh sửa</span>` : '';
+                const isDeletedLabel = r.reviewStatus === 'DELETED' ? `<span class="badge bg-danger ms-2" style="font-size:0.75rem;">Đã Xóa</span>` : '';
+                const isRejectLabel = r.reviewStatus === 'REJECTED' ? `<span class="badge bg-danger ms-2" style="font-size:0.75rem;">Reject</span>` : '';
+
+                const mediaStr = (r.mediaUrls && r.mediaUrls.length > 0) ? r.mediaUrls.join(',') : '';
+
+                let actions = '';
+                if (CURRENT_CUSTOMER_ID === r.customerId) {
+                    actions += `<button class="btn btn-sm btn-outline-primary ms-2" onclick="editReview(${r.id}, ${r.rating}, '${r.comment ? r.comment.replace(/'/g, "\\'") : ''}', '${mediaStr}')"><i class="fa fa-edit"></i> Sửa</button>`;
+                    if (r.reviewStatus !== 'DELETED') {
+                        actions += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteCustomerReview(${r.id})"><i class="fa fa-trash"></i> Xóa</button>`;
+                    }
+                } else if (CURRENT_USER_ROLE === 'STAFF') {
+                    if (r.reviewStatus === 'DELETED') {
+                        actions += `<button class="btn btn-sm btn-danger ms-2" onclick="deleteStaffReview(${r.id})"><i class="fa fa-trash-alt"></i> Xóa Vĩnh Viễn</button>`;
+                    }
+                }
+
+                return `<div class="review-card">
+                        <div class="review-avatar"><i class="fa fa-user"></i></div>
+                        <div class="flex-grow-1">
+
+                            <div class="fw-semibold" style="font-size:0.92rem;">
+                                ${r.name} ${isDeletedLabel} ${isRejectLabel}
+${r.isUpdate ? `<div class="review-meta">${isUpdateLabel} ${formatDate(r.updatedAt)}</div>` : ''}
+                                <div class="float-end">${actions}</div>
+                            </div>
+                            <div class="review-meta">${formatDate(r.createdAt)}</div>
+
+                            <div class="review-stars">${starsHtml(r.rating)}</div>
+                            ${commentPart}
+                            ${mediaPart}
+                        </div>
+                    </div>`;
+            }
+
+            /* ─── Open media lightbox ─────────────────────── */
+            window.openReviewMedia = function (src, isVid) {
+                modalContent.innerHTML = isVid
+                    ? `<video src="${src}" controls autoplay style="max-width:100%;max-height:75vh;border-radius:8px;"></video>`
+                    : `<img src="${src}" alt="media" style="max-width:100%;max-height:75vh;border-radius:8px;object-fit:contain;">`;
+                bsModal.show();
+            };
+
+            reviewMediaModal.addEventListener('hide.bs.modal', function () {
+                modalContent.innerHTML = '';
+            });
+
+            /* ─── Fetch reviews ──────────────────────────── */
+            function buildUrl(page) {
+                let url = `/product/review?productId=${PRODUCT_ID}&page=${page - 1}&size=${PAGE_SIZE}&sort=updatedAt,desc`;
+                if (activeRating > 0) url += `&filter=rating:${activeRating}`;
+                return url;
+            }
+
+            function fetchReviews(page, append) {
+                if (isLoading) return;
+                isLoading = true;
+                reviewLoading.style.display = 'block';
+                btnLoadMore.style.display = 'none';
+
+                fetch(buildUrl(page), {
+                    method: 'GET'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        isLoading = false;
+                        reviewLoading.style.display = 'none';
+
+                        const meta = data.meta || {};
+                        const result = data.result || [];
+
+                        totalPages = meta.pages || 1;
+                        currentPage = meta.page || page;
+
+                        if (!append && activeRating === 0 && meta.total > 0) {
+                            const ratings = result.map(r => r.rating);
+                            const avg = ratings.length
+                                ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+                                : '0.0';
+                            avgNumber.textContent = avg;
+                            avgStars.innerHTML = avgStarsHtml(parseFloat(avg));
+                            avgCount.textContent = `${meta.total} đánh giá`;
+                            reviewSummary.style.display = '';
+                            reviewSummary.style.removeProperty('display');
+                            reviewSummary.setAttribute('style', 'display:flex!important;');
+                        }
+
+                        if (!append) {
+                            reviewList.innerHTML = '';
+                        }
+
+                        if (result.length === 0 && !append) {
+                            reviewList.innerHTML = `<div class="review-empty">
+                        <i class="fa fa-comment-slash"></i>
+                        Chưa có đánh giá nào cho sản phẩm này
+                    </div>`;
+                        } else {
+                            result.forEach(r => {
+                                reviewList.insertAdjacentHTML('beforeend', renderReviewCard(r));
+                            });
+                        }
+
+                        btnLoadMore.style.display = (currentPage < totalPages) ? 'block' : 'none';
+                    })
+                    .catch(() => {
+                        isLoading = false;
+                        reviewLoading.style.display = 'none';
+                        if (!append) {
+                            reviewList.innerHTML = `<div class="review-empty">
+                        <i class="fa fa-exclamation-circle"></i>
+                        Không thể tải đánh giá, hãy thử lại sau.
+                    </div>`;
+                        }
+                    });
+            }
+
+            btnLoadMore.addEventListener('click', function () {
+                fetchReviews(currentPage + 1, true);
+            });
+
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function () {
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    activeRating = parseInt(this.dataset.rating, 10);
+                    currentPage = 1;
+                    fetchReviews(1, false);
+                });
+            });
+
+            window.deleteCustomerReview = function (id) {
+                Swal.fire({
+                    title: 'Xóa bình luận?',
+                    text: 'Bạn có chắc chắn muốn xóa bình luận này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                        fetch(`/product/review/delete/${id}`, { method: 'POST', headers: { 'X-CSRF-TOKEN': token } })
+                            .then(res => res.text()).then(msg => {
+                                fetchReviews(1, false);
+                            }).catch(e => console.error(e));
+                    }
+                });
+            };
+
+            window.deleteStaffReview = function (id) {
+                Swal.fire({
+                    title: 'Xóa vĩnh viễn?',
+                    text: 'Bình luận đã bị ẩn (DELETED). Bạn có muốn xóa vĩnh viễn để khách có thể review lại?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa vĩnh viễn',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                        fetch(`/product/review/staff-delete/${id}`, { method: 'POST', headers: { 'X-CSRF-TOKEN': token } })
+                            .then(res => res.text()).then(msg => {
+                                fetchReviews(1, false);
+                            }).catch(e => console.error(e));
+                    }
+                });
+            };
+
+            function redrawOldFiles() {
+                const container = document.getElementById('editReviewOldFiles');
+                container.innerHTML = '';
+                if (editOldFilesList.length === 0) {
+                    container.innerHTML = '<span class="text-muted">Không có file nào.</span>';
+                    return;
+                }
+                editOldFilesList.forEach((url, i) => {
+                    const src = MEDIA_BASE + url;
+                    let thumb = '';
+                    if (isVideo(url)) {
+                        thumb = `<video src="${src}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;"></video>`;
+                    } else {
+                        thumb = `<img src="${src}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;">`;
+                    }
+                    container.innerHTML += `<div class="position-relative d-inline-block">
+                        ${thumb}
+                        <input type="hidden" name="mediaUrls" value="${url}">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0" style="width:20px;height:20px;border-radius:50%;line-height:1;" onclick="removeOldFile(${i})">&times;</button>
+                    </div>`;
+                });
+            }
+
+            window.removeOldFile = function (i) {
+                editOldFilesList.splice(i, 1);
+                redrawOldFiles();
+            }
+
+            window.editReview = function (id, rating, comment, mediaUrlsStr) {
+                document.getElementById('editReviewId').value = id;
+                document.getElementById('editReviewRating').value = rating;
+                document.getElementById('editReviewComment').value = comment;
+                document.getElementById('editReviewNewFiles').value = '';
+
+                editOldFilesList = mediaUrlsStr ? mediaUrlsStr.split(',') : [];
+                editOldFilesList = editOldFilesList.filter(u => u.trim() !== '');
+                redrawOldFiles();
+
+                bsEditModal.show();
+            };
+
+            document.getElementById('reviewEditForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const btnSubmit = document.getElementById('btnSubmitEditReview');
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...';
+
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                fetch('/product/review/update', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token },
+                    body: formData
+                }).then(res => {
+                    if (!res.ok) throw new Error("Update failed");
+                    return res.text();
+                }).then(msg => {
+                    bsEditModal.hide();
+                    fetchReviews(1, false);
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Lưu thay đổi';
+                }).catch(e => {
+                    console.error(e);
+                    alert("Có lỗi xảy ra, thử lại sau!");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Lưu thay đổi';
+                });
+            });
+
+            fetchReviews(1, false);
+        })();
+    </script>
 </body>
 
 </html>

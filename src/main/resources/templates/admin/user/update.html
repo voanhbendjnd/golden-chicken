@@ -47,11 +47,13 @@
 
                             <div id="staffTypeGroup" class="mb-3" style="display: none;">
                                 <label class="form-label">Staff Type:</label>
-                                <select th:field="*{staffType}" class="form-select">
+                                <input th:field="*{staffType}" disabled class="form-select">
+
+                                <!-- <select th:field="*{staffType}" class="form-select">
                                     <option value="RECEPTIONIST">Receptionist</option>
                                     <option value="SHIPPER">Shipper</option>
                                     <option value="MANAGER">Manager</option>
-                                </select>
+                                </select> -->
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status:</label>

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
+import vn.edu.fpt.golden_chicken.domain.response.ReviewMessage;
+import vn.edu.fpt.golden_chicken.domain.response.UserMessage;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.services.MailService;
 
@@ -45,5 +47,27 @@ public class MailConsumer {
     public void listenLoginFailuresEvent(String email) {
         this.mailService.sendSecurityLoginFailures(email, "Lock Account About 3 Minutes", "mail/ban", email);
         System.out.println("SEND MAIL BAN SUCCESS!");
+    }
+
+    @KafkaListener(topics = "violate-review-topic", groupId = "email-group")
+    public void listViolateReviewCustomer(ReviewMessage message) {
+
+        this.mailService.sendMailViolateWordAfterReview(message.getEmail(), "Language used to describe violations",
+                "mail/violate.review", message.getEmail(), message.getProductName(),
+                String.valueOf(message.getRecord()));
+    }
+
+    @KafkaListener(topics = "violate-account-topic", groupId = "email-group")
+    public void listenBanViolate(String email) {
+        this.mailService.sendSecurityLoginFailures(email, "Lock Account About 1 Week!", "mail/ban.violate", email);
+        System.out.println("SEND MAIL BAN SUCCESS!");
+    }
+
+    @KafkaListener(topics = "create-account-topic", groupId = "email-group")
+    public void listenCreateAccount(UserMessage msg) {
+        this.mailService.sendEmailAndPasswordForStaff(msg.getEmail(), "Create account success!", "mail/sas",
+                msg.getEmail(), msg.getName(), msg.getPassword());
+        System.out.println("SEND MAIL CREATE SUCCESS!");
+
     }
 }

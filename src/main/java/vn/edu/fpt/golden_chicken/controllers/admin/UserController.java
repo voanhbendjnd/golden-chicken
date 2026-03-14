@@ -35,6 +35,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
 
 @Controller
 @RequestMapping("/admin/user")
+
 public class UserController {
     private final RoleService roleService;
     private final UserService userService;
@@ -55,7 +56,7 @@ public class UserController {
     public String listUsers(Model model,
             @RequestParam(required = false) String fullName,
             @Filter Specification<User> spec,
-            @PageableDefault(size = DeclareConstant.pageSize, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         // If fullName parameter is provided, create a filter specification
         if (fullName != null && !fullName.trim().isEmpty()) {

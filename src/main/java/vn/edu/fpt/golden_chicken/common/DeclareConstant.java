@@ -8,6 +8,7 @@ public class DeclareConstant {
     public static final String password = "123123";
     public static final int pageSize = 5;
     public static final String productFolder = "products";
+    public static final String reviewFolder = "reviews";
     public final static String PENDING_USER = "PENDING_USER:";
     public final static String USER_OTP = "USER_OTP:";
     public final static String action_point_add = "ADD";

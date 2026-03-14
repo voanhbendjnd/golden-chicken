@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${subject}">Lock Account</title>
+    <title th:text="${subject}">Violate Review</title>
     <style type="text/css">
         body,
         html {
@@ -79,14 +79,18 @@
                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="wrapper">
                     <tr>
                         <td class="header">
-                            <h1>Tài khoản bị khóa do đăng nhập sai 5 lần</h1>
+                            <h1>Đánh giá của bạn dùng từ ngữ không hợp lệ</h1>
                         </td>
                     </tr>
                     <tr>
                         <td class="content">
-
-                            <p>Hi, <span th:text="${email}">Customer@gmail.com</span></p>
-                            <p>Bạn sẽ không thể đăng nhập được trong vòng 3 phút</p>
+                            <p>Cảnh báo lần thứ <span th:text="${record}">100</span> !</p>
+                            <p>Xin chào, <span th:text="${email}">Customer@gmail.com</span></p>
+                            <p>Đánh giá của bạn vi phạm tiêu chuẩn cộng đồng của chúng tôi.</p>
+                            <p>Đánh giá của bạn sẽ không được đưa lên trang.</p>
+                            <p>Bạn có thể và phần review của sản phẩm <span th:text="${productName}">Golden</span> để
+                                sửa lại phần đánh giá.</p>
+                            <p>Nếu bạn vi phạm quá 5 lần thì bạn sẽ bị khóa tài khoản!</p>
                         </td>
                     </tr>
                     <tr>

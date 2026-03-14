@@ -30,6 +30,7 @@ import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Controller
+
 @RequestMapping("/admin/role")
 public class RoleController {
     private final PermissionService permissionService;

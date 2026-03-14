@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Thanh toán thất bại</title>
+    <title>Đánh giá thành công</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
@@ -150,16 +150,16 @@
             </svg>
         </div>
 
-        <h1 style="color: red;">Thanh toán thất bại!</h1>
-        <p>Đặt hàng không thành công.</p>
+        <h1>Đánh Giá Sản Phẩm Thành Công</h1>
+        <p>Đánh giá của bạn đã được tải lên</p>
 
         <div class="btn-group">
-            <a href="/home" class="btn-custom btn-primary-custom">
-                Tiếp tục mua hàng
+            <a th:href="@{/product/{id}(id=${productId})}" class="btn-custom btn-primary-custom">
+                Xem đánh giá
             </a>
 
-            <a href="/order-history" class="btn-custom btn-outline-custom">
-                Xem đơn hàng
+            <a href="/order-history?status=COMPLETED" class="btn-custom btn-outline-custom">
+                Trở lại
             </a>
         </div>
 

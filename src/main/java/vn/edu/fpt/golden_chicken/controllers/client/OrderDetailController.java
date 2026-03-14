@@ -48,7 +48,7 @@ public class OrderDetailController {
 
         model.addAttribute("data", data);
         model.addAttribute("currentStatus", status);
-        return "client/order-history";
+        return "client/order.history";
     }
 
     @GetMapping("/order/{id:[0-9]+}")
@@ -63,4 +63,3 @@ public class OrderDetailController {
         return "redirect:/order-history?successCancel";
     }
 }
-

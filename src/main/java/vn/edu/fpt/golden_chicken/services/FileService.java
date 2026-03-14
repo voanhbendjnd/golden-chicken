@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -82,8 +83,8 @@ public class FileService {
         }
     }
 
-    public String getLastNameFile(MultipartFile file) throws URISyntaxException, IOException {
-        var upPath = baseURI + DeclareConstant.productFolder;
+    public String getLastNameFile(MultipartFile file, String folder) throws URISyntaxException, IOException {
+        var upPath = baseURI + folder;
         var directory = Paths.get(upPath);
         Files.createDirectories(directory);
         var firstName = file.getOriginalFilename();
@@ -98,12 +99,33 @@ public class FileService {
         return lastName;
     }
 
-    public void deleteFile(String fileName) throws IOException {
+    // public void deleteFile(String folder, String fileName) throws IOException {
+    // if (fileName != null && !fileName.isEmpty()) {
+    // var path = Paths.get(baseURI + folder + fileName);
+    // Files.deleteIfExists(path);
+    // }
+    // return;
+    // }
+
+    public void deleteFile(String folder, String fileName) throws IOException {
         if (fileName != null && !fileName.isEmpty()) {
-            var path = Paths.get(baseURI + fileName);
+            var path = Paths.get(baseURI, folder, fileName);
             Files.deleteIfExists(path);
         }
-        return;
+    }
+
+    public boolean validFile(MultipartFile file) {
+        var allowedExtensions = Set.of(".jpg", ".png", ".jpeg", ".mp4");
+        var fileName = file.getOriginalFilename();
+        var lastDoIndex = fileName.lastIndexOf(".");
+        if (lastDoIndex == -1) {
+            return false;
+        }
+        var ext = fileName.substring(lastDoIndex).toLowerCase();
+        if (!allowedExtensions.contains(ext)) {
+            return false;
+        }
+        return true;
     }
 
 }

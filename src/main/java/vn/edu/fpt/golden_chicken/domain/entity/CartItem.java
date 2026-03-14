@@ -43,6 +43,7 @@ public class CartItem {
     @PrePersist
     public void handleBeforeCreateAt() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
 
     }
 
