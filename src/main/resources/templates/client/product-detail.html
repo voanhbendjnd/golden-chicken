@@ -71,11 +71,13 @@
 
                             <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
                                 <a class="btn btn-danger" style="text-decoration-line: none;"
-                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                     Mua Ngay
                                 </a>
-                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}">
-                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>
+                                <!-- th:href="@{/checkout?productId={id}(id=${pro.id})}" -->
+                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}"
+                                    style="color: white;">
+                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>Giỏ hàng
                                 </button>
 
 
@@ -236,7 +238,7 @@
                                 </p>
 
                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                     Mua ngay
                                 </a>
 

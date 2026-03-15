@@ -4,6 +4,8 @@
 <head>
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực OTP</title>
     <style>
@@ -130,36 +132,23 @@
             text-decoration: underline;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
-    <!-- <input type="hidden" id="user-email" th:value="${session.OTP_EMAIL}"> -->
     <div class="otp-card">
         <h2>Verify OTP</h2>
         <p>Nhập mã OTP nhận từ email để tiếp tục</p>
-
-        <div class="otp-inputs" id="otp-inputs">
-            <input type="number" maxlength="1" max="9" min="0" inputmode="numeric" autocomplete="one-time-code">
-            <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
-            <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
-            <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
-        </div>
-
-        <button class="btn-verify" onclick="verifyOTP()">Xác nhận</button>
-
-        <div class="resend">
-            Bạn không nhận được mã? <a th:href="@{/verify(email=${email})}">Gửi lại</a>
-        </div>
-        <div class="resend">
-            <a th:href="@{/register}" class="link-style">Bạn chưa có tài khoản? Đăng ký</a>
-        </div>
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrf-token" />
-
+        <div class="otp-inputs" id="otp-inputs"><input type="number" maxlength="1" max="9" min="0" inputmode="numeric"
+                autocomplete="one-time-code"><input type="number" maxlength="1" max="9" min="0"
+                inputmode="numeric"><input type="number" maxlength="1" max="9" min="0" inputmode="numeric"><input
+                type="number" maxlength="1" max="9" min="0" inputmode="numeric"></div><button class="btn-verify"
+            onclick="verifyOTP()">Xác nhận</button>
+        <div class="resend">Bạn không nhận được mã? <a th:href="@{/verify-v2(email=${email})}">Gửi lại</a></div>
+        <div class="resend"><a th:href="@{/register}" class="link-style">Bạn chưa có tài khoản? Đăng ký</a></div><input
+            type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrf-token" />
     </div>
-
-    <script>
-        const inputs = document.querySelectorAll('#otp-inputs input');
+    <script>const inputs = document.querySelectorAll('#otp-inputs input');
         const csrfToken = document.getElementById('csrf-token').value;
 
         inputs.forEach((input, index) => {
@@ -183,11 +172,19 @@
             const urlParams = new URLSearchParams(window.location.search);
             const emailFromUrl = urlParams.get('email');
 
-            fetch('/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            fetch('/verify-v2', {
 
-                body: JSON.stringify({ otp: otp, email: emailFromUrl })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken
+                }
+
+                ,
+
+                body: JSON.stringify({
+                    otp: otp, email: emailFromUrl
+                })
+
             }).then(res => {
                 if (res.ok) {
                     Swal.fire({
@@ -196,10 +193,13 @@
                         text: 'Xác thực OTP thành công. Đang chuyển hướng...',
                         timer: 2000,
                         showConfirmButton: false
+
                     }).then(() => {
-                        window.location.href = "/login?success";
+                        window.location.href = "/update-password-v2";
                     });
-                } else {
+                }
+
+                else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Thất bại',
@@ -209,8 +209,8 @@
                 }
             });
         }
-    </script>
 
+    </script>
 </body>
 
 </html>

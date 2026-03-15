@@ -2,7 +2,6 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -30,7 +29,6 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User implements Serializable {
-    private static final long OTP_VALID_DURATION = 5 * 60 * 1000; // 5p
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,10 +54,13 @@ public class User implements Serializable {
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
+    Boolean updatePassword = false;
 
     @PrePersist
     public void handleBeforeCreateAt() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             this.createdBy = authentication.getName();

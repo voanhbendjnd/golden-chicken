@@ -61,7 +61,7 @@
                     <a th:href="@{/login}" class="login-item">Đăng nhập</a>
                 </span>
             </div>
-            <div class="navbar-list">
+            <div class="navbar-list" th:if="${!(session.roleName == 'SHIPPER' or session.staffType == 'SHIPPER')}">
                 <div class="">
                     <ul class="navbar-nav justify-content-center flex-grow-1 ">
                         <li class="navbar-item">

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResReview;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ReviewMessage;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
+import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
 import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 import vn.edu.fpt.golden_chicken.utils.BadWordFilterUtility;
@@ -46,7 +48,7 @@ public class ReviewService {
     @Lazy
     @NonFinal
     ReviewService self;
-
+    ProductRepository productRepository;
     ReviewRepository reviewRepository;
     UserService userService;
     OrderItemRepository orderItemRepository;
@@ -154,6 +156,7 @@ public class ReviewService {
         currentReview.setRating(dto.getRating());
         currentReview.setIsUpdate(Boolean.TRUE);
         var lastReview = this.reviewRepository.save(currentReview);
+        self.syncProductRating(lastReview.getProduct().getId());
         if (check) {
             this.redisUserService.saveRecordViolateCustomer(email);
             var record = this.redisUserService.getRecordOfViolate(email);
@@ -249,6 +252,7 @@ public class ReviewService {
             }
 
         }
+        self.syncProductRating(product.getId());
 
         return "success_" + product.getId();
 
@@ -315,6 +319,7 @@ public class ReviewService {
         }
         review.setReviewStatus(ReviewStatus.DELETED);
         this.reviewRepository.save(review);
+        self.syncProductRating(review.getProduct().getId());
     }
 
     public void staffDeleteReview(Long id) throws PermissionException {
@@ -333,6 +338,19 @@ public class ReviewService {
 
             this.reviewRepository.save(review);
         }
+        self.syncProductRating(review.getProduct().getId());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void syncProductRating(Long productId) {
+        var avgRating = this.reviewRepository.getAverageRating(productId, ReviewStatus.PUBLISHED);
+        var totalReview = this.reviewRepository.getTotalReviews(productId, ReviewStatus.PUBLISHED);
+        var product = this.productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID" + productId + " not found!"));
+        var roundeAvg = Math.round(avgRating * 10.0) / 10.0;
+        product.setAverageRating(roundeAvg);
+        product.setTotalReviews(totalReview);
+        this.productRepository.save(product);
     }
 
 }

@@ -78,11 +78,18 @@ public class MailService {
     @Async
     public void sendStatus(String to, String subject, String template, String email, String status, String id,
             String name) {
+        this.sendStatus(to, subject, template, email, status, id, name, null);
+    }
+
+    @Async
+    public void sendStatus(String to, String subject, String template, String email, String status, String id,
+            String name, String reason) {
         var ctx = new Context();
         ctx.setVariable("cus", name);
         ctx.setVariable("email", email);
         ctx.setVariable("status", status);
         ctx.setVariable("id", id);
+        ctx.setVariable("reason", reason);
         var at = new ArrayList<FileSystemResource>();
         var content = this.templateEngine.process(template, ctx);
         this.sendEmailSync(to, subject, content, false, true, at);
@@ -135,6 +142,16 @@ public class MailService {
         Context ctx = new Context();
         ctx.setVariable("name", name);
         ctx.setVariable("password", password);
+        ctx.setVariable("email", email);
+        var at = new ArrayList<FileSystemResource>();
+        var content = this.templateEngine.process(template, ctx);
+        this.sendEmailSync(to, subject, content, false, true, at);
+
+    }
+
+    @Async
+    public void recoverPasswordSuccess(String to, String subject, String template, String email) {
+        Context ctx = new Context();
         ctx.setVariable("email", email);
         var at = new ArrayList<FileSystemResource>();
         var content = this.templateEngine.process(template, ctx);
