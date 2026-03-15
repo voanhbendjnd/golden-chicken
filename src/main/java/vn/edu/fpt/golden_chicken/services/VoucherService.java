@@ -421,7 +421,7 @@ public class VoucherService {
 
         if (productVoucher != null) {
             Voucher voucher = productVoucher.getVoucher();
-            BigDecimal discount = calculateDiscount(voucher, productPrice, model);
+            BigDecimal discount = calculateDiscount(voucher, productPrice, productPrice, model);
             if (discount != null) {
                 productDiscount = discount;
             }
@@ -429,7 +429,7 @@ public class VoucherService {
 
         if (shippingVoucher != null) {
             Voucher voucher = shippingVoucher.getVoucher();
-            BigDecimal discount = calculateDiscount(voucher, productPrice, model);
+            BigDecimal discount = calculateDiscount(voucher, shippingFee, productPrice, model);
             if (discount != null) {
                 shippingDiscount = discount.min(shippingFee);
             }
@@ -443,12 +443,13 @@ public class VoucherService {
         model.addAttribute("selectedShippingVoucher", shippingVoucher);
     }
 
-    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal productPrice, Model model) {
+    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal discountBase, BigDecimal minOrderBase,
+            Model model) {
         if (voucher == null) {
             return BigDecimal.ZERO;
         }
 
-        if (voucher.getMinOrderValue() != null && productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+        if (voucher.getMinOrderValue() != null && minOrderBase.compareTo(voucher.getMinOrderValue()) < 0) {
             model.addAttribute("voucherError", "Đơn hàng chưa đủ điều kiện để dùng voucher này");
             return null;
         }
@@ -457,13 +458,13 @@ public class VoucherService {
         if ("FIXED".equals(voucher.getDiscountType())) {
             discount = BigDecimal.valueOf(voucher.getDiscountValue());
         } else if ("PERCENT".equals(voucher.getDiscountType())) {
-            discount = productPrice
+            discount = discountBase
                     .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
                     .divide(BigDecimal.valueOf(100));
         }
 
-        if (discount.compareTo(productPrice) > 0) {
-            discount = productPrice;
+        if (discount.compareTo(discountBase) > 0) {
+            discount = discountBase;
         }
 
         return discount;
