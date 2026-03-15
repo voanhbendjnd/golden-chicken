@@ -101,12 +101,13 @@
                             <div class="carousel-item active rounded">
                                 <img src="img/sliderbanner3.jpeg" class="img-fluid w-100 h-100 bg-secondary rounded"
                                     alt="First slide">
-                                <a href="#" class="btn px-4 py-2 text-white rounded">Gà giòn</a>
+                                <a href="/menu?cat=original-chicken" class="btn px-4 py-2 text-white rounded">Gà
+                                    giòn</a>
                             </div>
                             <div class="carousel-item rounded">
                                 <img src="img/sliderbanner2.jpeg" class="img-fluid w-100 h-100 rounded"
                                     alt="Second slide">
-                                <a href="#" class="btn px-4 py-2 text-white rounded">Gà sốt</a>
+                                <a href="/menu?cat=sauce-chicken" class="btn px-4 py-2 text-white rounded">Gà sốt</a>
                             </div>
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#carouselId"
@@ -811,12 +812,13 @@
                             <div class="col-6">
                                 <a th:href="@{/product/{id}(id=${product.id})}" th:text="${product.name}"
                                     class="h5">Organic Tomato</a>
-                                <div class="d-flex my-3">
-                                    <i class="fas fa-star text-secondary"></i>
-                                    <i class="fas fa-star text-secondary"></i>
-                                    <i class="fas fa-star text-secondary"></i>
-                                    <i class="fas fa-star text-secondary"></i>
-                                    <i class="fas fa-star"></i>
+                                <div class="d-flex my-3 justify-content-center align-items-center text-muted">
+                                    <i class="fas fa-star text-warning me-2"></i>
+
+                                    <span
+                                        th:text="|${product.totalReviews ?: 0} lượt đánh giá, ${product.averageRating ?: 0.0}/5 sao|">
+                                        100 lượt đánh giá, 4.3/5 sao
+                                    </span>
                                 </div>
                                 <h4 class="mb-3"
                                     th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">
@@ -839,16 +841,18 @@
                         <div class="py-4">
                             <a th:href="@{/product/{id}(id=${product.id})}" class="h5" th:text="${product.name}">Organic
                                 Tomato</a>
-                            <div class="d-flex my-3 justify-content-center">
-                                <i class="fas fa-star text-secondary"></i>
-                                <i class="fas fa-star text-secondary"></i>
-                                <i class="fas fa-star text-secondary"></i>
-                                <i class="fas fa-star text-secondary"></i>
-                                <i class="fas fa-star"></i>
+                            <div class="d-flex my-3 justify-content-center align-items-center text-muted">
+                                <i class="fas fa-star text-warning me-2"></i>
+
+                                <span
+                                    th:text="|${product.totalReviews ?: 0} lượt đánh giá, ${product.averageRating ?: 0.0}/5 sao|">
+                                    100 lượt đánh giá, 4.3/5 sao
+                                </span>
                             </div>
                             <h4 class="mb-3"
                                 th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">3.12 $
                             </h4>
+
                             <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart"
                                 th:data-id="${product.id}">
                                 <i class="fa fa-shopping-bag me-2 text-secondary"></i>Giỏ hàng

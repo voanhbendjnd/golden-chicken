@@ -31,10 +31,10 @@ public class ProductConvert {
         res.setCategory(cate);
         res.setImg(product.getImageUrl());
         res.setImgs(product.getProductImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
-        if (product.getAverageRating() != null && product.getTotalReviews() != null) {
-            res.setAverageRating(product.getAverageRating());
-            res.setTotalReview(product.getTotalReviews());
-        }
+        var averageRating = product.getAverageRating() != null ? product.getAverageRating() : 0;
+        var totalReviews = product.getTotalReviews() != null ? product.getTotalReviews() : 0;
+        res.setAverageRating(averageRating);
+        res.setTotalReviews(totalReviews);
         return res;
     }
 }
