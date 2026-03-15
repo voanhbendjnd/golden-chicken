@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực OTP</title>
+    <style>
+        /* ===== BACKGROUND ===== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('/img/register.jpg') no-repeat center center/cover;
+            font-family: 'Segoe UI', sans-serif;
+            position: relative;
+        }
+
+        /* overlay tối */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 0;
+        }
+
+        /* ===== CARD ===== */
+        .otp-card {
+            width: 420px;
+            padding: 40px;
+            border-radius: 25px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            transition: 0.3s ease;
+        }
+
+        .otp-card:hover {
+            transform: scale(1.03);
+        }
+
+        h2 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .otp-card p {
+            color: #eee;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* ===== OTP INPUT ===== */
+        .otp-inputs {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .otp-inputs input {
+            width: 55px;
+            height: 55px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            transition: 0.3s;
+        }
+
+        .otp-inputs input:focus {
+            transform: scale(1.05);
+
+        }
+
+        /* ===== BUTTON ===== */
+        .btn-verify {
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: #e9c3a3;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .btn-verify:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ===== LINKS ===== */
+        .resend {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #eee;
+        }
+
+        .resend a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .resend a:hover {
+            text-decoration: underline;
+        }
+
+        .link-style {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .link-style:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="otp-card">
+        <h2>Verify OTP</h2>
+        <p>Nhập mã OTP nhận từ email để tiếp tục</p>
+        <div class="otp-inputs" id="otp-inputs"><input type="number" maxlength="1" max="9" min="0" inputmode="numeric"
+                autocomplete="one-time-code"><input type="number" maxlength="1" max="9" min="0"
+                inputmode="numeric"><input type="number" maxlength="1" max="9" min="0" inputmode="numeric"><input
+                type="number" maxlength="1" max="9" min="0" inputmode="numeric"></div><button class="btn-verify"
+            onclick="verifyOTP()">Xác nhận</button>
+        <div class="resend">Bạn không nhận được mã? <a th:href="@{/verify-v2(email=${email})}">Gửi lại</a></div>
+        <div class="resend"><a th:href="@{/register}" class="link-style">Bạn chưa có tài khoản? Đăng ký</a></div><input
+            type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrf-token" />
+    </div>
+    <script>const inputs = document.querySelectorAll('#otp-inputs input');
+        const csrfToken = document.getElementById('csrf-token').value;
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        function verifyOTP() {
+            let otp = "";
+            inputs.forEach(input => otp += input.value);
+            // Hàm lấy tham số từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+
+            fetch('/verify-v2', {
+
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken
+                }
+
+                ,
+
+                body: JSON.stringify({
+                    otp: otp, email: emailFromUrl
+                })
+
+            }).then(res => {
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Xác thực OTP thành công. Đang chuyển hướng...',
+                        timer: 2000,
+                        showConfirmButton: false
+
+                    }).then(() => {
+                        window.location.href = "/update-password-v2";
+                    });
+                }
+
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thất bại',
+                        text: 'Mã OTP không đúng hoặc đã hết hạn!',
+                        confirmButtonColor: '#e9c3a3'
+                    });
+                }
+            });
+        }
+
+    </script>
+</body>
+
+</html>

@@ -64,4 +64,7 @@ public class Product {
     List<CartItem> cartItems;
     @OneToMany(mappedBy = "product")
     List<Review> reviews;
+
+    Double averageRating = 0.0;
+    Integer totalReviews = 0;
 }

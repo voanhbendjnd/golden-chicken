@@ -1,40 +1,36 @@
 package vn.edu.fpt.golden_chicken.services;
 
+import jakarta.persistence.criteria.Join;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import vn.edu.fpt.golden_chicken.common.DeclareConstant;
+import vn.edu.fpt.golden_chicken.domain.entity.Category;
+import vn.edu.fpt.golden_chicken.domain.entity.Product;
+import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
+import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ProductSearchSuggestionDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
+import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
+import vn.edu.fpt.golden_chicken.repositories.*;
+import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
+import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import jakarta.persistence.criteria.Join;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DeclareConstant;
-import vn.edu.fpt.golden_chicken.domain.entity.Category;
-import vn.edu.fpt.golden_chicken.domain.entity.Product;
-import vn.edu.fpt.golden_chicken.domain.entity.ProductImage;
-import vn.edu.fpt.golden_chicken.domain.request.ProductDTO;
-import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
-import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.repositories.CartItemRepository;
-import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
-import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
-import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
-import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
-import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
-import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
-import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
-import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -49,6 +45,14 @@ public class ProductService {
     OrderItemRepository orderItemRepository;
     ComboDetailRepository comboDetailRepository;
 
+    /** Tìm sản phẩm theo tên, chỉ trả sản phẩm active và category đang hoạt động. Trả DTO. */
+    public List<ProductSearchSuggestionDTO> searchByName(String name) {
+        var products = productRepository.findByNameContainingIgnoreCaseAndActiveTrueAndCategory_StatusTrue(name);
+        return products.stream()
+                .limit(8)
+                .map(p -> new ProductSearchSuggestionDTO(p.getId(), p.getName()))
+                .collect(Collectors.toList());
+    }
     public void updateStatus(Long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
@@ -68,7 +72,7 @@ public class ProductService {
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var page = this.productRepository.findAll(ps, pageable);
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
@@ -286,7 +290,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ResProduct> getAllActiveForMenu() {
-        return this.productRepository.findByActiveTrue().stream()
+        return this.productRepository.findByActiveTrueAndCategoryStatusTrue().stream()
                 .map(ProductConvert::toResProduct)
                 .collect(Collectors.toList());
     }

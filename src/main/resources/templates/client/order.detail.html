@@ -4,6 +4,12 @@
 <head>
     <title>Chi tiết đơn hàng - Golden Chicken</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <meta name="_csrf" th:content="${_csrf.token}" />
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
 
@@ -145,6 +151,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
 
@@ -210,6 +217,14 @@
                                 </th:block>
                             </div>
                         </div>
+                        <div class="mt-3 text-center" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                            <div class="alert alert-danger py-2 px-3 mb-0 small text-start">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                <strong>Lý do giao thất bại:</strong>
+                                <div th:text="${order.deliveryFailedReason}"></div>
+                            </div>
+                        </div>
+
                         <hr class="opacity-10">
                         <div class="timeline-info">
                             <div class="mb-3">
@@ -223,6 +238,27 @@
                                     th:text="${#temporals.format(order.updatedAt, 'dd/MM/yyyy, HH:mm')}"></strong>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin shipper (ngay dưới Trạng thái hiện tại) -->
+                <div class="card mb-4"
+                     th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
+                    <div class="card-header bg-white py-3 fw-bold border-bottom">
+                        <i class="fa-solid fa-motorcycle me-2 text-danger"></i>Thông tin shipper
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="small text-muted d-block">Shipper phụ trách</label>
+                            <span class="fw-bold" th:text="${order.shipperName}">Nguyễn Văn A</span>
+                        </div>
+                        <div>
+                            <label class="small text-muted d-block">Số điện thoại</label>
+                            <a th:href="'tel:' + ${order.shipperPhone}"
+                               class="fw-bold text-decoration-none text-primary"
+                               th:text="${order.shipperPhone}">0900000000</a>
+                        </div>
+                        <p class="small text-muted mb-0 mt-2">Shipper sẽ liên hệ khi đến điểm giao.</p>
                     </div>
                 </div>
 
@@ -243,6 +279,20 @@
                             </span>
                         </div>
                     </div>
+                    <!-- ===== REAL-TIME TRACKING (inside col-lg-8, visible only when DELIVERING) ===== -->
+                <div th:if="${order.status.name() == 'DELIVERING'}" class="card mb-4" id="trackingCard">
+                    <div class="card-header bg-white py-3 fw-bold border-bottom">
+                        <i class="fa-solid fa-location-crosshairs me-2 text-danger"></i>
+                        Theo dõi shipper thời gian thực
+                        <span class="badge bg-danger ms-2" style="animation: blink 1s infinite;">LIVE</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="shipperMap" style="height:380px; width:100%;"></div>
+                    </div>
+                    <div class="card-footer bg-white py-2 text-muted small" id="locationStatus">
+                        <i class="fa-solid fa-satellite-dish me-1"></i> Đang chờ tín hiệu vị trí shipper...
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -267,6 +317,68 @@
                     }
                 })
             }
+        </script>
+
+        <script th:inline="javascript">
+            (function () {
+                var mapEl = document.getElementById('shipperMap');
+                if (!mapEl || typeof SockJS === 'undefined' || typeof Stomp === 'undefined' || typeof L === 'undefined') {
+                    return;
+                }
+
+                var orderId = /*[[${order.id}]]*/ 0;
+                var locationStatus = document.getElementById('locationStatus');
+                var map = L.map('shipperMap').setView([10.762622, 106.660172], 13);
+                var marker = null;
+                var firstFix = true;
+                var stompClient = null;
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                var socket = new SockJS('/ws-chat');
+                stompClient = Stomp.over(socket);
+                stompClient.debug = null;
+
+                stompClient.connect({}, function () {
+                    if (locationStatus) {
+                        locationStatus.innerHTML = '<i class="fa-solid fa-wifi me-1"></i> Đã kết nối theo dõi vị trí shipper';
+                    }
+
+                    stompClient.subscribe('/topic/location/' + orderId, function (message) {
+                        try {
+                            var data = JSON.parse(message.body || '{}');
+                            if (typeof data.lat !== 'number' || typeof data.lng !== 'number') {
+                                return;
+                            }
+
+                            var latlng = [data.lat, data.lng];
+                            if (!marker) {
+                                marker = L.marker(latlng).addTo(map).bindPopup('Vị trí shipper hiện tại');
+                            } else {
+                                marker.setLatLng(latlng);
+                            }
+
+                            if (firstFix) {
+                                map.setView(latlng, 16);
+                                firstFix = false;
+                            }
+
+                            if (locationStatus) {
+                                locationStatus.innerHTML = '<i class="fa-solid fa-location-dot me-1 text-danger"></i> Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
+                            }
+                        } catch (e) {
+                            console.error('Invalid location payload', e);
+                        }
+                    });
+                }, function () {
+                    if (locationStatus) {
+                        locationStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1 text-danger"></i> Mất kết nối realtime với shipper';
+                    }
+                });
+            })();
         </script>
 </body>
 

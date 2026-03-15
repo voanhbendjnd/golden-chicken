@@ -71,7 +71,7 @@ public class AuthController {
             return "client/auth/register";
         }
         // this.userService.register(userRequest);
-        if (this.userRepository.existsByEmail(userRequest.getEmail())) {
+        if (this.userRepository.existsByEmailIgnoreCase(userRequest.getEmail())) {
             bindingResult.rejectValue("email", "CONFLICT", "Email already exists!");
             return "client/auth/register";
         }

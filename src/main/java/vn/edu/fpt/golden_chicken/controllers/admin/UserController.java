@@ -81,7 +81,7 @@ public class UserController {
     @PostMapping("/create")
     public String create(Model model, @ModelAttribute("newUser") @Valid UserDTO request,
             BindingResult bindingResult) {
-        if (this.userRepository.existsByEmail(request.getEmail())) {
+        if (this.userRepository.existsByEmailIgnoreCase(request.getEmail())) {
             bindingResult.rejectValue("email", "error.user", "Email already exists");
         }
         if (bindingResult.hasErrors()) {

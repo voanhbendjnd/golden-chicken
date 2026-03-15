@@ -18,8 +18,7 @@ public class KafkaOrderService {
                 order.getCustomer().getUser().getEmail(),
                 order.getName(),
                 order.getStatus(),
-                order.getFinalAmount());
-        System.out.println(">>>> Đã đẩy đơn hàng #" + order.getId() + " lên kafka!");
+                order.getFinalAmount(), "Not thing!");
 
         this.kafkaTemplate.send("order-chicken", msg);
     }

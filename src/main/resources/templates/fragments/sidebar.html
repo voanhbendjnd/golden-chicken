@@ -2,6 +2,7 @@
     <h3>Quản lý tài khoản</h3>
     <nav class="nav" style="display: flex; flex-direction: column;">
         <a th:href="@{/profile}">Cài đặt</a>
+        <a th:href="@{/staff/shipper/dashboard}" th:if="${session.roleName == 'SHIPPER' or session.staffType == 'SHIPPER'}">Quay lại menu shipper</a>
         <a th:href="@{/order-history}" th:if="${session.roleName == 'CUSTOMER'}">Đơn Hàng</a>
         <a th:href="@{/addresses}" th:if="${session.roleName == 'CUSTOMER'}">Địa Chỉ</a>
         <a th:href="@{/vouchers}" th:if="${session.roleName == 'CUSTOMER'}">Điểm</a>

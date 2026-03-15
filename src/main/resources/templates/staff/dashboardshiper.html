@@ -9,6 +9,8 @@
 
 <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -100,17 +102,19 @@
                                         th:text="${#temporals.format(order.createdAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span class="badge-status badge-assigned">
+                                <span th:if="${order.status.name() == 'READY_FOR_DELIVERY'}" class="badge-status badge-assigned">
                                     Chưa có shipper
+                                </span>
+                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Bị vấn đề
+                                </span>
+                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                    <i class="fa-solid fa-rotate me-1"></i>Giao lại
                                 </span>
 
                             </div>
 
-                            <div class="mb-1">
-                                <i class="fa-solid fa-user text-secondary me-1"></i>
-                                <span th:text="${order.name}"></span>
-                            </div>
-
+                        
                             <div class="mb-1">
                                 <i class="fa-solid fa-location-dot text-danger me-1"></i>
                                 <span th:text="${order.shippingAddress}"></span>
@@ -133,10 +137,7 @@
 
                             <div class="order-footer mt-3 d-flex gap-2">
 
-                                <button class="btn btn-outline-primary btn-sm"
-                                    th:onclick="'showOrderDetail(' + ${order.id} + ')'">
-                                    Xem chi tiết
-                                </button>
+                                
                                 <form th:action="@{/staff/shipper/order/accept}" method="post" class="flex-fill">
                                     <input type="hidden" name="orderId" th:value="${order.id}" />
                                     <button type="button" class="btn btn-warning flex-fill fw-bold"
@@ -175,8 +176,14 @@
                                         th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span class="badge-status badge-delivering">
+                                <span th:if="${order.status.name() == 'DELIVERING'}" class="badge-status badge-delivering">
                                     Đang giao
+                                </span>
+                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Bị vấn đề
+                                </span>
+                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                    <i class="fa-solid fa-rotate me-1"></i>Chờ giao lại
                                 </span>
 
                             </div>
@@ -206,6 +213,7 @@
                                 </div>
 
                                 <a class="btn btn-outline-secondary btn-sm"
+                                    th:if="${order.status.name() != 'REASSIGNING_SHIPPER' and order.status.name() != 'SHIPPER_ISSUE'}"
                                     th:href="'https://www.google.com/maps/search/?api=1&query=' + ${#strings.replace(order.shippingAddress,' ','+')}"
                                     target="_blank">
                                     Chỉ đường
@@ -213,35 +221,47 @@
 
                             </div>
 
-                            <div class="order-footer mt-3 d-flex gap-2">
+                            <div class="order-footer mt-3 d-flex flex-wrap gap-2"
+                                th:if="${order.status.name() != 'REASSIGNING_SHIPPER' and order.status.name() != 'SHIPPER_ISSUE'}">
 
-                                <button class="btn btn-outline-primary btn-sm"
+                                <button class="btn btn-outline-primary btn-sm flex-fill"
                                     th:onclick="'showOrderDetail(' + ${order.id} + ')'">
                                     Xem chi tiết
                                 </button>
 
                                 <form th:action="@{/staff/shipper/order/update-status}" method="post" class="flex-fill">
-
-
                                     <button type="button" class="btn btn-success w-100"
                                         th:onclick="'confirmUpdate(' + ${order.id} + ',\'Delivered\')'">
                                         Giao thành công
                                     </button>
-
                                 </form>
 
                                 <form th:action="@{/staff/shipper/order/update-status}" method="post" class="flex-fill">
-
                                     <input type="hidden" name="orderId" th:value="${order.id}" />
-                                    <input type="hidden" name="status" value="CANCELLED" />
-
+                                    <input type="hidden" name="status" value="DELIVERY_FAILED" />
                                     <button type="button" class="btn btn-danger w-100"
                                         th:onclick="'openCancelModal(' + ${order.id} + ')'">
                                         Thất bại
                                     </button>
-
-
                                 </form>
+
+                                <button type="button" class="btn btn-warning flex-fill"
+                                    th:onclick="'openIssueModal(' + ${order.id} + ')'">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Bị vấn đề
+                                </button>
+
+                            </div>
+
+                            <div class="order-footer mt-3" th:if="${order.status.name() == 'SHIPPER_ISSUE'}">
+                                <div class="alert alert-warning mb-0 py-2 text-center small">
+                                    Đơn đã báo bị vấn đề, đang chờ shipper khác nhận lại.
+                                </div>
+                            </div>
+
+                            <div class="order-footer mt-3" th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}">
+                                <div class="alert alert-warning mb-0 py-2 text-center small">
+                                    Đơn đang chờ shipper khác nhận lại.
+                                </div>
                             </div>
 
                         </div>
@@ -280,10 +300,19 @@
                                     </span>
 
                                     <span class="badge-status badge-failed"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).CANCELLED}">
-                                        FAILED
-
+                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERY_FAILED}">
+                                        GIAO THẤT BẠI
                                     </span>
+
+                                    <span class="badge-status badge-cancelled"
+                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).CANCELLED}">
+                                        ĐÃ HỦY
+                                    </span>
+                                    <span class="badge-status badge-issue"
+                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).SHIPPER_ISSUE}">
+                                       Bị vấn đề
+                                    </span>
+
                                     <button class="btn btn-outline-primary btn-sm"
                                         th:onclick="'showOrderDetail(' + ${order.id} + ')'">
                                         Xem chi tiết
@@ -301,6 +330,11 @@
                             <div class="mb-1">
                                 <i class="fa-solid fa-location-dot text-danger me-1"></i>
                                 <span th:text="${order.shippingAddress}"></span>
+                            </div>
+
+                            <div class="mb-1" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                                <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>
+                                <span class="text-danger" th:text="${order.deliveryFailedReason}"></span>
                             </div>
 
                             <div class="mt-2 d-flex justify-content-between">
@@ -425,10 +459,6 @@
                             </button>
 
                             <button type="button" class="reason-btn"
-                                onclick="setReason('Tài xế bị trục trặc')">
-                                Tài xế bị trục trặc
-                            </button>
-                            <button type="button" class="reason-btn"
                                 onclick="setReason('Thời tiết / sự cố giao thông')">
                                 Thời tiết / sự cố giao thông
                             </button>
@@ -455,9 +485,48 @@
         <form id="cancelForm" th:action="@{/staff/shipper/order/update-status}" method="post">
 
             <input type="hidden" name="orderId" id="cancelOrderId">
-            <input type="hidden" name="status" value="CANCELLED">
+            <input type="hidden" name="status" value="DELIVERY_FAILED">
             <input type="hidden" name="reason" id="cancelReasonInput">
 
+        </form>
+
+        <!-- SHIPPER ISSUE MODAL -->
+        <div class="modal fade" id="issueModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content cancel-card">
+                    <div class="modal-body text-center p-4">
+
+                        <div class="cancel-icon" style="color:#f0ad4e">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+
+                        <h5 class="fw-bold mt-2">Báo cáo sự cố</h5>
+                        <p class="text-muted mb-3">
+                            Vui lòng nhập mô tả sự cố gặp phải
+                        </p>
+
+                        <textarea id="issueReason" class="form-control mb-3" rows="3"
+                            placeholder="Nhập mô tả sự cố..."></textarea>
+
+                        <div class="quick-reasons mb-3">
+                            <button type="button" class="reason-btn" onclick="setIssueReason('Xe bị hỏng giữa đường')">Xe bị hỏng</button>
+                            <button type="button" class="reason-btn" onclick="setIssueReason('Tai nạn giao thông')">Tai nạn</button>
+                        
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-light px-4" data-bs-dismiss="modal">Huỷ</button>
+                            <button class="btn btn-warning px-4" onclick="submitIssue()">Xác nhận</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="issueForm" th:action="@{/staff/shipper/order/update-status}" method="post">
+            <input type="hidden" name="orderId" id="issueOrderId">
+            <input type="hidden" name="status" value="SHIPPER_ISSUE">
+            <input type="hidden" name="reason" id="issueReasonInput">
         </form>
         <script>
 
@@ -481,7 +550,12 @@
 
             function showOrderDetail(orderId, showAccept = false, formElement = null) {
 
-                fetch('/staff/shipper/order/fragment/' + orderId)
+                var url = '/staff/shipper/order/fragment/' + orderId;
+                if (showAccept) {
+                    url += '?addressOnly=true';
+                }
+
+                fetch(url)
                     .then(res => res.text())
 
                     .then(html => {
@@ -590,6 +664,94 @@
                 document.getElementById("cancelReason").value = text;
             }
 
+        </script>
+        <script>
+
+            let issueOrderId = null;
+
+            function openIssueModal(orderId) {
+                issueOrderId = orderId;
+                document.getElementById('issueReason').value = '';
+                let modal = new bootstrap.Modal(document.getElementById('issueModal'));
+                modal.show();
+            }
+
+            function submitIssue() {
+                let reason = document.getElementById('issueReason').value.trim();
+                if (reason === '') {
+                    alert('Vui lòng nhập mô tả sự cố!');
+                    return;
+                }
+                document.getElementById('issueOrderId').value = issueOrderId;
+                document.getElementById('issueReasonInput').value = reason;
+                document.getElementById('issueForm').submit();
+            }
+
+            function setIssueReason(text) {
+                document.getElementById('issueReason').value = text;
+            }
+
+        </script>
+
+        <script th:inline="javascript">
+            (function () {
+                var deliveringOrderIds = /*[[${deliveringOrders.![id]}]]*/ [];
+                if (!Array.isArray(deliveringOrderIds) || deliveringOrderIds.length === 0) {
+                    return;
+                }
+                if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
+                    return;
+                }
+                if (!navigator.geolocation) {
+                    console.warn('Geolocation is not supported on this browser.');
+                    return;
+                }
+
+                var socket = new SockJS('/ws-chat');
+                var stompClient = Stomp.over(socket);
+                stompClient.debug = null;
+                var watchId = null;
+                var lastSentAt = 0;
+                var minSendIntervalMs = 1000;
+
+                stompClient.connect({}, function () {
+                    watchId = navigator.geolocation.watchPosition(function (pos) {
+                        var now = Date.now();
+                        if (now - lastSentAt < minSendIntervalMs) {
+                            return;
+                        }
+                        lastSentAt = now;
+
+                        var lat = pos.coords.latitude;
+                        var lng = pos.coords.longitude;
+
+                        deliveringOrderIds.forEach(function (orderId) {
+                            stompClient.send('/app/location.update', {}, JSON.stringify({
+                                orderId: orderId,
+                                lat: lat,
+                                lng: lng
+                            }));
+                        });
+                    }, function (err) {
+                        console.warn('Cannot read GPS location:', err);
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 500
+                    });
+                }, function (error) {
+                    console.warn('Realtime tracking socket disconnected:', error);
+                });
+
+                window.addEventListener('beforeunload', function () {
+                    if (watchId !== null) {
+                        navigator.geolocation.clearWatch(watchId);
+                    }
+                    if (stompClient && stompClient.connected) {
+                        stompClient.disconnect();
+                    }
+                });
+            })();
         </script>
 
 

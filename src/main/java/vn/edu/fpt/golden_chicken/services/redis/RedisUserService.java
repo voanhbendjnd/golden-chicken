@@ -145,6 +145,13 @@ public class RedisUserService {
         return this.stringRedisTemplate.opsForValue().get(key);
     }
 
+    public boolean checkOTPForgotPassword(String email, String otp) {
+        if (this.getKeyOTPForgotPassword(email).equals(otp)) {
+            return true;
+        }
+        return false;
+    }
+
     public void deleteOTPGorgotPassword(String email) {
         this.stringRedisTemplate.delete("FORGOT_PASSWORD:" + email);
     }

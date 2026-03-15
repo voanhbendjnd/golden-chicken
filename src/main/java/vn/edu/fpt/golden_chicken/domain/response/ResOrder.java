@@ -18,6 +18,10 @@ public class ResOrder {
     String address;
     String phone;
     String note;
+    String deliveryFailedReason;
+
+    String shipperName;
+    String shipperPhone;
 
     BigDecimal totalPrice;
     BigDecimal feeShipping;

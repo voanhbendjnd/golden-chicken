@@ -109,6 +109,11 @@
                         });
 
                         if (response.ok) {
+                            const newTotal = await response.json();
+                            const cartCountElement = document.getElementById('cart-count');
+                            if (cartCountElement) {
+                                cartCountElement.innerText = newTotal;
+                            }
                             Swal.fire({
                                 title: 'Success',
                                 text: 'Add to cart success',

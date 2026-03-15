@@ -29,23 +29,24 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderMessage;
 import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
-import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
+import vn.edu.fpt.golden_chicken.repositories.CartRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
-import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
+
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class OrderService {
+
     @Autowired
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
 
@@ -54,9 +55,9 @@ public class OrderService {
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
-    CustomerVoucherRepository customerVoucherRepository;
-    VoucherRepository voucherRepository;
     CartService cartService;
+    UserService userService;
+    CartRepository cartRepository;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
@@ -90,7 +91,8 @@ public class OrderService {
             BigDecimal quantity = new BigDecimal(x.getQuantity());
             BigDecimal itemPriceTotal = product.getPrice().multiply(quantity);
             lastPriceProduct = lastPriceProduct.add(itemPriceTotal);
-            product.setSold(product.getSold() != null ? product.getSold() : 0 + x.getQuantity());
+            // product.setSold((product.getSold() != null ? product.getSold() : 0) +
+            // x.getQuantity());
             var orderItem = new OrderItem();
             orderItem.setFirstPrice(product.getPrice());
             orderItem.setOrder(order);
@@ -104,9 +106,6 @@ public class OrderService {
         if (calculatedFinalAmount.compareTo(dto.getFinalAmount()) != 0) {
             throw new CheckoutException("Invalid total amount. Recalculated total is " + calculatedFinalAmount);
         }
-        // customer
-        // .setPoint(totalBonus + (customer.getPoint() != null ? customer.getPoint() :
-        // 0));
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
         if (dto.getDiscountAmount() != null) {
@@ -115,10 +114,6 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-        markVoucherUsed(dto.getProductVoucherId(), newOrder);
-        markVoucherUsed(dto.getShippingVoucherId(), newOrder);
-
-        // this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
         if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
@@ -127,39 +122,46 @@ public class OrderService {
             message.setStatus(newOrder.getStatus());
             message.setTotalPrice(newOrder.getFinalAmount());
             message.setCustomerName(newOrder.getName());
+            message.setReason(newOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
+            this.cartService.cleanCartAfterCheckout(dto.getItems());
         }
-
-        this.cartService.cleanCartAfterCheckout(dto.getItems());
-        this.productRepository.saveAll(details);
-        // this.mailService.allowMailUpdateOrderStatus(user.getEmail(),
-        // newOrder.getStatus().toString(),
-        // "#" + order.getId(), order.getName());
 
         return newOrder;
     }
 
-    private void markVoucherUsed(Long voucherId, Order newOrder) {
-        if (voucherId == null) {
-            return;
+    public List<OrderDTO.OrderDetail> getItemsDTOByOrderID(Long orderId) throws PermissionException {
+        var user = this.userService.getUserInContext();
+        var customer = user.getCustomer();
+        if (customer == null) {
+            throw new PermissionException("You do not have permission!");
         }
-        var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
-        if (customerVoucher == null || customerVoucher.getVoucher() == null) {
-            return;
+        var order = this.orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", orderId));
+        var orderItems = order.getOrderItems();
+        if (orderItems.isEmpty()) {
+            return new ArrayList<>();
         }
-        customerVoucher.setStatus(vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher.USED);
-        customerVoucher.setUsedAt(LocalDateTime.now());
-        customerVoucher.setOrder(newOrder);
-        customerVoucherRepository.save(customerVoucher);
+        var customerId = customer.getId();
+        var resList = new ArrayList<OrderDTO.OrderDetail>();
+        var cartItems = this.cartRepository.findByCustomerIdAndProductIdIn(customerId,
+                orderItems.stream().map(x -> x.getProduct().getId()).toList());
+        var mapCartItems = cartItems.stream()
+                .collect(Collectors.toMap(x -> x.getProduct().getId(), x -> x.getId(), (c1, c2) -> c1));
 
-        var voucher = customerVoucher.getVoucher();
-        int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        int newQty = qty - 1;
-        voucher.setQuantity(newQty);
-        if (newQty <= 0) {
-            voucher.setStatus("DISABLED");
+        for (var x : orderItems) {
+            var productId = x.getProduct().getId();
+            var cartItemId = mapCartItems.get(productId);
+            if (cartItemId != null) {
+                var res = new OrderDTO.OrderDetail();
+                res.setItemId(cartItemId);
+                res.setProductId(productId);
+                res.setQuantity(x.getQuantity());
+                resList.add(res);
+            }
+
         }
-        voucherRepository.save(voucher);
+        return resList;
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Order> spec, Pageable pageable) {
@@ -178,6 +180,7 @@ public class OrderService {
             order.setName(x.getName());
             order.setPhone(x.getPhone());
             order.setNote(x.getNote());
+            order.setDeliveryFailedReason(x.getDeliveryFailedReason());
             order.setTotalPrice(x.getFinalAmount());
             order.setPaymentMethod(x.getPaymentMethod().toString());
             order.setPaymentStatus(x.getPaymentStatus().toString());
@@ -192,7 +195,6 @@ public class OrderService {
     @Transactional
     public void cancelOrderByCustomer(Long id) throws PermissionException {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        // var user = this.userRepository.findByEmailIgnoreCase(email);
 
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
@@ -221,11 +223,17 @@ public class OrderService {
         message.setStatus(updatedOrder.getStatus());
         message.setTotalPrice(updatedOrder.getFinalAmount());
         message.setCustomerName(updatedOrder.getName());
+        message.setReason(updatedOrder.getDeliveryFailedReason());
         this.kafkaTemplate.send("order-chicken-topic", message);
     }
 
     @Transactional
     public void changeOrderStatus(Long id, String statusName, Staff shipper) {
+        this.changeOrderStatus(id, statusName, shipper, null);
+    }
+
+    @Transactional
+    public void changeOrderStatus(Long id, String statusName, Staff shipper, String reason) {
         var order = this.orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
 
@@ -241,17 +249,29 @@ public class OrderService {
             throw new RuntimeException("Trạng thái không hợp lệ: " + statusName);
         }
 
-        if (currentStatus == nextStatus)
+        if (currentStatus == nextStatus) {
             return;
+        }
 
-        if (currentStatus == OrderStatus.DELIVERED ||
-                currentStatus == OrderStatus.CANCELLED ||
-                currentStatus == OrderStatus.COMPLETED) {
+        if (currentStatus == OrderStatus.DELIVERED
+                || currentStatus == OrderStatus.CANCELLED
+                || currentStatus == OrderStatus.COMPLETED) {
             throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
         }
 
         order.setStatus(nextStatus);
         order.setUpdatedAt(LocalDateTime.now());
+
+        String normalizedReason = reason == null ? null : reason.trim();
+        if (normalizedReason != null && normalizedReason.isEmpty()) {
+            normalizedReason = null;
+        }
+
+        if (nextStatus == OrderStatus.DELIVERY_FAILED || nextStatus == OrderStatus.SHIPPER_ISSUE) {
+            order.setDeliveryFailedReason(normalizedReason);
+        } else {
+            order.setDeliveryFailedReason(null);
+        }
 
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
             var actionMessage = new ActionPointMessage();
@@ -262,6 +282,17 @@ public class OrderService {
             actionMessage.setActionAt(LocalDateTime.now());
             actionMessage.setUserId(order.getCustomer().getId());
             order.setPaymentStatus(PaymentStatus.PAID);
+            var items = order.getOrderItems();
+            var products = this.productRepository.findByIdIn(items.stream().map(x -> x.getProduct().getId()).toList());
+            var mpItems = items.stream().collect(Collectors.toMap(x -> x.getProduct().getId(), x -> x.getQuantity()));
+            for (var x : products) {
+                var quantity = mpItems.get(x.getId());
+                if (quantity != null) {
+                    var currentQty = x.getSold() != null ? x.getSold() : 0;
+                    x.setSold(currentQty + quantity);
+                }
+            }
+            this.productRepository.saveAll(products);
             this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
         }
         if (nextStatus == OrderStatus.CANCELLED && currentPayment == PaymentStatus.PAID) {
@@ -277,6 +308,7 @@ public class OrderService {
             message.setStatus(lastOrder.getStatus());
             message.setTotalPrice(lastOrder.getFinalAmount());
             message.setCustomerName(lastOrder.getName());
+            message.setReason(lastOrder.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }
@@ -299,10 +331,12 @@ public class OrderService {
             message.setStatus(order.getStatus());
             message.setTotalPrice(order.getFinalAmount());
             message.setCustomerName(order.getName());
+            message.setReason(order.getDeliveryFailedReason());
             this.kafkaTemplate.send("order-chicken-topic", message);
         }
     }
 
+    @Transactional
     public ResOrder findById(Long id) {
         var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
         var res = new ResOrder();
@@ -311,10 +345,17 @@ public class OrderService {
         res.setId(order.getId());
         res.setName(order.getName());
         res.setNote(order.getNote());
+        res.setDeliveryFailedReason(order.getDeliveryFailedReason());
         res.setPaymentMethod(order.getPaymentMethod().toString());
         res.setPaymentStatus(order.getPaymentStatus().toString());
         res.setPhone(order.getPhone());
         res.setStatus(order.getStatus());
+        if (order.getShipper() != null && order.getShipper().getUser() != null) {
+            var shipperUser = order.getShipper().getUser();
+            res.setShipperName(shipperUser.getFullName());
+            res.setShipperPhone(shipperUser.getPhone());
+        }
+        res.setCustomerId(order.getCustomer() != null ? order.getCustomer().getId() : null);
         res.setTotalPrice(order.getTotalProductPrice());
         res.setFinalAmount(order.getFinalAmount());
         res.setFeeShipping(order.getShippingFee());
@@ -442,7 +483,7 @@ public class OrderService {
     }
 
     public List<OrderStatisResponse> getOrderStatisticData() {
-        String[] monthLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        String[] monthLabels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
         List<Object[]> rawData = orderRepository.getMonthlyRevenueRaw();
 
@@ -464,8 +505,9 @@ public class OrderService {
     @Transactional
     public void deleteOrder(Long orderId) {
         var order = this.orderRepository.findById(orderId).orElse(null);
-        if (order == null)
+        if (order == null) {
             return;
+        }
 
         if (order.getPaymentStatus() == PaymentStatus.UNPAID
                 && order.getStatus() == OrderStatus.PENDING) {

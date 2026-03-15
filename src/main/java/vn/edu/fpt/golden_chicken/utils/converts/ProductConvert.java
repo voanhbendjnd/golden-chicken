@@ -31,6 +31,10 @@ public class ProductConvert {
         res.setCategory(cate);
         res.setImg(product.getImageUrl());
         res.setImgs(product.getProductImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toList()));
+        if (product.getAverageRating() != null && product.getTotalReviews() != null) {
+            res.setAverageRating(product.getAverageRating());
+            res.setTotalReview(product.getTotalReviews());
+        }
         return res;
     }
 }

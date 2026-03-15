@@ -33,9 +33,14 @@ public class CartController {
 
     @PostMapping("/add")
     @ResponseBody
-    public ResponseEntity<?> addToCart(@RequestBody CartDTO dto) throws PermissionException {
-        return this.cartService.addToCart(dto) != false ? ResponseEntity.ok().build()
-                : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Fail");
+    public ResponseEntity<?> addToCart(@RequestBody CartDTO dto, HttpSession session) throws PermissionException {
+        boolean res = this.cartService.addToCart(dto);
+        if (res) {
+            int total = this.cartService.sumCart();
+            session.setAttribute("sumCart", total);
+            return ResponseEntity.ok(total);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Fail");
     }
 
     @PostMapping("/update")
@@ -44,7 +49,7 @@ public class CartController {
             throws PermissionException {
         this.cartService.updateQuantity(dto);
         int total = this.cartService.sumCart();
-        session.setAttribute("cartCount", total);
+        session.setAttribute("sumCart", total);
         var res = this.cartService.getProductInCart();
         return ResponseEntity.ok(res);
     }

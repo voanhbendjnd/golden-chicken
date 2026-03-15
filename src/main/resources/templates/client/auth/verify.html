@@ -7,36 +7,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực OTP</title>
     <style>
+        /* ===== BACKGROUND ===== */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f4f7f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('/img/register.jpg') no-repeat center center/cover;
+            font-family: 'Segoe UI', sans-serif;
+            position: relative;
         }
 
+        /* overlay tối */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 0;
+        }
+
+        /* ===== CARD ===== */
         .otp-card {
-            background: #fff;
+            width: 420px;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
             text-align: center;
-            max-width: 400px;
+            position: relative;
+            z-index: 1;
+            transition: 0.3s ease;
         }
 
-        .otp-card h2 {
+        .otp-card:hover {
+            transform: scale(1.03);
+        }
+
+        h2 {
+            color: #fff;
+            font-weight: 700;
             margin-bottom: 10px;
-            color: #333;
         }
 
         .otp-card p {
-            color: #666;
+            color: #eee;
             font-size: 14px;
             margin-bottom: 30px;
         }
 
+        /* ===== OTP INPUT ===== */
         .otp-inputs {
             display: flex;
             justify-content: space-between;
@@ -45,58 +68,76 @@
         }
 
         .otp-inputs input {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            transition: all 0.3s;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            transition: 0.3s;
         }
 
         .otp-inputs input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 8px rgba(13, 110, 253, 0.2);
-            outline: none;
+            transform: scale(1.05);
+
         }
 
+        /* ===== BUTTON ===== */
         .btn-verify {
             width: 100%;
             padding: 12px;
-            background-color: #0d6efd;
-            color: white;
+            border-radius: 15px;
             border: none;
-            border-radius: 8px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
+            background: #e9c3a3;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: 0.3s ease;
         }
 
         .btn-verify:hover {
-            background-color: #0b5ed7;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
         }
 
+        /* ===== LINKS ===== */
         .resend {
             margin-top: 20px;
             font-size: 14px;
-            color: #666;
+            color: #eee;
         }
 
         .resend a {
-            color: #0d6efd;
+            color: #fff;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: bold;
+        }
+
+        .resend a:hover {
+            text-decoration: underline;
+        }
+
+        .link-style {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .link-style:hover {
+            text-decoration: underline;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
     <!-- <input type="hidden" id="user-email" th:value="${session.OTP_EMAIL}"> -->
     <div class="otp-card">
         <h2>Verify OTP</h2>
-        <p>Please enter code that was sent to your email</p>
+        <p>Nhập mã OTP nhận từ email để tiếp tục</p>
 
         <div class="otp-inputs" id="otp-inputs">
             <input type="number" maxlength="1" max="9" min="0" inputmode="numeric" autocomplete="one-time-code">
@@ -110,8 +151,8 @@
         <div class="resend">
             Bạn không nhận được mã? <a th:href="@{/verify(email=${email})}">Gửi lại</a>
         </div>
-        <div class="text-center">
-            <a th:href="@{/register}" class="link-style">Need an account? Sign up</a>
+        <div class="resend">
+            <a th:href="@{/register}" class="link-style">Bạn chưa có tài khoản? Đăng ký</a>
         </div>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrf-token" />
 
@@ -148,8 +189,24 @@
 
                 body: JSON.stringify({ otp: otp, email: emailFromUrl })
             }).then(res => {
-                if (res.ok) window.location.href = "/login?success";
-                else alert("Mã OTP không đúng hoặc đã hết hạn!");
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Xác thực OTP thành công. Đang chuyển hướng...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "/login?success";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thất bại',
+                        text: 'Mã OTP không đúng hoặc đã hết hạn!',
+                        confirmButtonColor: '#e9c3a3'
+                    });
+                }
             });
         }
     </script>

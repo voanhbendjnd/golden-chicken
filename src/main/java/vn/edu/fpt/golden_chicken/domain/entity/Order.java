@@ -63,6 +63,8 @@ public class Order {
     @Column(columnDefinition = "NVARCHAR(255)")
 
     String note;
+    @Column(columnDefinition = "NVARCHAR(500)")
+    String deliveryFailedReason;
     @Enumerated(EnumType.STRING)
     PaymentMethod paymentMethod;
 

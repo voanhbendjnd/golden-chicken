@@ -36,6 +36,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class VoucherService {
+
     VoucherRepository repo;
     ProfileService profileService;
     CustomerRepository customerRepository;
@@ -157,8 +158,9 @@ public class VoucherService {
         }
         // nếu exchangeable = true thì pointCost phải > 0
         if (Boolean.TRUE.equals(dto.getExchangeable())
-                && (dto.getPointCost() == null || dto.getPointCost() <= 0))
+                && (dto.getPointCost() == null || dto.getPointCost() <= 0)) {
             throw new IllegalArgumentException("Point cost must be greater than 0");
+        }
         // validate business rule
         if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
             throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
@@ -296,7 +298,6 @@ public class VoucherService {
         this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
         // customer.setPoint(currentPoints - voucher.getPointCost());
-
         CustomerVoucher cv = new CustomerVoucher();
         cv.setCustomer(customer);
         cv.setVoucher(voucher);
@@ -319,26 +320,29 @@ public class VoucherService {
 
     public List<CustomerVoucher> getMyVouchers() {
         var currentUser = profileService.getCurrentUser();
-        if (currentUser == null)
+        if (currentUser == null) {
             return new ArrayList<>();
+        }
 
-       
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
-        if (customer == null)
+        if (customer == null) {
             return new ArrayList<>();
+        }
 
         return customerVoucherRepository.findByCustomer(customer);
     }
 
     public List<CustomerVoucher> getRedeemHistory() {
         var currentUser = profileService.getCurrentUser();
-        if (currentUser == null)
+        if (currentUser == null) {
             return new ArrayList<>();
+        }
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
-        if (customer == null)
+        if (customer == null) {
             return new ArrayList<>();
+        }
 
         return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
     }
@@ -376,8 +380,9 @@ public class VoucherService {
 
         for (CustomerVoucher cv : availableList) {
             Voucher voucher = cv.getVoucher();
-            if (voucher == null)
+            if (voucher == null) {
                 continue;
+            }
 
             boolean expiredByStatus = "EXPIRED".equalsIgnoreCase(voucher.getStatus());
             boolean expiredByTime = voucher.getEndAt() != null && now.isAfter(voucher.getEndAt());
@@ -538,6 +543,7 @@ public class VoucherService {
     }
 
     public static class VoucherSelection {
+
         private Long productVoucherId;
         private Long shippingVoucherId;
         private boolean valid;
