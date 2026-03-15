@@ -57,6 +57,26 @@
               </div>
             </div>
           </div>
+
+          <div class="mt-4" th:if="${totalPages > 1}">
+            <nav aria-label="Voucher pagination">
+              <ul class="pagination pagination-default justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                  <a class="page-link"
+                    th:href="@{/vouchers/myVouchers(page=${currentPage - 1}, size=${size})}">Trước</a>
+                </li>
+                <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                  th:classappend="${p == currentPage} ? 'active'">
+                  <a class="page-link" th:href="@{/vouchers/myVouchers(page=${p}, size=${size})}"
+                    th:text="${p}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                  <a class="page-link"
+                    th:href="@{/vouchers/myVouchers(page=${currentPage + 1}, size=${size})}">Sau</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </section>
       </div>
     </main>

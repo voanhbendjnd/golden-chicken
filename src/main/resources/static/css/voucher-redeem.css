@@ -196,3 +196,42 @@
 .btn-danger:hover {
     background: #b91c1c;
 }
+
+.pagination {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    list-style: none;
+    padding-left: 0;
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination-default .page-link {
+    background: #fff;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+}
+
+.pagination-default .page-item.active .page-link {
+    background: #fff;
+    color: #1f2937;
+    border-color: #e5e7eb;
+}
+
+.pagination-default .page-item.disabled .page-link {
+    color: #9ca3af;
+    background: #fff;
+}

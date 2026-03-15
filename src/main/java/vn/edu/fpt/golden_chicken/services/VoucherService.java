@@ -310,6 +310,18 @@ public class VoucherService {
         return customerVoucherRepository.findByCustomer(customer);
     }
 
+    public List<CustomerVoucher> getMyVouchersAvailableOnly() {
+        List<CustomerVoucher> result = new ArrayList<>();
+
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() == StatusVoucher.AVAILABLE) {
+                result.add(voucher);
+            }
+        }
+
+        return result;
+    }
+
     public List<CustomerVoucher> getRedeemHistory() {
         var currentUser = profileService.getCurrentUser();
         if (currentUser == null)

@@ -4,11 +4,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -22,7 +25,7 @@ public class ClientVoucherController {
     public String listVoucher(Model model) throws PermissionException {
         long points = voucherService.getPoints();
         var vouchers = voucherService.getListVoucherForExchange();
-        var myVouchers = voucherService.getMyVouchers();
+        var myVouchers = voucherService.getMyVouchersAvailableOnly();
 
         model.addAttribute("points", points);
         model.addAttribute("vouchers", vouchers);
@@ -37,9 +40,23 @@ public class ClientVoucherController {
     }
 
     @GetMapping("/vouchers/myVouchers")
-    public String myVouchers(Model model) throws PermissionException {
+    public String myVouchers(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) throws PermissionException {
+        List<CustomerVoucher> allVouchers = voucherService.getMyVouchersAvailableOnly();
+        int total = allVouchers.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
+        int fromIndex = Math.max(0, (currentPage - 1) * size);
+        int toIndex = Math.min(fromIndex + size, total);
+        var pageVouchers = allVouchers.subList(fromIndex, toIndex);
+
         model.addAttribute("points", voucherService.getPoints());
-        model.addAttribute("myVouchers", voucherService.getMyVouchers());
+        model.addAttribute("myVouchers", pageVouchers);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("size", size);
         return "client/voucher/myVouchers";
     }
 
@@ -53,7 +70,7 @@ public class ClientVoucherController {
     @GetMapping("/list-vouchers")
     public String listAllVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
-        model.addAttribute("myVouchers", voucherService.getMyVouchers());
+        model.addAttribute("myVouchers", voucherService.getMyVouchersAvailableOnly());
         model.addAttribute("systemVouchers", voucherService.getListVoucherForExchange());
         return "client/voucher/listAllVouchers";
     }
