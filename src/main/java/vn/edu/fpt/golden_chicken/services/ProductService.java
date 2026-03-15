@@ -72,7 +72,7 @@ public class ProductService {
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var page = this.productRepository.findAll(ps, pageable);
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);

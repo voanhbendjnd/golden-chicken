@@ -19,7 +19,8 @@
     <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
 
-    <!-- jQuery & main.js đã được load trong header.djnd -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
     <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet">
     <script th:src="@{/lib/easing/easing.min.js}"></script>
     <script th:src="@{/lib/waypoints/waypoints.min.js}"></script>
@@ -682,9 +683,9 @@
     <div class="container-fluid vesitable py-5">
         <div class="container py-5">
             <h1 class="mb-0">Sản phẩm mới</h1>
-            <div class="owl-carousel vegetable-carousel justify-content-center">
+            <div class="owl-carousel vegetable-carousel">
                 <!-- LOOP PRODUCT -->
-                <div class="col" th:each="product : ${newProducts}">
+                <div th:each="product : ${newProducts}">
 
                     <div class="rounded position-relative fruite-item">
 
