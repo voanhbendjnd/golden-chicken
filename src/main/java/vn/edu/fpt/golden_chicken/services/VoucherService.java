@@ -322,7 +322,6 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-       
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
@@ -399,12 +398,15 @@ public class VoucherService {
                 StatusVoucher.AVAILABLE);
     }
 
-    public void applyVouchersToOrder(
-            Long productVoucherId,
-            Long shippingVoucherId,
-            OrderDTO orderDTO,
-            BigDecimal shippingFee,
-            Model model) {
+    public CustomerVoucher getCustomerVoucherById(Long voucherId) {
+        if (voucherId == null) {
+            return null;
+        }
+        return customerVoucherRepository.findById(voucherId).orElse(null);
+    }
+
+    public void applyVouchersToOrder(Long productVoucherId, Long shippingVoucherId, OrderDTO orderDTO,
+            BigDecimal shippingFee, Model model) {
         BigDecimal productPrice = orderDTO.getTotalProductPrice();
         BigDecimal productDiscount = BigDecimal.ZERO;
         BigDecimal shippingDiscount = BigDecimal.ZERO;
@@ -470,14 +472,11 @@ public class VoucherService {
         return discount;
     }
 
-    public VoucherSelection resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode,
-            Model model) {
+    public OrderDTO resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode) {
         refreshVoucherStatuses();
-        VoucherSelection selection = new VoucherSelection();
+        OrderDTO order = new OrderDTO();
         if (currentUser == null) {
-            model.addAttribute("voucherError", "Bạn cần đăng nhập.");
-            selection.setValid(false);
-            return selection;
+            throw new IllegalArgumentException("Bạn cần đăng nhập.");
         }
 
         Long productVoucherId = null;
@@ -488,16 +487,12 @@ public class VoucherService {
                     .findFirstByCustomer_IdAndVoucher_CodeAndStatusOrderByIdDesc(
                             currentUser.getId(), voucherCode, StatusVoucher.AVAILABLE);
             if (customerVoucher == null) {
-                model.addAttribute("voucherError", "Mã voucher không hợp lệ.");
-                selection.setValid(false);
-                return selection;
+                throw new IllegalArgumentException("Mã voucher không hợp lệ.");
             }
             if (customerVoucher.getVoucher() != null
                     && customerVoucher.getVoucher().getCode() != null
                     && !customerVoucher.getVoucher().getCode().equals(voucherCode)) {
-                model.addAttribute("voucherError", "Mã voucher không hợp lệ.");
-                selection.setValid(false);
-                return selection;
+                throw new IllegalArgumentException("Mã voucher không hợp lệ.");
             }
             var voucherType = customerVoucher.getVoucher() != null
                     ? customerVoucher.getVoucher().getVoucherType()
@@ -507,9 +502,7 @@ public class VoucherService {
             } else if ("SHIPPING".equalsIgnoreCase(voucherType)) {
                 shippingVoucherId = customerVoucher.getId();
             } else {
-                model.addAttribute("voucherError", "Loại voucher không hợp lệ.");
-                selection.setValid(false);
-                return selection;
+                throw new IllegalArgumentException("Loại voucher không hợp lệ.");
             }
         }
 
@@ -531,39 +524,8 @@ public class VoucherService {
             }
         }
 
-        selection.setProductVoucherId(productVoucherId);
-        selection.setShippingVoucherId(shippingVoucherId);
-        selection.setValid(true);
-        return selection;
-    }
-
-    public static class VoucherSelection {
-        private Long productVoucherId;
-        private Long shippingVoucherId;
-        private boolean valid;
-
-        public Long getProductVoucherId() {
-            return productVoucherId;
-        }
-
-        public void setProductVoucherId(Long productVoucherId) {
-            this.productVoucherId = productVoucherId;
-        }
-
-        public Long getShippingVoucherId() {
-            return shippingVoucherId;
-        }
-
-        public void setShippingVoucherId(Long shippingVoucherId) {
-            this.shippingVoucherId = shippingVoucherId;
-        }
-
-        public boolean isValid() {
-            return valid;
-        }
-
-        public void setValid(boolean valid) {
-            this.valid = valid;
-        }
+        order.setProductVoucherId(productVoucherId);
+        order.setShippingVoucherId(shippingVoucherId);
+        return order;
     }
 }

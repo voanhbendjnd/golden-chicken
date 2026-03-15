@@ -123,23 +123,18 @@ public class CheckoutController {
         var currentUser = profileService.getCurrentUser();
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
-        BigDecimal orderTotal = calculateOrderTotal(productId, productIds);
+        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds);
         final BigDecimal orderTotalFinal = orderTotal;
 
         List<CustomerVoucher> allVouchers = vouchers;
 
-        int total = allVouchers.size();
-        int totalPages = (int) Math.ceil((double) total / size);
-        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
-        int fromIndex = Math.max(0, (currentPage - 1) * size);
-        int toIndex = Math.min(fromIndex + size, total);
-        List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
+        var pagination = checkoutService.paginateVouchers(allVouchers, page, size);
 
-        model.addAttribute("vouchers", pageVouchers);
+        model.addAttribute("vouchers", pagination.items());
         model.addAttribute("orderTotal", orderTotalFinal);
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("size", size);
+        model.addAttribute("currentPage", pagination.currentPage());
+        model.addAttribute("totalPages", pagination.totalPages());
+        model.addAttribute("size", pagination.size());
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
@@ -147,25 +142,6 @@ public class CheckoutController {
         return "client/voucher-select";
     }
 
-    private BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
-        if (productId != null) {
-            var product = productService.findById(productId);
-            return product != null ? product.getPrice() : BigDecimal.ZERO;
-        }
-        if (productIds != null && !productIds.isEmpty()) {
-            var cart = cartService.getProductInCart();
-            BigDecimal total = BigDecimal.ZERO;
-            if (cart.getItems() != null) {
-                for (var item : cart.getItems()) {
-                    if (productIds.contains(item.getProductId())) {
-                        total = total.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
-                    }
-                }
-            }
-            return total;
-        }
-        return BigDecimal.ZERO;
-    }
 
     @PostMapping("/apply-vouchers")
     public String applyVouchers(
@@ -174,9 +150,16 @@ public class CheckoutController {
             @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
             Model model) throws PermissionException {
-        var selection = voucherService.resolveVoucherSelection(profileService.getCurrentUser(), voucherIds, voucherCode,
-                model);
-        if (!selection.isValid()) {
+        OrderDTO selection;
+        try {
+            selection = voucherService.resolveVoucherSelection(profileService.getCurrentUser(), voucherIds,
+                    voucherCode);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("voucherError", ex.getMessage());
+            return handleCheckout(productId, ids, null, null, null, null, model);
+        }
+
+        if (selection.getProductVoucherId() == null && selection.getShippingVoucherId() == null) {
             return handleCheckout(productId, ids, null, null, null, null, model);
         }
 
