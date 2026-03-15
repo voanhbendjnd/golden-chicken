@@ -28,16 +28,24 @@ public class DashboardController {
 
     @GetMapping("/staff")
     public String getDashboardStaffPage(Model model) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            var user = this.userService.getByEmail(authentication.getName());
-            if (user != null && user.getStaff() != null && user.getStaff().getStaffType() == StaffType.SHIPPER) {
+        var user = this.userService.getUserInContext();
+        var staff = user.getStaff();
+        if (staff != null) {
+            var staffType = staff.getStaffType();
+            if (staffType == StaffType.SHIPPER) {
                 return "redirect:/staff/shipper/dashboard";
             }
+            if (staffType == StaffType.RECEPTIONIST) {
+                return "redirect:/staff/order";
+            }
+            if (staffType == StaffType.MANAGER) {
+                model.addAttribute("charData", this.orderService.getOrderStatisticData());
+                model.addAttribute("cntUser", this.userService.countCustomer());
+                model.addAttribute("cntOrder", this.orderRepository.count());
+                return "staff/dashboard";
+            }
         }
-        model.addAttribute("charData", this.orderService.getOrderStatisticData());
-        model.addAttribute("cntUser", this.userService.countCustomer());
-        model.addAttribute("cntOrder", this.orderRepository.count());
-        return "staff/dashboard";
+        return "redirect:/";
+
     }
 }

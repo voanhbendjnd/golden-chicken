@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -177,6 +178,9 @@ public class CartService {
     }
 
     public void cleanCartAfterCheckout(List<OrderDTO.OrderDetail> item) {
+        if (item.isEmpty()) {
+            return;
+        }
         var listFromCart = new ArrayList<CartItem>();
         if (item.getFirst().getItemId() != null) {
             var cartItems = this.cartRepository

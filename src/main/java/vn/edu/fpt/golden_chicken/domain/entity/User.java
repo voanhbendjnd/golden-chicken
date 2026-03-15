@@ -59,6 +59,8 @@ public class User implements Serializable {
     @PrePersist
     public void handleBeforeCreateAt() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             this.createdBy = authentication.getName();
