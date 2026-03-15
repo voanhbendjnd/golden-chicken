@@ -17,7 +17,6 @@ import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
-import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -32,13 +31,13 @@ public class CheckoutService {
     private final AddressServices addressServices;
     private final VoucherService voucherService;
     private final ProfileService profileService;
-    private final CustomerVoucherRepository customerVoucherRepository;
 
     public CheckoutResponse buildCheckout(
             Long productId,
             List<Long> ids,
             Long orderId,
-            Long voucherId,
+            Long productVoucherId,
+            Long shippingVoucherId,
             Long addressId) throws PermissionException {
 
         CheckoutResponse response = new CheckoutResponse();
@@ -183,77 +182,126 @@ public class CheckoutService {
 
         model.put("vouchers", vouchers);
 
-        applyVoucher(voucherId, orderDTO, shippingFee, model);
+        VoucherApplyResult voucherResult = applyVouchersToOrder(productVoucherId, shippingVoucherId, orderDTO,
+                shippingFee);
 
         model.put("order", orderDTO);
         model.put("defaultAddress", selectedAddress);
+        model.put("selectedProductVoucher", voucherResult.productVoucher());
+        model.put("selectedShippingVoucher", voucherResult.shippingVoucher());
+        if (voucherResult.errorMessage() != null) {
+            model.put("voucherError", voucherResult.errorMessage());
+        }
 
         return response;
     }
 
-    private void applyVoucher(Long voucherId,
+    private VoucherApplyResult applyVouchersToOrder(Long productVoucherId,
+            Long shippingVoucherId,
             OrderDTO orderDTO,
-            BigDecimal shippingFee,
-            Map<String, Object> model) {
-
-        if (voucherId == null)
-            return;
-
-        CustomerVoucher selected = customerVoucherRepository.findById(voucherId).orElse(null);
-
-        if (selected == null)
-            return;
-
-        Voucher voucher = selected.getVoucher();
+            BigDecimal shippingFee) {
         BigDecimal productPrice = orderDTO.getTotalProductPrice();
+        BigDecimal productDiscount = BigDecimal.ZERO;
+        BigDecimal shippingDiscount = BigDecimal.ZERO;
+        String errorMessage = null;
 
-        if (voucher.getMinOrderValue() != null &&
-                productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+        CustomerVoucher productVoucher = voucherService.getCustomerVoucherById(productVoucherId);
+        CustomerVoucher shippingVoucher = voucherService.getCustomerVoucherById(shippingVoucherId);
 
-            model.put("voucherError",
-                    "Đơn hàng chưa đủ điều kiện để dùng voucher này");
-            return;
+        if (productVoucher != null) {
+            Voucher voucher = productVoucher.getVoucher();
+            DiscountResult discountResult = calculateDiscount(voucher, productPrice, productPrice);
+            if (discountResult.errorMessage() != null) {
+                errorMessage = discountResult.errorMessage();
+            } else if (discountResult.discount() != null) {
+                productDiscount = discountResult.discount();
+            }
+        }
+
+        if (shippingVoucher != null) {
+            Voucher voucher = shippingVoucher.getVoucher();
+            DiscountResult discountResult = calculateDiscount(voucher, shippingFee, productPrice);
+            if (discountResult.errorMessage() != null) {
+                errorMessage = discountResult.errorMessage();
+            } else if (discountResult.discount() != null) {
+                shippingDiscount = discountResult.discount().min(shippingFee);
+            }
+        }
+
+        orderDTO.setDiscountAmount(productDiscount);
+        orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
+        orderDTO.setFinalAmount(productPrice.add(orderDTO.getShippingFee()).subtract(productDiscount));
+
+        orderDTO.setProductVoucherId(productVoucherId);
+        orderDTO.setShippingVoucherId(shippingVoucherId);
+
+        return new VoucherApplyResult(productVoucher, shippingVoucher, errorMessage);
+    }
+
+    private DiscountResult calculateDiscount(Voucher voucher, BigDecimal discountBase, BigDecimal minOrderBase) {
+        if (voucher == null) {
+            return new DiscountResult(BigDecimal.ZERO, null);
+        }
+
+        if (voucher.getMinOrderValue() != null && minOrderBase.compareTo(voucher.getMinOrderValue()) < 0) {
+            return new DiscountResult(null, "Đơn hàng chưa đủ điều kiện để dùng voucher này");
         }
 
         BigDecimal discount = BigDecimal.ZERO;
-
         if ("FIXED".equals(voucher.getDiscountType())) {
             discount = BigDecimal.valueOf(voucher.getDiscountValue());
-        }
-
-        if ("PERCENT".equals(voucher.getDiscountType())) {
-            discount = productPrice
+        } else if ("PERCENT".equals(voucher.getDiscountType())) {
+            discount = discountBase
                     .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
                     .divide(BigDecimal.valueOf(100));
         }
 
-        if (discount.compareTo(productPrice) > 0) {
-            discount = productPrice;
+        if (discount.compareTo(discountBase) > 0) {
+            discount = discountBase;
         }
 
-        if ("SHIPPING".equals(voucher.getVoucherType())) {
+        return new DiscountResult(discount, null);
+    }
 
-            BigDecimal shippingDiscount = discount;
+    private record VoucherApplyResult(CustomerVoucher productVoucher,
+            CustomerVoucher shippingVoucher,
+            String errorMessage) {
+    }
 
-            if (shippingDiscount.compareTo(shippingFee) > 0) {
-                shippingDiscount = shippingFee;
+    private record DiscountResult(BigDecimal discount, String errorMessage) {
+    }
+
+    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
+        if (productId != null) {
+            var product = productService.findById(productId);
+            return product != null ? product.getPrice() : BigDecimal.ZERO;
+        }
+        if (productIds != null && !productIds.isEmpty()) {
+            var cart = cartService.getProductInCart();
+            BigDecimal total = BigDecimal.ZERO;
+            if (cart.getItems() != null) {
+                for (var item : cart.getItems()) {
+                    if (productIds.contains(item.getProductId())) {
+                        total = total.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+                    }
+                }
             }
-
-            orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
-
-            orderDTO.setFinalAmount(
-                    productPrice.add(orderDTO.getShippingFee()));
-
-        } else {
-
-            orderDTO.setDiscountAmount(discount);
-
-            orderDTO.setFinalAmount(
-                    productPrice
-                            .add(orderDTO.getShippingFee())
-                            .subtract(discount));
+            return total;
         }
+        return BigDecimal.ZERO;
+    }
 
-        model.put("selectedVoucher", selected);
+    public PaginationResult<CustomerVoucher> paginateVouchers(List<CustomerVoucher> allVouchers, int page, int size) {
+        int total = allVouchers.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
+        int fromIndex = Math.max(0, (currentPage - 1) * size);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
+        return new PaginationResult<>(pageVouchers, currentPage, totalPages, size);
+    }
+
+    public record PaginationResult<T>(List<T> items, int currentPage, int totalPages, int size) {
     }
 }
+

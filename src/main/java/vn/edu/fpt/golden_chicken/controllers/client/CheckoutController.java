@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,14 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
-import vn.edu.fpt.golden_chicken.services.*;
+import vn.edu.fpt.golden_chicken.services.AddressServices;
+import vn.edu.fpt.golden_chicken.services.CartService;
+import vn.edu.fpt.golden_chicken.services.CheckoutService;
+import vn.edu.fpt.golden_chicken.services.OrderService;
+import vn.edu.fpt.golden_chicken.services.ProductService;
+import vn.edu.fpt.golden_chicken.services.ProfileService;
+import vn.edu.fpt.golden_chicken.services.UserService;
+import vn.edu.fpt.golden_chicken.services.VoucherService;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -33,20 +41,24 @@ public class CheckoutController {
     VoucherService voucherService;
     CheckoutService checkoutService;
     UserService userService;
+    ProductService productService;
+    CartService cartService;
 
     @GetMapping
     public String handleCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
             @RequestParam(value = "orderId", required = false) Long orderId,
-            @RequestParam(value = "voucherId", required = false) Long voucherId,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
             Model model) throws PermissionException {
         var user = this.userService.getUserInContext();
         if (user.getCustomer() == null) {
             throw new PermissionException("You do not have permission!");
         }
-        CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, voucherId, addressId);
+        CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, productVoucherId,
+                shippingVoucherId, addressId);
 
         if (response.getRedirect() != null) {
             return response.getRedirect();
@@ -77,6 +89,9 @@ public class CheckoutController {
 
     @PostMapping("/order")
     public String order(@ModelAttribute("order") OrderDTO dto) throws PermissionException {
+        if (dto.getProductVoucherId() == null && dto.getShippingVoucherId() == null) {
+            dto.setDiscountAmount(BigDecimal.ZERO);
+        }
         var order = this.orderService.order(dto);
 
         if (dto.getPaymentMethod() == PaymentMethod.VNPAY) {
@@ -101,17 +116,54 @@ public class CheckoutController {
     public String chooseVoucher(
             @RequestParam(value = "id", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> productIds,
-            Model model) {
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "9") int size,
+            Model model) throws PermissionException {
 
         var currentUser = profileService.getCurrentUser();
-
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
-        model.addAttribute("vouchers", vouchers);
+        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds);
+        final BigDecimal orderTotalFinal = orderTotal;
+
+        List<CustomerVoucher> allVouchers = vouchers;
+
+        var pagination = checkoutService.paginateVouchers(allVouchers, page, size);
+
+        model.addAttribute("vouchers", pagination.items());
+        model.addAttribute("orderTotal", orderTotalFinal);
+        model.addAttribute("currentPage", pagination.currentPage());
+        model.addAttribute("totalPages", pagination.totalPages());
+        model.addAttribute("size", pagination.size());
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
 
         return "client/voucher-select";
+    }
+
+
+    @PostMapping("/apply-vouchers")
+    public String applyVouchers(
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
+            @RequestParam(value = "voucherCode", required = false) String voucherCode,
+            Model model) throws PermissionException {
+        OrderDTO selection;
+        try {
+            selection = voucherService.resolveVoucherSelection(profileService.getCurrentUser(), voucherIds,
+                    voucherCode);
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("voucherError", ex.getMessage());
+            return handleCheckout(productId, ids, null, null, null, null, model);
+        }
+
+        if (selection.getProductVoucherId() == null && selection.getShippingVoucherId() == null) {
+            return handleCheckout(productId, ids, null, null, null, null, model);
+        }
+
+        return handleCheckout(productId, ids, null, selection.getProductVoucherId(), selection.getShippingVoucherId(),
+                null, model);
     }
 }

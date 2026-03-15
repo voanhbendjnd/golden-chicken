@@ -89,7 +89,8 @@
                     </a>
                     <div class="nav-item dropdown">
                         <a href="/profile" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="fas fa-user fa-2x" style="color:#ffb524;"></i>
+                            <img th:src="@{/img/avatar/{file}(file=${profile.avatar})}" alt="Avatar"
+                                 style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
