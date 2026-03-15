@@ -19,11 +19,6 @@ public class LocationController {
         this.shipperLocationStore = shipperLocationStore;
     }
 
-    /**
-     * Shipper gửi vị trí GPS qua STOMP → broadcast cho customer theo dõi.
-     * Destination: /app/location.update
-     * Broadcast to: /topic/location/{orderId}
-     */
     @MessageMapping("/location.update")
     public void updateLocation(@Payload LocationMessage msg) {
         if (msg.getOrderId() == null)

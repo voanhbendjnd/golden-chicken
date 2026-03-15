@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import vn.edu.fpt.golden_chicken.domain.entity.Review;
 import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
 
@@ -16,4 +16,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.product.id = :productId  AND r.reviewStatus = :status")
     Integer getTotalReviews(@Param("productId") Long productId, @Param("status") ReviewStatus status);
+
+    @Query("SELECT r.product.name, COUNT(r) as reviewCount " +
+            "FROM Review r WHERE r.reviewStatus = vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus.PUBLISHED " +
+            "GROUP BY r.product.id, r.product.name " +
+            "ORDER BY reviewCount DESC")
+    java.util.List<Object[]> findMostReviewedProduct(org.springframework.data.domain.Pageable pageable);
 }

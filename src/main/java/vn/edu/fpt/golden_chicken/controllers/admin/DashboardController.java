@@ -1,6 +1,5 @@
 package vn.edu.fpt.golden_chicken.controllers.admin;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,22 +7,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
-import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
-@Controller
+@Controller("adminDashboardController")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DashboardController {
     UserService userService;
-    OrderRepository orderRepository;
-    OrderService orderService;
 
     @GetMapping("/admin")
     public String getDashboardAdminPage() {
-        return "admin/dashboard";
+        return "redirect:/admin/user";
     }
 
     @GetMapping("/staff")
@@ -39,10 +34,7 @@ public class DashboardController {
                 return "redirect:/staff/order";
             }
             if (staffType == StaffType.MANAGER) {
-                model.addAttribute("charData", this.orderService.getOrderStatisticData());
-                model.addAttribute("cntUser", this.userService.countCustomer());
-                model.addAttribute("cntOrder", this.orderRepository.count());
-                return "staff/dashboard";
+                return "redirect:/staff/dashboard";
             }
         }
         return "redirect:/";

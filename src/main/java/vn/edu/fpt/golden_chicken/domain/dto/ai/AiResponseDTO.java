@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AiResponseDTO {
-    private String action; // "CHAT" or "ADD_TO_CART"
+    private String action;
     private String message;
     private List<ItemDTO> items;
 }
