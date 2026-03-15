@@ -322,7 +322,7 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-        // update voucher status
+       
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
@@ -471,6 +471,7 @@ public class VoucherService {
 
     public VoucherSelection resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode,
             Model model) {
+        refreshVoucherStatuses();
         VoucherSelection selection = new VoucherSelection();
         if (currentUser == null) {
             model.addAttribute("voucherError", "Bạn cần đăng nhập.");
