@@ -22,19 +22,14 @@ public class BadWordFilterUtility {
             return false;
         }
 
-        // 1️⃣ lowercase
         String normalized = comment.toLowerCase();
 
-        // 2️⃣ remove dấu tiếng Việt
         normalized = removeAccent(normalized);
 
-        // 3️⃣ remove ký tự đặc biệt nhưng giữ space
         normalized = normalized.replaceAll("[^a-z\\s]", " ");
 
-        // 4️⃣ gộp nhiều space
         normalized = normalized.replaceAll("\\s+", " ").trim();
 
-        // 5️⃣ check theo word boundary
         for (String badWord : BLACKLIST) {
 
             String normalizedBadWord = removeAccent(badWord);
