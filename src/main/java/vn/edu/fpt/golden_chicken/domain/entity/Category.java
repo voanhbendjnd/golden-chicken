@@ -36,6 +36,4 @@ public class Category {
     @OneToMany(mappedBy = "category")
     List<Product> products;
     Boolean status;
-    @Column(name = "is_delete")
-    Boolean isDelete;
 }

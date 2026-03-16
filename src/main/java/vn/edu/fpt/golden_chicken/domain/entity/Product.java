@@ -46,8 +46,6 @@ public class Product {
     String imageUrl;
     @Enumerated(EnumType.STRING)
     ProductType type;
-    @Column(name = "is_delete")
-    Boolean isDelete;
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;
