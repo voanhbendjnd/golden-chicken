@@ -29,9 +29,32 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 @SuppressWarnings("unusend")
 public class CartService {
-    UserRepository userRepository;
     CartRepository cartRepository;
     ProductRepository productRepository;
+    UserRepository userRepository;
+    vn.edu.fpt.golden_chicken.repositories.CustomerRepository customerRepository;
+
+    @Transactional
+    public void addToCart(Long customerId, Long productId, Integer quantity) {
+        var customer = this.customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer ID", customerId));
+        var product = this.productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", productId));
+        
+        var cartItem = this.cartRepository.findByCustomerIdAndProductId(customerId, productId);
+        if (cartItem == null) {
+            cartItem = new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setQuantity(quantity);
+            cartItem.setPrice(product.getPrice());
+            customer.addCartItem(cartItem);
+        } else {
+            int currentQty = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
+            cartItem.setQuantity(currentQty + quantity);
+            cartItem.setPrice(product.getPrice());
+        }
+        this.cartRepository.save(cartItem);
+    }
 
     @Transactional
     public boolean addToCart(CartDTO dto) throws PermissionException {

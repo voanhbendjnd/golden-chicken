@@ -1,0 +1,423 @@
+<div th:fragment="ai-assistant" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <!-- Only show to authenticated customers -->
+    <div sec:authorize="hasRole('CUSTOMER')">
+        <style>
+            :root {
+                --ai-primary: #6366f1;
+                --ai-secondary: #4f46e5;
+                --ai-bg: #ffffff;
+                --ai-text: #1f2937;
+                --ai-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+
+            #ai-chat-btn {
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 26px;
+                cursor: pointer;
+                box-shadow: var(--ai-shadow);
+                z-index: 10000;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            #ai-chat-btn:hover {
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+
+            #ai-chat-btn .pulse {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: var(--ai-primary);
+                opacity: 0.6;
+                animation: ai-pulse 2s infinite;
+                z-index: -1;
+            }
+
+            @keyframes ai-pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.6;
+                }
+
+                70% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
+
+            #ai-chat-panel {
+                position: fixed;
+                bottom: 170px;
+                right: 20px;
+                width: 380px;
+                height: 550px;
+                background: var(--ai-bg);
+                border-radius: 20px;
+                box-shadow: var(--ai-shadow);
+                display: none;
+                flex-direction: column;
+                z-index: 10000;
+                overflow: hidden;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                animation: ai-slide-up 0.4s ease-out;
+            }
+
+            @keyframes ai-slide-up {
+                from {
+                    transform: translateY(30px);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            .ai-header {
+                background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
+                color: white;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .ai-header-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .ai-avatar {
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+            }
+
+            .ai-status {
+                width: 10px;
+                height: 10px;
+                background: #4ade80;
+                border-radius: 50%;
+                border: 2px solid white;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+            }
+
+            .ai-title h4 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: white;
+            }
+
+            .ai-title p {
+                margin: 0;
+                font-size: 12px;
+                opacity: 0.9;
+            }
+
+            .ai-body {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                background: #f8fafc;
+            }
+
+            .ai-message {
+                max-width: 85%;
+                padding: 12px 16px;
+                border-radius: 15px;
+                font-size: 14px;
+                line-height: 1.5;
+                position: relative;
+            }
+
+            .ai-message.bot {
+                align-self: flex-start;
+                background: white;
+                color: var(--ai-text);
+                border-bottom-left-radius: 2px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .ai-message.user {
+                align-self: flex-end;
+                background: var(--ai-primary);
+                color: white;
+                border-bottom-right-radius: 2px;
+            }
+
+            .ai-footer {
+                padding: 15px 20px;
+                background: white;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            .ai-input-wrapper {
+                flex: 1;
+                position: relative;
+            }
+
+            #ai-input {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1px solid #e2e8f0;
+                border-radius: 25px;
+                outline: none;
+                font-size: 14px;
+                transition: border-color 0.2s;
+            }
+
+            #ai-input:focus {
+                border-color: var(--ai-primary);
+            }
+
+            #ai-send-btn {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                background: var(--ai-primary);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+            }
+
+            #ai-send-btn:hover {
+                background: var(--ai-secondary);
+            }
+
+            /* Typing Indicator */
+            .typing {
+                display: none;
+                align-items: center;
+                gap: 4px;
+                padding: 12px 16px;
+                background: white;
+                border-radius: 15px;
+                width: fit-content;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .dot {
+                width: 6px;
+                height: 6px;
+                background: #94a3b8;
+                border-radius: 50%;
+                animation: typing-dot 1s infinite ease-in-out;
+            }
+
+            .dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            @keyframes typing-dot {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .ai-body::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .ai-body::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+        </style>
+
+        <div id="ai-chat-btn" onclick="toggleAiChat()">
+            <div class="pulse"></div>
+            <i class="fas fa-magic"></i>
+        </div>
+
+        <div id="ai-chat-panel">
+            <div class="ai-header">
+                <div class="ai-header-left">
+                    <div class="ai-avatar" style="position: relative;">
+                        <i class="fas fa-robot"></i>
+                        <div class="ai-status"></div>
+                    </div>
+                    <div class="ai-title">
+                        <h4>Golden AI Assistant</h4>
+                        <p>Đặt hàng • Gợi ý • Chat</p>
+                    </div>
+                </div>
+                <div onclick="toggleAiChat()" style="cursor: pointer; opacity: 0.8;"><i class="fas fa-times"></i></div>
+            </div>
+
+            <div class="ai-body" id="ai-chat-body">
+                <div class="ai-message bot">
+                    Xin chào! Tôi là trợ lý AI Golden Chicken của bạn. Tôi có thể giúp bạn tìm món ăn, xem thực đơn,
+                    hoặc thậm chí thêm món vào giỏ
+                    hàng! <br><br>
+                    Hãy thử với: <i>"Tôi có 100k, lấy cho tôi phần ăn 2 người"</i>
+                </div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="ai-typing" class="ai-body"
+                style="background: transparent; padding: 0 20px 10px; min-height: auto;">
+                <div class="typing" id="ai-typing-indicator">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="ai-footer">
+                <div class="ai-input-wrapper">
+                    <input type="text" id="ai-input" placeholder="Type a message..."
+                        onkeypress="if(event.key === 'Enter') sendAiMessage()">
+                </div>
+                <button id="ai-send-btn" onclick="sendAiMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            const customerId = /*[[${session.id}]]*/ null;
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+
+            function toggleAiChat() {
+                const panel = document.getElementById('ai-chat-panel');
+                if (panel.style.display === 'flex') {
+                    panel.style.display = 'none';
+                } else {
+                    panel.style.display = 'flex';
+                    document.getElementById('ai-input').focus();
+                    scrollAiToBottom();
+                }
+            }
+
+            async function sendAiMessage() {
+                const input = document.getElementById('ai-input');
+                const message = input.value.trim();
+                if (!message) return;
+
+                // Append user message
+                appendAiMessage(message, 'user');
+                input.value = '';
+
+                // Show typing indicator
+                const typing = document.getElementById('ai-typing-indicator');
+                typing.style.display = 'flex';
+                scrollAiToBottom();
+
+                try {
+                    const response = await fetch('/api/ai/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            chatMessage: message,
+                            customerId: customerId
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const aiReply = data.message;
+                        appendAiMessage(aiReply, 'bot');
+
+                        // Update cart count in header
+                        const cartCountElement = document.getElementById('cart-count');
+                        if (cartCountElement && data.cartCount !== undefined) {
+                            cartCountElement.innerText = data.cartCount;
+                        }
+
+                        // If the reply looks like an order confirmation, show success toast
+                        if (aiReply.toLowerCase().includes('added') || aiReply.toLowerCase().includes('đã thêm')) {
+                            if (window.Swal) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Cart Updated!',
+                                    text: 'AI has added items to your cart.',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    toast: true,
+                                    position: 'top-end'
+                                });
+                            }
+                            // Optionally refresh cart count in header if menu.js has that function
+                            if (typeof updateCartCount === 'function') {
+                                updateCartCount();
+                            }
+                        }
+                    } else {
+                        appendAiMessage("Sorry, I'm having trouble connecting to the chicken coops right now.", 'bot');
+                    }
+                } catch (error) {
+                    console.error('AI Chat Error:', error);
+                    appendAiMessage("Oops! Something went wrong on my end.", 'bot');
+                } finally {
+                    typing.style.display = 'none';
+                    scrollAiToBottom();
+                }
+            }
+
+            function appendAiMessage(text, type) {
+                const chatBody = document.getElementById('ai-chat-body');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `ai-message ${type}`;
+                msgDiv.innerHTML = text;
+                chatBody.appendChild(msgDiv);
+                scrollAiToBottom();
+            }
+
+            function scrollAiToBottom() {
+                const chatBody = document.getElementById('ai-chat-body');
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        </script>
+    </div>
+</div>

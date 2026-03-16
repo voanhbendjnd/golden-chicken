@@ -22,7 +22,7 @@ public class ResProduct {
 
     Category category;
     Double averageRating;
-    Integer totalReview;
+    Integer totalReviews;
 
     @Data
     public static class Category {
