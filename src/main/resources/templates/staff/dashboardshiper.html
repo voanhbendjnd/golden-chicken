@@ -31,6 +31,8 @@
                     <h2 class="fw-bold">Golden - Shipper</h2>
                 </div>
 
+                <div th:if="${error}" class="alert alert-warning" role="alert" th:text="${error}"></div>
+
                 <!-- STATS -->
 
                 <div class="stats">
@@ -292,33 +294,41 @@
                                         th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span th:switch="${order.status}">
+                                <span th:if="${reassignedOrderIdSet != null and reassignedOrderIdSet.contains(order.id)}"
+                                    class="badge-status badge-issue">
+                                    Bị vấn đề
+                                </span>
 
-                                    <span class="badge-status badge-delivered"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERED}">
-                                        COMPLETED
+                                <span th:unless="${reassignedOrderIdSet != null and reassignedOrderIdSet.contains(order.id)}"
+                                    th:with="statusName=${#strings.toString(order.status)}">
+
+                                    <span class="badge-status badge-delivered" th:if="${statusName == 'DELIVERED'}">
+                                        HOÀN THÀNH
                                     </span>
 
-                                    <span class="badge-status badge-failed"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERY_FAILED}">
+                                    <span class="badge-status badge-failed" th:if="${statusName == 'DELIVERY_FAILED'}">
                                         GIAO THẤT BẠI
                                     </span>
 
-                                    <span class="badge-status badge-cancelled"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).CANCELLED}">
+                                    <span class="badge-status badge-cancelled" th:if="${statusName == 'CANCELLED'}">
                                         ĐÃ HỦY
                                     </span>
+
                                     <span class="badge-status badge-issue"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).SHIPPER_ISSUE}">
-                                       Bị vấn đề
+                                        th:if="${statusName == 'SHIPPER_ISSUE' or statusName == 'REASSIGNING_SHIPPER'}">
+                                        Bị vấn đề
                                     </span>
 
-                                    <button class="btn btn-outline-primary btn-sm"
-                                        th:onclick="'showOrderDetail(' + ${order.id} + ')'">
-                                        Xem chi tiết
-                                    </button>
+                                    <span class="badge-status badge-assigned" th:if="${statusName == 'DELIVERING'}">
+                                        ĐANG GIAO
+                                    </span>
 
                                 </span>
+
+                                <button class="btn btn-outline-primary btn-sm"
+                                    th:onclick="'showOrderDetail(' + ${order.id} + ')'">
+                                    Xem chi tiết
+                                </button>
 
                             </div>
 
@@ -335,6 +345,12 @@
                             <div class="mb-1" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
                                 <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>
                                 <span class="text-danger" th:text="${order.deliveryFailedReason}"></span>
+                            </div>
+
+                            <div class="mb-1"
+                                th:if="${#strings.isEmpty(order.deliveryFailedReason) and reassignedReasonMap != null and reassignedReasonMap[order.id] != null and !#strings.isEmpty(reassignedReasonMap[order.id])}">
+                                <i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>
+                                <span class="text-danger" th:text="${reassignedReasonMap[order.id]}"></span>
                             </div>
 
                             <div class="mt-2 d-flex justify-content-between">

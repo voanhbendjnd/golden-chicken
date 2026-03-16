@@ -280,19 +280,6 @@
                         </div>
                     </div>
                     <!-- ===== REAL-TIME TRACKING (inside col-lg-8, visible only when DELIVERING) ===== -->
-                <div th:if="${order.status.name() == 'DELIVERING'}" class="card mb-4" id="trackingCard">
-                    <div class="card-header bg-white py-3 fw-bold border-bottom">
-                        <i class="fa-solid fa-location-crosshairs me-2 text-danger"></i>
-                        Theo dõi shipper thời gian thực
-                        <span class="badge bg-danger ms-2" style="animation: blink 1s infinite;">LIVE</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div id="shipperMap" style="height:380px; width:100%;"></div>
-                    </div>
-                    <div class="card-footer bg-white py-2 text-muted small" id="locationStatus">
-                        <i class="fa-solid fa-satellite-dish me-1"></i> Đang chờ tín hiệu vị trí shipper...
-                    </div>
-                </div>
                 </div>
             </div>
         </div>

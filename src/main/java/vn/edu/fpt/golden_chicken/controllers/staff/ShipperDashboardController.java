@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -88,11 +89,18 @@ public class ShipperDashboardController {
     }
 
     @PostMapping("/order/accept")
-    public String acceptOrder(@RequestParam("orderId") Long orderId) {
+    public String acceptOrder(@RequestParam("orderId") Long orderId, RedirectAttributes redirectAttributes) {
         Staff shipper = getCurrentShipper();
         if (shipper == null) {
             return "redirect:/staff";
         }
+
+        String shipperPhone = (shipper.getUser() != null) ? shipper.getUser().getPhone() : null;
+        if (shipperPhone == null || shipperPhone.isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng cập nhật số điện thoại trong hồ sơ trước khi nhận đơn.");
+            return "redirect:/staff/shipper/dashboard";
+        }
+
         Order order = this.orderService.getOrderEntity(orderId);
         boolean isHandoverStatus = order.getStatus() == OrderStatus.SHIPPER_ISSUE
                 || order.getStatus() == OrderStatus.REASSIGNING_SHIPPER;
@@ -239,9 +247,13 @@ public class ShipperDashboardController {
         boolean isReassigning = order.getStatus() == OrderStatus.REASSIGNING_SHIPPER
                 || order.getStatus() == OrderStatus.SHIPPER_ISSUE;
 
+        boolean wasReassignedFromThisShipper = shipperLocationStore
+                .getReassignedOrderIdsForShipper(shipper.getId()).contains(id);
+
         if (order.getShipper() != null
                 && !order.getShipper().getId().equals(shipper.getId())
-                && !isReassigning) {
+                && !isReassigning
+                && !wasReassignedFromThisShipper) {
             return "redirect:/staff/shipper/dashboard";
         }
 

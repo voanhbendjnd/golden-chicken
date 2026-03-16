@@ -54,3 +54,12 @@
     font-weight: bold;
     color: #dc3545;
 }
+.info-label{
+    font-size:14px;
+    color:#6c757d;
+}
+
+.info-value{
+    font-weight:500;
+    font-size:16px;
+}
