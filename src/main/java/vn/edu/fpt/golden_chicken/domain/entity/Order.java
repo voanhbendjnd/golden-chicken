@@ -45,6 +45,8 @@ public class Order {
     BigDecimal totalProductPrice;
     BigDecimal shippingFee;
     BigDecimal discountAmount;
+    BigDecimal productDiscountAmount;
+    BigDecimal shippingDiscountAmount;
     BigDecimal finalAmount;
     String phone;
     @Column(columnDefinition = "NVARCHAR(255)")

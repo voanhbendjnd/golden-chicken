@@ -224,8 +224,17 @@ public class CheckoutService {
             }
         }
 
+        if (productDiscount == null) {
+            productDiscount = BigDecimal.ZERO;
+        }
+        if (shippingDiscount == null) {
+            shippingDiscount = BigDecimal.ZERO;
+        }
+
         orderDTO.setDiscountAmount(productDiscount);
         orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
+        orderDTO.setProductDiscountAmount(productDiscount);
+        orderDTO.setShippingDiscountAmount(shippingDiscount);
         orderDTO.setFinalAmount(productPrice.add(orderDTO.getShippingFee()).subtract(productDiscount));
 
         orderDTO.setProductVoucherId(productVoucher != null ? productVoucher.getId() : null);
@@ -280,4 +289,3 @@ public class CheckoutService {
     }
 
 }
-

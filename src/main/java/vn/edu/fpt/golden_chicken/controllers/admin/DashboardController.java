@@ -35,6 +35,8 @@ public class DashboardController {
             }
             if (staffType == StaffType.MANAGER) {
                 return "redirect:/staff/dashboard";
+            } else {
+                return "redirect:/staff/dashboard";
             }
         }
         return "redirect:/";

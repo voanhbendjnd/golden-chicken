@@ -38,6 +38,7 @@ import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -110,9 +111,9 @@ public class OrderService {
         }
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
-        if (dto.getDiscountAmount() != null) {
-            order.setDiscountAmount(discount);
-        }
+        order.setDiscountAmount(discount);
+        order.setProductDiscountAmount(dto.getProductDiscountAmount());
+        order.setShippingDiscountAmount(dto.getShippingDiscountAmount());
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
@@ -142,7 +143,7 @@ public class OrderService {
         if (customerVoucher == null || customerVoucher.getVoucher() == null) {
             return;
         }
-        customerVoucher.setStatus(vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher.USED);
+        customerVoucher.setStatus(StatusVoucher.USED);
         customerVoucher.setUsedAt(LocalDateTime.now());
         customerVoucher.setOrder(newOrder);
         customerVoucherRepository.save(customerVoucher);

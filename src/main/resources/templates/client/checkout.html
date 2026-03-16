@@ -175,6 +175,8 @@
                             <span
                                 th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT') + 'đ'}"></span>
                             <input type="hidden" th:field="*{discountAmount}" />
+                            <input type="hidden" th:field="*{productDiscountAmount}" />
+                            <input type="hidden" th:field="*{shippingDiscountAmount}" />
                             <input type="hidden" th:field="*{productVoucherId}" />
                             <input type="hidden" th:field="*{shippingVoucherId}" />
                         </div>
