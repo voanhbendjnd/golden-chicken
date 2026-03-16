@@ -1,14 +1,13 @@
 package vn.edu.fpt.golden_chicken.services;
 
+import org.springframework.stereotype.Component;
+import vn.edu.fpt.golden_chicken.domain.response.LocationMessage;
+
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.springframework.stereotype.Component;
-
-import vn.edu.fpt.golden_chicken.domain.response.LocationMessage;
 
 @Component
 public class ShipperLocationStore {
@@ -59,7 +58,7 @@ public class ShipperLocationStore {
     }
 
     public void savePreviousShipperSnapshot(Long orderId, String shipperName, Double lat, Double lng,
-            String issueReason) {
+                                            String issueReason) {
         if (orderId == null) {
             return;
         }

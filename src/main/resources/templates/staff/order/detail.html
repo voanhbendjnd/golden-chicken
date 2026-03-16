@@ -248,10 +248,14 @@
                                     <label class="small text-muted mb-2">Current Status Step:</label>
                                     <select class="form-select fw-bold mb-3 shadow-none focus-ring focus-ring-warning"
                                         id="orderStatusSelect" th:onchange="'updateStatus(this, ' + ${order.id} + ')'"
-                                        th:disabled="${order.status.name() == 'DELIVERED'
-                                            or order.status.name() == 'CANCELLED'
-                                            or order.status.name()== 'READY_FOR_DELIVERY'
-                                            or order.status.name()== 'COMPLETED'}">
+                                        th:disabled="${order.status.name() == 'DELIVERED' or
+                                                order.status.name() == 'COMPLETED' or
+                                                order.status.name() == 'CANCELLED' or
+                                                order.status.name()== 'READY_FOR_DELIVERY' or
+                                                order.status.name() == 'DELIVERING' or
+                                                order.status.name() == 'SHIPPER_ISSUE' or
+                                                order.status.name() == 'REASSIGNING_SHIPPER' or
+                                                order.status.name() == 'DELIVERY_FAILED'}">
 
                                         <option th:value="${order.status.name()}" th:text="${order.status.name()}"
                                             selected></option>
