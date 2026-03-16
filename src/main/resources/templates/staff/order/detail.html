@@ -202,6 +202,18 @@
                                             <span class="fw-bold text-dark"
                                                 th:text="${#numbers.formatDecimal(order.feeShipping, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
                                         </div>
+                                        <div class="d-flex justify-content-between w-100" style="min-width: 250px;"
+                                            th:if="${order.productDiscountAmount != null and order.productDiscountAmount > 0}">
+                                            <span class="text-muted small">Giảm giá sản phẩm:</span>
+                                            <span class="fw-bold text-success"
+                                                th:text="${'-' + #numbers.formatDecimal(order.productDiscountAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between w-100" style="min-width: 250px;"
+                                            th:if="${order.shippingDiscountAmount != null and order.shippingDiscountAmount > 0}">
+                                            <span class="text-muted small">Giảm giá vận chuyển:</span>
+                                            <span class="fw-bold text-success"
+                                                th:text="${'-' + #numbers.formatDecimal(order.shippingDiscountAmount, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+                                        </div>
                                         <hr class="w-100 my-2" style="opacity: 0.1;">
                                         <div class="d-flex justify-content-between w-100 align-items-center"
                                             style="min-width: 250px;">
@@ -248,10 +260,14 @@
                                     <label class="small text-muted mb-2">Current Status Step:</label>
                                     <select class="form-select fw-bold mb-3 shadow-none focus-ring focus-ring-warning"
                                         id="orderStatusSelect" th:onchange="'updateStatus(this, ' + ${order.id} + ')'"
-                                        th:disabled="${order.status.name() == 'DELIVERED'
-                                            or order.status.name() == 'CANCELLED'
-                                            or order.status.name()== 'READY_FOR_DELIVERY'
-                                            or order.status.name()== 'COMPLETED'}">
+                                        th:disabled="${order.status.name() == 'DELIVERED' or
+                                                order.status.name() == 'COMPLETED' or
+                                                order.status.name() == 'CANCELLED' or
+                                                order.status.name()== 'READY_FOR_DELIVERY' or
+                                                order.status.name() == 'DELIVERING' or
+                                                order.status.name() == 'SHIPPER_ISSUE' or
+                                                order.status.name() == 'REASSIGNING_SHIPPER' or
+                                                order.status.name() == 'DELIVERY_FAILED'}">
 
                                         <option th:value="${order.status.name()}" th:text="${order.status.name()}"
                                             selected></option>
