@@ -30,12 +30,15 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
+import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -53,6 +56,8 @@ public class OrderService {
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
+    CustomerVoucherRepository customerVoucherRepository;
+    VoucherRepository voucherRepository;
     CartService cartService;
     UserService userService;
     CartRepository cartRepository;
@@ -106,12 +111,14 @@ public class OrderService {
         }
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
-        if (dto.getDiscountAmount() != null) {
-            order.setDiscountAmount(discount);
-        }
+        order.setDiscountAmount(discount);
+        order.setProductDiscountAmount(dto.getProductDiscountAmount());
+        order.setShippingDiscountAmount(dto.getShippingDiscountAmount());
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
+        markVoucherUsed(dto.getProductVoucherId(), newOrder);
+        markVoucherUsed(dto.getShippingVoucherId(), newOrder);
 
         if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
@@ -126,6 +133,29 @@ public class OrderService {
         }
 
         return newOrder;
+    }
+
+    private void markVoucherUsed(Long voucherId, Order newOrder) {
+        if (voucherId == null) {
+            return;
+        }
+        var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
+        if (customerVoucher == null || customerVoucher.getVoucher() == null) {
+            return;
+        }
+        customerVoucher.setStatus(StatusVoucher.USED);
+        customerVoucher.setUsedAt(LocalDateTime.now());
+        customerVoucher.setOrder(newOrder);
+        customerVoucherRepository.save(customerVoucher);
+
+        var voucher = customerVoucher.getVoucher();
+        int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+        int newQty = qty - 1;
+        voucher.setQuantity(newQty);
+        if (newQty <= 0) {
+            voucher.setStatus("DISABLED");
+        }
+        voucherRepository.save(voucher);
     }
 
     public List<OrderDTO.OrderDetail> getItemsDTOByOrderID(Long orderId) throws PermissionException {
