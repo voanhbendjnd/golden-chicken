@@ -2,6 +2,7 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import vn.edu.fpt.golden_chicken.domain.request.ReviewDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResReview;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ReviewMessage;
+import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
@@ -55,8 +57,8 @@ public class ReviewService {
     FileService fileService;
     BadWordFilterUtility badWordFilterUtility;
     KafkaTemplate<String, ReviewMessage> kafkaReviewTemplate;
-    RedisUserService redisUserService;
     KafkaTemplate<String, String> kafkaBanViolate;
+    CustomerRepository customerRepository;
 
     public String reviewOrder(ReviewDTO dto, List<MultipartFile> files, Long orderItemId)
             throws IOException, URISyntaxException, PermissionException {
@@ -158,13 +160,18 @@ public class ReviewService {
         var lastReview = this.reviewRepository.save(currentReview);
         self.syncProductRating(lastReview.getProduct().getId());
         if (check) {
-            this.redisUserService.saveRecordViolateCustomer(email);
-            var record = this.redisUserService.getRecordOfViolate(email);
+            // this.redisUserService.saveRecordViolateCustomer(email);
+            var customer = currentReview.getCustomer();
+            var record = customer.getViolationCount() != null ? customer.getViolationCount() : 0;
+            customer.setViolationCount(record += 1);
             if (record > 4) {
-                this.redisUserService.lockAccountVilote(email);
+                // this.redisUserService.lockAccountVilote(email);
+                customer.setLockedUntil(LocalDateTime.now().plusMinutes(1));
                 this.kafkaBanViolate.send("violate-account-topic", email);
                 this.userService.forceLogoutCurrentUser();
+
             } else {
+
                 var msgReview = new ReviewMessage();
                 msgReview.setComment(lastReview.getComment());
                 msgReview.setEmail(email);
@@ -188,7 +195,7 @@ public class ReviewService {
         review.setComment(comment);
         review.setRating(rating);
         review.setIsUpdate(Boolean.TRUE);
-        review.setReviewStatus(vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus.PUBLISHED);
+        review.setReviewStatus(ReviewStatus.PUBLISHED);
         this.reviewRepository.save(review);
     }
 
@@ -232,16 +239,19 @@ public class ReviewService {
         }
         var lastReview = this.reviewRepository.save(review);
         if (check) {
-            this.redisUserService.saveRecordViolateCustomer(email);
-            Integer record = this.redisUserService.getRecordOfViolate(email);
-
+            // this.redisUserService.saveRecordViolateCustomer(email);
+            Integer record = customer.getViolationCount() != null ? customer.getViolationCount() : 0;
+            customer.setViolationCount(record += 1);
             if (record > 4) {
-                this.redisUserService.lockAccountVilote(email);
+
+                // this.redisUserService.lockAccountVilote(email);
+                customer.setLockedUntil(LocalDateTime.now().plusMinutes(1));
                 this.kafkaBanViolate.send("violate-account-topic", email);
                 this.userService.forceLogoutCurrentUser();
                 return "fail_" + product.getId();
 
             } else {
+
                 var msgReview = new ReviewMessage();
                 msgReview.setComment(lastReview.getComment());
                 msgReview.setEmail(email);

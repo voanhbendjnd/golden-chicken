@@ -278,7 +278,7 @@ public class ProductService {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
         if (this.orderItemRepository.existsByProductId(id) || this.cartItemRepository.existsByProductId(id)
-                || this.comboDetailRepository.existsByProductId(id)) {
+                || this.comboDetailRepository.existsByProductId(id) || this.comboDetailRepository.existsByComboId(id)) {
             product.setActive(false);
             var combos = this.comboDetailRepository.findByProductId(id);
             for (var x : combos) {

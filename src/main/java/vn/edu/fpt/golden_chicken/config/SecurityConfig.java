@@ -22,6 +22,7 @@ import org.springframework.session.security.web.authentication.SpringSessionReme
 import jakarta.servlet.DispatcherType;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.CustomUserDetailsService;
+import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 
 @Configuration
@@ -46,8 +47,9 @@ public class SecurityConfig {
      * Vị trí lấy thông tin User
      */
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository, RedisUserService redisUserService) {
-        return new CustomUserDetailsService(userRepository, redisUserService);
+    public UserDetailsService userDetailsService(UserService userService, UserRepository userRepository,
+            RedisUserService redisUserService) {
+        return new CustomUserDetailsService(userService, userRepository, redisUserService);
     }
 
     /*

@@ -125,6 +125,12 @@ public class UserController {
         return "redirect:/admin/user";
     }
 
+    @PostMapping("/status/{id:[0-9]+}")
+    public String revertStatus(@PathVariable("id") long id) {
+        this.userService.revertStatusAccount(id);
+        return "redirect:/admin/user";
+    }
+
     // @DeleteMapping("/{id:[0-9]+}")
     // @ResponseBody
     // public ResponseEntity<?> delete(@PathVariable("id") Long id) {

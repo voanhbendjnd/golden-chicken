@@ -10,8 +10,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import vn.edu.fpt.golden_chicken.domain.dto.ai.AiResponseDTO;
+
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
+import vn.edu.fpt.golden_chicken.domain.response.ai.AiResponseDTO;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 
 import java.util.Collections;

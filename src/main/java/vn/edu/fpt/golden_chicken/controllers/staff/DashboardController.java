@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import vn.edu.fpt.golden_chicken.domain.dto.DashboardReportDTO;
+
+import vn.edu.fpt.golden_chicken.domain.request.DashboardReportDTO;
 import vn.edu.fpt.golden_chicken.services.DashboardService;
 
 import java.io.ByteArrayInputStream;

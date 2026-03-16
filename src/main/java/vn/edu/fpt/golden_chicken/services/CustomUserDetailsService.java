@@ -17,10 +17,13 @@ import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RedisUserService redisUserService;
+    private final UserService userService;
 
-    public CustomUserDetailsService(UserRepository userRepository, RedisUserService redisUserService) {
+    public CustomUserDetailsService(UserService userService, UserRepository userRepository,
+            RedisUserService redisUserService) {
         this.userRepository = userRepository;
         this.redisUserService = redisUserService;
+        this.userService = userService;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (this.redisUserService.isAccountLocked(username)) {
             throw new LockedException("Account has locked!");
         }
-        if (this.redisUserService.isAccountLockedWhenReview(username)) {
+        if (!this.userService.checkLockedAccount(username)) {
             throw new LockedException("Account has locked when review!");
 
         }

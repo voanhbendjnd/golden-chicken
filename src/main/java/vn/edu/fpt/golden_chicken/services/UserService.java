@@ -15,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -219,6 +220,29 @@ public class UserService {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         return UserConvert.toUserRes(user);
+    }
+
+    public boolean checkLockedAccount(String email) {
+        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        var customer = user.getCustomer();
+        if (customer.getLockedUntil() != null && customer.getLockedUntil().isAfter(LocalDateTime.now())) {
+            return false;
+        }
+        if (customer.getLockedUntil() != null && customer.getLockedUntil().isBefore(LocalDateTime.now())) {
+            customer.setLockedUntil(null);
+            customer.setViolationCount(0);
+            this.customerRepository.save(customer);
+            return true;
+        }
+        return false;
+
+    }
+
+    public void revertStatusAccount(Long id) {
+        var user = this.userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
+        user.setStatus(!user.getStatus());
+        this.userRepository.save(user);
     }
 
     public void deleteById(long id) {

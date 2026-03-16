@@ -2,19 +2,24 @@ package vn.edu.fpt.golden_chicken.utils;
 
 import org.springframework.stereotype.Component;
 
+import vn.edu.fpt.golden_chicken.repositories.BadWordRepository;
+
 import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class BadWordFilterUtility {
+    private final BadWordRepository badWordRepository;
 
-    private static final Set<String> BLACKLIST = new HashSet<>(Arrays.asList(
-            "thối", "tanh", "hôi", "ôi thiu", "ươn", "mốc", "khó ăn", "dở tệ",
-            "ghê", "ghê tởm", "kinh dị", "bẩn", "dơ", "bẩn thỉu", "khó nuốt",
-            "hôi hám", "tanh tưởi", "mùi thối", "mùi hôi", "mùi tanh"));
+    public BadWordFilterUtility(BadWordRepository badWordRepository) {
+        this.badWordRepository = badWordRepository;
+    }
+
+    // private static final Set<String> BLACKLIST = new HashSet<>(Arrays.asList(
+    // "thối", "tanh", "hôi", "ôi thiu", "ươn", "mốc", "khó ăn", "dở tệ",
+    // "ghê", "ghê tởm", "kinh dị", "bẩn", "dơ", "bẩn thỉu", "khó nuốt",
+    // "hôi hám", "tanh tưởi", "mùi thối", "mùi hôi", "mùi tanh"));
 
     public boolean isViolating(String comment) {
 
@@ -29,15 +34,14 @@ public class BadWordFilterUtility {
         normalized = normalized.replaceAll("[^a-z\\s]", " ");
 
         normalized = normalized.replaceAll("\\s+", " ").trim();
-
-        for (String badWord : BLACKLIST) {
+        var setBadWord = this.badWordRepository.fetchAllActiveWordsOnly().stream().collect(Collectors.toSet());
+        for (String badWord : setBadWord) {
 
             String normalizedBadWord = removeAccent(badWord);
 
             Pattern pattern = Pattern.compile("\\b" + normalizedBadWord + "\\b");
 
             if (pattern.matcher(normalized).find()) {
-                System.out.println("Phát hiện từ cấm: " + badWord);
                 return true;
             }
         }
