@@ -182,22 +182,23 @@ public class CheckoutService {
 
         model.put("vouchers", vouchers);
 
-        VoucherApplyResult voucherResult = applyVouchersToOrder(productVoucherId, shippingVoucherId, orderDTO,
-                shippingFee);
+        CustomerVoucher productVoucher = voucherService.getCustomerVoucherById(productVoucherId);
+        CustomerVoucher shippingVoucher = voucherService.getCustomerVoucherById(shippingVoucherId);
+        String errorMessage = applyVouchersToOrder(productVoucher, shippingVoucher, orderDTO, shippingFee);
 
         model.put("order", orderDTO);
         model.put("defaultAddress", selectedAddress);
-        model.put("selectedProductVoucher", voucherResult.productVoucher());
-        model.put("selectedShippingVoucher", voucherResult.shippingVoucher());
-        if (voucherResult.errorMessage() != null) {
-            model.put("voucherError", voucherResult.errorMessage());
+        model.put("selectedProductVoucher", productVoucher);
+        model.put("selectedShippingVoucher", shippingVoucher);
+        if (errorMessage != null) {
+            model.put("voucherError", errorMessage);
         }
 
         return response;
     }
 
-    private VoucherApplyResult applyVouchersToOrder(Long productVoucherId,
-            Long shippingVoucherId,
+    private String applyVouchersToOrder(CustomerVoucher productVoucher,
+            CustomerVoucher shippingVoucher,
             OrderDTO orderDTO,
             BigDecimal shippingFee) {
         BigDecimal productPrice = orderDTO.getTotalProductPrice();
@@ -205,26 +206,21 @@ public class CheckoutService {
         BigDecimal shippingDiscount = BigDecimal.ZERO;
         String errorMessage = null;
 
-        CustomerVoucher productVoucher = voucherService.getCustomerVoucherById(productVoucherId);
-        CustomerVoucher shippingVoucher = voucherService.getCustomerVoucherById(shippingVoucherId);
-
         if (productVoucher != null) {
             Voucher voucher = productVoucher.getVoucher();
-            DiscountResult discountResult = calculateDiscount(voucher, productPrice, productPrice);
-            if (discountResult.errorMessage() != null) {
-                errorMessage = discountResult.errorMessage();
-            } else if (discountResult.discount() != null) {
-                productDiscount = discountResult.discount();
+            try {
+                productDiscount = calculateDiscount(voucher, productPrice, productPrice);
+            } catch (IllegalArgumentException ex) {
+                errorMessage = ex.getMessage();
             }
         }
 
         if (shippingVoucher != null) {
             Voucher voucher = shippingVoucher.getVoucher();
-            DiscountResult discountResult = calculateDiscount(voucher, shippingFee, productPrice);
-            if (discountResult.errorMessage() != null) {
-                errorMessage = discountResult.errorMessage();
-            } else if (discountResult.discount() != null) {
-                shippingDiscount = discountResult.discount().min(shippingFee);
+            try {
+                shippingDiscount = calculateDiscount(voucher, shippingFee, productPrice).min(shippingFee);
+            } catch (IllegalArgumentException ex) {
+                errorMessage = ex.getMessage();
             }
         }
 
@@ -232,19 +228,19 @@ public class CheckoutService {
         orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
         orderDTO.setFinalAmount(productPrice.add(orderDTO.getShippingFee()).subtract(productDiscount));
 
-        orderDTO.setProductVoucherId(productVoucherId);
-        orderDTO.setShippingVoucherId(shippingVoucherId);
+        orderDTO.setProductVoucherId(productVoucher != null ? productVoucher.getId() : null);
+        orderDTO.setShippingVoucherId(shippingVoucher != null ? shippingVoucher.getId() : null);
 
-        return new VoucherApplyResult(productVoucher, shippingVoucher, errorMessage);
+        return errorMessage;
     }
 
-    private DiscountResult calculateDiscount(Voucher voucher, BigDecimal discountBase, BigDecimal minOrderBase) {
+    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal discountBase, BigDecimal minOrderBase) {
         if (voucher == null) {
-            return new DiscountResult(BigDecimal.ZERO, null);
+            return BigDecimal.ZERO;
         }
 
         if (voucher.getMinOrderValue() != null && minOrderBase.compareTo(voucher.getMinOrderValue()) < 0) {
-            return new DiscountResult(null, "Đơn hàng chưa đủ điều kiện để dùng voucher này");
+            throw new IllegalArgumentException("Đơn hàng chưa đủ điều kiện để dùng voucher này");
         }
 
         BigDecimal discount = BigDecimal.ZERO;
@@ -260,15 +256,7 @@ public class CheckoutService {
             discount = discountBase;
         }
 
-        return new DiscountResult(discount, null);
-    }
-
-    private record VoucherApplyResult(CustomerVoucher productVoucher,
-            CustomerVoucher shippingVoucher,
-            String errorMessage) {
-    }
-
-    private record DiscountResult(BigDecimal discount, String errorMessage) {
+        return discount;
     }
 
     public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
@@ -291,17 +279,5 @@ public class CheckoutService {
         return BigDecimal.ZERO;
     }
 
-    public PaginationResult<CustomerVoucher> paginateVouchers(List<CustomerVoucher> allVouchers, int page, int size) {
-        int total = allVouchers.size();
-        int totalPages = (int) Math.ceil((double) total / size);
-        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
-        int fromIndex = Math.max(0, (currentPage - 1) * size);
-        int toIndex = Math.min(fromIndex + size, total);
-        List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
-        return new PaginationResult<>(pageVouchers, currentPage, totalPages, size);
-    }
-
-    public record PaginationResult<T>(List<T> items, int currentPage, int totalPages, int size) {
-    }
 }
 

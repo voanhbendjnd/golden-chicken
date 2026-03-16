@@ -41,8 +41,6 @@ public class CheckoutController {
     VoucherService voucherService;
     CheckoutService checkoutService;
     UserService userService;
-    ProductService productService;
-    CartService cartService;
 
     @GetMapping
     public String handleCheckout(
@@ -128,13 +126,18 @@ public class CheckoutController {
 
         List<CustomerVoucher> allVouchers = vouchers;
 
-        var pagination = checkoutService.paginateVouchers(allVouchers, page, size);
+        int total = allVouchers.size();
+        int totalPages = (int) Math.ceil((double) total / size);
+        int currentPage = Math.max(1, Math.min(page, Math.max(totalPages, 1)));
+        int fromIndex = Math.max(0, (currentPage - 1) * size);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
 
-        model.addAttribute("vouchers", pagination.items());
+        model.addAttribute("vouchers", pageVouchers);
         model.addAttribute("orderTotal", orderTotalFinal);
-        model.addAttribute("currentPage", pagination.currentPage());
-        model.addAttribute("totalPages", pagination.totalPages());
-        model.addAttribute("size", pagination.size());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("size", size);
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
