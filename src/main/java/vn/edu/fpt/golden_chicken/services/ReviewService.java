@@ -34,7 +34,6 @@ import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
-import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 import vn.edu.fpt.golden_chicken.utils.BadWordFilterUtility;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
@@ -56,9 +55,9 @@ public class ReviewService {
     OrderItemRepository orderItemRepository;
     FileService fileService;
     BadWordFilterUtility badWordFilterUtility;
+    CustomerRepository customerRepository;
     KafkaTemplate<String, ReviewMessage> kafkaReviewTemplate;
     KafkaTemplate<String, String> kafkaBanViolate;
-    CustomerRepository customerRepository;
 
     public String reviewOrder(ReviewDTO dto, List<MultipartFile> files, Long orderItemId)
             throws IOException, URISyntaxException, PermissionException {
@@ -361,6 +360,87 @@ public class ReviewService {
         product.setAverageRating(roundeAvg);
         product.setTotalReviews(totalReview);
         this.productRepository.save(product);
+    }
+
+    public ResultPaginationDTO fetchAllReviewWithPagination(Specification<Review> spec, Pageable pageable) {
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        var page = this.reviewRepository.findAll(spec, pageable);
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(x -> {
+            var result = new ResReview();
+            var customer = x.getCustomer();
+            result.setComment(x.getComment());
+            result.setCreatedAt(x.getCreatedAt());
+            result.setCustomerId(customer.getId());
+            result.setId(x.getId());
+            result.setIsUpdate(x.getIsUpdate());
+            result.setMediaUrls(x.getMediaUrls());
+            result.setName(customer.getUser().getFullName());
+            result.setOrderId(x.getOrderItem().getOrder().getId());
+            var product = x.getProduct();
+            result.setProductId(product.getId());
+            result.setProductName(product.getName());
+            result.setRating(x.getRating());
+            result.setReviewStatus(x.getReviewStatus());
+            return result;
+        }).toList());
+        return res;
+    }
+
+    public ResReview fetchReviewById(Long id) {
+        var x = this.reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID (" + id + ") not found!"));
+        var result = new ResReview();
+        var customer = x.getCustomer();
+        result.setComment(x.getComment());
+        result.setCreatedAt(x.getCreatedAt());
+        result.setCustomerId(customer.getId());
+        result.setId(x.getId());
+        result.setIsUpdate(x.getIsUpdate());
+        result.setMediaUrls(x.getMediaUrls());
+        result.setName(customer.getUser().getFullName());
+        result.setOrderId(x.getOrderItem().getOrder().getId());
+        var product = x.getProduct();
+        result.setProductId(product.getId());
+        result.setProductName(product.getName());
+        result.setRating(x.getRating());
+        result.setReviewStatus(x.getReviewStatus());
+
+        return result;
+    }
+
+    public boolean revertReviewStatus(Long reviewId, ReviewStatus status) {
+        var review = this.reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID (" + reviewId + ") not found!"));
+        if (status == ReviewStatus.PUBLISHED || status == ReviewStatus.HIDDEN) {
+            review.setReviewStatus(status);
+            this.reviewRepository.save(review);
+            return true;
+        }
+        return false;
+    }
+
+    public List<String> getSuggestions(String query) {
+        List<String> suggestions = new ArrayList<>();
+        if (query == null || query.isBlank())
+            return suggestions;
+
+        var products = this.productRepository.findByNameContainingIgnoreCaseAndActiveTrue(query);
+        for (var p : products) {
+            suggestions.add("Product: " + p.getName());
+        }
+
+        var customers = this.customerRepository.findByUserFullNameContainingIgnoreCase(query);
+        for (var c : customers) {
+            suggestions.add("Customer: " + c.getUser().getFullName());
+        }
+
+        return suggestions;
     }
 
 }

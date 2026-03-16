@@ -22,4 +22,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
             "GROUP BY r.product.id, r.product.name " +
             "ORDER BY reviewCount DESC")
     java.util.List<Object[]> findMostReviewedProduct(org.springframework.data.domain.Pageable pageable);
+
 }

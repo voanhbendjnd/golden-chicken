@@ -224,6 +224,9 @@ public class UserService {
 
     public boolean checkLockedAccount(String email) {
         var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        if (user.getStaff() != null) {
+            return true;
+        }
         var customer = user.getCustomer();
         if (customer.getLockedUntil() != null && customer.getLockedUntil().isAfter(LocalDateTime.now())) {
             return false;

@@ -84,4 +84,7 @@ public class BadWordService {
         return res;
     }
 
+    public void reloadAllReview() {
+
+    }
 }
