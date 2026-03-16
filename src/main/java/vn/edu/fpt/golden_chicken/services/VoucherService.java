@@ -233,6 +233,18 @@ public class VoucherService {
         return result;
     }
 
+    public List<CustomerVoucher> getMyVouchersExpiredOnly() {
+        List<CustomerVoucher> result = new ArrayList<>();
+
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() == StatusVoucher.EXPIRED) {
+                result.add(voucher);
+            }
+        }
+
+        return result;
+    }
+
     public long getPoints() throws PermissionException {
         long points = 0L;
 
@@ -341,6 +353,7 @@ public class VoucherService {
 
         return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
     }
+
 
     private void refreshVoucherStatuses() {
         refreshExpiredStatus();

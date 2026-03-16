@@ -25,67 +25,122 @@
             <h1 class="title">VOUCHER LIST</h1>
             <div class="voucher-container">
 
-                <section class="">
-                    <div class="section-head">
-                        <h2>Voucher của tôi</h2>
-                    </div>
-                    <div class="list" th:if="${#lists.isEmpty(myVouchers)}">
-                        <div class="voucher">
-                            <div class="v-left">
-                                <div class="v-title">Bạn chưa sở hữu voucher nào</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="list" th:unless="${#lists.isEmpty(myVouchers)}">
-                        <div class="voucher" th:each="cv : ${myVouchers}">
-                            <div class="v-left">
-                                <div class="v-title" th:text="${cv.voucher.name}">Tên Voucher</div>
-                                <div class="v-sub" th:text="${cv.voucher.code}">CODE</div>
-                            </div>
-                            <div class="v-right">
-                                <span class="tag personal" th:text="${cv.status}">AVAILABLE</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                <ul class="nav nav-tabs" id="voucherTabs" role="tablist" style="margin-bottom: 12px;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-mine" data-bs-toggle="tab"
+                            data-bs-target="#tab-mine-pane" type="button" role="tab">Voucher của tôi</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-system" data-bs-toggle="tab" data-bs-target="#tab-system-pane"
+                            type="button" role="tab">Voucher hệ thống</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-expired" data-bs-toggle="tab"
+                            data-bs-target="#tab-expired-pane" type="button" role="tab">Hết hạn</button>
+                    </li>
+                </ul>
 
-                <!-- Khối 2: Voucher hệ thống -->
-                <section class="">
-                    <div class="section-head">
-                        <h2>Voucher hệ thống</h2>
-                    </div>
-                    <div class="list" th:if="${#lists.isEmpty(systemVouchers)}">
-                        <div class="voucher">
-                            <div class="v-left">
-                                <div class="v-title">Không có voucher hệ thống khả dụng</div>
+                <div class="tab-content" id="voucherTabsContent">
+
+                    <div class="tab-pane fade show active" id="tab-mine-pane" role="tabpanel">
+                        <section>
+                            <div class="section-head">
+                                <h2>Voucher của tôi</h2>
                             </div>
-                        </div>
-                    </div>
-                    <div class="list" th:unless="${#lists.isEmpty(systemVouchers)}">
-                        <div class="voucher" th:each="v : ${systemVouchers}">
-                            <div class="v-left">
-                                <div class="v-title" th:text="${v.name}">Tên Voucher</div>
-                                <div class="v-sub">
-                                    <span
-                                        th:text="'Áp dụng cho đơn từ ' + ${v.minOrderValue} + 'đ trở lên'"></span><br />
-                                    <span th:text="'Hiệu lực: ' + ${#temporals.format(v.startAt, 'dd/MM/yyyy')} 
-                                                   + ' - ' + ${#temporals.format(v.endAt, 'dd/MM/yyyy')}"></span>
+                            <div class="list" th:if="${#lists.isEmpty(myVouchers)}">
+                                <div class="voucher">
+                                    <div class="v-left">
+                                        <div class="v-title">Bạn chưa sở hữu voucher nào</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="v-right">
-                                <span class="tag"
-                                    th:text="${v.discountType == 'PERCENT' ? v.discountValue + '%': v.discountValue + 'đ'}">
-                                    -10%
-                                </span>
+                            <div class="list" th:unless="${#lists.isEmpty(myVouchers)}">
+                                <div class="voucher" th:each="cv : ${myVouchers}">
+                                    <div class="v-left">
+                                        <div class="v-title" th:text="${cv.voucher.name}">Tên Voucher</div>
+                                        <div class="v-sub" th:text="${cv.voucher.code}">CODE</div>
+                                        <div
+                                            th:text="${cv.voucher.endAt != null ? #temporals.format(cv.voucher.endAt, 'dd/MM/yyyy HH:mm') : 'Không xác định'}">
+                                            Date
+                                        </div>
+                                    </div>
+                                    <div class="v-right">
+                                        <span class="tag personal" th:text="${cv.status}">AVAILABLE</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
-                </section>
 
+                    <div class="tab-pane fade" id="tab-system-pane" role="tabpanel">
+                        <section>
+                            <div class="section-head">
+                                <h2>Voucher hệ thống</h2>
+                            </div>
+                            <div class="list" th:if="${#lists.isEmpty(systemVouchers)}">
+                                <div class="voucher">
+                                    <div class="v-left">
+                                        <div class="v-title">Không có voucher hệ thống khả dụng</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list" th:unless="${#lists.isEmpty(systemVouchers)}">
+                                <div class="voucher" th:each="v : ${systemVouchers}">
+                                    <div class="v-left">
+                                        <div class="v-title" th:text="${v.name}">Tên Voucher</div>
+                                        <div class="v-sub">
+                                            <span
+                                                th:text="'Áp dụng cho đơn từ ' + ${v.minOrderValue} + 'đ trở lên'"></span><br />
+                                            <span th:text="'Hiệu lực: ' + ${#temporals.format(v.startAt, 'dd/MM/yyyy')} 
+                                                   + ' - ' + ${#temporals.format(v.endAt, 'dd/MM/yyyy')}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="v-right">
+                                        <span class="tag"
+                                            th:text="${v.discountType == 'PERCENT' ? v.discountValue + '%': v.discountValue + 'đ'}">
+                                            -10%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tab-pane fade" id="tab-expired-pane" role="tabpanel">
+                        <section>
+                            <div class="section-head">
+                                <h2>Voucher hết hạn</h2>
+                            </div>
+                            <div class="list" th:if="${#lists.isEmpty(expiredVouchers)}">
+                                <div class="voucher">
+                                    <div class="v-left">
+                                        <div class="v-title">Không có voucher hết hạn</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list" th:unless="${#lists.isEmpty(expiredVouchers)}">
+                                <div class="voucher" th:each="cv : ${expiredVouchers}">
+                                    <div class="v-left">
+                                        <div class="v-title" th:text="${cv.voucher.name}">Tên Voucher</div>
+                                        <div class="v-sub" th:text="${cv.voucher.code}">CODE</div>
+                                        <div
+                                            th:text="${cv.voucher.endAt != null ? #temporals.format(cv.voucher.endAt, 'dd/MM/yyyy HH:mm') : 'Không xác định'}">
+                                            Date
+                                        </div>
+                                    </div>
+                                    <div class="v-right">
+                                        <span class="tag expired">EXPIRED</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
     <div th:replace="~{client/layout/footer.djnd}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
