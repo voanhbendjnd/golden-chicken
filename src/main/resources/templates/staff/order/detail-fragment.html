@@ -7,9 +7,42 @@
 <!-- fragment containing full order details -->
 <div th:fragment="orderDetail (order)">
 
+    <div class="card shadow-sm" th:if="${addressOnly}">
+        <div class="card-header bg-white fw-bold">
+            Địa chỉ giao hàng
+        </div>
+        <div class="card-body">
+            <div class="info-value" th:text="${order.address}">
+                123 Street
+            </div>
 
+            <div class="mt-3 p-2 rounded" style="background:#fff8e1;" th:if="${isReassigning}">
+                <div class="fw-semibold text-warning-emphasis mb-1">
+                    <i class="fa-solid fa-rotate me-1"></i>Thông tin shipper cũ
+                </div>
+                <div class="small text-muted mb-1">
+                    <span class="fw-semibold">Tên:</span>
+                    <span th:text="${#strings.isEmpty(oldShipperName) ? 'Không rõ' : oldShipperName}">Không rõ</span>
+                </div>
+                <div class="small text-muted mb-1" th:if="${oldShipperLat != null and oldShipperLng != null}">
+                    <span class="fw-semibold">Vị trí gần nhất:</span>
+                    <span th:text="${oldShipperLat}">0.0</span>,
+                    <span th:text="${oldShipperLng}">0.0</span>
+                </div>
+                <a th:if="${oldShipperLat != null and oldShipperLng != null}"
+                    class="btn btn-outline-secondary btn-sm mt-1"
+                    th:href="'https://www.google.com/maps/search/?api=1&query=' + ${oldShipperLat} + ',' + ${oldShipperLng}"
+                    target="_blank">
+                    Mở vị trí shipper bị vấn đề
+                </a>
+                <div class="small text-muted" th:if="${oldShipperLat == null or oldShipperLng == null}">
+                    Chưa có vị trí gần nhất của shipper cũ.
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="row g-4">
+    <div class="row g-4" th:if="${!addressOnly}">
 
         <!-- LEFT SIDE -->
         <div class="col-lg-8">
@@ -83,6 +116,11 @@
                         <div class="text-warning fst-italic"
                             th:text="${#strings.isEmpty(order.note) ? 'Không có ghi chú.' : order.note}">
                         </div>
+
+                        <div class="mt-3" th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                            <div class="fw-semibold mb-1 text-danger">Lý do giao hàng thất bại</div>
+                            <div class="text-danger-emphasis" th:text="${order.deliveryFailedReason}"></div>
+                        </div>
                     </div>
 
 
@@ -91,13 +129,14 @@
 
                         <div class="d-flex justify-content-between">
                             <span>Tổng tiền hàng:</span>
-                            <b class="pe-2" th:text="${#numbers.formatDecimal(order.totalPrice,0,'COMMA',0,'POINT')} + ' ₫'"></b>
+                            <b class="pe-2"
+                                th:text="${#numbers.formatDecimal(order.totalPrice,0,'COMMA',0,'POINT')} + ' ₫'"></b>
                         </div>
 
                         <div class="d-flex justify-content-between">
                             <span>Phí vận chuyển:</span>
                             <b class="pe-2"
-                               th:text="${#numbers.formatDecimal(order.feeShipping,0,'COMMA',0,'POINT')} + ' ₫'">
+                                th:text="${#numbers.formatDecimal(order.feeShipping,0,'COMMA',0,'POINT')} + ' ₫'">
                             </b>
                         </div>
 
@@ -147,6 +186,34 @@
                             </div>
                         </div>
 
+                        <div class="col-12" th:if="${!addressOnly and hasOldShipperInfo}">
+                            <div class="mt-2 p-2 rounded" style="background:#fff8e1;">
+                                <div class="fw-semibold text-warning-emphasis mb-1">
+                                    <i class="fa-solid fa-rotate me-1"></i>Thông tin shipper cũ
+                                </div>
+                                <div class="small text-muted mb-1">
+                                    <span class="fw-semibold">Tên:</span>
+                                    <span
+                                        th:text="${#strings.isEmpty(oldShipperName) ? 'Không rõ' : oldShipperName}">Không
+                                        rõ</span>
+                                </div>
+                                <div class="small text-muted mb-1"
+                                    th:if="${oldShipperLat != null and oldShipperLng != null}">
+                                    <span class="fw-semibold">Vị trí gần nhất:</span>
+                                    <span th:text="${oldShipperLat}">0.0</span>,
+                                    <span th:text="${oldShipperLng}">0.0</span>
+                                </div>
+                                <a th:if="${oldShipperLat != null and oldShipperLng != null}"
+                                    class="btn btn-outline-secondary btn-sm mt-1"
+                                    th:href="'https://www.google.com/maps/search/?api=1&query=' + ${oldShipperLat} + ',' + ${oldShipperLng}"
+                                    target="_blank">
+                                    Mở vị trí shipper bị vấn đề
+                                </a>
+                            </div>
+                        </div>
+
+
+
                     </div>
 
                 </div>
@@ -155,7 +222,7 @@
 
             <!-- SHIPPER INFO (fragment for shipper dashboard) -->
             <div class="card shadow-sm mt-3"
-                 th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
+                th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
                 <div class="card-header bg-white fw-bold">
                     Assigned Shipper
                 </div>
@@ -167,9 +234,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="info-label">Shipper Phone</label>
-                            <a th:href="'tel:' + ${order.shipperPhone}"
-                               class="info-value text-decoration-none"
-                               th:text="${order.shipperPhone}">0900000000</a>
+                            <a th:href="'tel:' + ${order.shipperPhone}" class="info-value text-decoration-none"
+                                th:text="${order.shipperPhone}">0900000000</a>
                         </div>
                     </div>
                 </div>

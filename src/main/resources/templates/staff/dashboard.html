@@ -2,91 +2,152 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <head th:replace="~{common/head}"></head>
     <link th:href="@{/css/dashboard.css}" rel="stylesheet">
-    <!-- <script th:src="@{/js/dashboard.js}"></script> -->
-
-
-    <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Golden Chicken - Admin Dashboard</title>
+    <style>
+        .premium-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+        .premium-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+        .gradient-bg-revenue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .metric-value { font-size: 1.8rem; font-weight: 800; }
+        .metric-label { font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
+        .table-premium thead { background: #f8f9fa; }
+        .table-premium th { border-top: none; font-weight: 600; color: #555; }
+        .badge-status { border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; }
+    </style>
 </head>
 
 <body>
     <div th:replace="~{component/header}"></div>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-3 col-lg-2 p-0">
+            <div class="col-md-3 col-lg-2 p-0 sidebar-bg">
                 <div th:replace="~{staff/layout/sidebar}"></div>
             </div>
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
-                <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-                    rel="stylesheet">
-                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="fas fa-chart-pie me-2 text-primary"></i>Sales Performance Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a th:href="@{/staff/dashboard/export}" class="btn btn-sm btn-outline-success shadow-sm">
+                            <i class="fas fa-file-excel me-1"></i> Export Excel Report
+                        </a>
+                    </div>
+                </div>
 
-                <div class="container py-4">
-                    <h1 class="text-center mb-4">Data Visualization Dashboard</h1>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="dashboard-card weather-widget">
-                                <div class="weather-icon">
-                                    <i class="fas fa-sun"></i>
-                                </div>
-                                <div class="weather-temp">25°C</div>
-                                <div class="weather-description">Sunny</div>
-                                <div class="weather-location">New York, NY</div>
-                            </div>
-                            <div class="dashboard-card">
-                                <h3>Quick Stats</h3>
-                                <div class="row">
-                                    <div class="col-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-icon text-primary">
-                                                <i class="fas fa-users"></i>
-                                            </div>
-                                            <div class="stat-value" th:text="${cntUser}">1,234</div>
-                                            <div class="stat-label">Total Users</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <div class="stat-card">
-                                            <div class="stat-icon text-success">
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </div>
-                                            <div class="stat-value" th:text="${cntOrder}">$5,678</div>
-                                            <div class="stat-label">Revenue</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat-card">
-                                            <div class="stat-icon text-info">
-                                                <i class="fas fa-file-alt"></i>
-                                            </div>
-                                            <div class="stat-value">42</div>
-                                            <div class="stat-label">New Posts</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="stat-card">
-                                            <div class="stat-icon text-warning">
-                                                <i class="fas fa-star"></i>
-                                            </div>
-                                            <div class="stat-value">4.7</div>
-                                            <div class="stat-label">Avg. Rating</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Core Metrics Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="premium-card shadow-sm p-4 gradient-bg-revenue text-white">
+                            <div class="metric-label">Revenue Today</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(report.revenueToday, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                            <i class="fas fa-calendar-day mt-2 opacity-50"></i>
                         </div>
-                        <div class="col-md-9">
-                            <div class="dashboard-card">
-                                <h3>Monthly Revenue</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="premium-card shadow-sm p-4 bg-primary text-white">
+                            <div class="metric-label">Monthly Revenue</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(report.revenueThisMonth, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                            <i class="fas fa-calendar-alt mt-2 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="premium-card shadow-sm p-4 bg-dark text-white">
+                            <div class="metric-label">Annual Revenue</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(report.revenueThisYear, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                            <i class="fas fa-chart-line mt-2 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="premium-card shadow-sm p-4 bg-success text-white">
+                            <div class="metric-label">Successful Orders</div>
+                            <div class="metric-value" th:text="${report.successfulOrdersThisMonth}">0</div>
+                            <small class="opacity-75">This Month</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts & Top Performers -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-8">
+                        <div class="premium-card shadow-sm p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 fw-bold">Daily Revenue (Last 7 Days)</h5>
+                                <span class="badge bg-light text-dark">Snapshot</span>
+                            </div>
+                            <div style="height: 300px;">
                                 <canvas id="revenueChart"></canvas>
                             </div>
-                            <div class="dashboard-card">
-                                <h3>User Demographics</h3>
-                                <canvas id="demographicsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="premium-card shadow-sm p-4 mb-4">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-trophy text-warning me-2"></i>Best Seller</h5>
+                            <div th:if="${report.bestSellerProduct != null}">
+                                <div class="h6 mb-1" th:text="${report.bestSellerProduct.productName}">Product Name</div>
+                                <div class="text-muted small" th:text="${report.bestSellerProduct.value + ' units sold'}">0 sold</div>
+                            </div>
+                            <div th:unless="${report.bestSellerProduct != null}" class="text-muted italic">No data yet</div>
+                        </div>
+                        <div class="premium-card shadow-sm p-4 mb-4">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-star text-info me-2"></i>Most Reviewed</h5>
+                            <div th:if="${report.mostReviewedProduct != null}">
+                                <div class="h6 mb-1" th:text="${report.mostReviewedProduct.productName}">Product Name</div>
+                                <div class="text-muted small" th:text="${report.mostReviewedProduct.value + ' reviews'}">0 reviews</div>
+                            </div>
+                            <div th:unless="${report.mostReviewedProduct != null}" class="text-muted italic">No data yet</div>
+                        </div>
+                        <div class="premium-card shadow-sm p-4">
+                            <h5 class="fw-bold mb-3"><i class="fas fa-award text-danger me-2"></i>Peaks</h5>
+                            <div class="small mb-2">
+                                <strong>High Day:</strong> <span th:text="${report.highestRevenueDay}">N/A</span>
+                            </div>
+                            <div class="small">
+                                <strong>High Month:</strong> <span th:text="${report.highestRevenueMonth}">N/A</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <div class="premium-card shadow-sm p-4 mb-5">
+                    <h5 class="fw-bold mb-4">Recent Transactions</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-premium">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${report.recentOrders}">
+                                    <td th:text="'#' + ${order.orderId}">#123</td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${order.customerName}">Customer name</div>
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(order.amount, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</td>
+                                    <td>
+                                        <span class="badge badge-status" 
+                                              th:classappend="${order.status == 'COMPLETED' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}"
+                                              th:text="${order.status}">Status</span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${#strings.substring(order.date,0,16)}">Date</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </main>
@@ -96,59 +157,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
-            // 1. Kiểm tra dữ liệu từ Server
-            const rawData = /*[[${chartData}]]*/[];
-            if (!rawData || rawData.length === 0) {
-                console.warn("No chart data available");
-                return;
-            }
+            const chartData = /*[[${report.last7DaysRevenue}]]*/ [];
+            if (!chartData || chartData.length === 0) return;
 
-            // 2. Tách dữ liệu
-            const labels = rawData.map(item => item.month);
-            const revenueValues = rawData.map(item => item.revenue);
+            const labels = chartData.map(d => d.date);
+            const values = chartData.map(d => d.revenue);
 
-            // 3. Khởi tạo biểu đồ Revenue
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(revenueCtx, {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Doanh thu (VNĐ)',
-                        data: revenueValues,
-                        borderColor: '#4bc0c0',
-                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                        label: 'Daily Revenue',
+                        data: values,
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
                         fill: true,
-                        borderWidth: 3,
                         tension: 0.4,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#4bc0c0'
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#764ba2',
+                        pointRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Giúp biểu đồ co giãn tốt hơn trong card
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: (value) => value.toLocaleString('vi-VN') + ' ₫'
+                                callback: (v) => v.toLocaleString('vi-VN') + ' ₫'
                             }
                         }
                     },
                     plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => `Doanh thu: ${context.parsed.y.toLocaleString('vi-VN')} ₫`
-                            }
-                        }
+                        legend: { display: false }
                     }
                 }
             });
-
-            // 4. (Gợi ý) Khởi tạo Demographics Chart nếu bạn có dữ liệu
-            // Nếu chưa có, hãy tạm thời xóa thẻ canvas id="demographicsChart" ở trên đi.
         });
     </script>
 </body>

@@ -17,6 +17,7 @@ public class OrderConvert {
         resOrder.setId(order.getId());
         resOrder.setName(order.getName());
         resOrder.setNote(order.getNote());
+        resOrder.setDeliveryFailedReason(order.getDeliveryFailedReason());
         resOrder.setPaymentMethod(order.getPaymentMethod().toString());
         resOrder.setPaymentStatus(order.getPaymentStatus().toString());
         resOrder.setPhone(order.getPhone());

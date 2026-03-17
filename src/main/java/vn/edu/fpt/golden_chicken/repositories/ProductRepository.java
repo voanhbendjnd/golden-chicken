@@ -11,14 +11,11 @@ import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import java.util.List;
 
 @Repository
-@SuppressWarnings("null")
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByNameContainingIgnoreCaseAndActiveTrue(String name);
 
-    /** Chỉ lấy sản phẩm active + category đang hoạt động (status=true). */
     List<Product> findByNameContainingIgnoreCaseAndActiveTrueAndCategory_StatusTrue(String name);
 
-    /** Chỉ lấy sản phẩm active có category đang hoạt động, dùng cho menu. */
     @Query("SELECT p FROM Product p JOIN FETCH p.category c WHERE p.active = true AND c.status = true")
     List<Product> findByActiveTrueAndCategoryStatusTrue();
 
@@ -46,7 +43,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("select p from Product p join fetch p.category where p.active = true")
     List<Product> findAllWithCategory();
 
-    // @EntityGraph(attributePaths = { "reviews" })
-    // Page<Product> findAll(Specification<Product> spec, Pageable pageable);
-
+    @Query("select p from Product p join fetch p.category where p.active = true and p.category.status = true")
+    List<Product> fetchAllActiveAndCategoryActive();
 }

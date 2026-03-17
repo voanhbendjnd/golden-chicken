@@ -190,18 +190,18 @@ public class UserService {
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
-        var role = this.roleRepository.findById(request.getRoleId())
-                .orElseThrow(() -> new ResourceNotFoundException("User ID",
-                        request.getRoleId()));
-        if (role.getName().equalsIgnoreCase("STAFF")) {
-            user.getStaff().setStaffType(request.getStaffType());
-            user.setUpdatedAt(LocalDateTime.now());
-            var email = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (email == null || email.isEmpty()) {
-                email = "Anonymous";
-            }
-            user.setCreatedBy(email);
-        }
+        // var role = this.roleRepository.findById(request.getRoleId())
+        // .orElseThrow(() -> new ResourceNotFoundException("User ID",
+        // request.getRoleId()));
+        // if (role.getName().equalsIgnoreCase("STAFF")) {
+        // user.getStaff().setStaffType(request.getStaffType());
+        // user.setUpdatedAt(LocalDateTime.now());
+        // var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        // if (email == null || email.isEmpty()) {
+        // email = "Anonymous";
+        // }
+        // user.setCreatedBy(email);
+        // }
 
         // if (role.getName().equalsIgnoreCase("ADMIN")) {
         // user.setRole(role);
@@ -224,7 +224,10 @@ public class UserService {
     public void deleteById(long id) {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
-
+        var userLogin = this.getUserInContext();
+        if (user.getEmail().equalsIgnoreCase(userLogin.getEmail())) {
+            throw new DataInvalidException("Không thể tự xóa bản thân!");
+        }
         if (user.getStaff() != null) {
             var staff = user.getStaff();
             if (this.orderRepository.existsByShipperId(staff.getId())) {
@@ -250,7 +253,6 @@ public class UserService {
         return this.userRepository.findByEmailIgnoreCase(email);
     }
 
-    @SuppressWarnings("null")
     @Transactional(rollbackFor = Exception.class)
     public void importUsers(MultipartFile file) throws IOException, DataFormatException {
         if (!file.getOriginalFilename().endsWith(".xlsx")) {

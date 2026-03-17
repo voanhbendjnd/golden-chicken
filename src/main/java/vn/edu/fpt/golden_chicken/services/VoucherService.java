@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
+import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
+import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherCreateDTO;
 import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ActionPointMessage;
@@ -23,6 +25,9 @@ import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
+import org.springframework.ui.Model;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,7 +184,7 @@ public class VoucherService {
         if (isUsed) {
             throw new IllegalStateException("Voucher đã được khách hàng nhận hoặc sử dụng, không thể xóa");
         }
-        repo.delete(voucher); // HARD DELETE
+        repo.delete(voucher);
     }
 
     private ResVoucher toResVoucher(Voucher voucher) {
@@ -192,7 +197,7 @@ public class VoucherService {
         res.setDiscountType(voucher.getDiscountType());
         res.setMinOrderValue(voucher.getMinOrderValue());
         res.setPointCost(voucher.getPointCost());
-        // new update
+
         res.setQuantity(voucher.getQuantity() != null ? voucher.getQuantity() : 0);
         res.setVoucherType(voucher.getVoucherType());
         res.setStartAt(voucher.getStartAt());
@@ -206,10 +211,26 @@ public class VoucherService {
 
         List<ResVoucher> resVouchers = new ArrayList<>();
         for (Voucher voucher : vouchers) {
+            int quantity = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+            if (quantity <= 0) {
+                continue;
+            }
             resVouchers.add(toResVoucher(voucher));
         }
         return resVouchers;
 
+    }
+
+    public List<CustomerVoucher> getMyVouchersAvailableOnly() {
+        List<CustomerVoucher> result = new ArrayList<>();
+
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() == StatusVoucher.AVAILABLE) {
+                result.add(voucher);
+            }
+        }
+
+        return result;
     }
 
     public long getPoints() throws PermissionException {
@@ -284,11 +305,11 @@ public class VoucherService {
 
         customerVoucherRepository.save(cv);
         var qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        // trừ quantity
-        voucher.setQuantity(qty - 1);
+        int newQty = qty - 1;
 
-        // nếu hết thì disable
-        if (qty <= 0) {
+        voucher.setQuantity(newQty);
+
+        if (newQty <= 0) {
             voucher.setStatus("DISABLED");
         }
 
@@ -301,7 +322,6 @@ public class VoucherService {
         if (currentUser == null)
             return new ArrayList<>();
 
-        // update voucher status
         refreshVoucherStatuses();
         var customer = customerRepository.findById(currentUser.getId()).orElse(null);
         if (customer == null)
@@ -372,10 +392,74 @@ public class VoucherService {
         }
     }
 
-    // mới, ap dung voucher
     public List<CustomerVoucher> getCustomerVouchers(Long customerId) {
         return customerVoucherRepository.findByCustomer_IdAndStatus(
                 customerId,
                 StatusVoucher.AVAILABLE);
+    }
+
+    public CustomerVoucher getCustomerVoucherById(Long voucherId) {
+        if (voucherId == null) {
+            return null;
+        }
+        return customerVoucherRepository.findById(voucherId).orElse(null);
+    }
+
+
+    public OrderDTO resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode) {
+        refreshVoucherStatuses();
+        OrderDTO order = new OrderDTO();
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Bạn cần đăng nhập.");
+        }
+
+        Long productVoucherId = null;
+        Long shippingVoucherId = null;
+
+        if (voucherCode != null && !voucherCode.isBlank()) {
+            var customerVoucher = customerVoucherRepository
+                    .findFirstByCustomer_IdAndVoucher_CodeAndStatusOrderByIdDesc(
+                            currentUser.getId(), voucherCode, StatusVoucher.AVAILABLE);
+            if (customerVoucher == null) {
+                throw new IllegalArgumentException("Mã voucher không hợp lệ.");
+            }
+            if (customerVoucher.getVoucher() != null
+                    && customerVoucher.getVoucher().getCode() != null
+                    && !customerVoucher.getVoucher().getCode().equals(voucherCode)) {
+                throw new IllegalArgumentException("Mã voucher không hợp lệ.");
+            }
+            var voucherType = customerVoucher.getVoucher() != null
+                    ? customerVoucher.getVoucher().getVoucherType()
+                    : null;
+            if ("PRODUCT".equalsIgnoreCase(voucherType)) {
+                productVoucherId = customerVoucher.getId();
+            } else if ("SHIPPING".equalsIgnoreCase(voucherType)) {
+                shippingVoucherId = customerVoucher.getId();
+            } else {
+                throw new IllegalArgumentException("Loại voucher không hợp lệ.");
+            }
+        }
+
+        if (voucherIds != null) {
+            for (Long voucherId : voucherIds) {
+                if (voucherId == null) {
+                    continue;
+                }
+                var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
+                if (customerVoucher == null || customerVoucher.getVoucher() == null) {
+                    continue;
+                }
+                var voucherType = customerVoucher.getVoucher().getVoucherType();
+                if ("PRODUCT".equalsIgnoreCase(voucherType) && productVoucherId == null) {
+                    productVoucherId = voucherId;
+                } else if ("SHIPPING".equalsIgnoreCase(voucherType) && shippingVoucherId == null) {
+                    shippingVoucherId = voucherId;
+                }
+            }
+        }
+
+        order.setProductVoucherId(productVoucherId);
+        order.setShippingVoucherId(shippingVoucherId);
+        return order;
     }
 }

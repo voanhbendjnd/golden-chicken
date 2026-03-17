@@ -45,7 +45,10 @@ public class ProductService {
     OrderItemRepository orderItemRepository;
     ComboDetailRepository comboDetailRepository;
 
-    /** Tìm sản phẩm theo tên, chỉ trả sản phẩm active và category đang hoạt động. Trả DTO. */
+    /**
+     * Tìm sản phẩm theo tên, chỉ trả sản phẩm active và category đang hoạt động.
+     * Trả DTO.
+     */
     public List<ProductSearchSuggestionDTO> searchByName(String name) {
         var products = productRepository.findByNameContainingIgnoreCaseAndActiveTrueAndCategory_StatusTrue(name);
         return products.stream()
@@ -53,6 +56,7 @@ public class ProductService {
                 .map(p -> new ProductSearchSuggestionDTO(p.getId(), p.getName()))
                 .collect(Collectors.toList());
     }
+
     public void updateStatus(Long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
@@ -72,7 +76,7 @@ public class ProductService {
         var meta = new ResultPaginationDTO.Meta();
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
-        var page = this.productRepository.findAll(Specification.where(spec).and(ps), pageable);
+        var page = this.productRepository.findAll(ps, pageable);
         meta.setPages(page.getTotalPages());
         meta.setTotal(page.getTotalElements());
         res.setMeta(meta);
@@ -192,7 +196,6 @@ public class ProductService {
             product.setProductImages(imgs);
 
         }
-        product.setIsDelete(false);
         this.productRepository.save(product);
 
     }

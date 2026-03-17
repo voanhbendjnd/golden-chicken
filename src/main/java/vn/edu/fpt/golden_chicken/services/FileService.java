@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
