@@ -12,7 +12,7 @@ import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 @RequiredArgsConstructor
 public class KafkaChatConsumer {
     private final SimpMessagingTemplate messagingTemplate;
-    private final RedisUserService redisUserService; // Inject Service Redis của Ben vào
+    private final RedisUserService redisUserService;
 
     @KafkaListener(topics = "chat-topic", groupId = "#{T(java.util.UUID).randomUUID().toString()}")
     public void consumeChat(ChatMessage message) {

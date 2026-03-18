@@ -237,7 +237,7 @@ public class UserService {
             this.customerRepository.save(customer);
             return true;
         }
-        return false;
+        return true;
 
     }
 

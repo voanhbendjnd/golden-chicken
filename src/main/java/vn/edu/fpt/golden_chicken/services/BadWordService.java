@@ -3,6 +3,7 @@ package vn.edu.fpt.golden_chicken.services;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
@@ -20,6 +21,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 @RequiredArgsConstructor
 public class BadWordService {
     BadWordRepository badWordRepository;
+    KafkaTemplate<String, String> kafkaScanOldReview;
 
     public void create(BadWordDTO dto) {
         if (this.badWordRepository.existsByWordIgnoreCase(dto.word())) {
@@ -28,7 +30,10 @@ public class BadWordService {
         var badWord = new BadWord();
         badWord.setWord(dto.word());
         badWord.setStatus(dto.status());
-        this.badWordRepository.save(badWord);
+        var currentBadWord = this.badWordRepository.save(badWord);
+        if (currentBadWord.getStatus()) {
+            kafkaScanOldReview.send("scan-old-reviews-topic", dto.word());
+        }
     }
 
     public void update(BadWordDTO dto) {
@@ -39,7 +44,11 @@ public class BadWordService {
                 .orElseThrow(() -> new ResourceNotFoundException("Bad word with id (" + dto.id() + " ) not found!"));
         badWord.setStatus(dto.status());
         badWord.setWord(dto.word());
-        this.badWordRepository.save(badWord);
+        var currentBadWord = this.badWordRepository.save(badWord);
+        if (currentBadWord.getStatus()) {
+            kafkaScanOldReview.send("scan-old-reviews-topic", dto.word());
+        }
+
     }
 
     public void delete(Long id) {
@@ -52,7 +61,11 @@ public class BadWordService {
         var badWord = this.badWordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bad word with ID(" + id + " ) not found!"));
         badWord.setStatus(!badWord.getStatus());
-        this.badWordRepository.save(badWord);
+        var current = this.badWordRepository.save(badWord);
+        if (current.getStatus()) {
+            kafkaScanOldReview.send("scan-old-reviews-topic", badWord.getWord());
+
+        }
     }
 
     public BadWordResponse fetchById(Long id) {

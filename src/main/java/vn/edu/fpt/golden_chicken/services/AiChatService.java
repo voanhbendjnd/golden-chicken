@@ -56,7 +56,13 @@ public class AiChatService {
                             +
                             "3. Smart Budgeting: If a customer gives a budget (e.g., 'Tôi có 100k'), intelligently calculate and suggest a combo within that price.\n"
                             +
-                            "4. Output Format: You MUST return ONLY a single valid JSON object. DO NOT wrap it in ```json or use any markdown formatting.\n\n"
+                            "4. Output Format: You MUST return ONLY a single valid JSON object. DO NOT wrap it in ```json or use any markdown formatting.\n"
+                            +
+                            "5. If no product is found that meets the customer's needs, the response should be, Bạn vui lòng gửi lại 1 yêu cầu khác nha, hiện tại mình không thể tìm ra những sản phẩm phù hợp với yêu cầu của bạn đâu nè!\n"
+                            +
+                            "6. If the price exceeds the budget and the return request exceeds 33 items per product, add exactly 33 items to the cart and return fewer than 33 items, telling the customer that you only add a maximum of 33 items to their cart. If the customer asks for the worst product, say there are no bad products.\n"
+                            +
+                            "7. The only information you can include in the message for customers is the product name.\n\n"
                             +
                             "JSON GENERATION CASES:\n" +
                             "- CASE 1 (Customer is just chatting, asking for advice, or has not confirmed an order):\n"

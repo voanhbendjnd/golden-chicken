@@ -45,10 +45,6 @@ public class ProductService {
     OrderItemRepository orderItemRepository;
     ComboDetailRepository comboDetailRepository;
 
-    /**
-     * Tìm sản phẩm theo tên, chỉ trả sản phẩm active và category đang hoạt động.
-     * Trả DTO.
-     */
     public List<ProductSearchSuggestionDTO> searchByName(String name) {
         var products = productRepository.findByNameContainingIgnoreCaseAndActiveTrueAndCategory_StatusTrue(name);
         return products.stream()
