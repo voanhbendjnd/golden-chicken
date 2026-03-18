@@ -35,7 +35,8 @@
                 <span class="fa fa-bars text-secondary"></span>
             </button>
             <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-                <div class="navbar-nav mx-auto" th:if="${!(session.roleName == 'SHIPPER' or session.staffType == 'SHIPPER')}">
+                <div class="navbar-nav mx-auto"
+                    th:if="${!(session.roleName == 'SHIPPER' or session.staffType == 'SHIPPER')}">
                     <a href="/" class="nav-item nav-link">Home</a>
                     <li class="nav-item menu-dropdown">
 
@@ -90,8 +91,10 @@
                     </a>
                     <div class="nav-item dropdown">
                         <a href="/profile" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img th:src="@{/img/avatar/{file}(file=${profile.avatar})}" alt="Avatar"
-                                 style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
+                            <img th:src="${profile != null and profile.avatar != null}
+                            ? @{/img/avatar/{file}(file=${profile.avatar})}
+                            : @{/img/testavt.jpg}" alt="Avatar"
+                                style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">

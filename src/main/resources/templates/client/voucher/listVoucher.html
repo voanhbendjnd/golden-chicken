@@ -64,7 +64,7 @@
 
           <div class="mt-4" th:if="${totalPages > 1}">
             <nav aria-label="Voucher pagination">
-              <ul class="pagination justify-content-center">
+              <ul class="pagination justify-content-center d-flex">
                 <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
                   <a class="page-link" th:href="@{/vouchers(page=${currentPage - 1}, size=${size})}">Trước</a>
                 </li>
