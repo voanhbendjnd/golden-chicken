@@ -32,6 +32,7 @@ import vn.edu.fpt.golden_chicken.services.RoleService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.EmailAlreadyExistsException;
+import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
 @Controller
 @RequestMapping("/admin/user")
@@ -120,22 +121,17 @@ public class UserController {
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String delete(@PathVariable("id") long id) {
+    public String delete(@PathVariable("id") long id, Model model) throws PermissionException {
         this.userService.deleteById(id);
+
         return "redirect:/admin/user";
     }
 
-    // @DeleteMapping("/{id:[0-9]+}")
-    // @ResponseBody
-    // public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-    // try {
-    // this.userService.deleteById(id);
-    // return ResponseEntity.ok("Delete User Success!");
-    // } catch (Exception ex) {
-    // return
-    // ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    // }
-    // }
+    @PostMapping("/status/{id:[0-9]+}")
+    public String revertStatus(@PathVariable("id") long id) throws PermissionException {
+        this.userService.revertStatusAccount(id);
+        return "redirect:/admin/user";
+    }
 
     @PostMapping("/import")
     public String importUser(@RequestParam("file") MultipartFile file, Model model,

@@ -2,8 +2,10 @@ package vn.edu.fpt.golden_chicken.services;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,9 +31,10 @@ import vn.edu.fpt.golden_chicken.domain.request.ReviewDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResReview;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ReviewMessage;
+import vn.edu.fpt.golden_chicken.repositories.CustomerRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
+import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
-import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 import vn.edu.fpt.golden_chicken.utils.BadWordFilterUtility;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus;
@@ -46,14 +50,14 @@ public class ReviewService {
     @Lazy
     @NonFinal
     ReviewService self;
-
+    ProductRepository productRepository;
     ReviewRepository reviewRepository;
     UserService userService;
     OrderItemRepository orderItemRepository;
     FileService fileService;
     BadWordFilterUtility badWordFilterUtility;
+    CustomerRepository customerRepository;
     KafkaTemplate<String, ReviewMessage> kafkaReviewTemplate;
-    RedisUserService redisUserService;
     KafkaTemplate<String, String> kafkaBanViolate;
 
     public String reviewOrder(ReviewDTO dto, List<MultipartFile> files, Long orderItemId)
@@ -154,14 +158,20 @@ public class ReviewService {
         currentReview.setRating(dto.getRating());
         currentReview.setIsUpdate(Boolean.TRUE);
         var lastReview = this.reviewRepository.save(currentReview);
+        self.syncProductRating(lastReview.getProduct().getId());
         if (check) {
-            this.redisUserService.saveRecordViolateCustomer(email);
-            var record = this.redisUserService.getRecordOfViolate(email);
+            // this.redisUserService.saveRecordViolateCustomer(email);
+            var customer = currentReview.getCustomer();
+            var record = customer.getViolationCount() != null ? customer.getViolationCount() : 0;
+            customer.setViolationCount(record += 1);
             if (record > 4) {
-                this.redisUserService.lockAccountVilote(email);
+                // this.redisUserService.lockAccountVilote(email);
+                customer.setLockedUntil(LocalDateTime.now().plusMinutes(1));
                 this.kafkaBanViolate.send("violate-account-topic", email);
                 this.userService.forceLogoutCurrentUser();
+
             } else {
+
                 var msgReview = new ReviewMessage();
                 msgReview.setComment(lastReview.getComment());
                 msgReview.setEmail(email);
@@ -185,7 +195,7 @@ public class ReviewService {
         review.setComment(comment);
         review.setRating(rating);
         review.setIsUpdate(Boolean.TRUE);
-        review.setReviewStatus(vn.edu.fpt.golden_chicken.utils.constants.ReviewStatus.PUBLISHED);
+        review.setReviewStatus(ReviewStatus.PUBLISHED);
         this.reviewRepository.save(review);
     }
 
@@ -229,16 +239,19 @@ public class ReviewService {
         }
         var lastReview = this.reviewRepository.save(review);
         if (check) {
-            this.redisUserService.saveRecordViolateCustomer(email);
-            Integer record = this.redisUserService.getRecordOfViolate(email);
-
+            // this.redisUserService.saveRecordViolateCustomer(email);
+            Integer record = customer.getViolationCount() != null ? customer.getViolationCount() : 0;
+            customer.setViolationCount(record += 1);
             if (record > 4) {
-                this.redisUserService.lockAccountVilote(email);
+
+                // this.redisUserService.lockAccountVilote(email);
+                customer.setLockedUntil(LocalDateTime.now().plusMinutes(1));
                 this.kafkaBanViolate.send("violate-account-topic", email);
                 this.userService.forceLogoutCurrentUser();
                 return "fail_" + product.getId();
 
             } else {
+
                 var msgReview = new ReviewMessage();
                 msgReview.setComment(lastReview.getComment());
                 msgReview.setEmail(email);
@@ -249,6 +262,7 @@ public class ReviewService {
             }
 
         }
+        self.syncProductRating(product.getId());
 
         return "success_" + product.getId();
 
@@ -315,6 +329,7 @@ public class ReviewService {
         }
         review.setReviewStatus(ReviewStatus.DELETED);
         this.reviewRepository.save(review);
+        self.syncProductRating(review.getProduct().getId());
     }
 
     public void staffDeleteReview(Long id) throws PermissionException {
@@ -333,6 +348,103 @@ public class ReviewService {
 
             this.reviewRepository.save(review);
         }
+        self.syncProductRating(review.getProduct().getId());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void syncProductRating(Long productId) {
+        var avgRating = this.reviewRepository.getAverageRating(productId, ReviewStatus.PUBLISHED);
+        var totalReview = this.reviewRepository.getTotalReviews(productId, ReviewStatus.PUBLISHED);
+        var product = this.productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID" + productId + " not found!"));
+        var roundeAvg = Math.round(avgRating * 10.0) / 10.0;
+        product.setAverageRating(roundeAvg);
+        product.setTotalReviews(totalReview);
+        this.productRepository.save(product);
+    }
+
+    public ResultPaginationDTO fetchAllReviewWithPagination(Specification<Review> spec, Pageable pageable) {
+        var res = new ResultPaginationDTO();
+        var meta = new ResultPaginationDTO.Meta();
+        var page = this.reviewRepository.findAll(spec, pageable);
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setPages(page.getTotalPages());
+        meta.setTotal(page.getTotalElements());
+        res.setMeta(meta);
+        res.setResult(page.getContent().stream().map(x -> {
+            var result = new ResReview();
+            var customer = x.getCustomer();
+            result.setComment(x.getComment());
+            result.setCreatedAt(x.getCreatedAt());
+            result.setCustomerId(customer.getId());
+            result.setId(x.getId());
+            result.setIsUpdate(x.getIsUpdate());
+            result.setMediaUrls(x.getMediaUrls());
+            result.setName(customer.getUser().getFullName());
+            result.setOrderId(x.getOrderItem().getOrder().getId());
+            var product = x.getProduct();
+            result.setProductId(product.getId());
+            result.setProductName(product.getName());
+            result.setRating(x.getRating());
+            result.setReviewStatus(x.getReviewStatus());
+            return result;
+        }).toList());
+        return res;
+    }
+
+    public ResReview fetchReviewById(Long id) {
+        var x = this.reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID (" + id + ") not found!"));
+        var result = new ResReview();
+        var customer = x.getCustomer();
+        result.setComment(x.getComment());
+        result.setCreatedAt(x.getCreatedAt());
+        result.setCustomerId(customer.getId());
+        result.setId(x.getId());
+        result.setIsUpdate(x.getIsUpdate());
+        result.setMediaUrls(x.getMediaUrls());
+        result.setName(customer.getUser().getFullName());
+        result.setOrderId(x.getOrderItem().getOrder().getId());
+        var product = x.getProduct();
+        result.setProductId(product.getId());
+        result.setProductName(product.getName());
+        result.setRating(x.getRating());
+        result.setReviewStatus(x.getReviewStatus());
+
+        return result;
+    }
+
+    public boolean revertReviewStatus(Long reviewId, ReviewStatus status) {
+        var review = this.reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review with ID (" + reviewId + ") not found!"));
+        if (status == ReviewStatus.PUBLISHED || status == ReviewStatus.HIDDEN) {
+            review.setReviewStatus(status);
+            this.reviewRepository.save(review);
+            if (status == ReviewStatus.HIDDEN) {
+                self.syncProductRating(reviewId);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public List<String> getSuggestions(String query) {
+        List<String> suggestions = new ArrayList<>();
+        if (query == null || query.isBlank())
+            return suggestions;
+
+        var products = this.productRepository.findByNameContainingIgnoreCaseAndActiveTrue(query);
+        for (var p : products) {
+            suggestions.add("Product: " + p.getName());
+        }
+
+        var customers = this.customerRepository.findByUserFullNameContainingIgnoreCase(query);
+        for (var c : customers) {
+            suggestions.add("Customer: " + c.getUser().getFullName());
+        }
+
+        return suggestions;
     }
 
 }

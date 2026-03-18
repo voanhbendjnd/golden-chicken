@@ -18,12 +18,15 @@ public class ResOrder {
     String address;
     String phone;
     String note;
+    String deliveryFailedReason;
 
     String shipperName;
     String shipperPhone;
 
     BigDecimal totalPrice;
     BigDecimal feeShipping;
+    BigDecimal productDiscountAmount;
+    BigDecimal shippingDiscountAmount;
     BigDecimal finalAmount;
     String paymentMethod;
     String paymentStatus;
@@ -43,6 +46,7 @@ public class ResOrder {
         BigDecimal price;
         String img;
         Boolean isReview;
+        Boolean allowReview;
 
     }
 

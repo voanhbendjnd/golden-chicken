@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
-import vn.edu.fpt.golden_chicken.domain.response.ChatMessage;
+import vn.edu.fpt.golden_chicken.domain.response.ChatMessageDTO;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
@@ -49,7 +49,7 @@ public class RedisUserService {
         return this.stringRedisTemplate.opsForSet().members(KEY_CHAT_PARTNERS + user);
     }
 
-    public List<ChatMessage> getChatHistory(String user1, String user2) {
+    public List<ChatMessageDTO> getChatHistory(String user1, String user2) {
         var key = this.getChatKey(user1, user2);
 
         List<String> rawMessages = this.stringRedisTemplate.opsForList().range(key, 0, -1);
@@ -61,7 +61,7 @@ public class RedisUserService {
         return rawMessages.stream()
                 .map(json -> {
                     try {
-                        return objectMapper.readValue(json, ChatMessage.class);
+                        return objectMapper.readValue(json, ChatMessageDTO.class);
                     } catch (JsonProcessingException e) {
                         return null;
                     }
@@ -178,7 +178,7 @@ public class RedisUserService {
         return Boolean.TRUE.equals(this.stringRedisTemplate.hasKey(key));
     }
 
-    public void saveChatMessageToRedis(ChatMessage message) {
+    public void saveChatMessageToRedis(ChatMessageDTO message) {
         try {
 
             String key = this.getChatKey(message.getSenderId(), message.getRecipientId());

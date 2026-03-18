@@ -11,6 +11,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AccessLevel;
@@ -65,6 +66,9 @@ public class PermissionService {
     public void deleteById(long id) {
         var permission = this.permissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission ID", id));
+        if (this.permissionRepository.isPermissionInUse(id)) {
+            return;
+        }
         this.permissionRepository.delete(permission);
     }
 

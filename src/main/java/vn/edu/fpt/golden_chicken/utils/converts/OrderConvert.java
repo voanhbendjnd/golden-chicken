@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.utils.converts;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.springframework.stereotype.Component;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
+import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 
 @Component
 public class OrderConvert {
@@ -17,6 +19,7 @@ public class OrderConvert {
         resOrder.setId(order.getId());
         resOrder.setName(order.getName());
         resOrder.setNote(order.getNote());
+        resOrder.setDeliveryFailedReason(order.getDeliveryFailedReason());
         resOrder.setPaymentMethod(order.getPaymentMethod().toString());
         resOrder.setPaymentStatus(order.getPaymentStatus().toString());
         resOrder.setPhone(order.getPhone());
@@ -41,6 +44,10 @@ public class OrderConvert {
         res.setPrice(product.getPrice());
         res.setProductId(product.getId());
         res.setQuantity(item.getQuantity());
+        boolean isValidStatus = (OrderStatus.COMPLETED == order.getStatus()
+                || order.getStatus() == OrderStatus.DELIVERED);
+        boolean isAllowed = LocalDateTime.now().isBefore(order.getUpdatedAt().plusDays(7));
+        res.setAllowReview(isValidStatus && isAllowed);
         return res;
     }
 }

@@ -20,8 +20,9 @@ public class ResProduct {
     String img;
     List<String> imgs;
 
-    // Long categoryId;
     Category category;
+    Double averageRating;
+    Integer totalReviews;
 
     @Data
     public static class Category {

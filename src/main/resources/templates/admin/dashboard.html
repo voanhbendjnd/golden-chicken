@@ -4,6 +4,8 @@
 <head>
 
     <head th:replace="~{common/head}"></head>
+    <link th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <title>Dashboard</title>
 </head>
@@ -12,7 +14,7 @@
     <div th:replace="~{component/header}"></div>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-3 col-lg-2 p-0">
+            <div class="col-md-3 col-lg-2 p-0 sidebar-bg">
                 <div th:replace="~{admin/layout/sidebar}"></div>
             </div>
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">

@@ -124,6 +124,12 @@
                 <span th:text="${status}">SHIPPING</span>
             </div>
 
+            <div class="alert alert-warning text-start"
+                th:if="${(status == 'SHIPPER_ISSUE' or status == 'DELIVERY_FAILED') and !#strings.isEmpty(reason)}">
+                <div class="fw-bold mb-1">Lý do Giao hàng</div>
+                <div th:text="${reason}">Không có lý do chi tiết.</div>
+            </div>
+
             <div class="info-container text-start">
                 <div class="mb-3">
                     <div class="info-label text-muted">Customer Email</div>

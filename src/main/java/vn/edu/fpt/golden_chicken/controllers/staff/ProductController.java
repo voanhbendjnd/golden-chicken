@@ -54,7 +54,7 @@ public class ProductController {
 
     @GetMapping
     public String getProductTablePage(Model model,
-            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Filter Specification<Product> spec) {
         var data = this.productService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("meta", data.getMeta());

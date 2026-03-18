@@ -1,70 +1,53 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 180px; min-height:100vh"
-    xmlns:th="http://www.thymeleaf.org">
-    <a th:href="@{/}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <svg class="bi me-2" width="40" height="32">
-            <use xlink:href="#bootstrap"></use>
-        </svg>
-        <span class="fs-4">Admin Dashboard</span>
-    </a>
-    <hr>
+<div class="sidebar-sticky sidebar" xmlns:th="http://www.thymeleaf.org">
+    <div class="sidebar-header d-flex align-items-center mb-3">
+        <i class="fas fa-shield-alt me-2"></i>
+        <span>Admin Panel</span>
+    </div>
+    <hr class="mx-3 border-secondary opacity-25">
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
-            <a th:href="@{/}" class="nav-link text-white" aria-current="page">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#home"></use>
-                </svg>
+            <a th:href="@{/}" class="nav-link">
+                <i class="fas fa-home"></i>
                 Home
             </a>
         </li>
-        <li class="nav-item">
-            <a th:href="@{/staff}" class="nav-link text-white" aria-current="page">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#home"></use>
-                </svg>
-                Staff
-            </a>
-        </li>
         <li>
-            <a th:href="@{/admin}" class="nav-link text-white">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#speedometer2"></use>
-                </svg>
-                Dashboard
-            </a>
-        </li>
-
-        <li>
-            <a th:href="@{/admin/user}" class="nav-link text-white">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#people-circle"></use>
-                </svg>
+            <a th:href="@{/admin/user}" class="nav-link">
+                <i class="fas fa-users"></i>
                 Users
             </a>
         </li>
         <li>
-            <a th:href="@{/admin/role}" class="nav-link text-white">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#people-circle"></use>
-                </svg>
+            <a th:href="@{/admin/role}" class="nav-link">
+                <i class="fas fa-user-tag"></i>
                 Roles
             </a>
         </li>
         <li>
-            <a th:href="@{/admin/permission}" class="nav-link text-white">
-                <svg class="bi me-2" width="16" height="16">
-                    <use xlink:href="#people-circle"></use>
-                </svg>
+            <a th:href="@{/admin/permission}" class="nav-link">
+                <i class="fas fa-key"></i>
                 Permissions
             </a>
         </li>
-
+        <li>
+            <a th:href="@{/staff}" class="nav-link">
+                <i class="fas fa-user-tie"></i>
+                Staff Views
+            </a>
+        </li>
     </ul>
-    <div class="sb-sidenav-footer">
-        <div class="small">Logged in as:
-            <span th:text="${session.fullName}"></span>
+    <div class="sidebar-footer mt-auto p-3 text-muted small border-top border-secondary border-opacity-10">
+        <div class="d-flex align-items-center">
+            <div class="avatar-circle me-2 bg-warning text-dark text-center"
+                style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; font-weight: 700;"
+                th:text="${#strings.substring(session.fullName ?: 'A', 0, 1)}">A</div>
+            <div>
+                <div class="text-white fw-bold mb-0" style="font-size: 0.8rem;" th:text="${session.fullName}">Admin Name
+                </div>
+                <div class="text-muted" style="font-size: 0.7rem;">Administrator</div>
+            </div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -72,12 +55,24 @@
         const currentUrl = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-link');
 
+        let bestMatch = null;
+        let maxLen = -1;
+
         navLinks.forEach(link => {
             const linkHref = link.getAttribute('href');
             if (currentUrl === linkHref) {
-                link.classList.add('active');
-                link.classList.remove('text-white');
+                bestMatch = link;
+                maxLen = linkHref.length;
+            } else if (linkHref !== '/' && currentUrl.startsWith(linkHref)) {
+                if (linkHref.length > maxLen) {
+                    bestMatch = link;
+                    maxLen = linkHref.length;
+                }
             }
         });
+
+        if (bestMatch) {
+            bestMatch.classList.add('active');
+        }
     });
 </script>

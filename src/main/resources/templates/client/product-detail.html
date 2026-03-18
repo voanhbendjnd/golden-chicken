@@ -75,8 +75,9 @@
                                     Mua Ngay
                                 </a>
                                 <!-- th:href="@{/checkout?productId={id}(id=${pro.id})}" -->
-                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}">
-                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>
+                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}"
+                                    style="color: white;">
+                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>Giỏ hàng
                                 </button>
 
 
@@ -375,7 +376,6 @@
                     : `<div class="review-no-comment">Khách hàng không để lại nhận xét.</div>`;
 
                 const isUpdateLabel = r.isUpdate ? `<span>Đã chỉnh sửa</span>` : '';
-                const isDeletedLabel = r.reviewStatus === 'DELETED' ? `<span class="badge bg-danger ms-2" style="font-size:0.75rem;">Đã Xóa</span>` : '';
                 const isRejectLabel = r.reviewStatus === 'REJECTED' ? `<span class="badge bg-danger ms-2" style="font-size:0.75rem;">Reject</span>` : '';
 
                 const mediaStr = (r.mediaUrls && r.mediaUrls.length > 0) ? r.mediaUrls.join(',') : '';
@@ -383,13 +383,7 @@
                 let actions = '';
                 if (CURRENT_CUSTOMER_ID === r.customerId) {
                     actions += `<button class="btn btn-sm btn-outline-primary ms-2" onclick="editReview(${r.id}, ${r.rating}, '${r.comment ? r.comment.replace(/'/g, "\\'") : ''}', '${mediaStr}')"><i class="fa fa-edit"></i> Sửa</button>`;
-                    if (r.reviewStatus !== 'DELETED') {
-                        actions += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteCustomerReview(${r.id})"><i class="fa fa-trash"></i> Xóa</button>`;
-                    }
-                } else if (CURRENT_USER_ROLE === 'STAFF') {
-                    if (r.reviewStatus === 'DELETED') {
-                        actions += `<button class="btn btn-sm btn-danger ms-2" onclick="deleteStaffReview(${r.id})"><i class="fa fa-trash-alt"></i> Xóa Vĩnh Viễn</button>`;
-                    }
+
                 }
 
                 return `<div class="review-card">
@@ -397,7 +391,7 @@
                         <div class="flex-grow-1">
 
                             <div class="fw-semibold" style="font-size:0.92rem;">
-                                ${r.name} ${isDeletedLabel} ${isRejectLabel}
+                                ${r.name} ${isRejectLabel}
 ${r.isUpdate ? `<div class="review-meta">${isUpdateLabel} ${formatDate(r.updatedAt)}</div>` : ''}
                                 <div class="float-end">${actions}</div>
                             </div>
@@ -410,7 +404,6 @@ ${r.isUpdate ? `<div class="review-meta">${isUpdateLabel} ${formatDate(r.updated
                     </div>`;
             }
 
-            /* ─── Open media lightbox ─────────────────────── */
             window.openReviewMedia = function (src, isVid) {
                 modalContent.innerHTML = isVid
                     ? `<video src="${src}" controls autoplay style="max-width:100%;max-height:75vh;border-radius:8px;"></video>`
@@ -422,7 +415,6 @@ ${r.isUpdate ? `<div class="review-meta">${isUpdateLabel} ${formatDate(r.updated
                 modalContent.innerHTML = '';
             });
 
-            /* ─── Fetch reviews ──────────────────────────── */
             function buildUrl(page) {
                 let url = `/product/review?productId=${PRODUCT_ID}&page=${page - 1}&size=${PAGE_SIZE}&sort=updatedAt,desc`;
                 if (activeRating > 0) url += `&filter=rating:${activeRating}`;

@@ -149,8 +149,7 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                             <span>Phí giao hàng</span>
-                            <span
-                                th:text="${#numbers.formatDecimal(order.shippingFee,0,'COMMA',0,'POINT') + 'đ'}"></span>
+                            <span th:text="${#numbers.formatDecimal(15000,0,'COMMA',0,'POINT') + 'đ'}"></span>
                             <input type="hidden" th:field="*{shippingFee}" />
                         </div>
                         <!-- chọn voucher -->
@@ -165,17 +164,26 @@
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
                             </a>
-                            <a th:if="${order.discountAmount > 0 || (order.shippingFee < 15000 && selectedVoucher != null)}"
+                            <a th:if="${order.discountAmount > 0 || order.shippingFee < 15000}"
                                 th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null ? #strings.listJoin(order.items.![productId], ',') : null})}"
                                 class="btn btn-outline-danger btn-sm" title="Hủy bỏ voucher">
                                 <i class="fa-solid fa-xmark"></i> Hủy
                             </a>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
-                            <span>Giảm giá</span>
+                            <span>Giảm giá sản phẩm</span>
                             <span
                                 th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT') + 'đ'}"></span>
                             <input type="hidden" th:field="*{discountAmount}" />
+                            <input type="hidden" th:field="*{productDiscountAmount}" />
+                            <input type="hidden" th:field="*{shippingDiscountAmount}" />
+                            <input type="hidden" th:field="*{productVoucherId}" />
+                            <input type="hidden" th:field="*{shippingVoucherId}" />
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
+                            <span>Giảm giá vận chuyển</span>
+                            <span
+                                th:text="'-' + ${#numbers.formatDecimal(15000 - order.shippingFee,0,'COMMA',0,'POINT') + 'đ'}"></span>
                         </div>
                         <div th:if="${voucherError}" style="color:red;">
                             <span th:text="${voucherError}"></span>

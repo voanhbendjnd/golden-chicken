@@ -1,5 +1,5 @@
 .voucher-btn {
-    /*background-color: #ff6b6b;*/
+
     background-color: green;
     color: white;
     border: none;
@@ -11,14 +11,14 @@
     transition: all 0.2s ease;
 }
 
-/* hover */
+
 .voucher-btn:hover {
     background-color: #ff5252;
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-/* click */
+
 .voucher-btn:active {
     transform: translateY(0);
     box-shadow: none;
@@ -31,7 +31,7 @@ body{
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* card voucher */
+
 .voucher-card{
     background: white;
     border-radius: 12px;
@@ -43,13 +43,13 @@ body{
     border-left: 6px solid #2ecc71; /* xanh lá */
 }
 
-/* hover nổi lên */
+
 .voucher-card:hover{
     transform: translateY(-4px);
     box-shadow: 0 10px 22px rgba(0,0,0,0.15);
 }
 
-/* code voucher */
+
 .voucher-card h3{
     margin: 0;
     color: #2ecc71;
@@ -57,21 +57,21 @@ body{
     font-weight: 700;
 }
 
-/* tên voucher */
+
 .voucher-card p{
     margin: 8px 0;
     font-size: 15px;
     color: #333;
 }
 
-/* mô tả */
+
 .voucher-card small{
     display: block;
     color: #777;
     margin-bottom: 12px;
 }
 
-/* nút chọn */
+
 .voucher-card a{
     display: inline-block;
     text-decoration: none;
@@ -84,7 +84,7 @@ body{
     transition: 0.2s;
 }
 
-/* hover nút */
+
 .voucher-card a:hover{
     background-color: #27ae60;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -98,7 +98,7 @@ body{
     position: relative;
 }
 
-/* đường kẻ trang trí */
+
 .voucher-title::after{
     content: "";
     display: block;

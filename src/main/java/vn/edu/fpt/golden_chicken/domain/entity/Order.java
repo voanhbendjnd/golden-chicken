@@ -45,6 +45,8 @@ public class Order {
     BigDecimal totalProductPrice;
     BigDecimal shippingFee;
     BigDecimal discountAmount;
+    BigDecimal productDiscountAmount;
+    BigDecimal shippingDiscountAmount;
     BigDecimal finalAmount;
     String phone;
     @Column(columnDefinition = "NVARCHAR(255)")
@@ -63,6 +65,8 @@ public class Order {
     @Column(columnDefinition = "NVARCHAR(255)")
 
     String note;
+    @Column(columnDefinition = "NVARCHAR(500)")
+    String deliveryFailedReason;
     @Enumerated(EnumType.STRING)
     PaymentMethod paymentMethod;
 
