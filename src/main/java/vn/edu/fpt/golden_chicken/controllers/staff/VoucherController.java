@@ -52,29 +52,27 @@ public class VoucherController {
 
     @GetMapping("/list")
     public String list(@RequestParam(name = "page", defaultValue = "0") int page,
-                       @RequestParam(name = "size", defaultValue = "5") int size,
-                       Model model) {
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            Model model) {
         Page<ResVoucher> voucherPage = service.getAll(page, size);
         model.addAttribute("vouchers", voucherPage);
         model.addAttribute("currentPage", page);
         return "staff/voucher/list";
     }
 
-    // chi tiet voucher
-    @GetMapping("/detail/{id}")
+    @GetMapping("/detail/{id:[0-9]+}")
     public String detail(@PathVariable("id") Long id, Model model) {
         model.addAttribute("voucher", service.getById(id));
         return "staff/voucher/detail";
     }
 
-    // update
-    @GetMapping("/edit/{id}")
+    @GetMapping("/edit/{id:[0-9]+}")
     public String editForm(@PathVariable("id") Long id, Model model) {
         model.addAttribute("voucher", service.getById(id));
         return "staff/voucher/edit";
     }
 
-    @PostMapping("/edit/{id}")
+    @PostMapping("/edit/{id:[0-9]+}")
     public String update(
             @PathVariable Long id,
             @Valid @ModelAttribute("voucher") VoucherUpdateDTO dto,
@@ -98,16 +96,15 @@ public class VoucherController {
         }
     }
 
-
-    @GetMapping("/disable/{id}")
+    @GetMapping("/disable/{id:[0-9]+}")
     public String disable(@PathVariable("id") Long id) {
         service.disableVoucher(id);
         return "redirect:/staff/voucher/list";
     }
 
-    @GetMapping("/delete/{id}")
+    @GetMapping("/delete/{id:[0-9]+}")
     public String deleteVoucher(@PathVariable("id") Long id,
-                                RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         try {
             service.deleteVoucher(id);
             redirectAttributes.addFlashAttribute("success", "Xóa voucher thành công");

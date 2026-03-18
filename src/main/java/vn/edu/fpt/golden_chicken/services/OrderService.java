@@ -30,12 +30,16 @@ import vn.edu.fpt.golden_chicken.domain.response.OrderStatisResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.CartRepository;
+import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
+import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.converts.OrderConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.CheckoutException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -53,6 +57,8 @@ public class OrderService {
     UserRepository userRepository;
     ProductRepository productRepository;
     OrderRepository orderRepository;
+    CustomerVoucherRepository customerVoucherRepository;
+    VoucherRepository voucherRepository;
     CartService cartService;
     UserService userService;
     CartRepository cartRepository;
@@ -106,12 +112,14 @@ public class OrderService {
         }
         order.setTotalProductPrice(lastPriceProduct);
         order.setShippingFee(shippingFee);
-        if (dto.getDiscountAmount() != null) {
-            order.setDiscountAmount(discount);
-        }
+        order.setDiscountAmount(discount);
+        order.setProductDiscountAmount(dto.getProductDiscountAmount());
+        order.setShippingDiscountAmount(dto.getShippingDiscountAmount());
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
+        markVoucherUsed(dto.getProductVoucherId(), newOrder);
+        markVoucherUsed(dto.getShippingVoucherId(), newOrder);
 
         if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
@@ -126,6 +134,29 @@ public class OrderService {
         }
 
         return newOrder;
+    }
+
+    private void markVoucherUsed(Long voucherId, Order newOrder) {
+        if (voucherId == null) {
+            return;
+        }
+        var customerVoucher = customerVoucherRepository.findById(voucherId).orElse(null);
+        if (customerVoucher == null || customerVoucher.getVoucher() == null) {
+            return;
+        }
+        customerVoucher.setStatus(StatusVoucher.USED);
+        customerVoucher.setUsedAt(LocalDateTime.now());
+        customerVoucher.setOrder(newOrder);
+        customerVoucherRepository.save(customerVoucher);
+
+        var voucher = customerVoucher.getVoucher();
+        int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
+        int newQty = qty - 1;
+        voucher.setQuantity(newQty);
+        if (newQty <= 0) {
+            voucher.setStatus("DISABLED");
+        }
+        voucherRepository.save(voucher);
     }
 
     public List<OrderDTO.OrderDetail> getItemsDTOByOrderID(Long orderId) throws PermissionException {
@@ -250,6 +281,44 @@ public class OrderService {
         if (currentStatus == nextStatus)
             return;
 
+    
+        var actor = this.userService.getUserInContext();
+        StaffType actorType = (actor != null && actor.getStaff() != null) ? actor.getStaff().getStaffType() : null;
+
+        boolean isShipperFlowStatus = nextStatus == OrderStatus.DELIVERING
+                || nextStatus == OrderStatus.SHIPPER_ISSUE
+                || nextStatus == OrderStatus.REASSIGNING_SHIPPER
+                || nextStatus == OrderStatus.DELIVERY_FAILED
+                || nextStatus == OrderStatus.DELIVERED;
+
+        boolean isLockedForReceptionist = currentStatus == OrderStatus.READY_FOR_DELIVERY
+                || currentStatus == OrderStatus.DELIVERING
+                || currentStatus == OrderStatus.SHIPPER_ISSUE
+                || currentStatus == OrderStatus.REASSIGNING_SHIPPER
+                || currentStatus == OrderStatus.DELIVERY_FAILED
+                || currentStatus == OrderStatus.DELIVERED
+                || currentStatus == OrderStatus.COMPLETED
+                || currentStatus == OrderStatus.CANCELLED;
+
+        if (actorType == StaffType.RECEPTIONIST) {
+            if (isLockedForReceptionist) {
+                throw new RuntimeException("Bạn không có quyền cập nhật trạng thái ở giai đoạn giao hàng.");
+            }
+            if (isShipperFlowStatus) {
+                throw new RuntimeException("Bạn không có quyền cập nhật trạng thái thuộc phạm trù shipper.");
+            }
+        }
+
+        if (actorType == StaffType.SHIPPER) {
+            if (shipper == null) {
+                throw new RuntimeException("Shipper không hợp lệ.");
+            }
+            if (order.getShipper() == null || order.getShipper().getId() == null
+                    || !order.getShipper().getId().equals(shipper.getId())) {
+                throw new RuntimeException("Bạn không được phép cập nhật đơn hàng không thuộc shipper này.");
+            }
+        }
+
         if (currentStatus == OrderStatus.DELIVERED ||
                 currentStatus == OrderStatus.CANCELLED ||
                 currentStatus == OrderStatus.COMPLETED) {
@@ -356,6 +425,10 @@ public class OrderService {
         res.setTotalPrice(order.getTotalProductPrice());
         res.setFinalAmount(order.getFinalAmount());
         res.setFeeShipping(order.getShippingFee());
+        res.setProductDiscountAmount(
+                order.getProductDiscountAmount() != null ? order.getProductDiscountAmount() : BigDecimal.ZERO);
+        res.setShippingDiscountAmount(
+                order.getShippingDiscountAmount() != null ? order.getShippingDiscountAmount() : BigDecimal.ZERO);
         res.setUpdatedAt(order.getUpdatedAt());
         res.setItems(order.getOrderItems().stream().map(x -> {
             var detail = new ResOrder.OrderDetail();

@@ -15,7 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -191,25 +190,6 @@ public class UserService {
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
-        // var role = this.roleRepository.findById(request.getRoleId())
-        // .orElseThrow(() -> new ResourceNotFoundException("User ID",
-        // request.getRoleId()));
-        // if (role.getName().equalsIgnoreCase("STAFF")) {
-        // user.getStaff().setStaffType(request.getStaffType());
-        // user.setUpdatedAt(LocalDateTime.now());
-        // var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        // if (email == null || email.isEmpty()) {
-        // email = "Anonymous";
-        // }
-        // user.setCreatedBy(email);
-        // }
-
-        // if (role.getName().equalsIgnoreCase("ADMIN")) {
-        // user.setRole(role);
-        // }
-        // if (role.getName().equalsIgnoreCase("CUSTOMER")) {
-        // user.setRole(role);
-        // }
         user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
@@ -241,19 +221,29 @@ public class UserService {
 
     }
 
-    public void revertStatusAccount(Long id) {
-        var user = this.userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
-        user.setStatus(!user.getStatus());
-        this.userRepository.save(user);
+    public void revertStatusAccount(Long id) throws PermissionException {
+        var admin = this.getUserInContext();
+        if (admin.getStaff() != null) {
+            var user = this.userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
+            var status = !user.getStatus();
+            if (!admin.getId().equals(user.getId())) {
+                user.setStatus(status);
+                this.userRepository.save(user);
+            } else {
+                throw new PermissionException("Không thể thay đổi trạng thái của chính tài khoản đang sử dụng!");
+            }
+
+        }
+
     }
 
-    public void deleteById(long id) {
+    public void deleteById(long id) throws PermissionException {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         var userLogin = this.getUserInContext();
         if (user.getEmail().equalsIgnoreCase(userLogin.getEmail())) {
-            throw new DataInvalidException("Không thể tự xóa bản thân!");
+            throw new PermissionException("Không thể tự xóa chính tài khoản!");
         }
         if (user.getStaff() != null) {
             var staff = user.getStaff();

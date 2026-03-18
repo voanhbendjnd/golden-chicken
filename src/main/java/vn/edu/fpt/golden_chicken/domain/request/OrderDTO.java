@@ -21,6 +21,10 @@ public class OrderDTO {
     BigDecimal discountAmount;
     BigDecimal finalAmount;
     PaymentMethod paymentMethod;
+    Long productVoucherId;
+    Long shippingVoucherId;
+    BigDecimal productDiscountAmount;
+    BigDecimal shippingDiscountAmount;
 
     List<OrderDetail> items;
 

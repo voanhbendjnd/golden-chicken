@@ -1,7 +1,99 @@
-    <head th:replace="~{common/head}"></head>
-    <link th:href="@{/css/dashboard.css}" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <title>Voucher Management - Golden Chicken</title>
+<head th:replace="~{common/head}"></head>
+<link th:href="@{/css/dashboard.css}" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<title>Voucher Management - Golden Chicken</title>
+<style>
+    /* Nền overlay */
+    .modal {
+        display: none;
+        /* ẩn mặc định */
+        position: fixed;
+        z-index: 999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+
+        background-color: rgba(0, 0, 0, 0.5);
+
+        /* Căn giữa */
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Nội dung modal */
+    .modal-content {
+        background-color: #fff;
+        padding: 25px 30px;
+        border-radius: 12px;
+        width: 350px;
+        max-width: 90%;
+        text-align: center;
+
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Title */
+    .modal-content h3 {
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+    /* Message */
+    .modal-content p {
+        margin-bottom: 20px;
+        color: #555;
+    }
+
+    /* Nút */
+    .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    /* Button confirm */
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Button cancel */
+    .btn-secondary {
+        background-color: #ccc;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    /* Hover */
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+    .btn-secondary:hover {
+        background-color: #b3b3b3;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
 </head>
 
 <body>
@@ -12,7 +104,8 @@
                 <div th:replace="~{staff/layout/sidebar}"></div>
             </div>
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><i class="fas fa-ticket-alt me-2 text-theme"></i>Voucher Management</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a th:href="@{/staff/voucher/create}" class="btn btn-theme shadow-sm">
@@ -48,13 +141,23 @@
                                 <tbody>
                                     <tr th:each="v : ${vouchers.content}">
                                         <td><span class="text-muted fw-bold" th:text="${v.id}">1</span></td>
-                                        <td><code><span class="text-primary fw-bold" th:text="${v.code}">CODE123</span></code></td>
+                                        <td><code><span class="text-primary fw-bold" th:text="${v.code}">CODE123</span></code>
+                                        </td>
                                         <td class="fw-bold text-dark" th:text="${v.name}">Voucher Name</td>
                                         <td>
-                                            <span th:if="${v.status == 'ACTIVE'}" class="badge-status bg-success-subtle text-success" th:text="${v.status}">ACTIVE</span>
-                                            <span th:if="${v.status == 'DISABLED'}" class="badge-status bg-warning-subtle text-warning" th:text="${v.status}">DISABLED</span>
-                                            <span th:if="${v.status == 'EXPIRED'}" class="badge-status bg-danger-subtle text-danger" th:text="${v.status}">EXPIRED</span>
-                                            <span th:unless="${v.status == 'ACTIVE' or v.status == 'DISABLED' or v.status == 'EXPIRED'}" class="badge-status bg-light text-dark" th:text="${v.status}">STATUS</span>
+                                            <span th:if="${v.status == 'ACTIVE'}"
+                                                class="badge-status bg-success-subtle text-success"
+                                                th:text="${v.status}">ACTIVE</span>
+                                            <span th:if="${v.status == 'DISABLED'}"
+                                                class="badge-status bg-warning-subtle text-warning"
+                                                th:text="${v.status}">DISABLED</span>
+                                            <span th:if="${v.status == 'EXPIRED'}"
+                                                class="badge-status bg-danger-subtle text-danger"
+                                                th:text="${v.status}">EXPIRED</span>
+                                            <span
+                                                th:unless="${v.status == 'ACTIVE' or v.status == 'DISABLED' or v.status == 'EXPIRED'}"
+                                                class="badge-status bg-light text-dark"
+                                                th:text="${v.status}">STATUS</span>
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -89,22 +192,27 @@
 
                         <!-- Pagination -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <span class="small text-muted">Showing page <span th:text="${currentPage + 1}"></span> of <span th:text="${vouchers.totalPages}"></span></span>
+                            <span class="small text-muted">Showing page <span th:text="${currentPage + 1}"></span> of
+                                <span th:text="${vouchers.totalPages}"></span></span>
                             <nav aria-label="Voucher pagination">
                                 <ul class="pagination pagination-sm mb-0">
                                     <li class="page-item" th:classappend="${!vouchers.hasPrevious()} ? 'disabled'">
-                                        <a class="page-link shadow-none" th:href="@{/staff/voucher/list(page=${currentPage - 1}, size=${vouchers.size})}">
+                                        <a class="page-link shadow-none"
+                                            th:href="@{/staff/voucher/list(page=${currentPage - 1}, size=${vouchers.size})}">
                                             Previous
                                         </a>
                                     </li>
                                     <li class="page-item" th:each="i : ${#numbers.sequence(0, vouchers.totalPages - 1)}"
                                         th:classappend="${i == currentPage} ? 'active'">
-                                        <a class="page-link shadow-none" th:classappend="${i == currentPage} ? 'bg-theme border-theme text-white' : ''"
-                                           th:href="@{/staff/voucher/list(page=${i}, size=${vouchers.size})}" th:text="${i + 1}">
+                                        <a class="page-link shadow-none"
+                                            th:classappend="${i == currentPage} ? 'bg-theme border-theme text-white' : ''"
+                                            th:href="@{/staff/voucher/list(page=${i}, size=${vouchers.size})}"
+                                            th:text="${i + 1}">
                                         </a>
                                     </li>
                                     <li class="page-item" th:classappend="${!vouchers.hasNext()} ? 'disabled'">
-                                        <a class="page-link shadow-none" th:href="@{/staff/voucher/list(page=${currentPage + 1}, size=${vouchers.size})}">
+                                        <a class="page-link shadow-none"
+                                            th:href="@{/staff/voucher/list(page=${currentPage + 1}, size=${vouchers.size})}">
                                             Next
                                         </a>
                                     </li>
@@ -129,6 +237,9 @@
         </div>
     </div>
     <script th:src="@{/js/voucher.js}"></script>
+    <!-- <script>
+        document.getElementById("confirmModal").style.display = "flex";
+    </script> -->
 </body>
 
 </html>

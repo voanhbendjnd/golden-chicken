@@ -68,9 +68,10 @@
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             <a href="/cart" class="dropdown-item">Cart</a>
-                            <a href="chackout.html" class="dropdown-item">Chackout</a>
+                            <a href="checkout.html" class="dropdown-item">Chackout</a>
                             <a href="testimonial.html" class="dropdown-item">Testimonial</a>
                             <a href="404.html" class="dropdown-item">404 Page</a>
+                            <a href="/vouchers" class="dropdown-item">Voucher Page</a>
                         </div>
                     </div>
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
@@ -89,7 +90,10 @@
                     </a>
                     <div class="nav-item dropdown">
                         <a href="/profile" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="fas fa-user fa-2x" style="color:#ffb524;"></i>
+                            <img th:src="${profile != null and profile.avatar != null}
+                            ? @{/img/avatar/{file}(file=${profile.avatar})}
+                            : @{/img/testavt.jpg}" alt="Avatar"
+                                style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">

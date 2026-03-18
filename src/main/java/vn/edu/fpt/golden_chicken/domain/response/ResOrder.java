@@ -25,6 +25,8 @@ public class ResOrder {
 
     BigDecimal totalPrice;
     BigDecimal feeShipping;
+    BigDecimal productDiscountAmount;
+    BigDecimal shippingDiscountAmount;
     BigDecimal finalAmount;
     String paymentMethod;
     String paymentStatus;

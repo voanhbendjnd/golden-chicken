@@ -17,7 +17,6 @@ import vn.edu.fpt.golden_chicken.domain.response.CartResponse;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResOrder;
 import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
-import vn.edu.fpt.golden_chicken.repositories.CustomerVoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
@@ -32,13 +31,13 @@ public class CheckoutService {
     private final AddressServices addressServices;
     private final VoucherService voucherService;
     private final ProfileService profileService;
-    private final CustomerVoucherRepository customerVoucherRepository;
 
     public CheckoutResponse buildCheckout(
             Long productId,
             List<Long> ids,
             Long orderId,
-            Long voucherId,
+            Long productVoucherId,
+            Long shippingVoucherId,
             Long addressId) throws PermissionException {
 
         CheckoutResponse response = new CheckoutResponse();
@@ -183,77 +182,110 @@ public class CheckoutService {
 
         model.put("vouchers", vouchers);
 
-        applyVoucher(voucherId, orderDTO, shippingFee, model);
+        CustomerVoucher productVoucher = voucherService.getCustomerVoucherById(productVoucherId);
+        CustomerVoucher shippingVoucher = voucherService.getCustomerVoucherById(shippingVoucherId);
+        String errorMessage = applyVouchersToOrder(productVoucher, shippingVoucher, orderDTO, shippingFee);
 
         model.put("order", orderDTO);
         model.put("defaultAddress", selectedAddress);
+        model.put("selectedProductVoucher", productVoucher);
+        model.put("selectedShippingVoucher", shippingVoucher);
+        if (errorMessage != null) {
+            model.put("voucherError", errorMessage);
+        }
 
         return response;
     }
 
-    private void applyVoucher(Long voucherId,
+    private String applyVouchersToOrder(CustomerVoucher productVoucher,
+            CustomerVoucher shippingVoucher,
             OrderDTO orderDTO,
-            BigDecimal shippingFee,
-            Map<String, Object> model) {
-
-        if (voucherId == null)
-            return;
-
-        CustomerVoucher selected = customerVoucherRepository.findById(voucherId).orElse(null);
-
-        if (selected == null)
-            return;
-
-        Voucher voucher = selected.getVoucher();
+            BigDecimal shippingFee) {
         BigDecimal productPrice = orderDTO.getTotalProductPrice();
+        BigDecimal productDiscount = BigDecimal.ZERO;
+        BigDecimal shippingDiscount = BigDecimal.ZERO;
+        String errorMessage = null;
 
-        if (voucher.getMinOrderValue() != null &&
-                productPrice.compareTo(voucher.getMinOrderValue()) < 0) {
+        if (productVoucher != null) {
+            Voucher voucher = productVoucher.getVoucher();
+            try {
+                productDiscount = calculateDiscount(voucher, productPrice, productPrice);
+            } catch (IllegalArgumentException ex) {
+                errorMessage = ex.getMessage();
+            }
+        }
 
-            model.put("voucherError",
-                    "Đơn hàng chưa đủ điều kiện để dùng voucher này");
-            return;
+        if (shippingVoucher != null) {
+            Voucher voucher = shippingVoucher.getVoucher();
+            try {
+                shippingDiscount = calculateDiscount(voucher, shippingFee, productPrice).min(shippingFee);
+            } catch (IllegalArgumentException ex) {
+                errorMessage = ex.getMessage();
+            }
+        }
+
+        if (productDiscount == null) {
+            productDiscount = BigDecimal.ZERO;
+        }
+        if (shippingDiscount == null) {
+            shippingDiscount = BigDecimal.ZERO;
+        }
+
+        orderDTO.setDiscountAmount(productDiscount);
+        orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
+        orderDTO.setProductDiscountAmount(productDiscount);
+        orderDTO.setShippingDiscountAmount(shippingDiscount);
+        orderDTO.setFinalAmount(productPrice.add(orderDTO.getShippingFee()).subtract(productDiscount));
+
+        orderDTO.setProductVoucherId(productVoucher != null ? productVoucher.getId() : null);
+        orderDTO.setShippingVoucherId(shippingVoucher != null ? shippingVoucher.getId() : null);
+
+        return errorMessage;
+    }
+
+    private BigDecimal calculateDiscount(Voucher voucher, BigDecimal discountBase, BigDecimal minOrderBase) {
+        if (voucher == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (voucher.getMinOrderValue() != null && minOrderBase.compareTo(voucher.getMinOrderValue()) < 0) {
+            throw new IllegalArgumentException("Đơn hàng chưa đủ điều kiện để dùng voucher này");
         }
 
         BigDecimal discount = BigDecimal.ZERO;
-
         if ("FIXED".equals(voucher.getDiscountType())) {
             discount = BigDecimal.valueOf(voucher.getDiscountValue());
-        }
-
-        if ("PERCENT".equals(voucher.getDiscountType())) {
-            discount = productPrice
+        } else if ("PERCENT".equals(voucher.getDiscountType())) {
+            discount = discountBase
                     .multiply(BigDecimal.valueOf(voucher.getDiscountValue()))
                     .divide(BigDecimal.valueOf(100));
         }
 
-        if (discount.compareTo(productPrice) > 0) {
-            discount = productPrice;
+        if (discount.compareTo(discountBase) > 0) {
+            discount = discountBase;
         }
 
-        if ("SHIPPING".equals(voucher.getVoucherType())) {
-
-            BigDecimal shippingDiscount = discount;
-
-            if (shippingDiscount.compareTo(shippingFee) > 0) {
-                shippingDiscount = shippingFee;
-            }
-
-            orderDTO.setShippingFee(shippingFee.subtract(shippingDiscount));
-
-            orderDTO.setFinalAmount(
-                    productPrice.add(orderDTO.getShippingFee()));
-
-        } else {
-
-            orderDTO.setDiscountAmount(discount);
-
-            orderDTO.setFinalAmount(
-                    productPrice
-                            .add(orderDTO.getShippingFee())
-                            .subtract(discount));
-        }
-
-        model.put("selectedVoucher", selected);
+        return discount;
     }
+
+    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
+        if (productId != null) {
+            var product = productService.findById(productId);
+            return product != null ? product.getPrice() : BigDecimal.ZERO;
+        }
+        if (productIds != null && !productIds.isEmpty()) {
+            var cart = cartService.getProductInCart();
+            BigDecimal total = BigDecimal.ZERO;
+            if (cart.getItems() != null) {
+                for (var item : cart.getItems()) {
+                    if (productIds.contains(item.getProductId())) {
+                        total = total.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+                    }
+                }
+            }
+            return total;
+        }
+        return BigDecimal.ZERO;
+    }
+
 }

@@ -36,9 +36,6 @@
               <div class="v-left">
                 <div class="v-title">Bạn chưa sở hữu voucher nào</div>
               </div>
-              <div class="v-right">
-                <a th:href="@{/vouchers}" class="btn-primary" style="text-decoration: none;">Đổi ngay</a>
-              </div>
             </div>
           </div>
 
@@ -56,6 +53,23 @@
                 <span class="tag personal" th:text="${cv.status}">AVAILABLE</span>
               </div>
             </div>
+          </div>
+
+          <div class="mt-4" th:if="${totalPages > 1}">
+            <nav aria-label="Voucher pagination">
+              <ul class="pagination justify-content-center d-flex" >
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                  <a class="page-link" th:href="@{/vouchers/myVouchers(page=${currentPage - 1}, size=${size})}">Trước</a>
+                </li>
+                <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
+                  th:classappend="${p == currentPage} ? 'active'">
+                  <a class="page-link" th:href="@{/vouchers/myVouchers(page=${p}, size=${size})}" th:text="${p}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                  <a class="page-link" th:href="@{/vouchers/myVouchers(page=${currentPage + 1}, size=${size})}">Sau</a>
+                </li>
+              </ul>
+            </nav>
           </div>
         </section>
       </div>
