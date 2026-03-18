@@ -43,7 +43,6 @@ public class OrderDetailController {
             @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable)
             throws PermissionException {
 
-        // TRUYỀN THẲNG chuỗi status (ví dụ: "DELIVERING", "CANCELLED") xuống Service
         var data = this.orderService.getOrderHistory(spec, pageable, status);
 
         model.addAttribute("data", data);

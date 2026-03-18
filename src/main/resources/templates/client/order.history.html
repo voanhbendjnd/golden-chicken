@@ -111,8 +111,7 @@
                                 style="display:inline; margin: 0; padding: 0;">
                                 <input type="hidden" name="orderItemId" th:value="${item.id}" />
 
-                                <button type="submit" class="btn btn-"
-                                    th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}">
+                                <button type="submit" class="btn btn-" th:if="${item.allowReview}">
                                     <i class="bi bi-pencil"></i></button>
                             </form>
                         </div>
@@ -167,7 +166,7 @@
                                     </a>
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -197,7 +196,7 @@
                         </li>
                     </ul>
                 </nav>
-                
+
             </div>
 
         </div>
