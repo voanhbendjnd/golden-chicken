@@ -238,19 +238,19 @@ public class UserService {
 
     }
 
-    public void deleteById(long id) throws PermissionException {
+    public boolean deleteById(long id) throws PermissionException {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         var userLogin = this.getUserInContext();
-        if (user.getEmail().equalsIgnoreCase(userLogin.getEmail())) {
-            throw new PermissionException("Không thể tự xóa chính tài khoản!");
+        if (user.getId().equals(userLogin.getId())) {
+            throw new PermissionException("Không thể tự xóa tài khoản ADMIN!");
         }
         if (user.getStaff() != null) {
             var staff = user.getStaff();
             if (this.orderRepository.existsByShipperId(staff.getId())) {
                 user.setStatus(false);
                 this.userRepository.save(user);
-                return;
+                return false;
             }
         } else if (user.getCustomer() != null) {
             var customer = user.getCustomer();
@@ -258,11 +258,12 @@ public class UserService {
                     || this.cartRepository.existsByCustomerId(customer.getId())) {
                 user.setStatus(false);
                 this.userRepository.save(user);
-                return;
+                return false;
             }
         }
 
         this.userRepository.delete(user);
+        return true;
 
     }
 

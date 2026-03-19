@@ -31,8 +31,5 @@ public class UserDTO implements Serializable {
     // @NotNull(message = "Role Cannot Be Empty!")
     Long roleId;
     StaffType staffType;
-    String address;
-    String district;
-    String ward;
     // String otp;
 }

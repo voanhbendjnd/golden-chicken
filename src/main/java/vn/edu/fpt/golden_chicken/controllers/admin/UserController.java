@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -55,16 +56,14 @@ public class UserController {
 
     @GetMapping("")
     public String listUsers(Model model,
-            @RequestParam(required = false) String fullName,
+            // @RequestParam(required = false) String fullName,
             @Filter Specification<User> spec,
             @PageableDefault(size = DeclareConstant.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        // If fullName parameter is provided, create a filter specification
-        if (fullName != null && !fullName.trim().isEmpty()) {
-            spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
-                    criteriaBuilder.lower(root.get("fullName")),
-                    "%" + fullName.toLowerCase().trim() + "%");
-        }
+        // if (fullName != null && !fullName.trim().isEmpty()) {
+        // spec = (root, query, criteriaBuilder) -> criteriaBuilder.like(
+        // criteriaBuilder.lower(root.get("fullName")),
+        // "%" + fullName.toLowerCase().trim() + "%");
+        // }
 
         var data = userService.fetchAllWithPagination(pageable, spec);
         model.addAttribute("users", data.getResult());
@@ -81,7 +80,7 @@ public class UserController {
 
     @PostMapping("/create")
     public String create(Model model, @ModelAttribute("newUser") @Valid UserDTO request,
-            BindingResult bindingResult) {
+            BindingResult bindingResult, RedirectAttributes ra) {
         if (this.userRepository.existsByEmailIgnoreCase(request.getEmail())) {
             bindingResult.rejectValue("email", "error.user", "Email already exists");
         }
@@ -90,7 +89,8 @@ public class UserController {
         }
 
         this.userService.create(request);
-        return "redirect:/admin/user"; // redirect tới mapping
+        ra.addFlashAttribute("msg", "Tạo mới account thành công!");
+        return "redirect:/admin/user";
     }
 
     @GetMapping("/update/{id:[0-9]+}")
@@ -101,7 +101,8 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public String updateUser(@ModelAttribute("updateUser") @Valid UserDTO request, BindingResult bindingResult) {
+    public String updateUser(@ModelAttribute("updateUser") @Valid UserDTO request, BindingResult bindingResult,
+            RedirectAttributes ra) {
         if (bindingResult.hasErrors()) {
             return "admin/user/update";
         }
@@ -111,6 +112,7 @@ public class UserController {
             bindingResult.rejectValue("email", "error.user", ex.getMessage());
             return "admin/user/update";
         }
+        ra.addFlashAttribute("msg", "Cập nhật tài khoản thành công!");
         return "redirect:/admin/user";
     }
 
@@ -121,15 +123,34 @@ public class UserController {
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String delete(@PathVariable("id") long id, Model model) throws PermissionException {
-        this.userService.deleteById(id);
+    public String delete(@PathVariable("id") long id, Model model, RedirectAttributes ra) throws PermissionException {
+        try {
+            var check = this.userService.deleteById(id);
+            if (!check) {
+                ra.addFlashAttribute("msgWarning",
+                        "Tài khoản không thể xóa do đã có lưu những thông tin quan trọng! Tài khoản sẽ tự chuyển sang trạng thái Inactive!");
+                return "redirect:/admin/user";
+            }
 
+        } catch (PermissionException pe) {
+            ra.addFlashAttribute("msgWarning", pe.getMessage());
+            return "redirect:/admin/user";
+
+        }
+        ra.addFlashAttribute("msg", "Tài khoản được xóa thành công!");
         return "redirect:/admin/user";
     }
 
     @PostMapping("/status/{id:[0-9]+}")
-    public String revertStatus(@PathVariable("id") long id) throws PermissionException {
-        this.userService.revertStatusAccount(id);
+    public String revertStatus(@PathVariable("id") long id, RedirectAttributes ra) throws PermissionException {
+        try {
+            this.userService.revertStatusAccount(id);
+
+        } catch (PermissionException pe) {
+            ra.addFlashAttribute("msgWarning", pe.getMessage());
+            return "redirect:/admin/user";
+
+        }
         return "redirect:/admin/user";
     }
 
