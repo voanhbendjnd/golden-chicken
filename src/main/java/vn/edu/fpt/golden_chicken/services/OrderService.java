@@ -62,6 +62,7 @@ public class OrderService {
     CartService cartService;
     UserService userService;
     CartRepository cartRepository;
+    ReviewService reviewService;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
@@ -281,7 +282,6 @@ public class OrderService {
         if (currentStatus == nextStatus)
             return;
 
-    
         var actor = this.userService.getUserInContext();
         StaffType actorType = (actor != null && actor.getStaff() != null) ? actor.getStaff().getStaffType() : null;
 

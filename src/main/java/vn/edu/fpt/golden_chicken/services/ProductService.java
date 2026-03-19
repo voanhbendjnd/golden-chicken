@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @SuppressWarnings("null")
 public class ProductService {
-
+    ReviewService reviewService;
     CategoryRepository categoryRepository;
     ProductRepository productRepository;
     FileService fileService;
@@ -267,6 +267,7 @@ public class ProductService {
     public ResProduct findById(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        this.reviewService.syncProductRating(id);
         return ProductConvert.toResProduct(product);
     }
 
