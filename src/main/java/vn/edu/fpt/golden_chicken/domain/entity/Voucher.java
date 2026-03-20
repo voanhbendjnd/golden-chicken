@@ -41,14 +41,14 @@ public class Voucher {
     private LocalDateTime endAt;
 
     @Column(nullable = false, length = 20)
-    private String status; // ACTIVE / DISABLED / EXPIRED
+    private String status;
 
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
     private Integer quantity;
 
-    private String voucherType; // PRODUCT / SHIPPING
+    private String voucherType;
 
     @Column(nullable = false)
     private boolean exchangeable = true;

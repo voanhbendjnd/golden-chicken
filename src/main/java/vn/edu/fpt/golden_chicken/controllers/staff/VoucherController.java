@@ -79,7 +79,6 @@ public class VoucherController {
             BindingResult result,
             Model model) {
 
-        // 1. Lỗi validation DTO
         if (result.hasErrors()) {
             return "staff/voucher/edit";
         }
@@ -89,7 +88,6 @@ public class VoucherController {
             return "redirect:/staff/voucher/list";
         } catch (IllegalArgumentException ex) {
 
-            // Đưa message ra view
             model.addAttribute("errorMessage", ex.getMessage());
 
             return "staff/voucher/edit";

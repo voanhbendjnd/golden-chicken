@@ -48,13 +48,12 @@ public class AddressController {
     @GetMapping("/addresses/new")
     public String createForm(
             @RequestParam(value = "productId", required = false) Long productId,
-            @RequestParam(value = "productIds", required = false) String productIds, // Nhận dạng String để dễ truyền qua URL
+            @RequestParam(value = "productIds", required = false) String productIds,
             Model model) {
 
         model.addAttribute("addressForm", new AddressFormDTO());
         model.addAttribute("isEdit", false);
 
-        // Đẩy thông tin giỏ hàng ra để hiển thị nút "Quay lại"
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
 
@@ -78,23 +77,21 @@ public class AddressController {
 
         addressServices.createMyAddress(form);
 
-        // LOGIC ĐIỀU HƯỚNG THÔNG MINH:
-        // Nếu có dữ liệu sản phẩm, quay lại trang CHỌN ĐỊA CHỈ THANH TOÁN
         if (productId != null || (productIds != null && !productIds.isEmpty())) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null) url.append("productId=").append(productId);
+            if (productId != null)
+                url.append("productId=").append(productId);
             if (productIds != null && !productIds.isEmpty()) {
-                if (productId != null) url.append("&");
+                if (productId != null)
+                    url.append("&");
                 url.append("productIds=").append(productIds);
             }
             return url.toString();
         }
 
-        // Luồng bình thường (vào từ profile) -> Về Sổ địa chỉ
         return "redirect:/addresses";
     }
 
-    // Đổi từ Post sang Get để nhận tham số từ link dễ hơn
     @GetMapping("/addresses/edit")
     public String editForm(
             @RequestParam("id") Long id,
@@ -102,13 +99,13 @@ public class AddressController {
             @RequestParam(value = "productIds", required = false) String productIds,
             Model model) {
         AddressFormDTO form = addressServices.getMyAddressForm(id);
-        if (form == null) return "redirect:/addresses";
+        if (form == null)
+            return "redirect:/addresses";
 
         model.addAttribute("addressId", id);
         model.addAttribute("addressForm", form);
         model.addAttribute("isEdit", true);
 
-        // Đẩy thông tin giỏ hàng vào model để Form edit biết đường quay về
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
 
@@ -132,12 +129,13 @@ public class AddressController {
 
         addressServices.updateUserAddress(form);
 
-        // LOGIC ĐIỀU HƯỚNG TƯƠNG TỰ NHƯ TẠO MỚI
         if (productId != null || (productIds != null && !productIds.isEmpty())) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null) url.append("productId=").append(productId);
+            if (productId != null)
+                url.append("productId=").append(productId);
             if (productIds != null && !productIds.isEmpty()) {
-                if (productId != null) url.append("&");
+                if (productId != null)
+                    url.append("&");
                 url.append("productIds=").append(productIds);
             }
             return url.toString();
@@ -176,12 +174,13 @@ public class AddressController {
 
         addressServices.deleteMyAddress(id);
 
-        // Điều hướng về trang chọn địa chỉ nếu đang trong luồng thanh toán
         if (productId != null || (productIds != null && !productIds.isEmpty())) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null) url.append("productId=").append(productId);
+            if (productId != null)
+                url.append("productId=").append(productId);
             if (productIds != null && !productIds.isEmpty()) {
-                if (productId != null) url.append("&");
+                if (productId != null)
+                    url.append("&");
                 url.append("productIds=").append(productIds);
             }
             return url.toString();

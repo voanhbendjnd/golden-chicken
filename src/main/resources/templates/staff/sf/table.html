@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <head th:replace="~{common/head}"></head>
+    <link th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Shipping Fee Management - Golden Chicken</title>
+</head>
+
+<body>
+    <div th:replace="~{component/header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 p-0 sidebar-bg">
+                <div th:replace="~{staff/layout/sidebar}"></div>
+            </div>
+            <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Shipping Fee Management</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a th:href="@{/staff/shippingFee/create}" class="btn btn-theme shadow-sm">
+                            <i class="fas fa-plus me-1"></i> Tạo mới
+                        </a>
+                    </div>
+                </div>
+
+                <div class="premium-card shadow-sm">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0">Shipping Fee</h5>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm" style="width: 250px;">
+                                    <input type="text" id="searchName" class="form-control"
+                                        placeholder="Tìm kiếm theo tên..." th:value="${searchName}">
+                                    <button class="btn btn-theme" type="button" onclick="handleSearch()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${errorMessage != null}" class="alert alert-danger shadow-sm border-0 mb-4" role="alert"
+                        th:text="${errorMessage}"></div>
+                    <div th:if="${msg != null}" class="alert alert-success shadow-sm border-0 mb-4" role="alert"
+                        th:text="${msg}"></div>
+                    <div th:if="${msgWarning != null}" class="alert alert-warning shadow-sm border-0 mb-4" role="alert"
+                        th:text="${msgWarning}"></div>
+                    <div class="card-body">
+                        <div th:if="${shippingFees != null and !shippingFees.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover table-premium">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Phường/Xã</th>
+                                        <th>Giá Ship</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Ngày Cập Nhật</th>
+                                        <th>Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="shippingFee : ${shippingFees}">
+                                        <td><span class="text-muted fw-bold" th:text="${shippingFee.id}">1</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-folder text-theme me-2"></i>
+                                                <span class="fw-bold text-dark" th:text="${shippingFee.ward}">Tạo mới
+                                                    phí ship</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-dark"
+                                                th:text="${#numbers.formatDecimal(shippingFee.fee, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0
+                                                VNĐ</span>
+                                        </td>
+                                        <td class="text-muted small"
+                                            th:text="${#temporals.format(shippingFee.createdAt, 'dd/MM/yyyy')}">Date
+                                        </td>
+                                        <td class="text-muted small"
+                                            th:text="${#temporals.format(shippingFee.updatedAt, 'dd/MM/yyyy')}">Date
+                                        </td>
+                                        <td>
+                                            <div class="btn-group shadow-sm border rounded">
+                                                <a th:href="@{/staff/shippingFee/update/{id}(id=${shippingFee.id})}"
+                                                    class="btn btn-sm btn-white text-info px-3" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form
+                                                    th:action="@{/staff/shippingFee/status/{id}(id=${shippingFee.id})}"
+                                                    method="POST" class="delete-form d-none">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}"
+                                                        th:value="${_csrf.token}" />
+                                                </form>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-white text-danger px-3 btn-delete"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                                <form
+                                                    th:action="@{/staff/shippingFee/delete/{id}(id=${shippingFee.id})}"
+                                                    method="POST" class="delete-form d-none">
+                                                    <input type="hidden" th:name="${_csrf.parameterName}"
+                                                        th:value="${_csrf.token}" />
+                                                </form>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div th:if="${shippingFees != null and !shippingFees.isEmpty()}"
+                            class="d-flex justify-content-between align-items-center mt-4">
+                            <span class="small text-muted">Showing page <span th:text="${meta.page}"></span> of <span
+                                    th:text="${meta.pages}"></span></span>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
+                                        <a class="page-link shadow-none"
+                                            th:href="@{/staff/shippingFee(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
+                                    </li>
+                                    <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
+                                        th:class="|page-item ${meta.page == p ? 'active' : ''}|">
+                                        <a class="page-link shadow-none"
+                                            th:classappend="${meta.page == p} ? 'bg-theme border-theme text-white' : ''"
+                                            th:href="@{/staff/shippingFee(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
+                                            th:text="${p}"></a>
+                                    </li>
+                                    <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
+                                        <a class="page-link shadow-none"
+                                            th:href="@{/staff/shippingFee(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
+                        <div th:if="${shippingFees == null or shippingFees.isEmpty()}" class="text-center py-5">
+                            <div class="display-1 text-light"><i class="fas fa-folder-open"></i></div>
+                            <p class="text-muted mt-3">No shippingFees found.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.nextElementSibling;
+
+                Swal.fire({
+                    title: 'Are you sure delete?',
+                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+        function handleSearch() {
+            const name = document.getElementById("searchName").value;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (name && name.trim() !== "") {
+                urlParams.set('filter', "ward ~~ '" + name.trim() + "'");
+            } else {
+                urlParams.delete('filter');
+            }
+
+            urlParams.set('page', '1');
+
+            window.location.href = window.location.pathname + "?" + urlParams.toString();
+        }
+        document.getElementById("searchName").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                handleSearch();
+            }
+        });
+    </script>
+</body>
+
+</html>

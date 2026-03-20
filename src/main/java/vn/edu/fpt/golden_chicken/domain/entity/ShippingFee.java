@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -8,33 +9,37 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+@Table(name = "shipping_fee")
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name = "chat_messages")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChatMessage {
-
+public class ShippingFee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(length = 255)
-    String senderId;
-    @Column(length = 255)
-    String receiverId;
-    @Column(columnDefinition = "NTEXT")
-    String content;
-    LocalDateTime timestamp;
-    Boolean isRead = false;
+    @Column(columnDefinition = "NVARCHAR(100)")
+    String ward;
+    BigDecimal fee;
+    LocalDateTime createdAt, updatedAt;
 
     @PrePersist
-    public void handleBeforeCreate() {
-        this.timestamp = LocalDateTime.now();
+    public void handleBeforeCreateAt() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdateBy() {
+        this.updatedAt = LocalDateTime.now();
+
     }
 }
