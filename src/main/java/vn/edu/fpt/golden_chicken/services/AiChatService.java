@@ -62,7 +62,9 @@ public class AiChatService {
                             +
                             "6. If the price exceeds the budget and the return request exceeds 33 items per product, add exactly 33 items to the cart and return fewer than 33 items, telling the customer that you only add a maximum of 33 items to their cart. If the customer asks for the worst product, say there are no bad products.\n"
                             +
-                            "7. The only information you can include in the message for customers is the product name.\n\n"
+                            "7. The only information you can include in the message for customers is the product name.\n"
+                            +
+                            "8. Absolutely do not return error codes in developer language; return natural language that everyone can understand.\n"
                             +
                             "JSON GENERATION CASES:\n" +
                             "- CASE 1 (Customer is just chatting, asking for advice, or has not confirmed an order):\n"

@@ -312,6 +312,8 @@ public class ReviewService {
             resReview.setId(x.getId());
             resReview.setCustomerId(x.getCustomer().getId());
             resReview.setIsUpdate(Boolean.TRUE.equals(x.getIsUpdate()));
+            boolean isAllowed = LocalDateTime.now().isBefore(x.getCreatedAt().plusDays(7));
+            resReview.setAllowReview(isAllowed);
             return resReview;
         }).toList());
         return res;
@@ -421,9 +423,9 @@ public class ReviewService {
         if (status == ReviewStatus.PUBLISHED || status == ReviewStatus.HIDDEN) {
             review.setReviewStatus(status);
             this.reviewRepository.save(review);
-            if (status == ReviewStatus.HIDDEN) {
-                self.syncProductRating(reviewId);
-            }
+            // if (status == ReviewStatus.HIDDEN) {
+            self.syncProductRating(review.getProduct().getId());
+            // }
             return true;
         }
         return false;

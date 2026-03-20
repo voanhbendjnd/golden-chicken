@@ -381,7 +381,7 @@
                 const mediaStr = (r.mediaUrls && r.mediaUrls.length > 0) ? r.mediaUrls.join(',') : '';
 
                 let actions = '';
-                if (CURRENT_CUSTOMER_ID === r.customerId) {
+                if (CURRENT_CUSTOMER_ID === r.customerId && r.allowReview) {
                     actions += `<button class="btn btn-sm btn-outline-primary ms-2" onclick="editReview(${r.id}, ${r.rating}, '${r.comment ? r.comment.replace(/'/g, "\\'") : ''}', '${mediaStr}')"><i class="fa fa-edit"></i> Sửa</button>`;
 
                 }
