@@ -169,7 +169,10 @@ public class CheckoutService {
         }
 
         BigDecimal shippingFee = this.shippingFeeService.getFeeByWard(selectedAddress.getWard());
-
+        if (shippingFee == null) {
+            response.setRedirect("redirect:/home");
+            return response;
+        }
         orderDTO.setItems(details);
         orderDTO.setTotalProductPrice(totalPrice);
         orderDTO.setShippingFee(shippingFee);

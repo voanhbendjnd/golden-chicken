@@ -28,7 +28,7 @@ public class ShippingFeeService {
         if (sf != null) {
             return sf.getFee();
         }
-        return new BigDecimal(9999999);
+        return null;
     }
 
     public void create(ShippingFeeDTO dto) {
