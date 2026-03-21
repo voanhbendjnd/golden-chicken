@@ -57,6 +57,16 @@
                         <div class="product-price"
                             th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">50,000 ₫
                         </div>
+                        <div class="ms-4 d-flex align-items-center" th:if="${product.totalReviews > 0}">
+                            <div class="text-warning me-2">
+                                <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                    <i th:if="${product.averageRating >= i}" class="fa fa-star" style="color:#ffc107"></i>
+                                    <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}" class="fa fa-star-half-alt" style="color:#ffc107"></i>
+                                    <i th:if="${product.averageRating < i - 0.5}" class="fa fa-star" style="color:#e0e0e0"></i>
+                                </th:block>
+                            </div>
+                            <span class="text-muted small">(<span th:text="${product.averageRating}">4.5</span>/5 - <span th:text="${product.totalReviews}">10</span> đánh giá)</span>
+                        </div>
                     </div>
 
                     <div class="description-box mb-5">
@@ -109,14 +119,17 @@
         <div class="review-section" id="reviewSection">
             <div class="review-section-title">ĐÁNH GIÁ SẢN PHẨM</div>
 
-            <div class="review-summary" id="reviewSummary" style="display:none!important;">
+            <div class="review-summary" id="reviewSummary" th:style="${product.totalReviews > 0 ? 'display:flex!important;' : 'display:none!important;'}">
                 <div class="review-avg-score">
-                    <div class="review-avg-number" id="reviewAvgNumber">0.0</div>
+                    <div class="review-avg-number" id="reviewAvgNumber" th:text="${product.averageRating}">0.0</div>
                     <div class="review-avg-stars" id="reviewAvgStars">
-                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                            <i th:if="${product.averageRating >= i}" class="fa fa-star" style="color:#ffc107"></i>
+                            <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}" class="fa fa-star-half-alt" style="color:#ffc107"></i>
+                            <i th:if="${product.averageRating < i - 0.5}" class="fa fa-star" style="color:#e0e0e0"></i>
+                        </th:block>
                     </div>
-                    <div class="review-avg-count" id="reviewAvgCount">0 đánh giá</div>
+                    <div class="review-avg-count" id="reviewAvgCount" th:text="${product.totalReviews} + ' đánh giá'">0 đánh giá</div>
                 </div>
                 <div class="review-filter-pills" id="reviewFilterPills">
                     <span class="review-filter-pill active" data-rating="0">Tất cả</span>
@@ -442,13 +455,8 @@ ${r.isUpdate ? `<div class="review-meta">${isUpdateLabel} ${formatDate(r.updated
                         currentPage = meta.page || page;
 
                         if (!append && activeRating === 0 && meta.total > 0) {
-                            const ratings = result.map(r => r.rating);
-                            const avg = ratings.length
-                                ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
-                                : '0.0';
-                            avgNumber.textContent = avg;
-                            avgStars.innerHTML = avgStarsHtml(parseFloat(avg));
-                            avgCount.textContent = `${meta.total} đánh giá`;
+                            // Summary is now handled by server attributes (Thymeleaf)
+                            // We just ensure it's visible if it wasn't already
                             reviewSummary.style.display = '';
                             reviewSummary.style.removeProperty('display');
                             reviewSummary.setAttribute('style', 'display:flex!important;');

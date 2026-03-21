@@ -115,12 +115,12 @@
                                 cartCountElement.innerText = newTotal;
                             }
                             Swal.fire({
-                                title: 'Success',
-                                text: 'Add to cart success',
+                                title: 'Thành công',
+                                text: 'Thêm vào giỏ hàng thành công',
                                 icon: 'success',
                                 showCancelButton: true,
-                                confirmButtonText: 'Go to cart',
-                                cancelButtonText: 'Stay here',
+                                confirmButtonText: 'Đi tới giỏ hàng',
+                                cancelButtonText: 'Ở lại',
                                 reverseButtons: true,
                                 showClass: {
                                     popup: 'animate__animated animate__fadeInDown'

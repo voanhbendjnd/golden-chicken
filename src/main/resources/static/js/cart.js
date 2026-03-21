@@ -80,7 +80,6 @@
                 }
             });
 
-            // 3. GỌI API CẬP NHẬT
             async function updateCart(productId, quantity) {
                 try {
                     const response = await fetch('/cart/update', {
