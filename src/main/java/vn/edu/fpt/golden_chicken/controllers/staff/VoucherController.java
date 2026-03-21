@@ -12,6 +12,10 @@ import vn.edu.fpt.golden_chicken.domain.request.VoucherUpdateDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResVoucher;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+
 @Controller
 @RequestMapping("/staff/voucher")
 public class VoucherController {
@@ -33,6 +37,16 @@ public class VoucherController {
             BindingResult result,
             Model model) {
 
+        // 🔥 validate thời gian
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+//        if (dto.getStartAt() != null && dto.getStartAt().isBefore(now)) {
+//            result.rejectValue("startAt", "error.startAt",
+//                    "Start time must be now or in the future");
+//        }
+        if (dto.getEndAt() != null && dto.getEndAt().isBefore(now)) {
+            result.rejectValue("endAt", "error.endAt",
+                    "End time must be now or in the future");
+        }
         // 1. Lỗi validation DTO
         if (result.hasErrors()) {
             return "staff/voucher/create";
@@ -54,6 +68,7 @@ public class VoucherController {
     public String list(@RequestParam(name = "page", defaultValue = "0") int page,
                        @RequestParam(name = "size", defaultValue = "5") int size,
                        Model model) {
+        service.refreshExpiredStatus();
         Page<ResVoucher> voucherPage = service.getAll(page, size);
         model.addAttribute("vouchers", voucherPage);
         model.addAttribute("currentPage", page);
@@ -63,6 +78,7 @@ public class VoucherController {
     // chi tiet voucher
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable("id") Long id, Model model) {
+        service.refreshExpiredStatus();
         model.addAttribute("voucher", service.getById(id));
         return "staff/voucher/detail";
     }
@@ -81,6 +97,16 @@ public class VoucherController {
             BindingResult result,
             Model model) {
 
+        // 🔥 validate thời gian
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+//        if (dto.getStartAt() != null && dto.getStartAt().isBefore(now)) {
+//            result.rejectValue("startAt", "error.startAt",
+//                    "Start time must be now or in the future");
+//        }
+        if (dto.getEndAt() != null && dto.getEndAt().isBefore(now)) {
+            result.rejectValue("endAt", "error.endAt",
+                    "End time must be now or in the future");
+        }
         // 1. Lỗi validation DTO
         if (result.hasErrors()) {
             return "staff/voucher/edit";

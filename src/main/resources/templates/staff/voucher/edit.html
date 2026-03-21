@@ -124,6 +124,11 @@
                    id="startAt"
                    name="startAt"
                    th:value="${#temporals.format(voucher.startAt, 'yyyy-MM-dd''T''HH:mm')}"/>
+<!--                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"/>-->
+            <div class="field-error"
+                 th:if="${#fields.hasErrors('startAt')}"
+                 th:errors="*{startAt}">
+            </div>
         </div>
 
         <div class="form-group">
@@ -131,14 +136,20 @@
             <input type="datetime-local"
                    id="endAt"
                    name="endAt"
-                   th:value="${#temporals.format(voucher.endAt, 'yyyy-MM-dd''T''HH:mm')}"/>
+                   th:value="${#temporals.format(voucher.endAt, 'yyyy-MM-dd''T''HH:mm')}"
+                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"
+            />
+            <div class="field-error"
+                 th:if="${#fields.hasErrors('endAt')}"
+                 th:errors="*{endAt}">
+            </div>
         </div>
 
         <div class="form-group">
             <label>Quantity</label>
             <input type="number"
                    th:field="*{quantity}"
-                   />
+            />
             <div class="field-error"
                  th:if="${#fields.hasErrors('quantity')}"
                  th:errors="*{quantity}">

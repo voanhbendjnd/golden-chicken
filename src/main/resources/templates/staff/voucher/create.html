@@ -61,7 +61,7 @@
         </div>
         <div class="form-group">
             <label>Voucher Type</label>
-            <select th:field="*{voucherType}" >
+            <select th:field="*{voucherType}">
                 <option value="">-- Select voucher type --</option>
                 <option value="PRODUCT">PRODUCT</option>
                 <option value="SHIPPING">SHIPPING</option>
@@ -132,6 +132,7 @@
         <div class="form-group">
             <label>Start At:</label>
             <input type="datetime-local" th:field="*{startAt}"/>
+<!--                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"/>-->
             <div class="field-error"
                  th:if="${#fields.hasErrors('startAt')}"
                  th:errors="*{startAt}">
@@ -140,7 +141,8 @@
 
         <div class="form-group">
             <label>End At:</label>
-            <input type="datetime-local" th:field="*{endAt}"/>
+            <input type="datetime-local" th:field="*{endAt}"
+                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('endAt')}"
                  th:errors="*{endAt}">
