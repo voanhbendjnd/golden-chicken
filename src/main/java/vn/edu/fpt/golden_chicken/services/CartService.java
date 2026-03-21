@@ -72,9 +72,11 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.productId()));
         // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId());
+
         if (cartItem == null) {
             cartItem = new CartItem();
         }
+
         if (cartItem.getId() == null) {
             cartItem.setProduct(product);
             cartItem.setQuantity(dto.quantity());
@@ -82,8 +84,11 @@ public class CartService {
             customer.addCartItem(cartItem);
         } else {
             int currentQty = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
-
-            cartItem.setQuantity(currentQty + dto.quantity());
+            var lastQty = currentQty + dto.quantity();
+            if (lastQty > 33) {
+                lastQty = 33;
+            }
+            cartItem.setQuantity(lastQty);
             cartItem.setPrice(product.getPrice());
         }
         this.cartRepository.save(cartItem);
@@ -163,18 +168,10 @@ public class CartService {
             }
             return;
         }
-        if (cartItem == null) {
-            var product = this.productRepository.findById(dto.productId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.productId()));
-            cartItem.setProduct(product);
-            cartItem.setCustomer(customer);
-            cartItem.setQuantity(dto.quantity());
-            cartItem.setPrice(product.getPrice());
-        } else {
-            cartItem.setQuantity(dto.quantity());
-            cartItem.setPrice(cartItem.getProduct().getPrice());
-        }
+        cartItem.setQuantity(dto.quantity());
+        cartItem.setPrice(cartItem.getProduct().getPrice());
         this.cartRepository.save(cartItem);
+
     }
 
     public Integer sumCart() {

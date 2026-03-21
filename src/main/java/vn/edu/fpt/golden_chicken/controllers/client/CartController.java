@@ -52,5 +52,6 @@ public class CartController {
         session.setAttribute("sumCart", total);
         var res = this.cartService.getProductInCart();
         return ResponseEntity.ok(res);
+
     }
 }
