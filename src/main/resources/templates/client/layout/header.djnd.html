@@ -1,4 +1,4 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta name="_csrf" th:content="${_csrf.token}" />
@@ -90,7 +90,9 @@
                     </a>
                     <div class="nav-item dropdown">
                         <a href="/profile" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img th:src="@{/img/avatar/{file}(file=${profile.avatar})}" alt="Avatar"
+                            <img th:src="${profile != null and profile.avatar != null}
+                            ? @{/img/avatar/{file}(file=${profile.avatar})}
+                            : @{/img/testavt.jpg}" alt="Avatar"
                                  style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
