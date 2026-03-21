@@ -18,10 +18,8 @@ import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
-import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.CheckoutService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
-import vn.edu.fpt.golden_chicken.services.ProductService;
 import vn.edu.fpt.golden_chicken.services.ProfileService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
@@ -50,13 +48,14 @@ public class CheckoutController {
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) throws PermissionException {
         var user = this.userService.getUserInContext();
         if (user.getCustomer() == null) {
             throw new PermissionException("You do not have permission!");
         }
         CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, productVoucherId,
-                shippingVoucherId, addressId);
+                shippingVoucherId, addressId, quantity);
 
         if (response.getRedirect() != null) {
             return response.getRedirect();
@@ -114,6 +113,7 @@ public class CheckoutController {
     public String chooseVoucher(
             @RequestParam(value = "id", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> productIds,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "9") int size,
             Model model) throws PermissionException {
@@ -121,7 +121,7 @@ public class CheckoutController {
         var currentUser = profileService.getCurrentUser();
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
-        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds);
+        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds, quantity);
         final BigDecimal orderTotalFinal = orderTotal;
 
         List<CustomerVoucher> allVouchers = vouchers;
@@ -141,10 +141,10 @@ public class CheckoutController {
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("quantity", quantity);
 
         return "client/voucher-select";
     }
-
 
     @PostMapping("/apply-vouchers")
     public String applyVouchers(
@@ -152,6 +152,7 @@ public class CheckoutController {
             @RequestParam(value = "ids", required = false) List<Long> ids,
             @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) throws PermissionException {
         OrderDTO selection;
         try {
@@ -159,14 +160,14 @@ public class CheckoutController {
                     voucherCode);
         } catch (IllegalArgumentException ex) {
             model.addAttribute("voucherError", ex.getMessage());
-            return handleCheckout(productId, ids, null, null, null, null, model);
+            return handleCheckout(productId, ids, null, null, null, null, quantity, model);
         }
 
         if (selection.getProductVoucherId() == null && selection.getShippingVoucherId() == null) {
-            return handleCheckout(productId, ids, null, null, null, null, model);
+            return handleCheckout(productId, ids, null, null, null, null, quantity, model);
         }
 
         return handleCheckout(productId, ids, null, selection.getProductVoucherId(), selection.getShippingVoucherId(),
-                null, model);
+                null, quantity, model);
     }
 }

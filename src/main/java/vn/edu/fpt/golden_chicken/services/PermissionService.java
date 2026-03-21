@@ -65,6 +65,9 @@ public class PermissionService {
     public void deleteById(long id) {
         var permission = this.permissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission ID", id));
+        if (this.permissionRepository.isPermissionInUse(id)) {
+            return;
+        }
         this.permissionRepository.delete(permission);
     }
 

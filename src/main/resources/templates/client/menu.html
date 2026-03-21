@@ -84,6 +84,7 @@
                                     </p>
 
                                     <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
+                                        th:data-id="${product.id}"
                                         th:href="@{/checkout?productId={id}(id=${product.id})}">
                                         Mua ngay
                                     </a>

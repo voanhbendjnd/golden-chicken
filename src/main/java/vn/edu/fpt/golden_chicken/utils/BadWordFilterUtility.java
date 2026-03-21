@@ -2,47 +2,63 @@ package vn.edu.fpt.golden_chicken.utils;
 
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+import vn.edu.fpt.golden_chicken.repositories.BadWordRepository;
+import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;
+
 import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class BadWordFilterUtility {
+    private final BadWordRepository badWordRepository;
+    private final ReviewRepository reviewRepository;
+    private List<Pattern> badWordPatterns = new ArrayList<>();
 
-    private static final Set<String> BLACKLIST = new HashSet<>(Arrays.asList(
-            "thối", "tanh", "hôi", "ôi thiu", "ươn", "mốc", "khó ăn", "dở tệ",
-            "ghê", "ghê tởm", "kinh dị", "bẩn", "dơ", "bẩn thỉu", "khó nuốt",
-            "hôi hám", "tanh tưởi", "mùi thối", "mùi hôi", "mùi tanh"));
+    public BadWordFilterUtility(BadWordRepository badWordRepository, ReviewRepository reviewRepository) {
+        this.badWordRepository = badWordRepository;
+        this.reviewRepository = reviewRepository;
+    }
 
     public boolean isViolating(String comment) {
+        if (comment == null || comment.trim().isEmpty())
+            return false;
+        String normalized = removeAccent(comment.toLowerCase())
+                .replaceAll("[^a-z\\s]", " ").replaceAll("\\s+", " ").trim();
+        for (Pattern pattern : badWordPatterns) {
+            if (pattern.matcher(normalized).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public boolean isViolatingV1(String comment) {
         if (comment == null || comment.trim().isEmpty()) {
             return false;
         }
-
-        // 1️⃣ lowercase
         String normalized = comment.toLowerCase();
-
-        // 2️⃣ remove dấu tiếng Việt
         normalized = removeAccent(normalized);
-
-        // 3️⃣ remove ký tự đặc biệt nhưng giữ space
         normalized = normalized.replaceAll("[^a-z\\s]", " ");
-
-        // 4️⃣ gộp nhiều space
         normalized = normalized.replaceAll("\\s+", " ").trim();
-
-        // 5️⃣ check theo word boundary
-        for (String badWord : BLACKLIST) {
-
-            String normalizedBadWord = removeAccent(badWord);
-
-            Pattern pattern = Pattern.compile("\\b" + normalizedBadWord + "\\b");
-
+        var setBadWord = this.badWordRepository.fetchAllActiveWordsOnly().stream().collect(Collectors.toSet());
+        for (String badWord : setBadWord) {
+            if (badWord == null || badWord.isBlank()) {
+                continue;
+            }
+            String normalizedBadWord = removeAccent(badWord).toLowerCase()
+                    .replaceAll("[^a-z\\s]", " ")
+                    .replaceAll("\\s+", " ")
+                    .trim();
+            if (normalizedBadWord.isEmpty()) {
+                continue;
+            }
+            Pattern pattern = Pattern.compile("\\b" + Pattern.quote(normalizedBadWord) + "\\b",
+                    Pattern.CASE_INSENSITIVE);
             if (pattern.matcher(normalized).find()) {
-                System.out.println("Phát hiện từ cấm: " + badWord);
                 return true;
             }
         }
@@ -50,8 +66,51 @@ public class BadWordFilterUtility {
         return false;
     }
 
+    @PostConstruct
+    public void loadAndCompileBadWords() {
+        badWordPatterns.clear();
+        List<String> badWords = badWordRepository.fetchAllActiveWordsOnly();
+        for (String word : badWords) {
+            if (word != null && !word.isBlank()) {
+                String normalizedWord = removeAccent(word.toLowerCase())
+                        .replaceAll("[^a-z\\s]", " ").replaceAll("\\s+", " ").trim();
+
+                if (!normalizedWord.isEmpty()) {
+                    badWordPatterns.add(
+                            Pattern.compile("\\b" + Pattern.quote(normalizedWord) + "\\b", Pattern.CASE_INSENSITIVE));
+                }
+            }
+        }
+    }
+
+    public boolean containsBadWordThoroughly(String comment, String badWord) {
+        if (comment == null || comment.trim().isEmpty() || badWord == null || badWord.isBlank()) {
+            return false;
+        }
+        String normalizedComment = removeAccent(comment.toLowerCase())
+                .replaceAll("[^a-z\\s]", " ")
+                .replaceAll("\\s+", " ").trim();
+        String normalizedBadWord = removeAccent(badWord.toLowerCase())
+                .replaceAll("[^a-z\\s]", " ")
+                .replaceAll("\\s+", " ").trim();
+        if (normalizedBadWord.isEmpty()) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("\\b" + Pattern.quote(normalizedBadWord) + "\\b", Pattern.CASE_INSENSITIVE);
+        return pattern.matcher(normalizedComment).find();
+    }
+
     private String removeAccent(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    public boolean isViolatingWithSet(String badWord) {
+        var setReview = this.reviewRepository.getAllComment().stream().collect(Collectors.toSet());
+        if (setReview.contains(badWord.toLowerCase())) {
+            return true;
+        }
+        return false;
+
     }
 }

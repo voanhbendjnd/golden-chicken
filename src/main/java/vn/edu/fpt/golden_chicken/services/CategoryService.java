@@ -29,8 +29,8 @@ public class CategoryService {
 
     public void create(CategoryDTO dto) {
         var name = dto.getName();
-        if (this.categoryRepository.existsByName(name)) {
-            throw new DataInvalidException("Category With Name (" + name + ") Already Exists!");
+        if (this.categoryRepository.existsByNameIgnoreCase(name)) {
+            throw new DataInvalidException("Thể lại với tên là (" + name + ") đã tồn tại!");
         }
         var category = new Category();
         category.setName(name);
@@ -42,11 +42,11 @@ public class CategoryService {
     public void update(CategoryDTO dto) {
         var name = dto.getName();
         var id = dto.getId();
-        if (this.categoryRepository.existsByNameAndIdNot(name, id)) {
-            throw new DataInvalidException("Category With Name (" + name + ") Already Exists!");
+        if (this.categoryRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new DataInvalidException("Thể lại với tên là (" + name + ") đã tồn tại!");
         }
         var category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new DataInvalidException("Category With ID (" + id + ") Already Exists!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Thể loại", id));
         category.setName(name);
         category.setStatus(dto.getStatus());
         category.setDescription(dto.getDescription());
@@ -55,7 +55,7 @@ public class CategoryService {
 
     public ResCategory findById(long id) {
         var category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Thể loại", id));
         var res = new ResCategory();
         res.setDescription(category.getDescription());
         res.setId(id);
@@ -66,7 +66,7 @@ public class CategoryService {
 
     public void updateStatus(Long id, String condition) {
         var category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new DataInvalidException("Category With ID (" + id + ") Already Exists!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Thể loại", id));
         if (condition.equalsIgnoreCase("on")) {
             category.setStatus(true);
         } else {
@@ -107,15 +107,15 @@ public class CategoryService {
     }
 
     public void delete(Long id) {
-        var cate = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID", id));
+        var category = this.categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Thể loại", id));
 
         if (this.productRepository.existsByCategoryId(id)) {
-            cate.setStatus(false);
-            this.categoryRepository.save(cate);
+            category.setStatus(false);
+            this.categoryRepository.save(category);
             return;
         } else {
-            this.categoryRepository.delete(cate);
+            this.categoryRepository.delete(category);
         }
     }
 

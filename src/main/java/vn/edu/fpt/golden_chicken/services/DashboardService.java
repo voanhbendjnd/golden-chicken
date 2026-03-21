@@ -5,8 +5,9 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.golden_chicken.domain.dto.DashboardReportDTO;
+
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
+import vn.edu.fpt.golden_chicken.domain.request.DashboardReportDTO;
 import vn.edu.fpt.golden_chicken.repositories.OrderItemRepository;
 import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.ReviewRepository;

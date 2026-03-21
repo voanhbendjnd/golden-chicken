@@ -281,7 +281,6 @@ public class OrderService {
         if (currentStatus == nextStatus)
             return;
 
-    
         var actor = this.userService.getUserInContext();
         StaffType actorType = (actor != null && actor.getStaff() != null) ? actor.getStaff().getStaffType() : null;
 

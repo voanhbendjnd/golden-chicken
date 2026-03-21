@@ -1,6 +1,7 @@
 package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,11 @@ public class Customer implements Serializable {
     List<CustomerVoucher> customerVouchers;
     @OneToMany(mappedBy = "customer")
     List<Review> reviews;
+    @Column(name = "violation_count")
+    private Integer violationCount = 0;
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
 
     public void addCartItem(CartItem item) {
         if (this.cartItems == null) {

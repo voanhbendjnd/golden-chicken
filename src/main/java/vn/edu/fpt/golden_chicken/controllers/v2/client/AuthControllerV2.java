@@ -55,20 +55,16 @@ public class AuthControllerV2 {
     @GetMapping("verify-v2")
     public String verifyPage(@RequestParam("email") String email, Model model, HttpSession session) {
         model.addAttribute("email", email);
-        // ==== Generate OTP ====
         var oneTimePassword = this.userService.generateBase();
-        // ==== 5 minutes ====
         this.redisUserService.saveKeyOTPForgotPassword(email, oneTimePassword);
         var verifyMsg = new VerifyAccountMessage();
         verifyMsg.setDescription("Send OTP for update password");
         verifyMsg.setCreatedAt(LocalDateTime.now());
         verifyMsg.setEmail(email);
-        // ==== Session ====
         long expireAt = Instant.now().getEpochSecond() + 5 * 60;
 
         session.setAttribute("FP:OTP", oneTimePassword);
         session.setAttribute("FP:EXPIREAT", expireAt);
-        // ==== Send OTP ====
         this.kafkaVerifyMessage.send("forgot-password-account-topic", verifyMsg);
         return "client/auth/verify.v2";
     }

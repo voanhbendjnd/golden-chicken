@@ -20,7 +20,8 @@
         <a class="btn btn-outline-secondary"
            th:href="@{/checkout(
                     productId=${productId},
-                    ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}
+                    ids=${productIds != null ? #strings.listJoin(productIds, ',') : null},
+                    quantity=${quantity}
                )}">
             <i class="fa-solid fa-arrow-left"></i> Quay lại thanh toán
         </a>
@@ -32,6 +33,7 @@
         <input type="hidden" name="productId" th:value="${productId}" />
         <input type="hidden" name="ids"
                th:value="${productIds != null ? #strings.listJoin(productIds, ',') : ''}" />
+        <input type="hidden" name="quantity" th:value="${quantity}" />
         <input type="hidden" name="currentPage" th:value="${currentPage}" />
 
         <div class="row mb-3 align-items-end">
@@ -83,17 +85,17 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, page=${currentPage - 1}, size=${size})}">Trước</a>
+                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, quantity=${quantity}, page=${currentPage - 1}, size=${size})}">Trước</a>
                 </li>
                 <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}"
                     th:classappend="${p == currentPage} ? 'active'">
                     <a class="page-link"
-                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, page=${p}, size=${size})}"
+                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, quantity=${quantity}, page=${p}, size=${size})}"
                        th:text="${p}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, page=${currentPage + 1}, size=${size})}">Sau</a>
+                       th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, quantity=${quantity}, page=${currentPage + 1}, size=${size})}">Sau</a>
                 </li>
             </ul>
         </nav>

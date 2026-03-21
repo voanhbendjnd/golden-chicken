@@ -1,4 +1,4 @@
-package vn.edu.fpt.golden_chicken.domain.dto;
+package vn.edu.fpt.golden_chicken.domain.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

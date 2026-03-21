@@ -46,6 +46,7 @@ public class ResOrder {
         BigDecimal price;
         String img;
         Boolean isReview;
+        Boolean allowReview;
 
     }
 

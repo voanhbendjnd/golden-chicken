@@ -22,4 +22,8 @@ public class ResReview {
     ReviewStatus reviewStatus;
     LocalDateTime createdAt, updatedAt;
     Boolean isUpdate;
+    Long productId;
+    String productName;
+    Long orderId;
+    Boolean allowReview;
 }

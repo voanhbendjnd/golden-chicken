@@ -1,469 +1,702 @@
 <div th:fragment="chat-widget" xmlns:th="http://www.thymeleaf.org"
     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <!-- Chat Widget HTML -->
     <div sec:authorize="isAuthenticated()">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
         <style>
+            /* ── Float button ── */
             #gc-chat-btn {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background-color: #ffb524;
-                color: white;
-                text-align: center;
-                line-height: 60px;
-                font-size: 24px;
-                cursor: pointer;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 9999;
-                transition: transform 0.2s;
+                position: fixed; bottom: 20px; right: 20px;
+                width: 60px; height: 60px; border-radius: 50%;
+                background: linear-gradient(135deg,#ffb524,#ff8c00);
+                color: #fff; text-align: center; line-height: 60px;
+                font-size: 24px; cursor: pointer;
+                box-shadow: 0 4px 14px rgba(255,181,36,.5);
+                z-index: 9999; transition: transform .2s, box-shadow .2s;
             }
+            #gc-chat-btn:hover { transform: scale(1.12); box-shadow: 0 6px 20px rgba(255,181,36,.65); }
 
-            #gc-chat-btn:hover {
-                transform: scale(1.1);
-            }
-
+            /* ── Panel ── */
             #gc-chat-panel {
-                position: fixed;
-                bottom: 90px;
-                right: 20px;
-                width: 350px;
-                height: 450px;
-                background: white;
-                border-radius: 10px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                display: none;
-                flex-direction: column;
-                z-index: 9999;
-                overflow: hidden;
+                position: fixed; bottom: 90px; right: 20px;
+                width: 370px; height: 530px;
+                background: #fff; border-radius: 18px;
+                box-shadow: 0 10px 40px rgba(0,0,0,.16);
+                display: none; flex-direction: column;
+                z-index: 9999; overflow: hidden;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             }
 
+            /* ── Header ── */
             .gc-chat-header {
-                background-color: #ffb524;
-                color: white;
-                padding: 15px;
-                font-weight: bold;
-                display: flex;
-                align-items: center;
+                background: linear-gradient(135deg,#ffb524,#ff8c00);
+                color: #fff; padding: 13px 16px;
+                font-weight: 700; font-size: 15px;
+                display: flex; align-items: center; gap: 8px;
+                flex-shrink: 0;
             }
-
-            .gc-chat-header .title-container {
-                flex-grow: 1;
-                display: flex;
-                align-items: center;
+            .gc-chat-header .gc-hd-left { flex-grow: 1; display: flex; align-items: center; gap: 8px; }
+            .gc-online-dot {
+                width: 9px; height: 9px; border-radius: 50%;
+                background: #a8ff78; box-shadow: 0 0 6px #a8ff78; flex-shrink: 0;
             }
+            .gc-close-chat { cursor: pointer; font-size: 21px; opacity: .85; line-height: 1; flex-shrink: 0; }
+            .gc-close-chat:hover { opacity: 1; }
+            .gc-back-chat  { cursor: pointer; font-size: 16px; opacity: .85; display: none; flex-shrink: 0; }
+            .gc-back-chat:hover  { opacity: 1; }
 
-            .gc-chat-body {
-                flex-grow: 1;
-                padding: 15px;
-                overflow-y: auto;
-                background: #fdfdfd;
-                font-family: sans-serif;
-            }
 
-            .gc-chat-footer {
-                padding: 10px;
-                border-top: 1px solid #ddd;
-                display: flex;
-                background: #fff;
-            }
-
-            .gc-chat-footer input {
-                flex-grow: 1;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 20px;
-                margin-right: 8px;
-                outline: none;
-            }
-
-            .gc-chat-footer button {
-                background-color: #ffb524;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-weight: bold;
-            }
-
-            .gc-msg {
-                margin-bottom: 10px;
-                padding: 10px 14px;
-                border-radius: 18px;
-                max-width: 80%;
-                clear: both;
-                word-wrap: break-word;
-                font-size: 14px;
-            }
-
-            .gc-msg.sent {
-                background-color: #ffefcb;
-                float: right;
-                border-bottom-right-radius: 4px;
-            }
-
-            .gc-msg.received {
-                background-color: #e9ecef;
-                float: left;
-                border-bottom-left-radius: 4px;
-            }
-
-            .gc-close-chat {
-                cursor: pointer;
-                font-size: 20px;
-            }
-
-            .gc-back-chat {
-                cursor: pointer;
-                margin-right: 15px;
-                display: none;
-            }
-
-            #gc-chat-badge {
-                position: absolute;
-                top: 0;
-                right: 0;
-                background: red;
-                color: white;
-                border-radius: 50%;
-                width: 20px;
-                height: 20px;
-                font-size: 12px;
-                line-height: 20px;
-                display: none;
-            }
-
+            /* ── User list ── */
+            #gc-user-list { flex-grow: 1; overflow-y: auto; background: #fff; display: none; }
             .gc-user-item {
-                padding: 12px 15px;
-                border-bottom: 1px solid #f0f0f0;
-                cursor: pointer;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                color: #333;
-                font-size: 15px;
+                padding: 11px 14px; border-bottom: 1px solid #f5f5f5;
+                cursor: pointer; display: flex; align-items: center; gap: 10px;
+                transition: background .15s;
             }
-
-            .gc-user-item:hover {
-                background-color: #f9f9f9;
+            .gc-user-item:hover { background: #fffaf0; }
+            .gc-avatar {
+                width: 40px; height: 40px; border-radius: 50%;
+                background: linear-gradient(135deg,#ffb524,#ff6b00);
+                color: #fff; display: flex; align-items: center; justify-content: center;
+                font-size: 15px; font-weight: 700; flex-shrink: 0;
             }
-
+            .gc-user-info { flex-grow: 1; min-width: 0; }
+            .gc-user-name {
+                font-size: 13.5px; font-weight: 600; color: #1a1a1a;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .gc-user-name.has-unread { color: #ff8c00; }
+            .gc-user-preview {
+                font-size: 12px; color: #999; margin-top: 2px;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .gc-user-preview.has-unread { color: #555; font-weight: 600; }
+            .gc-user-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+            .gc-user-time { font-size: 10.5px; color: #bbb; }
             .gc-unread-badge {
-                background: red;
-                color: white;
-                border-radius: 50%;
-                width: 22px;
-                height: 22px;
-                font-size: 12px;
-                line-height: 22px;
-                text-align: center;
-                display: inline-block;
+                background: #e53935; color: #fff;
+                border-radius: 12px; min-width: 20px; height: 20px;
+                font-size: 11px; line-height: 20px; text-align: center;
+                display: inline-block; padding: 0 5px; font-weight: 700;
             }
 
-            .gc-chat-body::-webkit-scrollbar {
-                width: 6px;
+            /* ── Messages body ── */
+            #gc-chat-body {
+                flex-grow: 1; padding: 14px 14px 6px;
+                overflow-y: auto; background: #f5f6fa;
+                display: none;
+            }
+            #gc-load-more-btn {
+                display: none; width: 100%; background: none; border: none;
+                color: #999; font-size: 12px; padding: 5px 0 10px;
+                cursor: pointer; text-align: center;
+            }
+            #gc-load-more-btn:hover { color: #ffb524; }
+
+            /* ── Footer ── */
+            #gc-chat-footer {
+                padding: 10px 12px; border-top: 1px solid #eee;
+                display: none; background: #fff; gap: 8px; align-items: center;
+                flex-shrink: 0;
+            }
+            #gc-chat-footer input[type="text"] {
+                flex-grow: 1; padding: 10px 14px;
+                border: 1.5px solid #eee; border-radius: 24px;
+                outline: none; font-size: 14px; background: #f8f9fb;
+                transition: border-color .2s;
+            }
+            #gc-chat-footer input[type="text"]:focus { border-color: #ffb524; background: #fff; }
+            #gc-chat-footer button {
+                background: #ffb524; color: #fff; border: none;
+                width: 40px; height: 40px; border-radius: 50%;
+                cursor: pointer; font-size: 15px;
+                display: flex; align-items: center; justify-content: center;
+                flex-shrink: 0; transition: background .2s, transform .1s;
+            }
+            #gc-chat-footer button:hover { background: #e0a000; transform: scale(1.08); }
+
+            /* ── Bubbles ── */
+            .gc-msg-wrapper { display: flex; flex-direction: column; margin-bottom: 12px; }
+            .gc-msg-wrapper.sent     { align-items: flex-end; }
+            .gc-msg-wrapper.received { align-items: flex-start; }
+            .gc-msg {
+                padding: 10px 14px; border-radius: 18px;
+                max-width: 78%; word-wrap: break-word;
+                font-size: 14px; line-height: 1.45;
+            }
+            .gc-msg.sent     { background: linear-gradient(135deg,#ffb524,#ff8c00); color:#fff; border-bottom-right-radius:5px; }
+            .gc-msg.received { background:#fff; color:#222; border:1px solid #eee; border-bottom-left-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+            .gc-msg-meta { font-size:10px; color:#aaa; margin-top:3px; padding:0 4px; display:flex; align-items:center; gap:4px; }
+            .gc-msg-wrapper.sent     .gc-msg-meta { justify-content: flex-end; }
+            .gc-msg-wrapper.received .gc-msg-meta { justify-content: flex-start; }
+            .gc-seen-tick { font-size:11px; color:#aaa; }
+            .gc-seen-tick.seen { color:#4fc3f7; }
+            .gc-sender-label { font-size:11px; color:#888; margin-bottom:3px; padding:0 4px; }
+
+            /* ── Info / empty ── */
+            .gc-info-msg { text-align:center; color:#ccc; font-size:12px; padding:12px 0; }
+
+            /* ── Notification badge ── */
+            #gc-chat-badge {
+                position:absolute; top:0; right:0;
+                background:#e53935; color:#fff; border-radius:50%;
+                width:20px; height:20px; font-size:11px; line-height:20px;
+                display:none; font-weight:700; text-align:center;
             }
 
-            .gc-chat-body::-webkit-scrollbar-thumb {
-                background-color: #ccc;
-                border-radius: 3px;
-            }
+            /* ── Scrollbars ── */
+            #gc-user-list::-webkit-scrollbar, #gc-chat-body::-webkit-scrollbar { width:5px; }
+            #gc-user-list::-webkit-scrollbar-thumb, #gc-chat-body::-webkit-scrollbar-thumb { background:#ddd; border-radius:3px; }
         </style>
 
+        <!-- Float button -->
         <div id="gc-chat-btn" onclick="toggleGCChat()">
-            <i class="fas fa-comments" style="margin-top: 18px;"></i>
-            <span id="gc-chat-badge">0</span>
+            <i class="fas fa-comments" style="margin-top:17px;"></i>
+            <span id="gc-chat-badge"></span>
         </div>
 
+        <!-- Panel -->
         <div id="gc-chat-panel">
+
+            <!-- Header -->
             <div class="gc-chat-header">
-                <div class="title-container">
-                    <span class="gc-back-chat" id="gc-chat-back-btn" onclick="goBackToList()"><i
-                            class="fas fa-arrow-left"></i></span>
+                <div class="gc-hd-left">
+                    <span class="gc-back-chat" id="gc-chat-back-btn" onclick="goBackToList()">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span class="gc-online-dot"></span>
                     <span id="gc-chat-title">Hỗ trợ trực tuyến</span>
                 </div>
                 <span class="gc-close-chat" onclick="toggleGCChat()">&times;</span>
             </div>
 
-            <div class="gc-chat-body" id="gc-user-list" style="display:none; padding:0;">
-                <!-- User list dynamically appended -->
+
+            <!-- Staff: user list -->
+            <div id="gc-user-list"></div>
+
+            <!-- Chat messages -->
+            <div id="gc-chat-body">
+                <button id="gc-load-more-btn" onclick="loadOlderMessages()">
+                    <i class="fas fa-arrow-up"></i> Tải tin nhắn cũ hơn
+                </button>
             </div>
 
-            <div class="gc-chat-body" id="gc-chat-body">
-                <div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Kết nối thành công!
-                </div>
-            </div>
-
-            <div class="gc-chat-footer" id="gc-chat-footer">
+            <!-- Footer -->
+            <div id="gc-chat-footer">
                 <input type="hidden" id="gc-current-recipient" value="STAFF">
                 <input type="text" id="gc-chat-input" placeholder="Nhập tin nhắn..."
-                    onkeypress="if(event.key === 'Enter') sendGCChatMessage()">
+                    onkeypress="if(event.key==='Enter') sendGCChatMessage()">
                 <button onclick="sendGCChatMessage()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
 
         <script th:inline="javascript">
-            var gcStompClient = null;
-            var gcCurrentUser = /*[[${#authentication.name}]]*/ 'anonymous';
-            var gcIsStaff = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
+            // ── Identity ──────────────────────────────────────────────────────────
+            var gcIsStaff   = /*[[${#authorization.expression('hasAnyRole(''STAFF'', ''ADMIN'')')}]]*/ false;
             var sessionRole = /*[[${session.roleName}]]*/ 'GUEST';
-            var authName = /*[[${#authentication.name}]]*/ 'anonymous';
+            var authName    = /*[[${#authentication.name}]]*/ 'anonymous';
+            var gcMyId      = (sessionRole === 'ADMIN' || sessionRole === 'STAFF') ? 'STAFF' : authName;
 
-            var gcCurrentUser2 = (sessionRole === 'ADMIN' || sessionRole === 'STAFF') ? 'STAFF' : authName; var chatHistory = {};
-            var activeChat = gcIsStaff ? null : 'STAFF';
-            var totalUnread = 0;
+            // ── State ─────────────────────────────────────────────────────────────
+            // chatHistory[partner] = { unread, messages[], currentPage, hasMore, historyLoaded, lastMsg, lastTime }
+            var chatHistory   = {};
+            var activeChat    = gcIsStaff ? null : 'STAFF';
+            var totalUnread   = 0;
+            var gcStompClient = null;
 
-            document.addEventListener("DOMContentLoaded", function () {
+            // ── Bootstrap ─────────────────────────────────────────────────────────
+            document.addEventListener('DOMContentLoaded', function () {
+                connectWebSocket();
+
                 if (gcIsStaff) {
-                    document.getElementById('gc-user-list').style.display = 'block';
-                    document.getElementById('gc-chat-body').style.display = 'none';
-                    document.getElementById('gc-chat-footer').style.display = 'none';
-                    document.getElementById('gc-chat-title').innerText = "Danh sách khách hàng";
-                    // Load partners from Redis
-                    fetch('/api/chat/partners?user=STAFF')
-                        .then(res => res.json())
-                        .then(partners => {
-                            if (partners && partners.length > 0) {
-                                partners.forEach(partner => {
-                                    if (partner !== gcCurrentUser2 && partner !== '1' && partner !== '2' && partner !== 'STAFF') {
-                                        if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
-                                    }
-                                });
-                                renderUserList();
-                            }
-                        })
-                        .catch(err => console.error("Error loading partners:", err));
+                    document.getElementById('gc-chat-title').innerText = 'Danh sách khách hàng';
+                    showView('list');
+                    loadPartnersPreview(); // ← loads list with previews immediately
                 } else {
-                    document.getElementById('gc-chat-title').innerText = "Chăm sóc khách hàng";
-                    chatHistory['STAFF'] = { unread: 0, messages: [], historyLoaded: false };
-                    // Preload history for customer
-                    fetchHistoryForPartner('STAFF');
+                    document.getElementById('gc-chat-title').innerText = 'Chăm sóc khách hàng';
+                    ensureState('STAFF');
                 }
+            });
 
+            // ── WebSocket ─────────────────────────────────────────────────────────
+            function connectWebSocket() {
                 var socket = new SockJS('/ws-chat');
                 gcStompClient = Stomp.over(socket);
                 gcStompClient.debug = null;
-
-                gcStompClient.connect({}, function (frame) {
+                gcStompClient.connect({}, function () {
                     if (gcIsStaff) {
-                        gcStompClient.subscribe('/topic/staffChat', function (response) {
-                            var message = JSON.parse(response.body);
-                            handleIncomingMessage(message.senderId, message.content, 'received', message.senderId);
+                        gcStompClient.subscribe('/topic/staffChat', function (r) {
+                            var msg = JSON.parse(r.body);
+                            handleIncoming(msg.senderId, msg);
+                        });
+                        gcStompClient.subscribe('/topic/staffSeenEvent', function (r) {
+                            handleSeenEvent(JSON.parse(r.body));
                         });
                     } else {
-                        gcStompClient.subscribe('/user/queue/messages', function (response) {
-                            var message = JSON.parse(response.body);
-                            handleIncomingMessage('STAFF', message.content, 'received', 'Golden Chicken');
+                        gcStompClient.subscribe('/user/queue/messages', function (r) {
+                            var msg = JSON.parse(r.body);
+                            handleIncoming('STAFF', msg);
+                        });
+                        gcStompClient.subscribe('/user/queue/seen', function (r) {
+                            handleSeenEvent(JSON.parse(r.body));
                         });
                     }
-                }, function (error) {
-                    console.log("Chat error: " + error);
-                });
-            });
+                }, function (e) { console.warn('Chat WS error:', e); });
+            }
 
-            function fetchHistoryForPartner(partner, callback) {
-                if (chatHistory[partner] && chatHistory[partner].historyLoaded) {
-                    if (callback) callback();
+            // ── State helpers ─────────────────────────────────────────────────────
+            function ensureState(partner) {
+                if (!chatHistory[partner]) {
+                    chatHistory[partner] = {
+                        unread: 0,
+                        wasCleared: false,   // set true when user opens the chat → prevents re-inflating from DB
+                        messages: [],
+                        currentPage: 0, hasMore: true, historyLoaded: false,
+                        lastMsg: null, lastTime: null
+                    };
+                }
+            }
+
+            // ── Load partners with preview from DB ────────────────────────────────
+            function loadPartnersPreview() {
+                var url = '/api/chat/partners/preview';
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(previews => {
+                        var newTotal = 0;
+                        (previews || []).forEach(p => {
+                            var id = p.partnerId;
+                            ensureState(id);
+                            // Always refresh preview text & time from DB
+                            chatHistory[id].lastMsg  = p.lastMessage   || '';
+                            chatHistory[id].lastTime = p.lastTimestamp || null;
+                            // Only use DB unread count if staff hasn't already read this chat
+                            // wasCleared=true means staff opened this conversation → trust in-memory 0
+                            if (!chatHistory[id].wasCleared) {
+                                chatHistory[id].unread = p.unreadCount === 0 ? 0 : (p.unreadCount || 0);
+                            }
+                            newTotal += chatHistory[id].unread;
+                        });
+                        totalUnread = newTotal; // recalculate from scratch to avoid drift
+                        updateGlobalBadge();
+                        renderUserList(previews || []);
+                    })
+                    .catch(e => console.error('Load partners error:', e));
+            }
+
+            // ── Render user list ──────────────────────────────────────────────────
+            function renderUserList(previews) {
+                var listDom = document.getElementById('gc-user-list');
+                listDom.innerHTML = '';
+
+                if (!previews || previews.length === 0) {
+                    listDom.innerHTML = '<div class="gc-info-msg" style="padding:40px 20px;">' +
+                        '<i class="fas fa-comment-slash" style="font-size:28px;display:block;margin-bottom:8px;"></i>' +
+                        'Chưa có đoạn chat nào.</div>';
                     return;
                 }
 
-                // var u1 = gcIsStaff ? 'STAFF' : gcCurrentUser;
-                // var u2 = gcIsStaff ? 'STAFF' : gcCurrentUser;
-                var u1 = gcIsStaff ? partner : gcCurrentUser2;
-                var u2 = gcIsStaff ? gcCurrentUser2 : 'STAFF';
-                fetch(`/api/chat/history?user1=${u1}&user2=${u2}`)
-                    .then(res => res.json())
-                    .then(messages => {
-                        if (messages && messages.length > 0) {
-                            var loadedMsgs = [];
-                            messages.forEach(msg => {
-                                var type = msg.senderId === gcCurrentUser2 ? 'sent' : 'received';
-                                var senderName = msg.senderId === gcCurrentUser2 ? 'Tôi' : (msg.senderId === 'STAFF' ? 'Golden Chicken' : msg.senderId.split('@')[0]);
-                                loadedMsgs.push({ content: msg.content, type: type, senderName: senderName });
-                            });
-                            if (!chatHistory[partner]) chatHistory[partner] = { unread: 0, messages: [] };
-                            chatHistory[partner].messages = loadedMsgs.concat(chatHistory[partner].messages);
-                        }
-                        if (chatHistory[partner]) chatHistory[partner].historyLoaded = true;
-                        if (callback) callback();
-                    })
-                    .catch(err => console.error("Could not load history for " + partner, err));
+                previews.forEach(function (p) {
+                    var partner = p.partnerId;
+                    var state   = chatHistory[partner];
+                    // Use in-memory unread: NOTE must NOT use || because 0 is falsy.
+                    // wasCleared=true means staff opened this conversation → trust in-memory 0 over stale DB value.
+                    var unread  = state ? state.unread : (p.unreadCount === 0 ? 0 : (p.unreadCount || 0));
+                    var lastMsg = state.lastMsg || p.lastMessage || '';
+                    var lastTime = formatTimeShort(state.lastTime || p.lastTimestamp || '');
+
+                    var item = document.createElement('div');
+                    item.className = 'gc-user-item';
+                    item.setAttribute('data-partner', partner);
+                    item.onclick = function () { openChatWith(partner); };
+
+                    var initials = partner.charAt(0).toUpperCase();
+                    var nameDisplay = partner.split('@')[0];
+
+                    item.innerHTML = `
+                        <div class="gc-avatar">${initials}</div>
+                        <div class="gc-user-info">
+                            <div class="gc-user-name ${unread > 0 ? 'has-unread' : ''}">${nameDisplay}</div>
+                            <div class="gc-user-preview ${unread > 0 ? 'has-unread' : ''}">${escHtml(lastMsg) || 'Chưa có tin nhắn'}</div>
+                        </div>
+                        <div class="gc-user-right">
+                            <span class="gc-user-time">${lastTime}</span>
+                            ${unread > 0 ? `<span class="gc-unread-badge">${unread > 99 ? '99+' : unread}</span>` : '<i class="fas fa-chevron-right" style="color:#e0e0e0;font-size:11px;"></i>'}
+                        </div>`;
+                    listDom.appendChild(item);
+                });
             }
 
-            function handleIncomingMessage(partner, content, type, senderName) {
-                if (!chatHistory[partner]) {
-                    chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
-                }
-                chatHistory[partner].messages.push({ content: content, type: type, senderName: senderName });
 
-                var panelOpen = (document.getElementById('gc-chat-panel').style.display === 'flex');
+            // ── Fetch paginated history ───────────────────────────────────────────
+            function fetchHistory(partner, callback) {
+                ensureState(partner);
+                var state = chatHistory[partner];
+                if (state.historyLoaded && !state.hasMore) {
+                    if (callback) callback([]);
+                    return;
+                }
+
+                var u1   = gcIsStaff ? partner : gcMyId;
+                var u2   = gcIsStaff ? 'STAFF'  : 'STAFF';
+                var page = state.currentPage;
+
+                fetch(`/api/chat/history?user1=${encodeURIComponent(u1)}&user2=${encodeURIComponent(u2)}&page=${page}&viewer=${encodeURIComponent(gcMyId)}`)
+                    .then(r => r.json())
+                    .then(msgs => {
+                        state.historyLoaded = true;
+                        if (!msgs || msgs.length === 0) {
+                            state.hasMore = false;
+                            if (callback) callback([]);
+                            return;
+                        }
+                        if (msgs.length < 20) state.hasMore = false;
+                        state.currentPage++;
+
+                        var localMsgs = msgs.map(m => ({
+                            id:      m.id,
+                            content: m.content,
+                            type:    m.senderId === gcMyId ? 'sent' : 'received',
+                            sender:  m.senderId === 'STAFF' ? 'Golden Chicken' : m.senderId.split('@')[0],
+                            seen:    m.seen,
+                            time:    m.timestamp ? formatTime(m.timestamp) : ''
+                        }));
+
+                        // Prepend to message list (these are older)
+                        state.messages = localMsgs.concat(state.messages);
+
+                        // Update preview with latest message if first page
+                        if (page === 0 && localMsgs.length > 0) {
+                            var latest = localMsgs[localMsgs.length - 1];
+                            state.lastMsg  = latest.content;
+                        }
+
+                        if (callback) callback(localMsgs);
+                    })
+                    .catch(e => { console.error('History error:', e); if (callback) callback([]); });
+            }
+
+            // ── Mark seen ─────────────────────────────────────────────────────────
+            function markSeen(partner) {
+                var sender    = gcIsStaff ? partner : 'STAFF';
+                var recipient = gcMyId;
+
+                // REST → persist
+                fetch(`/api/chat/seen?sender=${encodeURIComponent(sender)}&recipient=${encodeURIComponent(recipient)}`,
+                    { method: 'POST' })
+                    .catch(e => console.warn('markSeen REST error:', e));
+
+                // WebSocket → real-time tick update for sender
+                if (gcStompClient && gcStompClient.connected) {
+                    gcStompClient.send('/app/chat.seen', {}, JSON.stringify({ from: gcMyId, to: sender }));
+                }
+            }
+
+            // ── Handle seen event ─────────────────────────────────────────────────
+            function handleSeenEvent(event) {
+                var chatBody = document.getElementById('gc-chat-body');
+                if (!chatBody) return;
+                chatBody.querySelectorAll('.gc-seen-tick').forEach(t => {
+                    t.textContent = '✓✓ Đã xem';
+                    t.classList.add('seen');
+                });
+                if (activeChat && chatHistory[activeChat]) {
+                    chatHistory[activeChat].messages.forEach(m => { if (m.type === 'sent') m.seen = true; });
+                }
+            }
+
+            // ── Handle real-time incoming message ─────────────────────────────────
+            function handleIncoming(partner, msg) {
+                ensureState(partner);
+                var state = chatHistory[partner];
+
+                var localMsg = {
+                    id:      msg.id || null,
+                    content: msg.content,
+                    type:    'received',
+                    sender:  msg.senderId === 'STAFF' ? 'Golden Chicken' : (msg.senderId || '').split('@')[0],
+                    seen:    false,
+                    time:    formatTime(msg.timestamp || new Date().toISOString())
+                };
+                state.messages.push(localMsg);
+                state.lastMsg  = localMsg.content;
+                state.lastTime = msg.timestamp || new Date().toISOString();
+
+                var panelOpen = document.getElementById('gc-chat-panel').style.display === 'flex';
 
                 if (activeChat === partner && panelOpen) {
-                    appendMessageDOM(content, type, senderName);
+                    appendMsg(localMsg);
+                    scrollBottom();
+                    markSeen(partner);
+                    // Tick update on our side
+                    document.getElementById('gc-chat-body')
+                        .querySelectorAll('.gc-seen-tick')
+                        .forEach(t => { t.textContent = '✓✓ Đã xem'; t.classList.add('seen'); });
                 } else {
-                    chatHistory[partner].unread++;
+                    state.unread++;
                     totalUnread++;
                     updateGlobalBadge();
-                    if (gcIsStaff && !activeChat) {
-                        renderUserList();
-                    }
+                    // Update preview in list DOM
+                    updateListItemPreview(partner, state);
                 }
             }
 
-            function updateGlobalBadge() {
-                var badge = document.getElementById('gc-chat-badge');
-                if (totalUnread > 0) {
-                    badge.innerText = totalUnread;
-                    badge.style.display = 'block';
-                } else {
-                    badge.style.display = 'none';
+            function updateListItemPreview(partner, state) {
+                var item = document.querySelector(`[data-partner="${partner}"]`);
+                if (!item) {
+                    // New partner — reload list
+                    if (gcIsStaff && !activeChat) loadPartnersPreview();
+                    return;
                 }
+                // Update name style
+                item.querySelector('.gc-user-name').classList.toggle('has-unread', state.unread > 0);
+                // Update preview text
+                var prev = item.querySelector('.gc-user-preview');
+                prev.textContent = state.lastMsg || '';
+                prev.classList.toggle('has-unread', state.unread > 0);
+                // Update badge
+                var right = item.querySelector('.gc-user-right');
+                right.innerHTML = `<span class="gc-user-time">${formatTimeShort(state.lastTime)}</span>
+                    <span class="gc-unread-badge">${state.unread > 99 ? '99+' : state.unread}</span>`;
+                // Move to top of list
+                var list = document.getElementById('gc-user-list');
+                list.insertBefore(item, list.firstChild);
             }
 
+            // ── Toggle chat panel ─────────────────────────────────────────────────
             function toggleGCChat() {
                 var panel = document.getElementById('gc-chat-panel');
                 if (panel.style.display === 'flex') {
                     panel.style.display = 'none';
                 } else {
                     panel.style.display = 'flex';
-                    if (gcIsStaff && activeChat) {
-                        openChatWith(activeChat);
-                    } else if (!gcIsStaff) {
+                    if (gcIsStaff) {
+                        if (activeChat) {
+                            openChatWith(activeChat);
+                        }
+                        // else list is already visible — no action needed
+                    } else {
                         openChatWith('STAFF');
                     }
-                    scrollGCChatToBottom();
                 }
             }
 
+            // ── Open chat with partner ────────────────────────────────────────────
             function openChatWith(partner) {
                 activeChat = partner;
+                ensureState(partner);
+                var state = chatHistory[partner];
 
-                if (chatHistory[partner]) {
-                    totalUnread -= chatHistory[partner].unread;
-                    if (totalUnread < 0) totalUnread = 0;
-                    chatHistory[partner].unread = 0;
-                    updateGlobalBadge();
-                } else {
-                    chatHistory[partner] = { unread: 0, messages: [], historyLoaded: false };
-                }
+                // Reset unread & mark as cleared so loadPartnersPreview won't re-inflate from DB
+                totalUnread = Math.max(0, totalUnread - state.unread);
+                state.unread = 0;
+                state.wasCleared = true;
+                updateGlobalBadge();
+
+                // Always switch to chat view — applies to BOTH staff AND customers
+                showView('chat');
 
                 if (gcIsStaff) {
-                    document.getElementById('gc-user-list').style.display = 'none';
-                    document.getElementById('gc-chat-body').style.display = 'block';
-                    document.getElementById('gc-chat-footer').style.display = 'flex';
                     document.getElementById('gc-chat-back-btn').style.display = 'inline';
                     document.getElementById('gc-chat-title').innerText = partner.split('@')[0];
                     document.getElementById('gc-current-recipient').value = partner;
+                } else {
+                    document.getElementById('gc-chat-title').innerText = 'Chăm sóc khách hàng';
                 }
 
+                // Show loading state
                 var chatBody = document.getElementById('gc-chat-body');
-                chatBody.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Đang tải...</div>';
+                chatBody.innerHTML = '<button id="gc-load-more-btn" onclick="loadOlderMessages()">' +
+                    '<i class="fas fa-spinner fa-spin"></i> Đang tải...</button>' +
+                    '<div class="gc-info-msg">Đang tải lịch sử...</div>';
 
-                var renderMsgs = function () {
-                    chatBody.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px; margin-bottom: 15px;">Kết nối thành công!</div>';
-                    chatHistory[partner].messages.forEach(function (msg) {
-                        appendMessageDOM(msg.content, msg.type, msg.senderName);
+                if (state.historyLoaded) {
+                    // Already loaded — render from memory immediately
+                    renderMessages(partner);
+                    markSeen(partner);
+                } else {
+                    // First open — fetch from DB
+                    fetchHistory(partner, function () {
+                        renderMessages(partner);
+                        markSeen(partner);
                     });
-                    scrollGCChatToBottom();
-                };
-
-                fetchHistoryForPartner(partner, renderMsgs);
-            }
-
-            function goBackToList() {
-                activeChat = null;
-                document.getElementById('gc-user-list').style.display = 'block';
-                document.getElementById('gc-chat-body').style.display = 'none';
-                document.getElementById('gc-chat-footer').style.display = 'none';
-                document.getElementById('gc-chat-back-btn').style.display = 'none';
-                document.getElementById('gc-chat-title').innerText = "Danh sách khách hàng";
-                renderUserList();
-            }
-
-            function renderUserList() {
-                var listDom = document.getElementById('gc-user-list');
-                listDom.innerHTML = '';
-
-                var partners = Object.keys(chatHistory);
-                if (partners.length === 0) {
-                    listDom.innerHTML = '<div style="text-align:center; padding: 20px; color:#999; font-size:14px;">Chưa có đoạn chat nào.</div>';
-                    return;
                 }
+            }
 
-                partners.forEach(function (partner) {
-                    var data = chatHistory[partner];
-                    var item = document.createElement('div');
-                    item.className = 'gc-user-item';
-                    item.onclick = function () { openChatWith(partner); };
+            // ── Render all in-memory messages ─────────────────────────────────────
+            function renderMessages(partner) {
+                var cb    = document.getElementById('gc-chat-body');
+                var state = chatHistory[partner];
 
-                    var nameSpan = document.createElement('span');
-                    nameSpan.style.fontWeight = data.unread > 0 ? 'bold' : 'normal';
-                    nameSpan.innerText = partner.split('@')[0];
+                cb.innerHTML = '<button id="gc-load-more-btn" onclick="loadOlderMessages()">' +
+                    '<i class="fas fa-arrow-up"></i> Tải tin nhắn cũ hơn</button>';
+                document.getElementById('gc-load-more-btn').style.display = state.hasMore ? 'block' : 'none';
 
-                    var rightDiv = document.createElement('div');
-                    if (data.unread > 0) {
-                        var bdg = document.createElement('span');
-                        bdg.className = 'gc-unread-badge';
-                        bdg.innerText = data.unread;
-                        rightDiv.appendChild(bdg);
-                    } else {
-                        rightDiv.innerHTML = '<i class="fas fa-chevron-right" style="color:#ccc;"></i>';
+                if (state.messages.length === 0) {
+                    cb.innerHTML += '<div class="gc-info-msg">Chưa có tin nhắn nào.<br>Hãy gõ lời chào! 👋</div>';
+                } else {
+                    state.messages.forEach(m => appendMsg(m));
+                }
+                scrollBottom();
+            }
+
+            // ── Load older messages on scroll-up ──────────────────────────────────
+            function loadOlderMessages() {
+                if (!activeChat) return;
+                var state = chatHistory[activeChat];
+                if (!state || !state.hasMore) return;
+
+                var btn = document.getElementById('gc-load-more-btn');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+                btn.disabled = true;
+
+                var cb = document.getElementById('gc-chat-body');
+                var prevH = cb.scrollHeight;
+
+                fetchHistory(activeChat, function (loaded) {
+                    if (loaded.length === 0) {
+                        btn.style.display = 'none';
+                        return;
                     }
+                    // Prepend newly loaded older messages before the first existing message
+                    var firstEl = cb.querySelector('.gc-msg-wrapper');
+                    loaded.forEach(m => cb.insertBefore(buildMsgEl(m), firstEl));
 
-                    item.appendChild(nameSpan);
-                    item.appendChild(rightDiv);
-                    listDom.appendChild(item);
+                    cb.scrollTop = cb.scrollHeight - prevH; // preserve position
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-arrow-up"></i> Tải tin nhắn cũ hơn';
+                    btn.style.display = state.hasMore ? 'block' : 'none';
                 });
             }
 
+            // ── Send message ──────────────────────────────────────────────────────
             function sendGCChatMessage() {
-                var input = document.getElementById('gc-chat-input');
+                var input   = document.getElementById('gc-chat-input');
                 var content = input.value.trim();
-                if (content && gcStompClient) {
-                    var recipient = gcIsStaff ? document.getElementById('gc-current-recipient').value : 'STAFF';
+                if (!content || !gcStompClient) return;
 
-                    var chatMessage = {
-                        senderId: gcCurrentUser2,
-                        recipientId: recipient,
-                        content: content
-                    };
+                var recipient = gcIsStaff
+                    ? document.getElementById('gc-current-recipient').value
+                    : 'STAFF';
 
-                    gcStompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+                gcStompClient.send('/app/chat.sendMessage', {}, JSON.stringify({
+                    senderId: gcMyId, recipientId: recipient,
+                    content:  content, timestamp: new Date().toISOString(), seen: false
+                }));
 
-                    handleIncomingMessage(recipient, content, 'sent', 'Tôi');
-                    input.value = '';
-                }
+                var localMsg = {
+                    id: null, content: content, type: 'sent',
+                    sender: 'Tôi', seen: false,
+                    time: formatTime(new Date().toISOString())
+                };
+                ensureState(recipient);
+                chatHistory[recipient].messages.push(localMsg);
+                chatHistory[recipient].lastMsg  = content;
+                chatHistory[recipient].lastTime = new Date().toISOString();
+                appendMsg(localMsg);
+                scrollBottom();
+                input.value = '';
             }
 
-            function appendMessageDOM(content, type, senderName) {
-                var chatBody = document.getElementById('gc-chat-body');
-                var msgDiv = document.createElement('div');
-                msgDiv.className = 'gc-msg ' + type;
+            // ── DOM helpers ───────────────────────────────────────────────────────
+            function appendMsg(msg) {
+                document.getElementById('gc-chat-body').appendChild(buildMsgEl(msg));
+            }
 
-                if (type === 'received' && !gcIsStaff) {
-                    msgDiv.innerHTML = `<div style="font-size:11px; color:#888; margin-bottom:4px;">` + senderName + `</div>` + content;
+            function buildMsgEl(msg) {
+                var w = document.createElement('div');
+                w.className = 'gc-msg-wrapper ' + msg.type;
+
+                // Sender label (for staff seeing customer name)
+                if (msg.type === 'received' && gcIsStaff && msg.sender) {
+                    var lbl = document.createElement('div');
+                    lbl.className = 'gc-sender-label';
+                    lbl.textContent = msg.sender;
+                    w.appendChild(lbl);
+                }
+
+                var bubble = document.createElement('div');
+                bubble.className = 'gc-msg ' + msg.type;
+                bubble.textContent = msg.content;
+                w.appendChild(bubble);
+
+                var meta = document.createElement('div');
+                meta.className = 'gc-msg-meta';
+                if (msg.time) {
+                    var ts = document.createElement('span');
+                    ts.textContent = msg.time;
+                    meta.appendChild(ts);
+                }
+                if (msg.type === 'sent') {
+                    var tick = document.createElement('span');
+                    tick.className = 'gc-seen-tick' + (msg.seen ? ' seen' : '');
+                    tick.textContent = msg.seen ? '✓✓ Đã xem' : '✓ Đã gửi';
+                    meta.appendChild(tick);
+                }
+                w.appendChild(meta);
+                return w;
+            }
+
+            // ── Go back to list (staff) ───────────────────────────────────────────
+            function goBackToList() {
+                activeChat = null;
+                showView('list');
+                document.getElementById('gc-chat-back-btn').style.display = 'none';
+                document.getElementById('gc-chat-title').innerText = 'Danh sách khách hàng';
+                loadPartnersPreview(); // refresh list
+            }
+
+            // ── View switching ────────────────────────────────────────────────────
+            function showView(view) {
+                var isList = view === 'list';
+                document.getElementById('gc-user-list').style.display   = isList ? 'block' : 'none';
+                document.getElementById('gc-chat-body').style.display   = isList ? 'none'  : 'block';
+                document.getElementById('gc-chat-footer').style.display = isList ? 'none'  : 'flex';
+            }
+
+            // ── Badge ─────────────────────────────────────────────────────────────
+            function updateGlobalBadge() {
+                var badge = document.getElementById('gc-chat-badge');
+                if (totalUnread > 0) {
+                    badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                    badge.style.display = 'block';
                 } else {
-                    msgDiv.innerHTML = content;
+                    badge.style.display = 'none';
                 }
-
-                chatBody.appendChild(msgDiv);
-
-                var cbDiv = document.createElement('div');
-                cbDiv.style.clear = 'both';
-                chatBody.appendChild(cbDiv);
-
-                scrollGCChatToBottom();
             }
 
-            function scrollGCChatToBottom() {
-                var chatBody = document.getElementById('gc-chat-body');
-                chatBody.scrollTop = chatBody.scrollHeight;
+            function scrollBottom() {
+                var cb = document.getElementById('gc-chat-body');
+                cb.scrollTop = cb.scrollHeight;
+            }
+
+            function escHtml(s) {
+                if (!s) return '';
+                return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            }
+
+            function formatTime(iso) {
+                try {
+                    var d = new Date(iso.replace(/\[.*]$/, ''));
+                    if (isNaN(d)) return '';
+                    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                } catch(e) { return ''; }
+            }
+
+            function formatTimeShort(iso) {
+                if (!iso) return '';
+                try {
+                    var d = new Date(iso.replace(/\[.*]$/, ''));
+                    if (isNaN(d)) return '';
+                    var now = new Date();
+                    var diff = now - d;
+                    if (diff < 60000)      return 'Vừa xong';
+                    if (diff < 3600000)    return Math.floor(diff/60000) + 'p trước';
+                    if (diff < 86400000)   return d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+                    return d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'});
+                } catch(e) { return ''; }
             }
         </script>
     </div>

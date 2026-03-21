@@ -190,25 +190,6 @@ public class UserService {
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
-        // var role = this.roleRepository.findById(request.getRoleId())
-        // .orElseThrow(() -> new ResourceNotFoundException("User ID",
-        // request.getRoleId()));
-        // if (role.getName().equalsIgnoreCase("STAFF")) {
-        // user.getStaff().setStaffType(request.getStaffType());
-        // user.setUpdatedAt(LocalDateTime.now());
-        // var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        // if (email == null || email.isEmpty()) {
-        // email = "Anonymous";
-        // }
-        // user.setCreatedBy(email);
-        // }
-
-        // if (role.getName().equalsIgnoreCase("ADMIN")) {
-        // user.setRole(role);
-        // }
-        // if (role.getName().equalsIgnoreCase("CUSTOMER")) {
-        // user.setRole(role);
-        // }
         user.setStatus(request.getStatus());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail().toLowerCase());
@@ -221,19 +202,55 @@ public class UserService {
         return UserConvert.toUserRes(user);
     }
 
-    public void deleteById(long id) {
+    public boolean checkLockedAccount(String email) {
+        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        if (user.getStaff() != null) {
+            return true;
+        }
+        var customer = user.getCustomer();
+        if (customer.getLockedUntil() != null && customer.getLockedUntil().isAfter(LocalDateTime.now())) {
+            return false;
+        }
+        if (customer.getLockedUntil() != null && customer.getLockedUntil().isBefore(LocalDateTime.now())) {
+            customer.setLockedUntil(null);
+            customer.setViolationCount(0);
+            this.customerRepository.save(customer);
+            return true;
+        }
+        return true;
+
+    }
+
+    public void revertStatusAccount(Long id) throws PermissionException {
+        var admin = this.getUserInContext();
+        if (admin.getStaff() != null) {
+            var user = this.userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
+            var status = !user.getStatus();
+            if (!admin.getId().equals(user.getId())) {
+                user.setStatus(status);
+                this.userRepository.save(user);
+            } else {
+                throw new PermissionException("Không thể thay đổi trạng thái của chính tài khoản đang sử dụng!");
+            }
+
+        }
+
+    }
+
+    public boolean deleteById(long id) throws PermissionException {
         var user = this.userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User ID", id));
         var userLogin = this.getUserInContext();
-        if (user.getEmail().equalsIgnoreCase(userLogin.getEmail())) {
-            throw new DataInvalidException("Không thể tự xóa bản thân!");
+        if (user.getId().equals(userLogin.getId())) {
+            throw new PermissionException("Không thể tự xóa tài khoản ADMIN!");
         }
         if (user.getStaff() != null) {
             var staff = user.getStaff();
             if (this.orderRepository.existsByShipperId(staff.getId())) {
                 user.setStatus(false);
                 this.userRepository.save(user);
-                return;
+                return false;
             }
         } else if (user.getCustomer() != null) {
             var customer = user.getCustomer();
@@ -241,11 +258,12 @@ public class UserService {
                     || this.cartRepository.existsByCustomerId(customer.getId())) {
                 user.setStatus(false);
                 this.userRepository.save(user);
-                return;
+                return false;
             }
         }
 
         this.userRepository.delete(user);
+        return true;
 
     }
 

@@ -8,6 +8,7 @@
     <meta name="_csrf" th:content="${_csrf.token}" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         /* ===== BACKGROUND ===== */
@@ -105,6 +106,29 @@
         #error-msg {
             color: #ffb3b3;
         }
+
+        /* ===== PASSWORD TOGGLE ===== */
+        .pw-group {
+            position: relative;
+        }
+        .pw-group .form-control {
+            padding-right: 48px;
+        }
+        .pw-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 5;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .pw-toggle:hover { color: #e9c3a3; }
     </style>
 </head>
 
@@ -129,15 +153,21 @@
                     style="color: #000; font-style: italic; margin-left: 10px;"></div>
             </div>
 
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-3 pw-group">
                 <input class="form-control" th:field="*{password}" id="password" type="password" placeholder="Password">
                 <label>Password</label>
+                <button type="button" class="pw-toggle" onclick="togglePw('password','eyeReg1')" tabindex="-1">
+                    <i id="eyeReg1" class="bi bi-eye"></i>
+                </button>
             </div>
+            <div id="reg-pw-len-error" class="mb-1 fw-semibold" style="color:#ffb3b3; font-size:0.88rem;"></div>
 
-            <div class="form-floating mb-3">
-                <input class="form-control" th:field="*{confirmPassword}" id="confirmPassword" type="password"
-                    placeholder="Confirm Password">
+            <div class="form-floating mb-3 pw-group">
+                <input class="form-control" th:field="*{confirmPassword}" id="confirmPassword" type="password" placeholder="Confirm Password">
                 <label>Confirm Password</label>
+                <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword','eyeReg2')" tabindex="-1">
+                    <i id="eyeReg2" class="bi bi-eye"></i>
+                </button>
             </div>
 
             <div id="error-msg" class="mb-3 fw-semibold"></div>
@@ -158,16 +188,52 @@
     </div>
 
     <script>
-        function validPassword() {
-            var password = document.getElementById("password").value;
-            var confirm = document.getElementById("confirmPassword").value;
-            var errorElement = document.getElementById("error-msg");
+        // Toggle hiển thị / ẩn mật khẩu
+        function togglePw(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon  = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
 
-            if (password !== confirm) {
-                errorElement.innerHTML = "Password and Confirm password are not the same!";
+        const pwInput      = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const errorMsg     = document.getElementById('error-msg');
+        const lenError     = document.getElementById('reg-pw-len-error');
+
+        function checkLength() {
+            if (pwInput.value.length > 0 && pwInput.value.length < 6) {
+                lenError.textContent = 'Mật khẩu phải có ít nhất 6 ký tự!';
                 return false;
             }
+            lenError.textContent = '';
             return true;
+        }
+
+        function checkMatch() {
+            if (confirmInput.value.length > 0 && pwInput.value !== confirmInput.value) {
+                errorMsg.innerHTML = 'Password và Confirm password không khớp!';
+                return false;
+            }
+            errorMsg.innerHTML = '';
+            return true;
+        }
+
+        pwInput.addEventListener('keyup', function () {
+            checkLength();
+            checkMatch();
+        });
+        confirmInput.addEventListener('keyup', checkMatch);
+
+        function validPassword() {
+            const lenOk   = checkLength();
+            const matchOk = checkMatch();
+            return lenOk && matchOk;
         }
 
         // 3D Tilt Effect

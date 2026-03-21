@@ -32,21 +32,21 @@
                         </a>
 
                         <a th:href="@{/order-history?status=WAITING}" class="btn btn-sm rounded-pill px-4"
-                            th:classappend="${param.status != null && param.status[0] == 'PENDING'} ? 'btn-warning' : 'btn-outline-secondary'">
+                            th:classappend="${param.status != null && param.status[0] == 'WAITING'} ? 'btn-warning' : 'btn-outline-secondary'">
                             Chờ xác nhận
                         </a>
 
                         <a th:href="@{/order-history?status=IN_PROGRESS}" class="btn btn-sm rounded-pill px-4"
-                            th:classappend="${param.status != null && param.status[0] == 'DELIVERING'} ? 'btn-warning' : 'btn-outline-secondary'">
+                            th:classappend="${param.status != null && param.status[0] == 'IN_PROGRESS'} ? 'btn-warning' : 'btn-outline-secondary'">
                             Đang giao
                         </a>
                         <a th:href="@{/order-history?status=FINISHED}" class="btn btn-sm rounded-pill px-4"
-                            th:classappend="${param.status != null && param.status[0] == 'COMPLETED'} ? 'btn-warning' : 'btn-outline-secondary'">
+                            th:classappend="${param.status != null && param.status[0] == 'FINISHED'} ? 'btn-warning' : 'btn-outline-secondary'">
                             Hoàn thành
                         </a>
 
                         <a th:href="@{/order-history?status=FAILED}" class="btn btn-sm rounded-pill px-4"
-                            th:classappend="${param.status != null && param.status[0] == 'CANCELLED'} ? 'btn-warning' : 'btn-outline-secondary'">
+                            th:classappend="${param.status != null && param.status[0] == 'FAILED'} ? 'btn-warning' : 'btn-outline-secondary'">
                             Đã hủy
                         </a>
                     </div>
@@ -111,8 +111,7 @@
                                 style="display:inline; margin: 0; padding: 0;">
                                 <input type="hidden" name="orderItemId" th:value="${item.id}" />
 
-                                <button type="submit" class="btn btn-"
-                                    th:if="${order.status.name() == 'COMPLETED' or order.status.name() == 'DELIVERED'}">
+                                <button type="submit" class="btn btn-" th:if="${item.allowReview}">
                                     <i class="bi bi-pencil"></i></button>
                             </form>
                         </div>
@@ -167,7 +166,7 @@
                                     </a>
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -197,7 +196,7 @@
                         </li>
                     </ul>
                 </nav>
-                
+
             </div>
 
         </div>

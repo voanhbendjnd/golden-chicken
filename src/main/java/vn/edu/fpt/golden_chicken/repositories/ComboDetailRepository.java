@@ -24,4 +24,6 @@ public interface ComboDetailRepository extends JpaRepository<ComboDetail, Long>,
     void deleteByComboId(@Param("comboId") Long comboId);
 
     boolean existsByProductId(long id);
+
+    boolean existsByComboId(long id);
 }

@@ -1,4 +1,4 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta name="_csrf" th:content="${_csrf.token}" />
@@ -35,8 +35,8 @@
                 <span class="fa fa-bars text-secondary"></span>
             </button>
             <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-                <div class="navbar-nav mx-auto" th:if="${!(session.roleName == 'SHIPPER' or session.staffType == 'SHIPPER')}">
-                    <a href="/" class="nav-item nav-link">Home</a>
+                <div class="navbar-nav mx-auto">
+                    <a href="/" class="nav-item nav-link">Trang chủ</a>
                     <li class="nav-item menu-dropdown">
 
                         <a href="/menu" class="nav-link navbar-link">
@@ -65,16 +65,13 @@
 
                     </li>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Danh mục</a>
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                            <a href="/cart" class="dropdown-item">Cart</a>
-                            <a href="checkout.html" class="dropdown-item">Chackout</a>
-                            <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                            <a href="404.html" class="dropdown-item">404 Page</a>
-                            <a href="/vouchers" class="dropdown-item">Voucher Page</a>
+                            <a href="/cart" class="dropdown-item">Giỏ hàng</a>
+                            <a href="/order-history" class="dropdown-item">Lịch sử mua hàng</a>
+                            <a href="/vouchers" class="dropdown-item">Voucher</a>
                         </div>
                     </div>
-                    <a href="contact.html" class="nav-item nav-link">Contact</a>
                 </div>
                 <div class="d-flex m-3 me-0">
                     <button class="btn-search btn border btn-md-square rounded-circle bg-white me-4"
@@ -93,7 +90,7 @@
                             <img th:src="${profile != null and profile.avatar != null}
                             ? @{/img/avatar/{file}(file=${profile.avatar})}
                             : @{/img/testavt.jpg}" alt="Avatar"
-                                 style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
+                                style="width: 43px; height: 43px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">

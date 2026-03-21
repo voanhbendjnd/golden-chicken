@@ -25,9 +25,6 @@ import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
-import org.springframework.ui.Model;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -233,6 +230,18 @@ public class VoucherService {
         return result;
     }
 
+    public List<CustomerVoucher> getMyVouchersExpiredOnly() {
+        List<CustomerVoucher> result = new ArrayList<>();
+
+        for (CustomerVoucher voucher : getMyVouchers()) {
+            if (voucher.getStatus() == StatusVoucher.EXPIRED) {
+                result.add(voucher);
+            }
+        }
+
+        return result;
+    }
+
     public long getPoints() throws PermissionException {
         long points = 0L;
 
@@ -404,7 +413,6 @@ public class VoucherService {
         }
         return customerVoucherRepository.findById(voucherId).orElse(null);
     }
-
 
     public OrderDTO resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode) {
         refreshVoucherStatuses();
