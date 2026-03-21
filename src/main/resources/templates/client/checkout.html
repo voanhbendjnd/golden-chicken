@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="mt-2">
-                            <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id})}"
+                            <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id}, quantity=${order.items[0].quantity})}"
                                 style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
                             </a>
@@ -107,9 +107,9 @@
                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
                                 <div style="flex: 1;">
                                     <h5 th:text="${product.name}" style="margin: 0; font-size: 1rem;"></h5>
-                                    <small class="text-muted">Số lượng: 1</small>
+                                    <small class="text-muted" th:text="'Số lượng: ' + ${order.items[0].quantity}">Số lượng: 1</small>
                                     <input type="hidden" name="items[0].productId" th:value="${product.id}" />
-                                    <input type="hidden" name="items[0].quantity" value="1" />
+                                    <input type="hidden" name="items[0].quantity" th:value="${order.items[0].quantity}" />
                                 </div>
                                 <strong class="text-danger"
                                     th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT') + 'đ'}"></strong>
@@ -155,7 +155,7 @@
                         </div>
                         <!-- chọn voucher -->
                         <div class="mb-3">
-                            <a th:if="${product != null}" th:href="@{/checkout/vouchers(id=${product.id})}"
+                            <a th:if="${product != null}" th:href="@{/checkout/vouchers(id=${product.id}, quantity=${order.items[0].quantity})}"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
                             </a>
@@ -166,7 +166,7 @@
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
                             </a>
                             <a th:if="${order.productDiscountAmount > 0 || order.shippingDiscountAmount > 0}"
-                                th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null ? #strings.listJoin(order.items.![productId], ',') : null})}"
+                                th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null ? #strings.listJoin(order.items.![productId], ',') : null}, quantity=${order.items[0].quantity})}"
                                 class="btn btn-outline-danger btn-sm" title="Hủy bỏ voucher">
                                 <i class="fa-solid fa-xmark"></i> Hủy
                             </a>

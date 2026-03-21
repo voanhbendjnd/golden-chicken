@@ -144,6 +144,22 @@
                     }
                 };
             });
+            document.querySelectorAll('.btn-buy-now').forEach(btn => {
+                btn.onclick = function (e) {
+                    const productId = this.getAttribute('data-id');
+                    const qtyInput = document.getElementById('qty-' + productId);
+                    if (qtyInput) {
+                        const quantity = qtyInput.value;
+                        const originalHref = this.getAttribute('href');
+                        const urlParts = originalHref.split('?');
+                        const baseUrl = urlParts[0];
+                        let params = new URLSearchParams(urlParts[1] || '');
+                        params.set('quantity', quantity);
+                        params.set('productId', productId);
+                        this.setAttribute('href', baseUrl + '?' + params.toString());
+                    }
+                };
+            });
         });
         function changeImg(element) {
             document.getElementById('mainImg').src = element.src;

@@ -39,7 +39,8 @@ public class CheckoutService {
             Long orderId,
             Long productVoucherId,
             Long shippingVoucherId,
-            Long addressId) throws PermissionException {
+            Long addressId,
+            Integer quantity) throws PermissionException {
 
         CheckoutResponse response = new CheckoutResponse();
 
@@ -97,11 +98,11 @@ public class CheckoutService {
 
             OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
             detail.setProductId(product.getId());
-            detail.setQuantity(1);
+            detail.setQuantity(quantity != null ? quantity : 1);
 
             details.add(detail);
 
-            totalPrice = product.getPrice();
+            totalPrice = product.getPrice().multiply(BigDecimal.valueOf(quantity != null ? quantity : 1));
 
             model.put("product", product);
         }
@@ -272,10 +273,10 @@ public class CheckoutService {
         return discount;
     }
 
-    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds) throws PermissionException {
+    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds, Integer quantity) throws PermissionException {
         if (productId != null) {
             var product = productService.findById(productId);
-            return product != null ? product.getPrice() : BigDecimal.ZERO;
+            return product != null ? product.getPrice().multiply(BigDecimal.valueOf(quantity != null ? quantity : 1)) : BigDecimal.ZERO;
         }
         if (productIds != null && !productIds.isEmpty()) {
             var cart = cartService.getProductInCart();

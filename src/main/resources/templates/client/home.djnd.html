@@ -92,7 +92,7 @@
                         </div>
                         <button id="heroSearchSubmit" type="button"
                             class="btn btn-secondary border-2 border-secondary py-3 px-4 position-absolute rounded-pill text-white h-100"
-                            style="top: 0; right: 25%; background-color: #ffb524;">Submit Now</button>
+                            style="top: 0; right: 25%; background-color: #ffb524;">Tìm Kiếm</button>
                     </div>
                 </div>
                 <div class="col-md-12 col-lg-5">
@@ -266,6 +266,7 @@
                                                 </p>
 
                                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
+                                                    th:data-id="${pro.id}"
                                                     th:href="@{/checkout?productId={id}(id=${pro.id})}">
                                                     Mua ngay
                                                 </a>
@@ -356,7 +357,8 @@
                                                 </p>
 
                                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                                    th:data-id="${product.id}"
+                                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                                     Mua ngay
                                                 </a>
 
@@ -447,7 +449,8 @@
                                                 </p>
 
                                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                                    th:data-id="${product.id}"
+                                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                                     Mua ngay
                                                 </a>
 
@@ -537,7 +540,8 @@
                                                 </p>
 
                                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                                    th:data-id="${product.id}"
+                                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                                     Mua ngay
                                                 </a>
 
@@ -627,7 +631,8 @@
                                                 </p>
 
                                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                                    th:href="@{/checkout?id={id}(id=${product.id})}">
+                                                    th:data-id="${product.id}"
+                                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
                                                     Mua ngay
                                                 </a>
 
@@ -726,7 +731,7 @@
                                 </p>
 
                                 <a class="btn border border-danger rounded-pill px-3 text-danger btn-buy-now"
-                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
+                                    th:data-id="${product.id}" th:href="@{/checkout?productId={id}(id=${product.id})}">
                                     Mua ngay
                                 </a>
 

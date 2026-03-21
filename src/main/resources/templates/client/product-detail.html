@@ -80,7 +80,8 @@
                         <div class="d-grid gap-2 d-md-flex">
 
                             <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                <a class="btn btn-danger" style="text-decoration-line: none;"
+                                <a class="btn btn-danger btn-buy-now" style="text-decoration-line: none;"
+                                    th:data-id="${product.id}"
                                     th:href="@{/checkout?productId={id}(id=${product.id})}">
                                     Mua Ngay
                                 </a>
