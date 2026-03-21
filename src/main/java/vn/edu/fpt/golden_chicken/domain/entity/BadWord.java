@@ -20,7 +20,7 @@ public class BadWord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(columnDefinition = "NVARCHAR(10)")
+    @Column(columnDefinition = "NVARCHAR(100)")
     String word;
     Boolean status;
 }

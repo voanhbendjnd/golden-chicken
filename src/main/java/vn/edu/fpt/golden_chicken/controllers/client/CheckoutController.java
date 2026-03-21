@@ -18,10 +18,8 @@ import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
-import vn.edu.fpt.golden_chicken.services.CartService;
 import vn.edu.fpt.golden_chicken.services.CheckoutService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
-import vn.edu.fpt.golden_chicken.services.ProductService;
 import vn.edu.fpt.golden_chicken.services.ProfileService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
@@ -147,7 +145,6 @@ public class CheckoutController {
 
         return "client/voucher-select";
     }
-
 
     @PostMapping("/apply-vouchers")
     public String applyVouchers(

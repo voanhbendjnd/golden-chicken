@@ -25,9 +25,6 @@ import vn.edu.fpt.golden_chicken.repositories.VoucherRepository;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
-import org.springframework.ui.Model;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -354,7 +351,6 @@ public class VoucherService {
         return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
     }
 
-
     private void refreshVoucherStatuses() {
         refreshExpiredStatus();
         refreshCustomerVoucherExpiredStatus();
@@ -417,7 +413,6 @@ public class VoucherService {
         }
         return customerVoucherRepository.findById(voucherId).orElse(null);
     }
-
 
     public OrderDTO resolveVoucherSelection(User currentUser, List<Long> voucherIds, String voucherCode) {
         refreshVoucherStatuses();

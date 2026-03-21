@@ -37,7 +37,7 @@
                             <div class="col-auto">
                                 <div class="input-group input-group-sm" style="width: 250px;">
                                     <input type="text" id="searchName" class="form-control"
-                                        placeholder="Search by name..." th:value="${searchName}">
+                                        placeholder="Tìm kiếm theo từ..." th:value="${searchName}">
                                     <button class="btn btn-theme" type="button" onclick="handleSearch()">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -159,16 +159,43 @@
 
                 Swal.fire({
                     title: 'Bạn chắc muốn xóa?',
-                    text: "Sau khi xóa sẽ không thể khôi phục lại!",
+                    html: `
+                        <p>Sau khi xóa sẽ không thể khôi phục lại!</p>
+                        <hr>
+                        <div class="text-start">
+                            <label class="mb-2 fw-bold">Chọn phạm vi áp dụng:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="applyChoice" id="applyOld" value="true" checked>
+                                <label class="form-check-label" for="applyOld">
+                                    Từ trước đến nay (Quét toàn bộ review cũ)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="applyChoice" id="applyNew" value="false">
+                                <label class="form-check-label" for="applyNew">
+                                    Chỉ từ sau lúc này
+                                </label>
+                            </div>
+                        </div>
+                    `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'OK',
                     cancelButtonText: 'Cancel',
-                    reverseButtons: true
+                    reverseButtons: true,
+                    preConfirm: () => {
+                        return document.querySelector('input[name="applyChoice"]:checked').value;
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        const applyChoice = result.value;
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'applyFromNowOn';
+                        input.value = applyChoice;
+                        form.appendChild(input);
                         form.submit();
                     }
                 });
@@ -198,15 +225,43 @@
                 const form = this.nextElementSibling;
                 Swal.fire({
                     title: 'Thay đổi trạng thái',
+                    html: `
+                        <p>Bạn có chắc muốn thay đổi trạng thái của từ khóa này?</p>
+                        <hr>
+                        <div class="text-start">
+                            <label class="mb-2 fw-bold">Chọn phạm vi áp dụng:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="applyChoiceStatus" id="applyOldStatus" value="true" checked>
+                                <label class="form-check-label" for="applyOldStatus">
+                                    Từ trước đến nay (Quét toàn bộ review cũ)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="applyChoiceStatus" id="applyNewStatus" value="false">
+                                <label class="form-check-label" for="applyNewStatus">
+                                    Chỉ từ sau lúc này
+                                </label>
+                            </div>
+                        </div>
+                    `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'OK',
                     cancelButtonText: 'Cancel',
-                    reverseButtons: true
+                    reverseButtons: true,
+                    preConfirm: () => {
+                        return document.querySelector('input[name="applyChoiceStatus"]:checked').value;
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        const applyChoice = result.value;
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'applyFromNowOn';
+                        input.value = applyChoice;
+                        form.appendChild(input);
                         form.submit();
                     }
                 });

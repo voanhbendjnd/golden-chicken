@@ -14,6 +14,7 @@ import vn.edu.fpt.golden_chicken.domain.request.BadWordDTO;
 import vn.edu.fpt.golden_chicken.domain.response.BadWordResponse;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.BadWordRepository;
+import vn.edu.fpt.golden_chicken.utils.BadWordFilterUtility;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 
 @Service
@@ -22,51 +23,71 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 public class BadWordService {
     BadWordRepository badWordRepository;
     KafkaTemplate<String, String> kafkaScanOldReview;
+    BadWordFilterUtility badWordFilterUtility;
 
     public void create(BadWordDTO dto) {
-        if (this.badWordRepository.existsByWordIgnoreCase(dto.word())) {
-            throw new DataInvalidException("Từ cấm là (" + dto.word() + ") đã tồn tại!");
+        if (this.badWordRepository.existsByWordIgnoreCase(dto.getWord())) {
+            throw new DataInvalidException("Từ cấm là (" + dto.getWord() + ") đã tồn tại!");
         }
         var badWord = new BadWord();
-        badWord.setWord(dto.word());
-        badWord.setStatus(dto.status());
+        badWord.setWord(dto.getWord());
+        badWord.setStatus(dto.getStatus());
         var currentBadWord = this.badWordRepository.save(badWord);
-        if (currentBadWord.getStatus()) {
-            kafkaScanOldReview.send("scan-old-reviews-topic", dto.word());
+        this.badWordFilterUtility.loadAndCompileBadWords();
+        if (Boolean.TRUE.equals(dto.getApplyFromNowOn())) {
+            if (currentBadWord.getStatus()) {
+                kafkaScanOldReview.send("scan-old-reviews-topic", dto.getWord());
+            }
+        } else {
+            reloadAllReview();
         }
     }
 
     public void update(BadWordDTO dto) {
-        if (this.badWordRepository.existsByWordIgnoreCaseAndIdNot(dto.word(), dto.id())) {
-            throw new DataInvalidException("Từ cấm là (" + dto.word() + ") đã tồn tại");
+        if (this.badWordRepository.existsByWordIgnoreCaseAndIdNot(dto.getWord(), dto.getId())) {
+            throw new DataInvalidException("Từ cấm là (" + dto.getWord() + ") đã tồn tại");
         }
-        var badWord = this.badWordRepository.findById(dto.id())
+        var badWord = this.badWordRepository.findById(dto.getId())
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Từ cấm với ID là (" + dto.id() + " ) không tìm thấy!"));
-        badWord.setStatus(dto.status());
-        badWord.setWord(dto.word());
+                        () -> new ResourceNotFoundException("Từ cấm với ID là (" + dto.getId() + " ) không tìm thấy!"));
+        badWord.setStatus(dto.getStatus());
+        badWord.setWord(dto.getWord());
         var currentBadWord = this.badWordRepository.save(badWord);
-        if (currentBadWord.getStatus()) {
-            kafkaScanOldReview.send("scan-old-reviews-topic", dto.word());
+        this.badWordFilterUtility.loadAndCompileBadWords();
+        if (Boolean.TRUE.equals(dto.getApplyFromNowOn())) {
+            if (currentBadWord.getStatus()) {
+                kafkaScanOldReview.send("scan-old-reviews-topic", dto.getWord());
+            }
+        } else {
+            reloadAllReview();
         }
 
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Boolean applyFromNowOn) {
         var badWord = this.badWordRepository.findById(id)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Từ cấm với ID là (" + id + " ) không tìm thấy!"));
         this.badWordRepository.delete(badWord);
+        this.badWordFilterUtility.loadAndCompileBadWords();
+        if (Boolean.FALSE.equals(applyFromNowOn)) {
+            reloadAllReview();
+        }
     }
 
-    public void revertStatus(Long id) {
+    public void revertStatus(Long id, Boolean applyFromNowOn) {
         var badWord = this.badWordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Từ cấm với ID (" + id + " ) không tìm thấy!"));
         badWord.setStatus(!badWord.getStatus());
         var current = this.badWordRepository.save(badWord);
-        if (current.getStatus()) {
-            kafkaScanOldReview.send("scan-old-reviews-topic", badWord.getWord());
+        this.badWordFilterUtility.loadAndCompileBadWords();
+        if (Boolean.TRUE.equals(applyFromNowOn)) {
+            if (current.getStatus()) {
+                kafkaScanOldReview.send("scan-old-reviews-topic", badWord.getWord());
 
+            }
+        } else {
+            reloadAllReview();
         }
     }
 
@@ -100,6 +121,6 @@ public class BadWordService {
     }
 
     public void reloadAllReview() {
-
+        this.badWordFilterUtility.loadAndCompileBadWords();
     }
 }

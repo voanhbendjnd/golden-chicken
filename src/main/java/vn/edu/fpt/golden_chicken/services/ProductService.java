@@ -143,9 +143,9 @@ public class ProductService {
     public void create(ProductDTO dto, List<MultipartFile> files, MultipartFile file, boolean isCombo)
             throws IOException, URISyntaxException {
         var category = this.categoryRepository.findById(dto.getCategory().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Thể loại", dto.getCategory().getId()));
         if (this.productRepository.existsByNameIgnoreCase(dto.getName())) {
-            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+            throw new DataInvalidException("Sản phẩm với tên (" + dto.getName() + ") đã tồn tại!");
         }
         var product = ProductConvert.toProduct(dto);
         product.setCategory(category);
@@ -228,14 +228,14 @@ public class ProductService {
     public void update(ProductDTO dto, MultipartFile file, List<MultipartFile> files)
             throws IOException, URISyntaxException {
         if (this.productRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), dto.getId())) {
-            throw new DataInvalidException("Product with Name (" + dto.getName() + ") already exists!");
+            throw new DataInvalidException("Sản phẩm với tên (" + dto.getName() + ") đã tồn tại!");
         }
         List<String> filesToDelete = new ArrayList<>();
 
         var category = this.categoryRepository.findById(dto.getCategory().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID", dto.getCategory().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Thể lại", dto.getCategory().getId()));
         var product = this.productRepository.findById(dto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm", dto.getId()));
         if (file != null && !file.isEmpty()) {
             if (!this.fileService.validFile(file)) {
                 throw new IOException("File Invalid");

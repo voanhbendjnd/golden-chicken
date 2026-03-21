@@ -12,4 +12,5 @@ public class BadWordResponse {
     Long id;
     String word;
     Boolean status;
+    Boolean applyFromNowOn;
 }

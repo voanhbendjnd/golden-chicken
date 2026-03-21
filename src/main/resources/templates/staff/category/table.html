@@ -22,7 +22,7 @@
                     <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Category Management</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a th:href="@{/staff/category/create}" class="btn btn-theme shadow-sm">
-                            <i class="fas fa-plus me-1"></i> New Category
+                            <i class="fas fa-plus me-1"></i> Tạo Mới
                         </a>
                     </div>
                 </div>
@@ -31,12 +31,12 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h5 class="mb-0">Product Categories</h5>
+                                <h5 class="mb-0">Thể Loại</h5>
                             </div>
                             <div class="col-auto">
                                 <div class="input-group input-group-sm" style="width: 250px;">
                                     <input type="text" id="searchName" class="form-control"
-                                        placeholder="Search by name..." th:value="${searchName}">
+                                        placeholder="Tìm kiếm theo thể loại..." th:value="${searchName}">
                                     <button class="btn btn-theme" type="button" onclick="handleSearch()">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -44,16 +44,22 @@
                             </div>
                         </div>
                     </div>
+                    <div th:if="${errorMessage != null}" class="alert alert-danger shadow-sm border-0 mb-4" role="alert"
+                        th:text="${errorMessage}"></div>
+                    <div th:if="${msg != null}" class="alert alert-success shadow-sm border-0 mb-4" role="alert"
+                        th:text="${msg}"></div>
+                    <div th:if="${msgWarning != null}" class="alert alert-warning shadow-sm border-0 mb-4" role="alert"
+                        th:text="${msgWarning}"></div>
                     <div class="card-body">
                         <div th:if="${categories != null and !categories.isEmpty()}" class="table-responsive">
                             <table class="table table-hover table-premium">
                                 <thead>
                                     <tr>
                                         <th style="width: 80px;">ID</th>
-                                        <th style="width: 200px;">Name</th>
-                                        <th>Description</th>
-                                        <th>Status</th>
-                                        <th class="text-end" style="width: 150px;">Actions</th>
+                                        <th style="width: 200px;">Thể loại</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end" style="width: 150px;">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>

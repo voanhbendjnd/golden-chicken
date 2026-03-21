@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.controllers.staff;
 
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -47,17 +49,20 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public String create(Model model, @ModelAttribute("category") CategoryDTO dto, BindingResult bindingResult) {
+    public String create(Model model, @ModelAttribute("category") CategoryDTO dto, BindingResult bindingResult,
+            RedirectAttributes ra) {
         if (bindingResult.hasErrors()) {
             return "staff/category/create";
         }
         try {
             this.categoryService.create(dto);
         } catch (DataInvalidException de) {
-            model.addAttribute("errorMessage", de.getMessage());
+            bindingResult.rejectValue("name", "CONFLICT", de.getMessage());
+            // model.addAttribute("errorMessage", de.getMessage());
             // bindingResult.rejectValue("error", de.getMessage());
             return "staff/category/create";
         }
+        ra.addFlashAttribute("msg", "Tạo mới thành công!");
         return "redirect:/staff/category";
     }
 
@@ -67,25 +72,37 @@ public class CategoryController {
         return "staff/category/update";
     }
 
-    @PostMapping("update")
-    public String update(Model model, @ModelAttribute("category") CategoryDTO dto, BindingResult bindingResult) {
+    @PostMapping("/update")
+    public String update(Model model, @ModelAttribute("category") CategoryDTO dto, BindingResult bindingResult,
+            RedirectAttributes ra) {
         if (bindingResult.hasErrors()) {
             return "staff/category/update";
         }
         try {
             this.categoryService.update(dto);
+        } catch (ResourceNotFoundException de) {
+            // model.addAttribute("errorMessage", de.getMessage());
+            bindingResult.rejectValue("name", "CONFLICT", de.getMessage());
+            return "staff/category/update";
         } catch (DataInvalidException de) {
-            model.addAttribute("errorMessage", de.getMessage());
-
-            // bindingResult.rejectValue("error", de.getMessage());
+            bindingResult.rejectValue("name", "CONFLICT", de.getMessage());
             return "staff/category/update";
         }
+        ra.addFlashAttribute("msg", "Cập nhật thành công!");
         return "redirect:/staff/category";
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String delete(@PathVariable("id") Long id) {
-        this.categoryService.delete(id);
+    public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
+        try {
+            this.categoryService.delete(id);
+
+        } catch (ResourceNotFoundException ex) {
+            ra.addFlashAttribute("errorMessage", "Xóa thất bại!");
+            return "redirect:/staff/category";
+
+        }
+        ra.addFlashAttribute("msg", "Xóa thành công!");
         return "redirect:/staff/category";
     }
 }

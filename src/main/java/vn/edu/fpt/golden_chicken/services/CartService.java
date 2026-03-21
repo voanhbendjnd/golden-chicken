@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer ID", customerId));
         var product = this.productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", productId));
-        
+
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customerId, productId);
         if (cartItem == null) {
             cartItem = new CartItem();

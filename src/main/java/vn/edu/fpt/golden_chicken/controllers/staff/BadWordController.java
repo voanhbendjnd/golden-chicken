@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
@@ -43,7 +44,7 @@ public class BadWordController {
 
     @GetMapping("/create")
     public String createPage(Model model) {
-        model.addAttribute("badword", new BadWordDTO(null, null, null));
+        model.addAttribute("badword", new BadWordDTO());
         return "staff/badword/create";
     }
 
@@ -91,9 +92,10 @@ public class BadWordController {
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String delete(@PathVariable("id") Long id,
+            @RequestParam(value = "applyFromNowOn", required = false) Boolean applyFromNowOn, RedirectAttributes ra) {
         try {
-            this.badWordService.delete(id);
+            this.badWordService.delete(id, applyFromNowOn);
             ra.addFlashAttribute("msg", "Xóa thành công!");
         } catch (ResourceNotFoundException de) {
             ra.addFlashAttribute("errorMessage", "Xóa thất bại!");
@@ -105,9 +107,10 @@ public class BadWordController {
     }
 
     @PostMapping("/status/{id:[0-9]+}")
-    public String revertStatus(@PathVariable("id") Long id, RedirectAttributes ra) {
+    public String revertStatus(@PathVariable("id") Long id,
+            @RequestParam(value = "applyFromNowOn", required = false) Boolean applyFromNowOn, RedirectAttributes ra) {
         try {
-            this.badWordService.revertStatus(id);
+            this.badWordService.revertStatus(id, applyFromNowOn);
             ra.addFlashAttribute("msg", "Thay đổi trạng thái thành công!");
         } catch (ResourceNotFoundException re) {
             ra.addFlashAttribute("errorMessage", "Thay đổi trạng thái thất bại");

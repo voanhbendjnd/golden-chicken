@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -61,7 +62,7 @@ public class ComboController {
     @PostMapping("/create")
     public String create(@ModelAttribute("product") @Valid ProductDTO productDTO, BindingResult bd,
             @RequestParam("thumbnailFile") MultipartFile thumbnailFile,
-            @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model)
+            @RequestParam("galleryFiles") List<MultipartFile> galleryFiles, Model model, RedirectAttributes ra)
             throws IOException, URISyntaxException {
         if (bd.hasErrors()) {
             model.addAttribute("categories", this.categoryService.fetchAll());
@@ -69,6 +70,7 @@ public class ComboController {
         }
         try {
             this.productService.create(productDTO, galleryFiles, thumbnailFile, true);
+            ra.addFlashAttribute("msg", "Tạo mới thành công!");
             return "redirect:/staff/combo";
         } catch (IOException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
@@ -79,6 +81,7 @@ public class ComboController {
             model.addAttribute("errorMessage", ex.getMessage());
             // bd.rejectValue("errorMessage", "IO Exception", ex.getMessage());
             model.addAttribute("categories", this.categoryService.fetchAll());
+            bd.rejectValue("name", "CONFLICT", ex.getMessage());
             return "staff/combo/create.combo";
         }
 

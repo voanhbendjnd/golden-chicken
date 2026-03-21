@@ -62,7 +62,6 @@ public class OrderService {
     CartService cartService;
     UserService userService;
     CartRepository cartRepository;
-    ReviewService reviewService;
 
     @Transactional
     public Order order(OrderDTO dto) throws PermissionException {
