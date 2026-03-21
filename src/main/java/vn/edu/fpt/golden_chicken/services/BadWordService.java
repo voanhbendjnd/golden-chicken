@@ -25,7 +25,7 @@ public class BadWordService {
 
     public void create(BadWordDTO dto) {
         if (this.badWordRepository.existsByWordIgnoreCase(dto.word())) {
-            throw new DataInvalidException("Words with (" + dto.word() + ") already exists!");
+            throw new DataInvalidException("Từ cấm là (" + dto.word() + ") đã tồn tại!");
         }
         var badWord = new BadWord();
         badWord.setWord(dto.word());
@@ -38,10 +38,11 @@ public class BadWordService {
 
     public void update(BadWordDTO dto) {
         if (this.badWordRepository.existsByWordIgnoreCaseAndIdNot(dto.word(), dto.id())) {
-            throw new DataInvalidException("Words with (" + dto.word() + ") already exists!");
+            throw new DataInvalidException("Từ cấm là (" + dto.word() + ") đã tồn tại");
         }
         var badWord = this.badWordRepository.findById(dto.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Bad word with id (" + dto.id() + " ) not found!"));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Từ cấm với ID là (" + dto.id() + " ) không tìm thấy!"));
         badWord.setStatus(dto.status());
         badWord.setWord(dto.word());
         var currentBadWord = this.badWordRepository.save(badWord);
@@ -53,13 +54,14 @@ public class BadWordService {
 
     public void delete(Long id) {
         var badWord = this.badWordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Bad word with ID(" + id + " ) not found!"));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Từ cấm với ID là (" + id + " ) không tìm thấy!"));
         this.badWordRepository.delete(badWord);
     }
 
     public void revertStatus(Long id) {
         var badWord = this.badWordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Bad word with ID(" + id + " ) not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Từ cấm với ID (" + id + " ) không tìm thấy!"));
         badWord.setStatus(!badWord.getStatus());
         var current = this.badWordRepository.save(badWord);
         if (current.getStatus()) {
@@ -70,7 +72,7 @@ public class BadWordService {
 
     public BadWordResponse fetchById(Long id) {
         var badWord = this.badWordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Bad word with ID (" + id + ") not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Từ cấm với ID (" + id + ") không tìm thấy!"));
         var res = new BadWordResponse();
         res.setId(badWord.getId());
         res.setStatus(badWord.getStatus());

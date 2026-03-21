@@ -13,7 +13,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-center">Update Badword</h3>
+                        <h3 class="text-center">Cập Nhật</h3>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/staff/badword/update}" method="post" th:object="${badword}">
@@ -21,15 +21,15 @@
                                 <input type="hidden" th:field="*{id}" />
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">word</label>
+                                <label class="form-label">Từ</label>
                                 <input type="text" class="form-control" th:field="*{word}" required />
                                 <div th:if="${#fields.hasErrors('word')}" style="color: red;" th:errors="*{word}"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Status:</label>
+                                <label class="form-label">Trạng thái</label>
                                 <select th:field="*{status}" class="form-select">
-                                    <option value="true">Active</option>
-                                    <option value="false">Non-active</option>
+                                    <option value="true">Hoạt động</option>
+                                    <option value="false">Không hoạt động</option>
                                 </select>
                                 <div th:if="${#fields.hasErrors('status')}" style="color: red;" th:errors="*{status}">
                                 </div>
@@ -39,8 +39,8 @@
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a th:href="@{/staff/badword}" class="btn btn-secondary me-md-2">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Update Badword</button>
+                                <a th:href="@{/staff/badword}" class="btn btn-secondary me-md-2">Hủy</a>
+                                <button type="submit" class="btn btn-primary">Cập Nhật</button>
                             </div>
                         </form>
                     </div>
