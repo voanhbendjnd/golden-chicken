@@ -20,6 +20,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecif
         @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.product.id = :productId AND r.reviewStatus = :status")
         Double getAverageRating(@Param("productId") Long productId, @Param("status") ReviewStatus status);
 
+        @Query(value = "select count(*) from reviews r where r.review_status = 'PUBLISHED'", nativeQuery = true)
+        Long getTotalReviewWithStatusPublished();
+
+        @Query("select count(r) from Review r where r.rating = :levelRating and r.reviewStatus = :status")
+        Long getTotalReviewMaxRating(@Param("levelRating") Integer levelRating, @Param("status") ReviewStatus status);
+
         @Query("SELECT COUNT(r) FROM Review r WHERE r.product.id = :productId  AND r.reviewStatus = :status")
         Integer getTotalReviews(@Param("productId") Long productId, @Param("status") ReviewStatus status);
 

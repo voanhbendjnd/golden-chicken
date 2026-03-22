@@ -45,4 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("select p from Product p join fetch p.category where p.active = true and p.category.status = true")
     List<Product> fetchAllActiveAndCategoryActive();
+
+    @Query("select count(p) from Product p join p.category where p.active = true and p.category.status = true")
+    Long countTotalProductActiveAndCategoryActive();
 }

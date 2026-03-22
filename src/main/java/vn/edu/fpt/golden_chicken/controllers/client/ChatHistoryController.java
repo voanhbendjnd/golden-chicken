@@ -50,19 +50,11 @@ public class ChatHistoryController {
         return ResponseEntity.ok(chatService.getChatPartners(user));
     }
 
-    /**
-     * Rich partner list for staff: includes last message preview, timestamp, unread
-     * count.
-     * Sorted: unread first, then newest message first.
-     */
     @GetMapping("/partners/preview")
     public ResponseEntity<List<ChatPartnerPreview>> getPartnersPreview() {
         return ResponseEntity.ok(chatService.getPartnersWithPreview());
     }
 
-    /**
-     * Search partners by customer name/email or message content.
-     */
     @GetMapping("/search")
     public ResponseEntity<List<String>> searchPartners(
             @RequestParam(value = "keyword", defaultValue = "") String keyword) {

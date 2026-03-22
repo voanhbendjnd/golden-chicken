@@ -30,31 +30,17 @@ import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // @Bean
-    // public RoleHierarchy roleHierarchy() {
-    // RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-    // // Admin có mọi quyền của Staff, Staff có mọi quyền của Customer
-    // roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF >
-    // ROLE_CUSTOMER");
-    // return roleHierarchy;
-    // }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /*
-     * Vị trí lấy thông tin User
-     */
     @Bean
     public UserDetailsService userDetailsService(UserService userService, UserRepository userRepository,
             RedisUserService redisUserService) {
         return new CustomUserDetailsService(userService, userRepository, redisUserService);
     }
 
-    /*
-     * So sánh passowrd truyền về
-     */
     @Bean
     public DaoAuthenticationProvider authProvider(PasswordEncoder passwordEncoder,
             UserDetailsService userDetailsService) {
@@ -75,9 +61,6 @@ public class SecurityConfig {
         return new HttpSessionEventPublisher();
     }
 
-    /*
-     * Tự động trả về trang khớp với role người đó
-     */
     @Bean
     public AuthenticationSuccessHandler customSuccessHandler() {
         return new CustomSuccessHandler();
@@ -87,13 +70,10 @@ public class SecurityConfig {
     @Bean
     public SpringSessionRememberMeServices rememberMeServices() {
         SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
-
-        // optionally customize
         rememberMeServices.setAlwaysRemember(true);
         return rememberMeServices;
     }
 
-    // override form login
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         String[] whiteList = {

@@ -29,7 +29,6 @@ public class PermissionInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object hanlder)
             throws Exception {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Nếu chưa authenticated, để Spring Security xử lý (sẽ redirect về login)
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal().toString())) {
             return true;
