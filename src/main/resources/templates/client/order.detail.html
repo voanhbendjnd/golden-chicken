@@ -163,7 +163,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
 
@@ -253,9 +253,7 @@
                     </div>
                 </div>
 
-                <!-- Thông tin shipper (ngay dưới Trạng thái hiện tại) -->
-                <div class="card mb-4"
-                     th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
+                <div class="card mb-4" th:if="${order.status.name() == 'DELIVERING' and order.shipperName != null}">
                     <div class="card-header bg-white py-3 fw-bold border-bottom">
                         <i class="fa-solid fa-motorcycle me-2 text-danger"></i>Thông tin shipper
                     </div>
@@ -267,8 +265,8 @@
                         <div>
                             <label class="small text-muted d-block">Số điện thoại</label>
                             <a th:href="'tel:' + ${order.shipperPhone}"
-                               class="fw-bold text-decoration-none text-primary"
-                               th:text="${order.shipperPhone}">0900000000</a>
+                                class="fw-bold text-decoration-none text-primary"
+                                th:text="${order.shipperPhone}">0900000000</a>
                         </div>
                         <p class="small text-muted mb-0 mt-2">Shipper sẽ liên hệ khi đến điểm giao.</p>
                     </div>
@@ -291,20 +289,8 @@
                             </span>
                         </div>
                     </div>
-                    <!-- ===== REAL-TIME TRACKING (inside col-lg-8, visible only when DELIVERING) ===== -->
-                <div th:if="${order.status.name() == 'DELIVERING'}" class="card mb-4" id="trackingCard">
-                    <div class="card-header bg-white py-3 fw-bold border-bottom">
-                        <i class="fa-solid fa-location-crosshairs me-2 text-danger"></i>
-                        Theo dõi shipper thời gian thực
-                        <span class="badge bg-danger ms-2" style="animation: blink 1s infinite;">LIVE</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <div id="shipperMap" style="height:380px; width:100%;"></div>
-                    </div>
-                    <div class="card-footer bg-white py-2 text-muted small" id="locationStatus">
-                        <i class="fa-solid fa-satellite-dish me-1"></i> Đang chờ tín hiệu vị trí shipper...
-                    </div>
-                </div>
+
+
                 </div>
             </div>
         </div>
@@ -324,7 +310,6 @@
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Cần đổi thành endpoint controller của bạn (ví dụ: /order/cancel/123)
                         window.location.href = '/order/cancel/' + orderId;
                     }
                 })

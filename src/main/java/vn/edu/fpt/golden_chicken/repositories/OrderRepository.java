@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -34,18 +35,18 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
         Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
-        Page<Order> findByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses, Pageable pageable);
+        Page<Order> findByShipperAndStatusIn(Staff shipper, List<OrderStatus> statuses, Pageable pageable);
 
         Page<Order> findByCustomerUserIdAndStatusIn(Long userId, List<OrderStatus> statuses, Pageable pageable);
 
         Page<Order> findByShipperAndStatus(Staff shipper, OrderStatus status, Pageable pageable);
 
-        long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status,
-                        java.time.LocalDateTime start, java.time.LocalDateTime end);
+        long countByShipperAndStatusAndUpdatedAtBetween(Staff shipper, OrderStatus status, LocalDateTime start,
+                        LocalDateTime end);
 
         long countByShipperAndStatus(Staff shipper, OrderStatus status);
 
-        long countByShipperAndStatusIn(Staff shipper, java.util.List<OrderStatus> statuses);
+        long countByShipperAndStatusIn(Staff shipper, List<OrderStatus> statuses);
 
         @Query("select coalesce(sum(o.finalAmount),0) from Order o where o.shipper = ?1 and o.paymentMethod = ?2 and o.paymentStatus = ?3")
         java.math.BigDecimal sumFinalAmountByShipperAndPaymentMethodAndPaymentStatus(Staff shipper,
@@ -59,12 +60,12 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         "ORDER BY MONTH(o.updated_at)", nativeQuery = true)
         List<Object[]> getMonthlyRevenueRaw();
 
-        // Dashboard Metrics
         @Query("SELECT COALESCE(SUM(o.finalAmount), 0) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.COMPLETED AND o.createdAt >= :start AND o.createdAt <= :end")
-        java.math.BigDecimal getTotalRevenueBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+        java.math.BigDecimal getTotalRevenueBetween(@Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("SELECT COUNT(o) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.COMPLETED AND o.createdAt >= :start AND o.createdAt <= :end")
-        long countSuccessfulOrdersBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+        long countSuccessfulOrdersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
         @Query(value = "SELECT TOP 1 FORMAT(o.created_at, 'yyyy-MM-dd') as date, SUM(o.final_amount) as revenue " +
                         "FROM orders o WHERE o.status = 'COMPLETED' AND YEAR(o.created_at) = YEAR(GETDATE()) " +
@@ -85,5 +86,5 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                         "FROM orders o WHERE o.status = 'COMPLETED' AND o.created_at >= :start " +
                         "GROUP BY FORMAT(o.created_at, 'yyyy-MM-dd') " +
                         "ORDER BY date ASC", nativeQuery = true)
-        List<Object[]> getDailyRevenueLast7Days(@Param("start") java.time.LocalDateTime start);
+        List<Object[]> getDailyRevenueLast7Days(@Param("start") LocalDateTime start);
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.golden_chicken.domain.entity.Product;
+import vn.edu.fpt.golden_chicken.domain.response.ai.ProductSuggest;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 
 import java.util.List;
@@ -48,4 +49,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("select count(p) from Product p join p.category where p.active = true and p.category.status = true")
     Long countTotalProductActiveAndCategoryActive();
+
+    @Query("select p.id as id, p.name as name, p.price as price from Product p join p.category c where p.active = true and c.status = true")
+    List<ProductSuggest> getIdAndNameProductForAI();
 }

@@ -11,11 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import vn.edu.fpt.golden_chicken.domain.entity.Product;
 import vn.edu.fpt.golden_chicken.domain.response.ai.AiResponseDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ai.ProductSuggest;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,18 +30,21 @@ public class AiChatService {
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${gemini.api.key}")
+    @Value("${groq.api.key}")
     private String apiKey;
 
-    @Value("${gemini.api.url}")
+    @Value("${groq.api.url}")
     private String apiUrl;
+
+    @Value("${groq.model}")
+    private String modelName;
 
     public Map<String, Object> processChat(String chatMessage, Long customerId) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<Product> activeProducts = productRepository.fetchAllActiveAndCategoryActive();
+            List<ProductSuggest> activeProducts = productRepository.getIdAndNameProductForAI();
             String dynamicMenu = activeProducts.stream()
-                    .map(p -> String.format("[ID: %d] - %s (%.0f VND)", p.getId(), p.getName(), p.getPrice()))
+                    .map(p -> String.format("%s (%.0f VND)", p.getName(), p.getPrice()))
                     .collect(Collectors.joining(", "));
 
             String systemPrompt = String.format(
@@ -74,39 +76,40 @@ public class AiChatService {
                             "  {\"action\": \"ADD_TO_CART\", \"message\": \"[Your enthusiastic confirmation in Vietnamese]\", \"items\": [{\"productId\": 1, \"quantity\": 2}]}",
                     dynamicMenu);
 
-            String fullPrompt = systemPrompt + "\n\nCustomer message: " + chatMessage;
+            Map<String, Object> systemMessage = new HashMap<>();
+            systemMessage.put("role", "system");
+            systemMessage.put("content", systemPrompt);
 
-            Map<String, Object> part = new HashMap<>();
-            part.put("text", fullPrompt);
-
-            Map<String, Object> content = new HashMap<>();
-            content.put("parts", Collections.singletonList(part));
+            Map<String, Object> userMessage = new HashMap<>();
+            userMessage.put("role", "user");
+            userMessage.put("content", chatMessage);
 
             Map<String, Object> payload = new HashMap<>();
-            payload.put("contents", Collections.singletonList(content));
+            payload.put("model", modelName);
+            payload.put("messages", List.of(systemMessage, userMessage));
+            payload.put("temperature", 0.7);
 
-            // 4. Call Gemini API
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-            String responseStr = restTemplate.postForObject(apiUrl + apiKey, entity, String.class);
-            log.info("Gemini raw response: {}", responseStr);
+            String responseStr = restTemplate.postForObject(apiUrl, entity, String.class);
+            log.info("Groq raw response: {}", responseStr);
 
             JsonNode root = objectMapper.readTree(responseStr);
 
             if (root.has("error")) {
-                log.error("Gemini API returned an error: {}", root.path("error").path("message").asText());
-                throw new Exception("Gemini API Error: " + root.path("error").path("message").asText());
+                log.error("Groq API returned an error: {}", root.path("error").path("message").asText());
+                throw new Exception("Groq API Error: " + root.path("error").path("message").asText());
             }
 
-            if (!root.has("candidates") || root.path("candidates").isEmpty()) {
-                log.error("Gemini response missing candidates: {}", responseStr);
-                throw new Exception("Gemini response missing candidates");
+            if (!root.has("choices") || root.path("choices").isEmpty()) {
+                log.error("Groq response missing choices: {}", responseStr);
+                throw new Exception("Groq response missing choices");
             }
 
-            String aiJsonText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text")
-                    .asText();
+            String aiJsonText = root.path("choices").get(0).path("message").path("content").asText();
             log.info("Extracted AI JSON text: {}", aiJsonText);
 
             if (aiJsonText.contains("```")) {
@@ -127,8 +130,7 @@ public class AiChatService {
 
         } catch (Exception e) {
             log.error("AI Chat Error Details: {}", e.getMessage(), e);
-            result.put("message",
-                    "Sorry, I'm having a bit of trouble connecting to the kitchen. (" + e.getMessage() + ")");
+            result.put("message", "Ơ kìa 🤔 mình chưa hiểu ý bạn lắm, nói lại giúp mình nha!");
             result.put("cartCount", 0);
             return result;
         }
