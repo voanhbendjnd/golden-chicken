@@ -274,13 +274,13 @@ public class UserService {
     @Transactional(rollbackFor = Exception.class)
     public void importUsers(MultipartFile file) throws IOException, DataFormatException {
         if (!file.getOriginalFilename().endsWith(".xlsx")) {
-            throw new IllegalArgumentException("Invalid file format. Please upload file excel(.xlsx)");
+            throw new IllegalArgumentException("File excel không đúng định dạng!");
         }
 
         try (var is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
             var sheet = workbook.getSheetAt(0);
             if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
-                throw new DataFormatException("File Excel Not Empty!");
+                throw new DataFormatException("File đang bỏ trống hoặc không đúng!");
             }
             var users = new ArrayList<User>();
             var mpAcc = new HashMap<ResUser, String>();
@@ -295,7 +295,7 @@ public class UserService {
 
                 if (rowNum == 0) {
                     if (row.getCell(0) == null || !"Email".equalsIgnoreCase(row.getCell(0).getStringCellValue())) {
-                        throw new DataFormatException("Invalid Header: Column 1 must be 'Email'");
+                        throw new DataFormatException("Cột 1 bắt buộc phải là 'Email'");
                     }
                     continue;
                 }
@@ -306,19 +306,19 @@ public class UserService {
 
                 if (row.getCell(1) == null || row.getCell(2) == null
                         || row.getCell(3) == null || row.getCell(6) == null) {
-                    throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
+                    throw new DataFormatException("Lỗi dữ liệu tại hàng " + (rowNum + 1) + ": bị bỏ sót!");
                 }
 
                 var email = row.getCell(0).getStringCellValue().trim();
 
                 if (!pattern.matcher(email).matches()) {
                     throw new DataFormatException(
-                            "Error at row " + (rowNum + 1) + ": Invalid Email format (" + email + ")");
+                            "Lỗi tại hàng " + (rowNum + 1) + ": lỗi định dạng email với (" + email + ")");
                 }
 
                 if (existingEmails.contains(email)) {
                     throw new EmailAlreadyExistsException(
-                            "Error at row " + (rowNum + 1) + ": Email " + email);
+                            "Lỗi tại hàng " + (rowNum + 1) + ": Email " + email);
                 }
 
                 var user = new User();
@@ -343,7 +343,7 @@ public class UserService {
                         staff.setStatus(StaffStatus.valueOf(statusStr.toUpperCase()));
                     } catch (Exception e) {
                         throw new DataFormatException(
-                                "Error at row " + (rowNum + 1) + ": Invalid Staff Type or Staff Status.");
+                                "Lỗi tại hàng " + (rowNum + 1) + ": với loại staff không đúng!");
                     }
                     staff.setUser(user);
                     user.setRole(this.roleRepository.findByName("STAFF"));
@@ -355,7 +355,7 @@ public class UserService {
                     user.setCustomer(customer);
                 } else {
                     throw new DataFormatException(
-                            "Error at row " + (rowNum + 1) + ": Unknown Role Type '" + roleType + "'");
+                            "Lỗi tại hàng " + (rowNum + 1) + ": lỗi với role type '" + roleType + "'");
                 }
 
                 user.setStatus("TRUE".equalsIgnoreCase(row.getCell(6).getStringCellValue()));

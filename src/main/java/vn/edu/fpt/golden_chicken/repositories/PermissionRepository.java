@@ -21,6 +21,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>, J
 
     List<Permission> findByIdIn(List<Long> ids);
 
+    boolean existsByApiPathAndMethod(String api, String method);
+
     @Query("SELECT COUNT(r) > 0 FROM Role r JOIN r.permissions p WHERE p.id = :permissionId")
     boolean isPermissionInUse(@Param("permissionId") Long permissionId);
 }

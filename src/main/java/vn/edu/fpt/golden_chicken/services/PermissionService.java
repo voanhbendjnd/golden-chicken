@@ -94,7 +94,7 @@ public class PermissionService {
                 .collect(Collectors.toSet());
         var permissions = new ArrayList<Permission>();
         if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
-            throw new DataFormatException("File Excel Not Empty!");
+            throw new DataFormatException("Không nhận được file hoặc file bị bỏ trống!");
         }
         for (var row : sheet) {
             int rowNum = row.getRowNum();
@@ -104,7 +104,7 @@ public class PermissionService {
             }
             if (row.getCell(0) == null || row.getCell(1) == null ||
                     row.getCell(2) == null || row.getCell(3) == null) {
-                throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
+                throw new DataFormatException("Lỗi tại hàng " + (rowNum + 1) + ": chưa truyền đủ thông tin!");
             }
             var permission = new Permission();
             var name = row.getCell(0).getStringCellValue();
@@ -114,7 +114,7 @@ public class PermissionService {
             var key = name + "-" + apiPath + "-" + method + "-" + module;
             if (set.contains(key)) {
                 throw new DataInvalidException(
-                        "This Permission (" + name + ") Already Exists!" + " With row: " + rowNum + 1);
+                        "Permission với tên này (" + name + ") đã tồn tại!" + " Với hàng: " + rowNum + 1);
             }
             permission.setName(name);
             permission.setApiPath(apiPath);
