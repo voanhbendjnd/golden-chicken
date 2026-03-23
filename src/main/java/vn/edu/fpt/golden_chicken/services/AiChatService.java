@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import vn.edu.fpt.golden_chicken.domain.response.ai.AiResponseDTO;
+import vn.edu.fpt.golden_chicken.domain.response.ai.ItemDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ai.ProductSuggest;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +41,12 @@ public class AiChatService {
     @Value("${groq.model}")
     private String modelName;
 
-    public Map<String, Object> processChat(String chatMessage, Long customerId) {
+    public Map<String, Object> processChat(String chatMessage, Long customerId, List<Map<String, String>> history) {
         Map<String, Object> result = new HashMap<>();
         try {
             List<ProductSuggest> activeProducts = productRepository.getIdAndNameProductForAI();
             String dynamicMenu = activeProducts.stream()
-                    .map(p -> String.format("%s (%.0f VND)", p.getName(), p.getPrice()))
+                    .map(p -> String.format("[%d] %s (%.0f VND)", p.getId(), p.getName(), p.getPrice()))
                     .collect(Collectors.joining(", "));
 
             String systemPrompt = String.format(
@@ -60,43 +62,67 @@ public class AiChatService {
                             +
                             "4. Output Format: You MUST return ONLY a single valid JSON object. DO NOT wrap it in ```json or use any markdown formatting.\n"
                             +
-                            "5. If no product is found that meets the customer's needs, the response should be, Bạn vui lòng gửi lại 1 yêu cầu khác nha, hiện tại mình không thể tìm ra những sản phẩm phù hợp với yêu cầu của bạn đâu nè!\n"
+                            "5. If no product is found that meets the customer's needs, the response should be, 'Bạn vui lòng gửi lại 1 yêu cầu khác nha, hiện tại mình không thể tìm ra những sản phẩm phù hợp với yêu cầu của bạn đâu nè!'\n"
                             +
-                            "6. If the price exceeds the budget and the return request exceeds 33 items per product, add exactly 33 items to the cart and return fewer than 33 items, telling the customer that you only add a maximum of 33 items to their cart. If the customer asks for the worst product, say there are no bad products.\n"
+                            "6. Max 33 items per product. If requested more, add exactly 33 and tell the customer you reached the limit.\n"
                             +
-                            "7. The only information you can include in the message for customers is the product name.\n"
+                            "7. The 'message' can ONLY mention product names from the menu.\n"
                             +
-                            "8. Absolutely do not return error codes in developer language; return natural language that everyone can understand.\n"
+                            "8. Avoid developer jargon; use natural, witty language.\n"
+                            +
+                            "9. When you want to suggest products but NOT add them immediately, use action 'SUGGEST' and say 'Mình muốn gợi ý...' in the message.\n"
                             +
                             "JSON GENERATION CASES:\n" +
-                            "- CASE 1 (Customer is just chatting, asking for advice, or has not confirmed an order):\n"
+                            "- CASE 1 (Chatting/Advice/Query): {\"action\": \"CHAT\", \"message\": \"[Vietnamese response]\"}\n"
                             +
-                            "  {\"action\": \"CHAT\", \"message\": \"[Your witty Vietnamese response here]\"}\n" +
-                            "- CASE 2 (Customer explicitly wants to order or accepts your suggested combo):\n" +
-                            "  {\"action\": \"ADD_TO_CART\", \"message\": \"[Your enthusiastic confirmation in Vietnamese]\", \"items\": [{\"productId\": 1, \"quantity\": 2}]}",
+                            "- CASE 2 (Direct order confirm): {\"action\": \"ADD_TO_CART\", \"message\": \"[Vietnamese confirmation]\", \"items\": [{\"productId\": 1, \"quantity\": 2}]}\n"
+                            +
+                            "- CASE 3 (Suggesting items): {\"action\": \"SUGGEST\", \"message\": \"[Vietnamese suggestion with 'Mình muốn gợi ý...']\", \"items\": [{\"productId\": 1, \"quantity\": 1}]}",
                     dynamicMenu);
 
             Map<String, Object> systemMessage = new HashMap<>();
             systemMessage.put("role", "system");
             systemMessage.put("content", systemPrompt);
 
+            List<Map<String, Object>> messages = new ArrayList<>();
+            messages.add(systemMessage);
+
+            // Add history context
+            if (history != null) {
+                for (Map<String, String> h : history) {
+                    Map<String, Object> hm = new HashMap<>();
+                    hm.put("role", h.get("role"));
+                    hm.put("content", h.get("content"));
+                    messages.add(hm);
+                }
+            }
+
             Map<String, Object> userMessage = new HashMap<>();
             userMessage.put("role", "user");
             userMessage.put("content", chatMessage);
+            messages.add(userMessage);
 
             Map<String, Object> payload = new HashMap<>();
             payload.put("model", modelName);
-            payload.put("messages", List.of(systemMessage, userMessage));
-            payload.put("temperature", 0.7);
+            payload.put("messages", messages);
+            payload.put("response_format", Map.of("type", "json_object"));
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
+            if (apiKey != null) {
+                headers.setBearerAuth(apiKey);
+            }
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
+            if (apiUrl == null) {
+                throw new Exception("apiUrl is not configured");
+            }
             String responseStr = restTemplate.postForObject(apiUrl, entity, String.class);
             log.info("Groq raw response: {}", responseStr);
 
+            if (responseStr == null) {
+                throw new Exception("Groq API returned null response");
+            }
             JsonNode root = objectMapper.readTree(responseStr);
 
             if (root.has("error")) {
@@ -121,17 +147,54 @@ public class AiChatService {
             if ("ADD_TO_CART".equalsIgnoreCase(aiResponse.getAction()) && aiResponse.getItems() != null) {
                 for (var item : aiResponse.getItems()) {
                     cartService.addToCart(customerId, item.getProductId(), item.getQuantity());
+                    // Enrich item info for UI
+                    activeProducts.stream()
+                            .filter(p -> p.getId().equals(item.getProductId()))
+                            .findFirst()
+                            .ifPresent(p -> {
+                                item.setName(p.getName());
+                                item.setPrice(p.getPrice().doubleValue());
+                                item.setImg(p.getImg());
+                            });
+                }
+            } else if ("SUGGEST".equalsIgnoreCase(aiResponse.getAction()) && aiResponse.getItems() != null) {
+                for (var item : aiResponse.getItems()) {
+                    activeProducts.stream()
+                            .filter(p -> p.getId().equals(item.getProductId()))
+                            .findFirst()
+                            .ifPresent(p -> {
+                                item.setName(p.getName());
+                                item.setPrice(p.getPrice().doubleValue());
+                                item.setImg(p.getImg());
+                            });
                 }
             }
 
             result.put("message", aiResponse.getMessage());
+            result.put("action", aiResponse.getAction());
+            result.put("items", aiResponse.getItems());
             result.put("cartCount", cartService.sumCart());
             return result;
 
         } catch (Exception e) {
             log.error("AI Chat Error Details: {}", e.getMessage(), e);
-            result.put("message", "Ơ kìa 🤔 mình chưa hiểu ý bạn lắm, nói lại giúp mình nha!");
-            result.put("cartCount", 0);
+            result.put("message",
+                    "Ơ kìa 🤔 mình chưa hiểu ý bạn lắm, nhưng bạn thử xem qua mấy món này của nhà Golden Chicken xem sao nha!");
+            result.put("action", "SUGGEST");
+
+            // Fallback suggestions: top 3 products
+            List<ProductSuggest> fallbacks = productRepository.getIdAndNameProductForAI().stream().limit(3)
+                    .collect(Collectors.toList());
+            List<ItemDTO> fallbackItems = fallbacks.stream().map(p -> ItemDTO.builder()
+                    .productId(p.getId())
+                    .name(p.getName())
+                    .price(p.getPrice().doubleValue())
+                    .img(p.getImg())
+                    .quantity(1)
+                    .build()).collect(Collectors.toList());
+
+            result.put("items", fallbackItems);
+            result.put("cartCount", cartService.sumCart());
             return result;
         }
     }

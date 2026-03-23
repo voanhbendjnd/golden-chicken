@@ -8,4 +8,5 @@ public interface ProductSuggest {
     String getName();
 
     BigDecimal getPrice();
+    String getImg();
 }

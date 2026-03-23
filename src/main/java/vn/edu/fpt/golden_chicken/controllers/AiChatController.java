@@ -20,7 +20,7 @@ public class AiChatController {
 
     @PostMapping("/chat")
     public ResponseEntity<Map<String, Object>> chat(@RequestBody AiChatRequest request) {
-        Map<String, Object> response = aiChatService.processChat(request.getChatMessage(), request.getCustomerId());
+        Map<String, Object> response = aiChatService.processChat(request.getChatMessage(), request.getCustomerId(), request.getHistory());
         return ResponseEntity.ok(response);
     }
 
@@ -28,5 +28,6 @@ public class AiChatController {
     public static class AiChatRequest {
         private String chatMessage;
         private Long customerId;
+        private java.util.List<Map<String, String>> history;
     }
 }

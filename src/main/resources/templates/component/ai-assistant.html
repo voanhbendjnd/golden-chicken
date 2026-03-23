@@ -4,8 +4,8 @@
     <div sec:authorize="hasRole('CUSTOMER')">
         <style>
             :root {
-                --ai-primary: #6366f1;
-                --ai-secondary: #4f46e5;
+                --ai-primary: #5c59f0;
+                --ai-secondary: #4a47e6;
                 --ai-bg: #ffffff;
                 --ai-text: #1f2937;
                 --ai-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -163,10 +163,18 @@
 
             .ai-message.bot {
                 align-self: flex-start;
-                background: white;
+                background: #ffffff;
                 color: var(--ai-text);
                 border-bottom-left-radius: 2px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                border: 1px solid rgba(226, 232, 240, 0.5);
+            }
+
+            .ai-message.has-products {
+                max-width: 95%;
+                width: 95%;
+                padding: 18px;
+                background: #ffffff;
             }
 
             .ai-message.user {
@@ -205,8 +213,8 @@
             }
 
             #ai-send-btn {
-                width: 45px;
-                height: 45px;
+                width: 48px;
+                height: 48px;
                 border-radius: 50%;
                 background: var(--ai-primary);
                 color: white;
@@ -215,11 +223,15 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: background 0.2s;
+                transition: all 0.2s;
+                font-size: 18px;
+                box-shadow: 0 4px 10px rgba(92, 89, 240, 0.3);
             }
 
             #ai-send-btn:hover {
                 background: var(--ai-secondary);
+                transform: scale(1.05);
+                box-shadow: 0 6px 15px rgba(92, 89, 240, 0.4);
             }
 
             /* Typing Indicator */
@@ -270,6 +282,35 @@
                 background: #cbd5e1;
                 border-radius: 10px;
             }
+
+            .ai-product-card {
+                background: #ffffff !important;
+                border: 1px solid #f1f5f9 !important;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            }
+
+            .ai-product-card:hover {
+                background: #f8faff !important;
+                border-color: var(--ai-primary) !important;
+                box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .ai-confirm-btn {
+                width: 100%;
+                margin-top: 15px !important;
+                background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary)) !important;
+                color: white !important;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                border-radius: 12px !important;
+                padding: 12px !important;
+            }
+
+            .ai-confirm-btn:hover {
+                filter: brightness(1.1);
+                box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+                transform: translateY(-1px);
+            }
         </style>
 
         <div id="ai-chat-btn" onclick="toggleAiChat()">
@@ -302,8 +343,7 @@
             </div>
 
             <!-- Typing indicator -->
-            <div id="ai-typing" class="ai-body"
-                style="background: transparent; padding: 0 20px 10px; min-height: auto;">
+            <div id="ai-typing" style="padding: 0 20px 10px; background: #f8fafc;">
                 <div class="typing" id="ai-typing-indicator">
                     <div class="dot"></div>
                     <div class="dot"></div>
@@ -313,7 +353,7 @@
 
             <div class="ai-footer">
                 <div class="ai-input-wrapper">
-                    <input type="text" id="ai-input" placeholder="Type a message..."
+                    <input type="text" id="ai-input" placeholder="Hỏi về món ăn bạn thích..."
                         onkeypress="if(event.key === 'Enter') sendAiMessage()">
                 </div>
                 <button id="ai-send-btn" onclick="sendAiMessage()">
@@ -325,6 +365,12 @@
         <script th:inline="javascript">
             const customerId = /*[[${session.id}]]*/ null;
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const CHAT_STORAGE_KEY = `ai_chat_history_${customerId}`;
+            const STORAGE_EXPIRY = 60 * 60 * 1000; // 1 hour
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadChatHistory();
+            });
 
             function toggleAiChat() {
                 const panel = document.getElementById('ai-chat-panel');
@@ -337,14 +383,47 @@
                 }
             }
 
-            async function sendAiMessage() {
+            function saveChatHistory(message, type, action = 'CHAT', items = null) {
+                let history = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
+                const now = new Date().getTime();
+                history.push({ message, type, action, items, timestamp: now });
+                localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(history));
+            }
+
+            function loadChatHistory() {
+                const history = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
+                const now = new Date().getTime();
+                const chatBody = document.getElementById('ai-chat-body');
+                
+                // Clear initial message if we have history
+                if (history.length > 0) {
+                    chatBody.innerHTML = '';
+                }
+
+                const validHistory = history.filter(item => (now - item.timestamp) < STORAGE_EXPIRY);
+                validHistory.forEach(item => {
+                    appendAiMessage(item.message, item.type, item.action, item.items, false);
+                });
+
+                localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(validHistory));
+                scrollAiToBottom();
+            }
+
+            async function sendAiMessage(forcedMessage = null) {
                 const input = document.getElementById('ai-input');
-                const message = input.value.trim();
+                const message = forcedMessage || input.value.trim();
                 if (!message) return;
+
+                // Gather history for context (last 10 messages)
+                const fullHistory = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
+                const history = fullHistory.slice(-10).map(h => ({
+                    role: h.type === 'bot' ? 'assistant' : 'user',
+                    content: h.message
+                }));
 
                 // Append user message
                 appendAiMessage(message, 'user');
-                input.value = '';
+                if (!forcedMessage) input.value = '';
 
                 // Show typing indicator
                 const typing = document.getElementById('ai-typing-indicator');
@@ -360,14 +439,14 @@
                         },
                         body: JSON.stringify({
                             chatMessage: message,
-                            customerId: customerId
+                            customerId: customerId,
+                            history: history
                         })
                     });
 
                     if (response.ok) {
                         const data = await response.json();
-                        const aiReply = data.message;
-                        appendAiMessage(aiReply, 'bot');
+                        appendAiMessage(data.message, 'bot', data.action, data.items);
 
                         // Update cart count in header
                         const cartCountElement = document.getElementById('cart-count');
@@ -375,43 +454,92 @@
                             cartCountElement.innerText = data.cartCount;
                         }
 
-                        // If the reply looks like an order confirmation, show success toast
-                        if (aiReply.toLowerCase().includes('added') || aiReply.toLowerCase().includes('đã thêm')) {
+                        if (data.action === 'ADD_TO_CART') {
                             if (window.Swal) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Cart Updated!',
-                                    text: 'AI has added items to your cart.',
+                                    title: 'Đã thêm vào giỏ!',
+                                    text: 'Các món ăn đã được thêm vào giỏ hàng của bạn.',
                                     timer: 2000,
                                     showConfirmButton: false,
                                     toast: true,
                                     position: 'top-end'
                                 });
                             }
-                            // Optionally refresh cart count in header if menu.js has that function
                             if (typeof updateCartCount === 'function') {
                                 updateCartCount();
                             }
                         }
                     } else {
-                        appendAiMessage("Sorry, I'm having trouble connecting to the chicken coops right now.", 'bot');
+                        appendAiMessage("Xin lỗi, mình đang gặp chút trục trặc kết nối với chuồng gà rồi. 🐔", 'bot');
                     }
                 } catch (error) {
                     console.error('AI Chat Error:', error);
-                    appendAiMessage("Oops! Something went wrong on my end.", 'bot');
+                    appendAiMessage("Ôi hỏng rồi! Có lỗi xảy ra mất rồi.", 'bot');
                 } finally {
                     typing.style.display = 'none';
                     scrollAiToBottom();
                 }
             }
 
-            function appendAiMessage(text, type) {
+            function appendAiMessage(text, type, action = 'CHAT', items = null, save = true) {
                 const chatBody = document.getElementById('ai-chat-body');
                 const msgDiv = document.createElement('div');
-                msgDiv.className = `ai-message ${type}`;
-                msgDiv.innerHTML = text;
+                msgDiv.className = `ai-message ${type} ${items && items.length > 0 ? 'has-products' : ''}`;
+                
+                let html = `<div>${text}</div>`;
+
+                if (items && items.length > 0) {
+                    const isSuggest = action === 'SUGGEST';
+                    const isAdd = action === 'ADD_TO_CART';
+                    
+                    html += `<div class="ai-products-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">`;
+                    if (isSuggest) {
+                        html += `<div style="font-size: 11px; font-weight: bold; color: #6366f1; text-transform: uppercase; margin-bottom: 4px;">✨ Gợi ý cho bạn</div>`;
+                    }
+                    
+                    items.forEach(item => {
+                        html += `
+                            <div class="ai-product-card" onclick="window.location.href='/product/${item.productId}'" 
+                                 style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px; border-radius: 12px; cursor: pointer; border: 1px solid #f1f5f9; transition: all 0.2s;">
+                                <img src="/images/products/${item.img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 8px;" alt="${item.name}">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 14px; font-weight: 700; color: #1f2937; margin-bottom: 2px;">${item.name}</div>
+                                    <div style="font-size: 12px; color: #64748b; font-weight: 500;">${item.price.toLocaleString()} VND x ${item.quantity}</div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="font-size: 10px; color: #cbd5e1;"></i>
+                            </div>
+                        `;
+                    });
+                    
+                    if (isSuggest && text.includes('muốn')) {
+                        html += `
+                            <button onclick="confirmAction(this)" class="ai-confirm-btn" 
+                                    style="margin-top: 8px; padding: 8px; background: #6366f1; color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                                Đồng ý luôn!
+                            </button>
+                        `;
+                    }
+                    html += `</div>`;
+                }
+
+                msgDiv.innerHTML = html;
                 chatBody.appendChild(msgDiv);
+                
+                if (save) {
+                    // Clean up any pending state buttons
+                    document.querySelectorAll('.ai-confirm-btn[disabled]').forEach(btn => btn.remove());
+                    saveChatHistory(text, type, action, items);
+                }
+                
                 scrollAiToBottom();
+            }
+
+            function confirmAction(btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.innerHTML = '<i class="fas fa-check"></i> Đang xử lý...';
+                sendAiMessage("Đồng ý");
             }
 
             function scrollAiToBottom() {
