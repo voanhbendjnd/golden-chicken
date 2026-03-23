@@ -72,6 +72,8 @@ public class CheckoutController {
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
+            @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) {
 
         var addresses = addressServices.getAllAddresses();
@@ -80,8 +82,10 @@ public class CheckoutController {
         model.addAttribute("productIds", productIds);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("quantity", quantity);
 
-        if (productId != null || (productIds != null && !productIds.isEmpty())) {
+        if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
             return "client/address/listAddressCheckout";
         }
 
@@ -119,6 +123,7 @@ public class CheckoutController {
             @RequestParam(value = "ids", required = false) List<Long> productIds,
             @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "orderId", required = false) Long orderId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "9") int size,
             Model model) throws PermissionException {
@@ -126,7 +131,7 @@ public class CheckoutController {
         var currentUser = profileService.getCurrentUser();
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
-        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds, quantity);
+        BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds, quantity, orderId);
         final BigDecimal orderTotalFinal = orderTotal;
 
         List<CustomerVoucher> allVouchers = vouchers;
@@ -148,6 +153,7 @@ public class CheckoutController {
         model.addAttribute("productIds", productIds);
         model.addAttribute("quantity", quantity);
         model.addAttribute("addressId", addressId);
+        model.addAttribute("orderId", orderId);
 
         return "client/voucher-select";
     }
@@ -160,6 +166,7 @@ public class CheckoutController {
             @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
             @RequestParam(value = "quantity", required = false) Integer quantity,
+            @RequestParam(value = "orderId", required = false) Long orderId,
             Model model) throws PermissionException {
         OrderDTO selection;
         try {
@@ -167,14 +174,15 @@ public class CheckoutController {
                     voucherCode);
         } catch (IllegalArgumentException ex) {
             model.addAttribute("voucherError", ex.getMessage());
-            return handleCheckout(productId, ids, null, null, null, addressId, quantity, model);
+            return handleCheckout(productId, ids, orderId, null, null, addressId, quantity, model);
         }
 
         if (selection.getProductVoucherId() == null && selection.getShippingVoucherId() == null) {
-            return handleCheckout(productId, ids, null, null, null, addressId, quantity, model);
+            return handleCheckout(productId, ids, orderId, null, null, addressId, quantity, model);
         }
 
-        return handleCheckout(productId, ids, null, selection.getProductVoucherId(), selection.getShippingVoucherId(),
+        return handleCheckout(productId, ids, orderId, selection.getProductVoucherId(),
+                selection.getShippingVoucherId(),
                 addressId, quantity, model);
     }
 }

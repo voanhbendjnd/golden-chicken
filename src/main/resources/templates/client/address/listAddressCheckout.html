@@ -26,12 +26,12 @@
                     <div class="name">
                         <span th:text="${a.recipientName}"></span>
 
-                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
+                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId}, orderId=${orderId})}"
                             class="ms-2 text-primary" title="Chỉnh sửa">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
 
-                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
+                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId}, orderId=${orderId})}"
                             class="ms-2 text-danger">
                             <i class="fa-solid fa-trash"></i>
                         </a>
@@ -51,7 +51,8 @@
                     productId=${productId},
                     productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null},
                     productVoucherId=${productVoucherId},
-                    shippingVoucherId=${shippingVoucherId}
+                    shippingVoucherId=${shippingVoucherId},
+                    orderId=${orderId}
                     )}" class="btn btn-success btn-add">
                     Thêm địa chỉ mới
                 </a>
@@ -76,21 +77,26 @@
                 const productIds = [[${ productIds }]]; // Lúc này là String "1,2,3"
                 const productVoucherId = [[${ productVoucherId }]];
                 const shippingVoucherId = [[${ shippingVoucherId }]];
+                const orderId = [[${ orderId }]];
 
                 let url = "";
 
-                // 1. Trường hợp mua ngay (Buy Now)
-                if (productId != null && productId !== '') {
+                // 1. Trường hợp mua lại (Rebuy)
+                if (orderId != null && orderId !== '') {
+                    url = `/checkout?orderId=${orderId}&addressId=${addressId}`;
+                }
+                // 2. Trường hợp mua ngay (Buy Now)
+                else if (productId != null && productId !== '') {
                     url = `/checkout?productId=${productId}&addressId=${addressId}`;
                 }
-                // 2. Trường hợp mua từ giỏ hàng (Cart)
+                // 3. Trường hợp mua từ giỏ hàng (Cart)
                 else if (productIds != null && productIds !== '') {
                     // Vì productIds đã là chuỗi "1,2,3", ta cần biến nó thành ?ids=1&ids=2&ids=3
                     const idsArray = productIds.split(',');
                     const idsQuery = idsArray.map(id => `ids=${id}`).join('&');
                     url = `/checkout?${idsQuery}&addressId=${addressId}`;
                 }
-                // 3. Trường hợp dự phòng
+                // 4. Trường hợp dự phòng
                 else {
                     url = `/checkout?addressId=${addressId}`;
                 }

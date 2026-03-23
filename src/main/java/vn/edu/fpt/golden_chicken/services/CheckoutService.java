@@ -200,6 +200,7 @@ public class CheckoutService {
         model.put("defaultAddress", selectedAddress);
         model.put("selectedProductVoucher", productVoucher);
         model.put("selectedShippingVoucher", shippingVoucher);
+        model.put("orderId", orderId);
         if (errorMessage != null) {
             model.put("voucherError", errorMessage);
         }
@@ -278,8 +279,12 @@ public class CheckoutService {
         return discount;
     }
 
-    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds, Integer quantity)
+    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds, Integer quantity, Long orderId)
             throws PermissionException {
+        if (orderId != null) {
+            ResOrder order = orderService.findById(orderId);
+            return order != null ? order.getFinalAmount() : BigDecimal.ZERO;
+        }
         if (productId != null) {
             var product = productService.findById(productId);
             return product != null ? product.getPrice().multiply(BigDecimal.valueOf(quantity != null ? quantity : 1))

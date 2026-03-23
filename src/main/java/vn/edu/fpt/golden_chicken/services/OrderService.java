@@ -403,7 +403,7 @@ public class OrderService {
 
     @Transactional
     public ResOrder findById(Long id) {
-        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+        var order = this.orderRepository.findWithItemsById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
         var res = new ResOrder();
         res.setAddress(order.getShippingAddress());
         res.setCreatedAt(order.getCreatedAt());
