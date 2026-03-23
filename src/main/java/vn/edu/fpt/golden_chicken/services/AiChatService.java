@@ -72,6 +72,8 @@ public class AiChatService {
                             +
                             "9. When you want to suggest products but NOT add them immediately, use action 'SUGGEST' and say 'Mình muốn gợi ý...' in the message.\n"
                             +
+                            "10. You are only allowed to offer a total product price that is lower than or equal to the customer's price; do not suggest a higher total price."
+                            +
                             "JSON GENERATION CASES:\n" +
                             "- CASE 1 (Chatting/Advice/Query): {\"action\": \"CHAT\", \"message\": \"[Vietnamese response]\"}\n"
                             +
