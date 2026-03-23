@@ -34,6 +34,8 @@
 
                         <input type="hidden" name="productId" th:value="${productId}" />
                         <input type="hidden" name="productIds" th:value="${productIds}" />
+                        <input type="hidden" name="productVoucherId" th:value="${productVoucherId}" />
+                        <input type="hidden" name="shippingVoucherId" th:value="${shippingVoucherId}" />
 
                         <input type="hidden" th:field="*{id}" />
 
@@ -86,7 +88,7 @@
                             </button>
 
                             <th:block th:if="${productId != null or (productIds != null && productIds != '')}">
-                                <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds})}"
+                                <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
                                     class="btn btn-outline-secondary">
                                     Hủy
                                 </a>

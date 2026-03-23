@@ -38,7 +38,7 @@
 
                     <div class="d-flex gap-2">
                         <th:block th:if="${productId != null or (productIds != null && productIds != '')}">
-                            <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds})}"
+                            <a th:href="@{/checkout/addresses(productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
                                 class="btn btn-secondary">Hủy</a>
                         </th:block>
                         <th:block th:unless="${productId != null or (productIds != null && productIds != '')}">
@@ -48,6 +48,8 @@
                         <form th:action="@{/addresses/{id}/delete(id=${address.id})}" method="post" class="m-0">
                             <input type="hidden" name="productId" th:value="${productId}" />
                             <input type="hidden" name="productIds" th:value="${productIds}" />
+                            <input type="hidden" name="productVoucherId" th:value="${productVoucherId}" />
+                            <input type="hidden" name="shippingVoucherId" th:value="${shippingVoucherId}" />
                             <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
                         </form>
                     </div>
