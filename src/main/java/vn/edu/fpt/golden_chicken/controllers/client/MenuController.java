@@ -48,7 +48,6 @@ public class MenuController {
         if (products == null)
             products = List.of();
 
-        // Map categoryName -> products (group)
         Map<String, List<ResProduct>> productsByCatName = new LinkedHashMap<>();
         for (ResProduct p : products) {
             if (p == null || p.getCategory() == null)
@@ -88,7 +87,6 @@ public class MenuController {
         }
 
         if (cat != null && !cat.isBlank()) {
-            // menuCategories = buildFullNav(categories, productsByCatName);
         }
 
         model.addAttribute("menuCategories", menuCategories);

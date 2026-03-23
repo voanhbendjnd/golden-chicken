@@ -147,7 +147,6 @@ public class AiChatService {
             if ("ADD_TO_CART".equalsIgnoreCase(aiResponse.getAction()) && aiResponse.getItems() != null) {
                 for (var item : aiResponse.getItems()) {
                     cartService.addToCart(customerId, item.getProductId(), item.getQuantity());
-                    // Enrich item info for UI
                     activeProducts.stream()
                             .filter(p -> p.getId().equals(item.getProductId()))
                             .findFirst()
@@ -182,7 +181,6 @@ public class AiChatService {
                     "Ơ kìa 🤔 mình chưa hiểu ý bạn lắm, nhưng bạn thử xem qua mấy món này của nhà Golden Chicken xem sao nha!");
             result.put("action", "SUGGEST");
 
-            // Fallback suggestions: top 3 products
             List<ProductSuggest> fallbacks = productRepository.getIdAndNameProductForAI().stream().limit(3)
                     .collect(Collectors.toList());
             List<ItemDTO> fallbackItems = fallbacks.stream().map(p -> ItemDTO.builder()
