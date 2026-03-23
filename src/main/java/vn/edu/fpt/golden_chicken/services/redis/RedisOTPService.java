@@ -17,6 +17,6 @@ public class RedisOTPService {
     StringRedisTemplate stringRedisTemplate;
 
     public void saveOTP(String email, String OTP) {
-        this.stringRedisTemplate.opsForValue().set(DeclareConstant.USER_OTP + email, OTP, 5, TimeUnit.MINUTES);
+        this.stringRedisTemplate.opsForValue().set(DeclareConstant.USER_OTP + email, OTP, 3, TimeUnit.MINUTES);
     }
 }

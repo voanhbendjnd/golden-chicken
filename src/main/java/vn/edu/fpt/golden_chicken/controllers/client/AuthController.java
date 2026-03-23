@@ -102,6 +102,8 @@ public class AuthController {
         msg.setCreatedAt(LocalDateTime.now());
         msg.setEmail(email);
         this.verifyAccountKafka.send("customer-account-topic", msg);
+
+        model.addAttribute("otpTtlSeconds", 180);
         return "client/auth/verify";
     }
 
@@ -179,11 +181,20 @@ public class AuthController {
     @GetMapping("/verify-otp")
     public String verifyOtpPage(HttpSession session, Model model, RedirectAttributes ra) {
         String email = (String) session.getAttribute(FP_EMAIL);
-        if (email == null || email.isBlank()) {
+        Long expireAt = (Long) session.getAttribute(FP_EXPIRE_AT);
+
+        if (email == null || email.isBlank() || expireAt == null) {
             ra.addFlashAttribute("error", "Vui lòng nhập email để nhận OTP.");
             return "redirect:/forgot-password";
         }
+
+        long now = Instant.now().getEpochSecond();
+        long remaining = expireAt - now;
+        if (remaining < 0)
+            remaining = 0;
+
         model.addAttribute("email", email);
+        model.addAttribute("otpTtlSeconds", remaining);
         return "client/auth/verify-otp";
     }
 

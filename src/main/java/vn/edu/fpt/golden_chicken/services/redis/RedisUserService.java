@@ -137,7 +137,7 @@ public class RedisUserService {
 
     public void saveKeyOTPForgotPassword(String email, String otp) {
         var key = "FORGOT_PASSWORD:" + email;
-        this.stringRedisTemplate.opsForValue().set(key, otp, 5, TimeUnit.MINUTES);
+        this.stringRedisTemplate.opsForValue().set(key, otp, 3, TimeUnit.MINUTES);
     }
 
     public String getKeyOTPForgotPassword(String email) {

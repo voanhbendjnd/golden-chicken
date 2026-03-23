@@ -61,11 +61,13 @@ public class AuthControllerV2 {
         verifyMsg.setDescription("Send OTP for update password");
         verifyMsg.setCreatedAt(LocalDateTime.now());
         verifyMsg.setEmail(email);
-        long expireAt = Instant.now().getEpochSecond() + 5 * 60;
+        long expireAt = Instant.now().getEpochSecond() + 3 * 60;
 
         session.setAttribute("FP:OTP", oneTimePassword);
         session.setAttribute("FP:EXPIREAT", expireAt);
         this.kafkaVerifyMessage.send("forgot-password-account-topic", verifyMsg);
+
+        model.addAttribute("otpTtlSeconds", 180);
         return "client/auth/verify.v2";
     }
 

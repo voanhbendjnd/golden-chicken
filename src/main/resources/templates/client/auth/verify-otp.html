@@ -130,7 +130,10 @@
 
     <!-- RIGHT -->
     <div class="right-panel">
-        <h3 class="text-center mb-4 fw-bold">Enter OTP</h3>
+        <h3 class="text-center mb-1 fw-bold">Enter OTP</h3>
+        <div id="otp-timer" class="text-center mb-4">
+            OTP expires in: <span id="timer-count" class="fw-bold" style="color: #d90429;">--:--</span>
+        </div>
 
         <div th:if="${message}" class="alert alert-success text-center">
             <span th:text="${message}"></span>
@@ -181,7 +184,34 @@
 
 </div>
 
-<script>
+<script th:inline="javascript">
+    const verifyBtn = document.querySelector('button[type="submit"]:not(.btn-outline-dark)');
+    let timeLeft = /*[[${otpTtlSeconds}]]*/ 180;
+    const timerSpan = document.getElementById('timer-count');
+
+    function startTimer() {
+        if (timeLeft <= 0) {
+            timerSpan.textContent = "Expired";
+            verifyBtn.disabled = true;
+            return;
+        }
+
+        const timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                timerSpan.textContent = "Expired";
+                verifyBtn.disabled = true;
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerSpan.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                timeLeft--;
+            }
+        }, 1000);
+    }
+
+    startTimer();
+
     function validateOtp() {
         const otp = document.getElementById("otp").value.trim();
         const err = document.getElementById("otp-error");
