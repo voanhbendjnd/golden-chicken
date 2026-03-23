@@ -146,7 +146,7 @@ public class DatabaseIntializer implements CommandLineRunner {
 
             var staff = new User();
             staff.setFullName("SUPER_STAFF");
-            staff.setEmail("mylndce190083@gmail.com");
+            staff.setEmail("voanhbendjnd@gmail.com");
             staff.setStatus(true);
             staff.setPassword(this.passwordEncoder.encode(DeclareConstant.password));
             staff.setRole(this.roleRepository.findByName(DeclareConstant.roleNameStaff));
