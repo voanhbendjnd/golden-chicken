@@ -70,12 +70,16 @@ public class CheckoutController {
     public String listAddressCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
 
         var addresses = addressServices.getAllAddresses();
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("productVoucherId", productVoucherId);
+        model.addAttribute("shippingVoucherId", shippingVoucherId);
 
         if (productId != null || (productIds != null && !productIds.isEmpty())) {
             return "client/address/listAddressCheckout";
@@ -114,6 +118,7 @@ public class CheckoutController {
             @RequestParam(value = "id", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> productIds,
             @RequestParam(value = "quantity", required = false) Integer quantity,
+            @RequestParam(value = "addressId", required = false) Long addressId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "9") int size,
             Model model) throws PermissionException {
@@ -142,6 +147,7 @@ public class CheckoutController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
         model.addAttribute("quantity", quantity);
+        model.addAttribute("addressId", addressId);
 
         return "client/voucher-select";
     }
@@ -150,6 +156,7 @@ public class CheckoutController {
     public String applyVouchers(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "addressId", required = false) Long addressId,
             @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
             @RequestParam(value = "quantity", required = false) Integer quantity,
@@ -160,14 +167,14 @@ public class CheckoutController {
                     voucherCode);
         } catch (IllegalArgumentException ex) {
             model.addAttribute("voucherError", ex.getMessage());
-            return handleCheckout(productId, ids, null, null, null, null, quantity, model);
+            return handleCheckout(productId, ids, null, null, null, addressId, quantity, model);
         }
 
         if (selection.getProductVoucherId() == null && selection.getShippingVoucherId() == null) {
-            return handleCheckout(productId, ids, null, null, null, null, quantity, model);
+            return handleCheckout(productId, ids, null, null, null, addressId, quantity, model);
         }
 
         return handleCheckout(productId, ids, null, selection.getProductVoucherId(), selection.getShippingVoucherId(),
-                null, quantity, model);
+                addressId, quantity, model);
     }
 }

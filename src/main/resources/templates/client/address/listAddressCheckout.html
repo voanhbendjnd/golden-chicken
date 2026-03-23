@@ -26,13 +26,13 @@
                     <div class="name">
                         <span th:text="${a.recipientName}"></span>
 
-                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds})}"
-                           class="ms-2 text-primary" title="Chỉnh sửa">
+                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
+                            class="ms-2 text-primary" title="Chỉnh sửa">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
 
-                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds})}"
-                           class="ms-2 text-danger">
+                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
+                            class="ms-2 text-danger">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>
@@ -48,10 +48,11 @@
 
             <div class="address-actions">
                 <a th:href="@{/addresses/new(
-                productId=${productId},
-                productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null}
-       )}"
-                   class="btn btn-success btn-add">
+                    productId=${productId},
+                    productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null},
+                    productVoucherId=${productVoucherId},
+                    shippingVoucherId=${shippingVoucherId}
+                    )}" class="btn btn-success btn-add">
                     Thêm địa chỉ mới
                 </a>
 
@@ -71,8 +72,10 @@
 
                 const addressId = selectedRadio.value;
                 // Thymeleaf sẽ render productId là số hoặc null, productIds là chuỗi hoặc null
-                const productId = [[${productId}]];
-                const productIds = [[${productIds}]]; // Lúc này là String "1,2,3"
+                const productId = [[${ productId }]];
+                const productIds = [[${ productIds }]]; // Lúc này là String "1,2,3"
+                const productVoucherId = [[${ productVoucherId }]];
+                const shippingVoucherId = [[${ shippingVoucherId }]];
 
                 let url = "";
 
@@ -92,6 +95,13 @@
                     url = `/checkout?addressId=${addressId}`;
                 }
 
+                if (productVoucherId != null) {
+                    url += `&productVoucherId=${productVoucherId}`;
+                }
+                if (shippingVoucherId != null) {
+                    url += `&shippingVoucherId=${shippingVoucherId}`;
+                }
+
                 console.log("Redirecting to:", url); // Kiểm tra log nếu vẫn không nhảy
                 window.location.href = url;
             }
@@ -100,5 +110,7 @@
     <div th:replace="~{client/layout/footer.djnd}"></div>
 
 </body>
+
+</html>
 
 </html>

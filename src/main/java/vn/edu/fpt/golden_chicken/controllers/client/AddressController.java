@@ -49,6 +49,8 @@ public class AddressController {
     public String createForm(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
 
         model.addAttribute("addressForm", new AddressFormDTO());
@@ -56,6 +58,8 @@ public class AddressController {
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("productVoucherId", productVoucherId);
+        model.addAttribute("shippingVoucherId", shippingVoucherId);
 
         return "client/address/createAddress";
     }
@@ -66,12 +70,16 @@ public class AddressController {
             BindingResult result,
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
 
         if (result.hasErrors()) {
             model.addAttribute("isEdit", false);
             model.addAttribute("productId", productId);
             model.addAttribute("productIds", productIds);
+            model.addAttribute("productVoucherId", productVoucherId);
+            model.addAttribute("shippingVoucherId", shippingVoucherId);
             return "client/address/createAddress";
         }
 
@@ -86,6 +94,12 @@ public class AddressController {
                     url.append("&");
                 url.append("productIds=").append(productIds);
             }
+            if (productVoucherId != null) {
+                url.append("&productVoucherId=").append(productVoucherId);
+            }
+            if (shippingVoucherId != null) {
+                url.append("&shippingVoucherId=").append(shippingVoucherId);
+            }
             return url.toString();
         }
 
@@ -97,6 +111,8 @@ public class AddressController {
             @RequestParam("id") Long id,
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
         AddressFormDTO form = addressServices.getMyAddressForm(id);
         if (form == null)
@@ -108,6 +124,8 @@ public class AddressController {
 
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("productVoucherId", productVoucherId);
+        model.addAttribute("shippingVoucherId", shippingVoucherId);
 
         return "client/address/createAddress";
     }
@@ -118,12 +136,16 @@ public class AddressController {
             BindingResult result,
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
 
         if (result.hasErrors()) {
             model.addAttribute("isEdit", true);
             model.addAttribute("productId", productId);
             model.addAttribute("productIds", productIds);
+            model.addAttribute("productVoucherId", productVoucherId);
+            model.addAttribute("shippingVoucherId", shippingVoucherId);
             return "client/address/createAddress";
         }
 
@@ -137,6 +159,12 @@ public class AddressController {
                 if (productId != null)
                     url.append("&");
                 url.append("productIds=").append(productIds);
+            }
+            if (productVoucherId != null) {
+                url.append("&productVoucherId=").append(productVoucherId);
+            }
+            if (shippingVoucherId != null) {
+                url.append("&shippingVoucherId=").append(shippingVoucherId);
             }
             return url.toString();
         }
@@ -155,6 +183,8 @@ public class AddressController {
             @PathVariable Long id,
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
         var address = addressServices.findById(id);
         if (address == null) {
@@ -163,6 +193,8 @@ public class AddressController {
         model.addAttribute("address", address);
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("productVoucherId", productVoucherId);
+        model.addAttribute("shippingVoucherId", shippingVoucherId);
         return "client/address/deleteAddress";
     }
 
@@ -170,7 +202,9 @@ public class AddressController {
     public String delete(
             @PathVariable Long id,
             @RequestParam(value = "productId", required = false) Long productId,
-            @RequestParam(value = "productIds", required = false) String productIds) {
+            @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId) {
 
         addressServices.deleteMyAddress(id);
 
@@ -182,6 +216,12 @@ public class AddressController {
                 if (productId != null)
                     url.append("&");
                 url.append("productIds=").append(productIds);
+            }
+            if (productVoucherId != null) {
+                url.append("&productVoucherId=").append(productVoucherId);
+            }
+            if (shippingVoucherId != null) {
+                url.append("&shippingVoucherId=").append(shippingVoucherId);
             }
             return url.toString();
         }
