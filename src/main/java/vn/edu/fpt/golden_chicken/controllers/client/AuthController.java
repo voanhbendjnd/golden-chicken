@@ -27,6 +27,7 @@ import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.MailService;
+import vn.edu.fpt.golden_chicken.services.RateLimitService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisOTPService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
@@ -40,17 +41,21 @@ public class AuthController {
     private final RedisUserService redisUserService;
     private final PasswordEncoder passwordEncoder;
 
+    private final RateLimitService rateLimitService;
+
     @Autowired
     private KafkaTemplate<String, VerifyAccountMessage> verifyAccountKafka;
 
     public AuthController(MailService mailService, RedisOTPService redisOTPService, UserService userService,
-            UserRepository userRepository, RedisUserService redisUserService, PasswordEncoder passwordEncoder) {
+            UserRepository userRepository, RedisUserService redisUserService, PasswordEncoder passwordEncoder,
+            RateLimitService rateLimitService) {
         this.userService = userService;
         this.mailService = mailService;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.redisOTPService = redisOTPService;
         this.redisUserService = redisUserService;
+        this.rateLimitService = rateLimitService;
     }
 
     @GetMapping("/login")
@@ -94,16 +99,25 @@ public class AuthController {
 
     @GetMapping("/verify")
     public String verifyPage(@RequestParam("email") String email, Model model) {
-        var OTP = this.userService.generateBase();
         model.addAttribute("email", email);
-        this.redisOTPService.saveOTP(email, OTP);
-        var msg = new VerifyAccountMessage();
-        msg.setDescription("Verify Account");
-        msg.setCreatedAt(LocalDateTime.now());
-        msg.setEmail(email);
-        this.verifyAccountKafka.send("customer-account-topic", msg);
 
-        model.addAttribute("otpTtlSeconds", 180);
+        // Áp dụng Rate Limiting cho việc gửi OTP (1 lần/phút)
+        if (this.rateLimitService.tryConsume(email)) {
+            var OTP = this.userService.generateBase();
+            this.redisOTPService.saveOTP(email, OTP);
+            var msg = new VerifyAccountMessage();
+            msg.setDescription("Verify Account");
+            msg.setCreatedAt(LocalDateTime.now());
+            msg.setEmail(email);
+            this.verifyAccountKafka.send("customer-account-topic", msg);
+        } else {
+            model.addAttribute("rateLimitMessage", "Vui lòng đợi 1 phút trước khi yêu cầu gửi lại OTP.");
+        }
+
+        // Đồng bộ thời gian còn lại của OTP thực tế trong Redis
+        long actualTtl = this.redisOTPService.getOTPTtl(email);
+        model.addAttribute("otpTtlSeconds", actualTtl > 0 ? actualTtl : 0);
+
         return "client/auth/verify";
     }
 
@@ -142,6 +156,11 @@ public class AuthController {
             return "redirect:/forgot-password";
         }
 
+        if (!this.rateLimitService.tryConsume(normalized)) {
+            ra.addFlashAttribute("error", "Vui lòng đợi 1 phút trước khi yêu cầu gửi lại OTP.");
+            return "redirect:/forgot-password";
+        }
+
         String otp = generateOtp6();
         long expireAt = Instant.now().getEpochSecond() + FP_TTL_SECONDS;
 
@@ -163,6 +182,11 @@ public class AuthController {
         if (email == null || email.isBlank()) {
             ra.addFlashAttribute("error", "Session đã hết. Vui lòng nhập email lại.");
             return "redirect:/forgot-password";
+        }
+
+        if (!this.rateLimitService.tryConsume(email)) {
+            ra.addFlashAttribute("error", "Vui lòng đợi 1 phút trước khi yêu cầu gửi lại OTP.");
+            return "redirect:/verify-otp";
         }
 
         String otp = generateOtp6();

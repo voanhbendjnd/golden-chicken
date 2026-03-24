@@ -19,4 +19,9 @@ public class RedisOTPService {
     public void saveOTP(String email, String OTP) {
         this.stringRedisTemplate.opsForValue().set(DeclareConstant.USER_OTP + email, OTP, 3, TimeUnit.MINUTES);
     }
+
+    public long getOTPTtl(String email) {
+        Long ttl = this.stringRedisTemplate.getExpire(DeclareConstant.USER_OTP + email, TimeUnit.SECONDS);
+        return ttl != null ? ttl : 0;
+    }
 }
