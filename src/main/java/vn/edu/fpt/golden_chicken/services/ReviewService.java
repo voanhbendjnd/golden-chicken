@@ -277,9 +277,9 @@ public class ReviewService {
             var p1 = c.equal(productJoin.get("id"), productId);
             if (isStaff) {
                 var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED);
-                var p3 = c.equal(r.get("reviewStatus"), ReviewStatus.DELETED);
+                // var p3 = c.equal(r.get("reviewStatus"), ReviewStatus.DELETED);
                 var p4 = c.equal(r.get("reviewStatus"), ReviewStatus.REJECTED);
-                return c.and(p1, c.or(p2, p3, p4));
+                return c.and(p1, c.or(p2, p4));
             } else {
                 var customer = user.getCustomer();
                 var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED);
