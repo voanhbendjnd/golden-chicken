@@ -59,23 +59,23 @@
                         </div>
 
                         <div class="mt-2">
-                            <a th:if="${product != null && orderId == null}"
-                                th:href="@{/checkout/addresses(productId=${product.id}, quantity=${order.items[0].quantity}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
-                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                            <button th:if="${product != null && orderId == null}" type="button"
+                                th:onclick="submitForm('/checkout/addresses', null, {productId: [[${product.id}]], quantity: [[${order.items[0].quantity}]], productVoucherId: [[${order.productVoucherId}]], shippingVoucherId: [[${order.shippingVoucherId}]]})"
+                                style="background: none; border: none; color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold; padding: 0;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
-                            </a>
+                            </button>
 
-                            <a th:if="${product == null && orderId == null}"
-                                th:href="@{/checkout/addresses(productIds=${#strings.listJoin(order.items.![productId], ',')}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
-                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                            <button th:if="${product == null && orderId == null}" type="button"
+                                th:onclick="submitForm('/checkout/addresses', null, {productIds: [[${#strings.listJoin(order.items.![productId], ',')}]], productVoucherId: [[${order.productVoucherId}]], shippingVoucherId: [[${order.shippingVoucherId}]]})"
+                                style="background: none; border: none; color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold; padding: 0;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
-                            </a>
+                            </button>
 
-                            <a th:if="${orderId != null}"
-                                th:href="@{/checkout/addresses(orderId=${orderId}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
-                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                            <button th:if="${orderId != null}" type="button"
+                                th:onclick="submitForm('/checkout/addresses', null, {orderId: [[${orderId}]], productVoucherId: [[${order.productVoucherId}]], shippingVoucherId: [[${order.shippingVoucherId}]]})"
+                                style="background: none; border: none; color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold; padding: 0;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
-                            </a>
+                            </button>
                         </div>
                     </div>
 
@@ -164,29 +164,29 @@
                         </div>
                         <!-- chọn voucher -->
                         <div class="mb-3">
-                            <a th:if="${product != null && orderId == null}"
-                                th:href="@{/checkout/vouchers(id=${product.id}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
+                            <button th:if="${product != null && orderId == null}" type="button" 
+                                th:onclick="submitForm('/checkout/vouchers', null, {id: [[${product.id}]], quantity: [[${order.items[0].quantity}]], addressId: [[${defaultAddress != null ? defaultAddress.id : null}]]})"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
-                            </a>
+                            </button>
 
-                            <a th:if="${product == null && orderId == null}"
-                                th:href="@{/checkout/vouchers(ids=${#strings.listJoin(order.items.![productId], ',')}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
+                            <button th:if="${product == null && orderId == null}" type="button"
+                                th:onclick="submitForm('/checkout/vouchers', {ids: [[${order.items.![productId]}]]}, {addressId: [[${defaultAddress != null ? defaultAddress.id : null}]]})"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
-                            </a>
+                            </button>
 
-                            <a th:if="${orderId != null}"
-                                th:href="@{/checkout/vouchers(orderId=${orderId}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
+                            <button th:if="${orderId != null}" type="button"
+                                th:onclick="submitForm('/checkout/vouchers', null, {orderId: [[${orderId}]], addressId: [[${defaultAddress != null ? defaultAddress.id : null}]]})"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
-                            </a>
+                            </button>
 
-                            <a th:if="${order.productDiscountAmount > 0 || order.shippingDiscountAmount > 0}"
-                                th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null && orderId == null ? #strings.listJoin(order.items.![productId], ',') : null}, orderId=${orderId}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null}, clearVouchers=true)}"
+                            <button th:if="${order.productDiscountAmount > 0 || order.shippingDiscountAmount > 0}" type="button"
+                                th:onclick="submitForm('/checkout', {ids: [[${product == null && orderId == null ? order.items.![productId] : null}]]}, {productId: [[${product != null ? product.id : null}]], orderId: [[${orderId}]], quantity: [[${order.items[0].quantity}]], addressId: [[${defaultAddress != null ? defaultAddress.id : null}]], clearVouchers: true})"
                                 class="btn btn-outline-danger btn-sm" title="Hủy bỏ voucher">
                                 <i class="fa-solid fa-xmark"></i> Hủy
-                            </a>
+                            </button>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: green;">
                             <span>Giảm giá sản phẩm</span>
@@ -227,6 +227,57 @@
         <script th:src="@{/js/checkout.js}"></script>
     </div>
     <div th:replace="~{client/layout/footer.djnd}"></div>
+    <script th:inline="javascript">
+        function submitForm(action, arrayParams, flatParams) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = action;
+
+            // CSRF Token
+            const csrfTokenElement = document.querySelector('input[name="_csrf"]');
+            if (csrfTokenElement) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfTokenElement.value;
+                form.appendChild(csrfInput);
+            }
+
+            // Handle flat params
+            if (flatParams) {
+                for (const key in flatParams) {
+                    if (flatParams.hasOwnProperty(key) && flatParams[key] !== null && flatParams[key] !== undefined) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = flatParams[key];
+                        form.appendChild(input);
+                    }
+                }
+            }
+
+            // Handle array params
+            if (arrayParams) {
+                for (const key in arrayParams) {
+                    if (arrayParams.hasOwnProperty(key) && arrayParams[key] !== null) {
+                        const values = Array.isArray(arrayParams[key]) ? arrayParams[key] : [arrayParams[key]];
+                        values.forEach(val => {
+                            if (val !== null && val !== undefined) {
+                                const input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = key;
+                                input.value = val;
+                                form.appendChild(input);
+                            }
+                        });
+                    }
+                }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 </body>
 
 </html>

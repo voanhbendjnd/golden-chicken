@@ -1,7 +1,9 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import vn.edu.fpt.golden_chicken.domain.response.ResAddress;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -50,14 +53,37 @@ public class CheckoutController {
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
-            @RequestParam(value = "quantity", required = false, defaultValue = "1") Integer quantity,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) throws PermissionException {
+
+        if (productId == null && model.containsAttribute("productId") && model.asMap().get("productId") != null) {
+            productId = Long.valueOf(model.asMap().get("productId").toString());
+        }
+        if (ids == null && model.containsAttribute("ids") && model.asMap().get("ids") != null) {
+            ids = (List<Long>) model.asMap().get("ids");
+        }
+        if (orderId == null && model.containsAttribute("orderId") && model.asMap().get("orderId") != null) {
+            orderId = Long.valueOf(model.asMap().get("orderId").toString());
+        }
+        if (quantity == null && model.containsAttribute("quantity") && model.asMap().get("quantity") != null) {
+            quantity = Integer.valueOf(model.asMap().get("quantity").toString());
+        }
+        if (addressId == null && model.containsAttribute("addressId") && model.asMap().get("addressId") != null) {
+            addressId = Long.valueOf(model.asMap().get("addressId").toString());
+        }
+        if (productVoucherId == null && model.containsAttribute("productVoucherId") && model.asMap().get("productVoucherId") != null) {
+            productVoucherId = Long.valueOf(model.asMap().get("productVoucherId").toString());
+        }
+        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId") && model.asMap().get("shippingVoucherId") != null) {
+            shippingVoucherId = Long.valueOf(model.asMap().get("shippingVoucherId").toString());
+        }
+
         var user = this.userService.getUserInContext();
         if (user.getCustomer() == null) {
             throw new PermissionException("You do not have permission!");
         }
 
-        if (quantity <= 0 || quantity == null) {
+        if (quantity == null || quantity <= 0) {
             quantity = 1;
         }
 
@@ -82,6 +108,31 @@ public class CheckoutController {
         return "client/checkout";
     }
 
+    @PostMapping
+    public String handleCheckoutPost(
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "quantity", required = false, defaultValue = "1") Integer quantity,
+            @RequestParam(value = "clearVouchers", required = false) Boolean clearVouchers,
+            RedirectAttributes redirectAttributes) {
+
+        redirectAttributes.addFlashAttribute("productId", productId);
+        redirectAttributes.addFlashAttribute("ids", ids);
+        redirectAttributes.addFlashAttribute("orderId", orderId);
+        if (clearVouchers == null || !clearVouchers) {
+            redirectAttributes.addFlashAttribute("productVoucherId", productVoucherId);
+            redirectAttributes.addFlashAttribute("shippingVoucherId", shippingVoucherId);
+        }
+        redirectAttributes.addFlashAttribute("addressId", addressId);
+        redirectAttributes.addFlashAttribute("quantity", quantity);
+
+        return "redirect:/checkout";
+    }
+
     @GetMapping("/addresses")
     public String listAddressCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
@@ -92,6 +143,25 @@ public class CheckoutController {
             @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) {
 
+        if (productId == null && model.containsAttribute("productId") && model.asMap().get("productId") != null) {
+            productId = Long.valueOf(model.asMap().get("productId").toString());
+        }
+        if (productIds == null && model.containsAttribute("productIds") && model.asMap().get("productIds") != null) {
+            productIds = model.asMap().get("productIds").toString();
+        }
+        if (orderId == null && model.containsAttribute("orderId") && model.asMap().get("orderId") != null) {
+            orderId = Long.valueOf(model.asMap().get("orderId").toString());
+        }
+        if (quantity == null && model.containsAttribute("quantity") && model.asMap().get("quantity") != null) {
+            quantity = Integer.valueOf(model.asMap().get("quantity").toString());
+        }
+        if (productVoucherId == null && model.containsAttribute("productVoucherId") && model.asMap().get("productVoucherId") != null) {
+            productVoucherId = Long.valueOf(model.asMap().get("productVoucherId").toString());
+        }
+        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId") && model.asMap().get("shippingVoucherId") != null) {
+            shippingVoucherId = Long.valueOf(model.asMap().get("shippingVoucherId").toString());
+        }
+
         var addresses = addressServices.getAllAddresses();
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
@@ -99,14 +169,45 @@ public class CheckoutController {
         model.addAttribute("orderId", orderId);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
-        model.addAttribute("orderId", orderId);
         model.addAttribute("quantity", quantity);
+
+        var defaultAddress = addressServices.getDefaultAddress();
+        List<ResAddress> additionalAddresses = new ArrayList<>();
+        if (addresses != null) {
+            for (ResAddress a : addresses) {
+                if (a.getIsDefault() == null || !a.getIsDefault()) {
+                    additionalAddresses.add(a);
+                }
+            }
+        }
+        model.addAttribute("additionalAddresses", additionalAddresses);
+        model.addAttribute("defaultAddress", defaultAddress);
 
         if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
             return "client/address/listAddressCheckout";
         }
 
-        return "client/address/addressBook";
+        return "client/address/listAddress";
+    }
+
+    @PostMapping("/addresses")
+    public String listAddressCheckoutPost(
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
+            RedirectAttributes redirectAttributes) {
+
+        redirectAttributes.addFlashAttribute("productId", productId);
+        redirectAttributes.addFlashAttribute("productIds", productIds);
+        redirectAttributes.addFlashAttribute("orderId", orderId);
+        redirectAttributes.addFlashAttribute("productVoucherId", productVoucherId);
+        redirectAttributes.addFlashAttribute("shippingVoucherId", shippingVoucherId);
+        redirectAttributes.addFlashAttribute("quantity", quantity);
+
+        return "redirect:/checkout/addresses";
     }
 
     @PostMapping("/order")
@@ -145,6 +246,22 @@ public class CheckoutController {
             @RequestParam(value = "size", defaultValue = "9") int size,
             Model model) throws PermissionException {
 
+        if (productId == null && model.containsAttribute("id")) {
+            productId = (Long) model.asMap().get("id");
+        }
+        if (productIds == null && model.containsAttribute("ids")) {
+            productIds = (List<Long>) model.asMap().get("ids");
+        }
+        if (quantity == null && model.containsAttribute("quantity")) {
+            quantity = (Integer) model.asMap().get("quantity");
+        }
+        if (addressId == null && model.containsAttribute("addressId")) {
+            addressId = (Long) model.asMap().get("addressId");
+        }
+        if (orderId == null && model.containsAttribute("orderId")) {
+            orderId = (Long) model.asMap().get("orderId");
+        }
+
         var currentUser = profileService.getCurrentUser();
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
@@ -173,6 +290,24 @@ public class CheckoutController {
         model.addAttribute("orderId", orderId);
 
         return "client/voucher-select";
+    }
+
+    @PostMapping("/vouchers")
+    public String listVouchersPost(
+            @RequestParam(value = "id", required = false) Long productId,
+            @RequestParam(value = "ids", required = false) List<Long> productIds,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "orderId", required = false) Long orderId,
+            RedirectAttributes redirectAttributes) {
+
+        redirectAttributes.addFlashAttribute("id", productId);
+        redirectAttributes.addFlashAttribute("ids", productIds);
+        redirectAttributes.addFlashAttribute("quantity", quantity);
+        redirectAttributes.addFlashAttribute("addressId", addressId);
+        redirectAttributes.addFlashAttribute("orderId", orderId);
+
+        return "redirect:/checkout/vouchers";
     }
 
     @PostMapping("/apply-vouchers")

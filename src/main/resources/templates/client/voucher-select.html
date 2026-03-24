@@ -17,16 +17,16 @@
 
     <main style="padding-top:200px; " class="container">
         <div class="mb-4">
-            <a class="btn btn-outline-secondary" th:href="@{/checkout(
-                    productId=${productId},
-                    ids=${productIds != null ? #strings.listJoin(productIds, ',') : null},
-                    orderId=${orderId},
-                    quantity=${quantity},
-                    addressId=${addressId},
-                    orderId=${orderId}
-               )}">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại thanh toán
-            </a>
+            <form th:action="@{/checkout}" method="post" style="display: inline;">
+                <input type="hidden" name="productId" th:value="${productId}" />
+                <input type="hidden" name="ids" th:value="${productIds != null ? #strings.listJoin(productIds, ',') : ''}" />
+                <input type="hidden" name="orderId" th:value="${orderId}" />
+                <input type="hidden" name="quantity" th:value="${quantity}" />
+                <input type="hidden" name="addressId" th:value="${addressId}" />
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại thanh toán
+                </button>
+            </form>
         </div>
 
         <h2 class="voucher-title text-center mb-4">Chọn ưu đãi cho đơn hàng của bạn</h2>

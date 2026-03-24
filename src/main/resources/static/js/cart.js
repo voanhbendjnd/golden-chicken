@@ -63,7 +63,30 @@
                         return;
                     }
 
-                    window.location.href = '/checkout?ids=' + selectedIds.join(',');
+                    // window.location.href = '/checkout?ids=' + selectedIds.join(',');
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/checkout';
+
+                    selectedIds.forEach(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'ids';
+                        input.value = id;
+                        form.appendChild(input);
+                    });
+
+                    const csrfTokenVal = document.getElementById('csrf-token').value;
+                    if (csrfTokenVal) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_csrf';
+                        csrfInput.value = csrfTokenVal;
+                        form.appendChild(csrfInput);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
                 };
 
                 const selectAll = document.getElementById('select-all');
