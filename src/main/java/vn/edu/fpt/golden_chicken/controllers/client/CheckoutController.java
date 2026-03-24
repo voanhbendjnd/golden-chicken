@@ -20,6 +20,7 @@ import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
 import vn.edu.fpt.golden_chicken.services.CheckoutService;
 import vn.edu.fpt.golden_chicken.services.OrderService;
+import vn.edu.fpt.golden_chicken.services.ProductService;
 import vn.edu.fpt.golden_chicken.services.ProfileService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.VoucherService;
@@ -39,6 +40,7 @@ public class CheckoutController {
     VoucherService voucherService;
     CheckoutService checkoutService;
     UserService userService;
+    ProductService productService;
 
     @GetMapping
     public String handleCheckout(
@@ -48,12 +50,25 @@ public class CheckoutController {
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "addressId", required = false) Long addressId,
-            @RequestParam(value = "quantity", required = false) Integer quantity,
+            @RequestParam(value = "quantity", required = false, defaultValue = "1") Integer quantity,
             Model model) throws PermissionException {
         var user = this.userService.getUserInContext();
         if (user.getCustomer() == null) {
             throw new PermissionException("You do not have permission!");
         }
+
+        if (quantity <= 0 || quantity == null) {
+            quantity = 1;
+        }
+
+        if (productId != null && !productService.checkProductAndCategoryActive(productId)) {
+            return "redirect:/home";
+        }
+        if (orderId != null) {
+            if (!this.orderService.checkOrderByCustomer(orderId))
+                return "redirect:/home";
+        }
+
         CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, productVoucherId,
                 shippingVoucherId, addressId, quantity);
 
@@ -62,6 +77,7 @@ public class CheckoutController {
         }
 
         model.addAllAttributes(response.getModel());
+        model.addAttribute("orderId", orderId);
 
         return "client/checkout";
     }
@@ -70,9 +86,9 @@ public class CheckoutController {
     public String listAddressCheckout(
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "orderId", required = false) Long orderId,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
-            @RequestParam(value = "orderId", required = false) Long orderId,
             @RequestParam(value = "quantity", required = false) Integer quantity,
             Model model) {
 
@@ -80,6 +96,7 @@ public class CheckoutController {
         model.addAttribute("addresses", addresses);
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
+        model.addAttribute("orderId", orderId);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
         model.addAttribute("orderId", orderId);
@@ -163,10 +180,10 @@ public class CheckoutController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "ids", required = false) List<Long> ids,
             @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "orderId", required = false) Long orderId,
             @RequestParam(value = "voucherIds", required = false) List<Long> voucherIds,
             @RequestParam(value = "voucherCode", required = false) String voucherCode,
             @RequestParam(value = "quantity", required = false) Integer quantity,
-            @RequestParam(value = "orderId", required = false) Long orderId,
             Model model) throws PermissionException {
         OrderDTO selection;
         try {

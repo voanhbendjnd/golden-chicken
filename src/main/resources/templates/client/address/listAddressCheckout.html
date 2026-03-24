@@ -26,13 +26,13 @@
                     <div class="name">
                         <span th:text="${a.recipientName}"></span>
 
-                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId}, orderId=${orderId})}"
-                            class="ms-2 text-primary" title="Chỉnh sửa">
+                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, orderId=${orderId}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId},                     quantity=${quantity}
+)}" class="ms-2 text-primary" title="Chỉnh sửa">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
 
-                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId}, orderId=${orderId})}"
-                            class="ms-2 text-danger">
+                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, orderId=${orderId}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId},                     quantity=${quantity}
+)}" class="ms-2 text-danger">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>
@@ -50,9 +50,11 @@
                 <a th:href="@{/addresses/new(
                     productId=${productId},
                     productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null},
+                    orderId=${orderId},
                     productVoucherId=${productVoucherId},
                     shippingVoucherId=${shippingVoucherId},
-                    orderId=${orderId}
+                    orderId=${orderId},
+                    quantity=${quantity}
                     )}" class="btn btn-success btn-add">
                     Thêm địa chỉ mới
                 </a>
@@ -78,16 +80,15 @@
                 const productVoucherId = [[${ productVoucherId }]];
                 const shippingVoucherId = [[${ shippingVoucherId }]];
                 const orderId = [[${ orderId }]];
-
+                const quantity = [[${ quantity }]]
                 let url = "";
 
-                // 1. Trường hợp mua lại (Rebuy)
                 if (orderId != null && orderId !== '') {
                     url = `/checkout?orderId=${orderId}&addressId=${addressId}`;
                 }
-                // 2. Trường hợp mua ngay (Buy Now)
+                // 1. Trường hợp mua ngay (Buy Now)
                 else if (productId != null && productId !== '') {
-                    url = `/checkout?productId=${productId}&addressId=${addressId}`;
+                    url = `/checkout?productId=${productId}&addressId=${addressId}&quantity=${quantity}`;
                 }
                 // 3. Trường hợp mua từ giỏ hàng (Cart)
                 else if (productIds != null && productIds !== '') {

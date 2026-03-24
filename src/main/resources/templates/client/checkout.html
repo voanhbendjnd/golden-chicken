@@ -59,13 +59,20 @@
                         </div>
 
                         <div class="mt-2">
-                            <a th:if="${product != null}" th:href="@{/checkout/addresses(productId=${product.id}, quantity=${order.items[0].quantity}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId}, orderId=${orderId})}"
+                            <a th:if="${product != null && orderId == null}"
+                                th:href="@{/checkout/addresses(productId=${product.id}, quantity=${order.items[0].quantity}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
                                 style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
                             </a>
 
-                            <a th:if="${product == null}"
-                                th:href="@{/checkout/addresses(productIds=${#strings.listJoin(order.items.![productId], ',')}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId}, orderId=${orderId})}"
+                            <a th:if="${product == null && orderId == null}"
+                                th:href="@{/checkout/addresses(productIds=${#strings.listJoin(order.items.![productId], ',')}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
+                                style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
+                                <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
+                            </a>
+
+                            <a th:if="${orderId != null}"
+                                th:href="@{/checkout/addresses(orderId=${orderId}, productVoucherId=${order.productVoucherId}, shippingVoucherId=${order.shippingVoucherId})}"
                                 style="color: #ffb524; font-size: 0.8rem; text-decoration: none; font-weight: bold;">
                                 <i class="fa-solid fa-arrows-rotate"></i> Thay đổi địa chỉ
                             </a>
@@ -157,18 +164,26 @@
                         </div>
                         <!-- chọn voucher -->
                         <div class="mb-3">
-                            <a th:if="${product != null}" th:href="@{/checkout/vouchers(id=${product.id}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null}, orderId=${orderId})}"
+                            <a th:if="${product != null && orderId == null}"
+                                th:href="@{/checkout/vouchers(id=${product.id}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
                             </a>
 
-                            <a th:if="${product == null}"
-                                th:href="@{/checkout/vouchers(ids=${#strings.listJoin(order.items.![productId], ',')}, addressId=${defaultAddress != null ? defaultAddress.id : null}, orderId=${orderId})}"
+                            <a th:if="${product == null && orderId == null}"
+                                th:href="@{/checkout/vouchers(ids=${#strings.listJoin(order.items.![productId], ',')}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
                                 class="btn btn-outline-warning btn-sm">
                                 <i class="fa-solid fa-ticket"></i> Chọn voucher
                             </a>
+
+                            <a th:if="${orderId != null}"
+                                th:href="@{/checkout/vouchers(orderId=${orderId}, addressId=${defaultAddress != null ? defaultAddress.id : null})}"
+                                class="btn btn-outline-warning btn-sm">
+                                <i class="fa-solid fa-ticket"></i> Chọn voucher
+                            </a>
+
                             <a th:if="${order.productDiscountAmount > 0 || order.shippingDiscountAmount > 0}"
-                                th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null && orderId == null ? #strings.listJoin(order.items.![productId], ',') : null}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null}, orderId=${orderId})}"
+                                th:href="@{/checkout(productId=${product != null ? product.id : null}, ids=${product == null && orderId == null ? #strings.listJoin(order.items.![productId], ',') : null}, orderId=${orderId}, quantity=${order.items[0].quantity}, addressId=${defaultAddress != null ? defaultAddress.id : null}, clearVouchers=true)}"
                                 class="btn btn-outline-danger btn-sm" title="Hủy bỏ voucher">
                                 <i class="fa-solid fa-xmark"></i> Hủy
                             </a>
