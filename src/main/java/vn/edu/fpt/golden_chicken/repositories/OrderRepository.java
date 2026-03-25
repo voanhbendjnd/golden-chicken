@@ -35,6 +35,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
         Page<Order> findAll(Specification<Order> spec, Pageable pageable);
 
+        @EntityGraph(attributePaths = { "orderItems", "orderItems.product" })
+        java.util.Optional<Order> findWithItemsById(Long id);
+
         Page<Order> findByShipperAndStatusIn(Staff shipper, List<OrderStatus> statuses, Pageable pageable);
 
         Page<Order> findByCustomerUserIdAndStatusIn(Long userId, List<OrderStatus> statuses, Pageable pageable);

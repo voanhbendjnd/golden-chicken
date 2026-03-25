@@ -116,9 +116,11 @@
             padding: 0 14px;
             transition: background 0.2s;
         }
+
         .input-group .btn-toggle-pw:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
         .input-group .form-control {
             border-radius: 15px 0 0 15px !important;
         }
@@ -129,7 +131,7 @@
 
     <div class="login-card">
 
-        <h3 class="text-center mb-4">Welcome Back</h3>
+        <h3 class="text-center mb-4">Đăng Nhập</h3>
 
         <form method="post" th:action="@{/login}">
 
@@ -155,7 +157,8 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                    <input class="form-control" type="password" id="loginPassword" name="password" placeholder="Enter your password" required />
+                    <input class="form-control" type="password" id="loginPassword" name="password"
+                        placeholder="Enter your password" required />
                     <button type="button" class="btn-toggle-pw" onclick="toggleLoginPw()" tabindex="-1">
                         <i id="loginEyeIcon" class="bi bi-eye"></i>
                     </button>
@@ -187,7 +190,7 @@
     <script>
         function toggleLoginPw() {
             const input = document.getElementById('loginPassword');
-            const icon  = document.getElementById('loginEyeIcon');
+            const icon = document.getElementById('loginEyeIcon');
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.replace('bi-eye', 'bi-eye-slash');

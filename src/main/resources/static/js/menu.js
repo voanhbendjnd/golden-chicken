@@ -119,22 +119,55 @@
             });
             document.querySelectorAll('.btn-buy-now').forEach(btn => {
                 btn.onclick = function (e) {
+                    e.preventDefault();
                     const productId = this.getAttribute('data-id');
                     const qtyInput = document.getElementById('qty-' + productId);
-                    if (qtyInput) {
-                        const quantity = qtyInput.value;
-                        const originalHref = this.getAttribute('href');
-                        // Tách URL và các tham số cũ
-                        const urlParts = originalHref.split('?');
-                        const baseUrl = urlParts[0];
-                        let params = new URLSearchParams(urlParts[1] || '');
+                    const quantity = qtyInput ? qtyInput.value : 1;
+                    const originalHref = this.getAttribute('href');
+                    const urlParts = originalHref.split('?');
+                    const params = new URLSearchParams(urlParts[1] || '');
 
-                        // Thêm/Cập nhật quantity
-                        params.set('quantity', quantity);
-                        params.set('productId', productId); // Đảm bảo productId đúng
+                    // Tạo form ẩn để gửi POST
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/checkout';
 
-                        this.setAttribute('href', baseUrl + '?' + params.toString());
+                    // Thêm tham số từ URL cũ và quantity mới
+                    params.forEach((value, key) => {
+                        if (key !== 'quantity' && key !== 'productId') {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key;
+                            input.value = value;
+                            form.appendChild(input);
+                        }
+                    });
+
+                    // Thêm productId và quantity
+                    const prodInput = document.createElement('input');
+                    prodInput.type = 'hidden';
+                    prodInput.name = 'productId';
+                    prodInput.value = productId;
+                    form.appendChild(prodInput);
+
+                    const qtyFormInput = document.createElement('input');
+                    qtyFormInput.type = 'hidden';
+                    qtyFormInput.name = 'quantity';
+                    qtyFormInput.value = quantity;
+                    form.appendChild(qtyFormInput);
+
+                    // Thêm CSRF token
+                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                    if (csrfToken) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_csrf';
+                        csrfInput.value = csrfToken;
+                        form.appendChild(csrfInput);
                     }
+
+                    document.body.appendChild(form);
+                    form.submit();
                 };
             });
         });

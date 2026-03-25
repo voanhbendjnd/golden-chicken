@@ -111,9 +111,11 @@
         .pw-group {
             position: relative;
         }
+
         .pw-group .form-control {
             padding-right: 48px;
         }
+
         .pw-toggle {
             position: absolute;
             right: 14px;
@@ -128,7 +130,10 @@
             padding: 0;
             transition: color 0.2s;
         }
-        .pw-toggle:hover { color: #e9c3a3; }
+
+        .pw-toggle:hover {
+            color: #e9c3a3;
+        }
     </style>
 </head>
 
@@ -136,13 +141,13 @@
 
     <div class="register-wrapper login-card">
 
-        <h3 class="text-center mb-4">Create Account</h3>
+        <h3 class="text-center mb-4">Đăng Ký Tài Khoản</h3>
 
         <form th:action="@{/register}" method="post" th:object="${registerUser}" onsubmit="return validPassword()">
 
             <div class="form-floating mb-3">
                 <input class="form-control" th:field="*{fullName}" placeholder="Full name">
-                <label>Full name</label>
+                <label>Tên</label>
             </div>
 
             <div class="form-floating mb-3">
@@ -155,7 +160,7 @@
 
             <div class="form-floating mb-3 pw-group">
                 <input class="form-control" th:field="*{password}" id="password" type="password" placeholder="Password">
-                <label>Password</label>
+                <label>Mật khẩu</label>
                 <button type="button" class="pw-toggle" onclick="togglePw('password','eyeReg1')" tabindex="-1">
                     <i id="eyeReg1" class="bi bi-eye"></i>
                 </button>
@@ -163,8 +168,9 @@
             <div id="reg-pw-len-error" class="mb-1 fw-semibold" style="color:#ffb3b3; font-size:0.88rem;"></div>
 
             <div class="form-floating mb-3 pw-group">
-                <input class="form-control" th:field="*{confirmPassword}" id="confirmPassword" type="password" placeholder="Confirm Password">
-                <label>Confirm Password</label>
+                <input class="form-control" th:field="*{confirmPassword}" id="confirmPassword" type="password"
+                    placeholder="Confirm Password">
+                <label>Xác nhận mật khẩu</label>
                 <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword','eyeReg2')" tabindex="-1">
                     <i id="eyeReg2" class="bi bi-eye"></i>
                 </button>
@@ -174,13 +180,13 @@
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-custom">
-                    Create Account
+                    Tạo tài khoản
                 </button>
             </div>
 
             <div class="login-link text-center mt-3">
                 <a th:href="@{/login}">
-                    Already have an account? Login
+                    Đã có tài khoản, Đăng Nhập
                 </a>
             </div>
 
@@ -191,7 +197,7 @@
         // Toggle hiển thị / ẩn mật khẩu
         function togglePw(inputId, iconId) {
             const input = document.getElementById(inputId);
-            const icon  = document.getElementById(iconId);
+            const icon = document.getElementById(iconId);
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.replace('bi-eye', 'bi-eye-slash');
@@ -201,10 +207,10 @@
             }
         }
 
-        const pwInput      = document.getElementById('password');
+        const pwInput = document.getElementById('password');
         const confirmInput = document.getElementById('confirmPassword');
-        const errorMsg     = document.getElementById('error-msg');
-        const lenError     = document.getElementById('reg-pw-len-error');
+        const errorMsg = document.getElementById('error-msg');
+        const lenError = document.getElementById('reg-pw-len-error');
 
         function checkLength() {
             if (pwInput.value.length > 0 && pwInput.value.length < 6) {
@@ -231,7 +237,7 @@
         confirmInput.addEventListener('keyup', checkMatch);
 
         function validPassword() {
-            const lenOk   = checkLength();
+            const lenOk = checkLength();
             const matchOk = checkMatch();
             return lenOk && matchOk;
         }

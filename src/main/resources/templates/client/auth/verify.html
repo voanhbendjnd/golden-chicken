@@ -142,6 +142,10 @@
             Mã OTP sẽ hết hạn sau: <span id="timer-count">--:--</span>
         </div>
 
+        <div th:if="${rateLimitMessage}" class="alert alert-warning" style="background: rgba(255, 193, 7, 0.2); color: #fff; border: 1px solid #ffc107; border-radius: 10px; padding: 10px; margin-bottom: 20px; font-size: 14px;">
+            <span th:text="${rateLimitMessage}"></span>
+        </div>
+
         <div class="otp-inputs" id="otp-inputs">
             <input type="number" maxlength="1" max="9" min="0" inputmode="numeric" autocomplete="one-time-code">
             <input type="number" maxlength="1" max="9" min="0" inputmode="numeric">
@@ -169,6 +173,15 @@
         const verifyBtn = document.querySelector('.btn-verify');
 
         function startTimer() {
+            if (timeLeft <= 0) {
+                timerSpan.textContent = "Hết hạn";
+                timerSpan.style.color = "#ff4d4d";
+                verifyBtn.disabled = true;
+                verifyBtn.style.background = "#ccc";
+                verifyBtn.style.cursor = "not-allowed";
+                return;
+            }
+
             const timer = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timer);

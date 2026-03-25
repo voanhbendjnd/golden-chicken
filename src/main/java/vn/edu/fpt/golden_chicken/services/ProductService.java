@@ -432,4 +432,19 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public boolean checkProductAndCategoryActive(Long id) {
+        var productOptional = this.productRepository.findById(id);
+        if (productOptional.isPresent()) {
+            var product = productOptional.get();
+            var cate = product.getCategory();
+            if (cate != null) {
+                if (product.getActive() && cate.getStatus()) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
 }

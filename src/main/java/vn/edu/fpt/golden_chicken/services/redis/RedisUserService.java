@@ -140,6 +140,12 @@ public class RedisUserService {
         this.stringRedisTemplate.opsForValue().set(key, otp, 3, TimeUnit.MINUTES);
     }
 
+    public long getKeyOTPForgotPasswordTtl(String email) {
+        var key = "FORGOT_PASSWORD:" + email;
+        Long ttl = this.stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return ttl != null ? ttl : 0;
+    }
+
     public String getKeyOTPForgotPassword(String email) {
         var key = "FORGOT_PASSWORD:" + email;
         return this.stringRedisTemplate.opsForValue().get(key);

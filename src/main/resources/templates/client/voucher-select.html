@@ -17,15 +17,16 @@
 
     <main style="padding-top:200px; " class="container">
         <div class="mb-4">
-            <a class="btn btn-outline-secondary" th:href="@{/checkout(
-                    productId=${productId},
-                    ids=${productIds != null ? #strings.listJoin(productIds, ',') : null},
-                    orderId=${orderId},
-                    quantity=${quantity},
-                    addressId=${addressId}
-               )}">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại thanh toán
-            </a>
+            <form th:action="@{/checkout}" method="post" style="display: inline;">
+                <input type="hidden" name="productId" th:value="${productId}" />
+                <input type="hidden" name="ids" th:value="${productIds != null ? #strings.listJoin(productIds, ',') : ''}" />
+                <input type="hidden" name="orderId" th:value="${orderId}" />
+                <input type="hidden" name="quantity" th:value="${quantity}" />
+                <input type="hidden" name="addressId" th:value="${addressId}" />
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại thanh toán
+                </button>
+            </form>
         </div>
 
         <h2 class="voucher-title text-center mb-4">Chọn ưu đãi cho đơn hàng của bạn</h2>
@@ -87,7 +88,7 @@
         <div class="mt-4" th:if="${totalPages > 1}">
             <nav aria-label="Voucher pagination">
                 <ul class="pagination justify-content-center">
-                     <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
                         <a class="page-link"
                             th:href="@{/checkout/vouchers(id=${productId}, ids=${productIds != null ? #strings.listJoin(productIds, ',') : null}, orderId=${orderId}, quantity=${quantity}, addressId=${addressId}, page=${currentPage - 1}, size=${size})}">Trước</a>
                     </li>

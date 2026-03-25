@@ -146,18 +146,51 @@
             });
             document.querySelectorAll('.btn-buy-now').forEach(btn => {
                 btn.onclick = function (e) {
+                    e.preventDefault();
                     const productId = this.getAttribute('data-id');
                     const qtyInput = document.getElementById('qty-' + productId);
-                    if (qtyInput) {
-                        const quantity = qtyInput.value;
-                        const originalHref = this.getAttribute('href');
-                        const urlParts = originalHref.split('?');
-                        const baseUrl = urlParts[0];
-                        let params = new URLSearchParams(urlParts[1] || '');
-                        params.set('quantity', quantity);
-                        params.set('productId', productId);
-                        this.setAttribute('href', baseUrl + '?' + params.toString());
+                    const quantity = qtyInput ? qtyInput.value : 1;
+                    const originalHref = this.getAttribute('href');
+                    const urlParts = originalHref.split('?');
+                    const params = new URLSearchParams(urlParts[1] || '');
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/checkout';
+
+                    params.forEach((value, key) => {
+                        if (key !== 'quantity' && key !== 'productId') {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key;
+                            input.value = value;
+                            form.appendChild(input);
+                        }
+                    });
+
+                    const prodInput = document.createElement('input');
+                    prodInput.type = 'hidden';
+                    prodInput.name = 'productId';
+                    prodInput.value = productId;
+                    form.appendChild(prodInput);
+
+                    const qtyFormInput = document.createElement('input');
+                    qtyFormInput.type = 'hidden';
+                    qtyFormInput.name = 'quantity';
+                    qtyFormInput.value = quantity;
+                    form.appendChild(qtyFormInput);
+
+                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                    if (csrfToken) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_csrf';
+                        csrfInput.value = csrfToken;
+                        form.appendChild(csrfInput);
                     }
+
+                    document.body.appendChild(form);
+                    form.submit();
                 };
             });
         });

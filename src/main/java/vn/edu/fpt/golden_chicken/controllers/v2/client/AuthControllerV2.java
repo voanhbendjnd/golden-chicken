@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
+import vn.edu.fpt.golden_chicken.services.RateLimitService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
 
@@ -36,6 +37,7 @@ public class AuthControllerV2 {
     RedisUserService redisUserService;
     KafkaTemplate<String, VerifyAccountMessage> kafkaVerifyMessage;
     UserRepository userRepository;
+    RateLimitService rateLimitService;
 
     @GetMapping("/forgot-password-v2")
     public String forgotPasswordPage(Model model) {
@@ -55,19 +57,27 @@ public class AuthControllerV2 {
     @GetMapping("verify-v2")
     public String verifyPage(@RequestParam("email") String email, Model model, HttpSession session) {
         model.addAttribute("email", email);
-        var oneTimePassword = this.userService.generateBase();
-        this.redisUserService.saveKeyOTPForgotPassword(email, oneTimePassword);
-        var verifyMsg = new VerifyAccountMessage();
-        verifyMsg.setDescription("Send OTP for update password");
-        verifyMsg.setCreatedAt(LocalDateTime.now());
-        verifyMsg.setEmail(email);
-        long expireAt = Instant.now().getEpochSecond() + 3 * 60;
 
-        session.setAttribute("FP:OTP", oneTimePassword);
-        session.setAttribute("FP:EXPIREAT", expireAt);
-        this.kafkaVerifyMessage.send("forgot-password-account-topic", verifyMsg);
+        if (this.rateLimitService.tryConsume(email)) {
+            var oneTimePassword = this.userService.generateBase();
+            this.redisUserService.saveKeyOTPForgotPassword(email, oneTimePassword);
+            var verifyMsg = new VerifyAccountMessage();
+            verifyMsg.setDescription("Send OTP for update password");
+            verifyMsg.setCreatedAt(LocalDateTime.now());
+            verifyMsg.setEmail(email);
+            long expireAt = Instant.now().getEpochSecond() + 3 * 60;
 
-        model.addAttribute("otpTtlSeconds", 180);
+            session.setAttribute("FP:OTP", oneTimePassword);
+            session.setAttribute("FP:EXPIREAT", expireAt);
+            this.kafkaVerifyMessage.send("forgot-password-account-topic", verifyMsg);
+        } else {
+            model.addAttribute("rateLimitMessage", "Vui lòng đợi 1 phút trước khi yêu cầu gửi lại OTP.");
+        }
+
+        // Đồng bộ thời gian còn lại thực tế trong Redis
+        long actualTtl = this.redisUserService.getKeyOTPForgotPasswordTtl(email);
+        model.addAttribute("otpTtlSeconds", actualTtl > 0 ? actualTtl : 0);
+
         return "client/auth/verify.v2";
     }
 

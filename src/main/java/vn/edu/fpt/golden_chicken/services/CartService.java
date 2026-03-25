@@ -49,7 +49,9 @@ public class CartService {
             customer.addCartItem(cartItem);
         } else {
             int currentQty = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
-            cartItem.setQuantity(currentQty + quantity);
+            var total = currentQty + quantity;
+
+            cartItem.setQuantity(total <= 33 ? total : 33);
             cartItem.setPrice(product.getPrice());
         }
         this.cartRepository.save(cartItem);

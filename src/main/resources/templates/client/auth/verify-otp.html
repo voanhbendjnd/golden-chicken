@@ -19,9 +19,17 @@
         }
 
         @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .wrapper {
@@ -39,15 +47,22 @@
         .left-panel {
             flex: 1;
             padding: 60px 40px;
-            background: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        .left-panel h2 { font-weight: 700; font-size: 32px; }
-        .left-panel p { opacity: 0.9; margin-top: 12px; }
+        .left-panel h2 {
+            font-weight: 700;
+            font-size: 32px;
+        }
+
+        .left-panel p {
+            opacity: 0.9;
+            margin-top: 12px;
+        }
 
         .right-panel {
             flex: 1.2;
@@ -106,150 +121,151 @@
         }
 
         @media(max-width: 768px) {
-            .wrapper { flex-direction: column; }
-            .left-panel { text-align: center; }
-            .otp-input { letter-spacing: 6px; }
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                text-align: center;
+            }
+
+            .otp-input {
+                letter-spacing: 6px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="wrapper login-card">
+    <div class="wrapper login-card">
 
-    <!-- LEFT -->
-    <div class="left-panel">
-        <h2>Verify OTP</h2>
-        <p>We’ve sent a 6-digit OTP to your email. Enter it below to continue.</p>
+        <!-- LEFT -->
+        <div class="left-panel">
+            <h2>Xác Thực OTP</h2>
+            <p>Hệ thống gửi OTP về cho Email của bạn</p>
 
-        <!-- optional: show email -->
-        <p class="hint mt-3" th:if="${email != null}">
-            Email: <b th:text="${email}">example@email.com</b>
-        </p>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="right-panel">
-        <h3 class="text-center mb-1 fw-bold">Enter OTP</h3>
-        <div id="otp-timer" class="text-center mb-4">
-            OTP expires in: <span id="timer-count" class="fw-bold" style="color: #d90429;">--:--</span>
+            <!-- optional: show email -->
+            <p class="hint mt-3" th:if="${email != null}">
+                Email: <b th:text="${email}">example@email.com</b>
+            </p>
         </div>
 
-        <div th:if="${message}" class="alert alert-success text-center">
-            <span th:text="${message}"></span>
-        </div>
-        <div th:if="${error}" class="alert alert-danger text-center">
-            <span th:text="${error}"></span>
-        </div>
-
-        <!-- Verify OTP -->
-        <form th:action="@{/verify-otp}" method="post" onsubmit="return validateOtp()">
-
-            <!-- hidden email (nếu bạn truyền email qua model) -->
-            <input type="hidden" name="email" th:value="${email}" />
-
-            <div class="form-floating mb-3">
-                <input class="form-control otp-input"
-                       id="otp"
-                       name="otp"
-                       inputmode="numeric"
-                       pattern="[0-9]{6}"
-                       maxlength="6"
-                       placeholder="OTP"
-                       required />
-                <label>6-digit OTP</label>
+        <!-- RIGHT -->
+        <div class="right-panel">
+            <h3 class="text-center mb-1 fw-bold">Nhập OTP</h3>
+            <div id="otp-timer" class="text-center mb-4">
+                OTP đến hạn trong: <span id="timer-count" class="fw-bold" style="color: #d90429;">--:--</span>
             </div>
 
-            <div id="otp-error" class="mb-3 fw-semibold" style="color:#b00020;"></div>
+            <div th:if="${message}" class="alert alert-success text-center">
+                <span th:text="${message}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger text-center">
+                <span th:text="${error}"></span>
+            </div>
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-danger">
-                    Verify OTP
-                </button>
+            <!-- Verify OTP -->
+            <form th:action="@{/verify-otp}" method="post" onsubmit="return validateOtp()">
 
-                <!-- Resend OTP -->
-                <button type="submit"
-                        class="btn btn-outline-dark"
-                        th:formaction="@{/forgot-password/resend}"
+                <!-- hidden email (nếu bạn truyền email qua model) -->
+                <input type="hidden" name="email" th:value="${email}" />
+
+                <div class="form-floating mb-3">
+                    <input class="form-control otp-input" id="otp" name="otp" inputmode="numeric" pattern="[0-9]{6}"
+                        maxlength="6" placeholder="OTP" required />
+                    <label>4-digit OTP</label>
+                </div>
+
+                <div id="otp-error" class="mb-3 fw-semibold" style="color:#b00020;"></div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        Xác thực OTP
+                    </button>
+
+                    <!-- Resend OTP -->
+                    <button type="submit" class="btn btn-outline-dark" th:formaction="@{/forgot-password/resend}"
                         formmethod="post">
-                    Resend OTP
-                </button>
-            </div>
+                        Gửi Lại OTP
+                    </button>
+                </div>
 
-            <div class="back-link text-center mt-3">
-                <a th:href="@{/login}">← Back to Login</a>
-            </div>
-        </form>
+                <div class="back-link text-center mt-3">
+                    <a th:href="@{/login}">← Trở lại đăng nhập</a>
+                </div>
+            </form>
+        </div>
+
     </div>
 
-</div>
+    <script th:inline="javascript">
+        const verifyBtn = document.querySelector('button[type="submit"]:not(.btn-outline-dark)');
+        let timeLeft = /*[[${otpTtlSeconds}]]*/ 180;
+        const timerSpan = document.getElementById('timer-count');
 
-<script th:inline="javascript">
-    const verifyBtn = document.querySelector('button[type="submit"]:not(.btn-outline-dark)');
-    let timeLeft = /*[[${otpTtlSeconds}]]*/ 180;
-    const timerSpan = document.getElementById('timer-count');
-
-    function startTimer() {
-        if (timeLeft <= 0) {
-            timerSpan.textContent = "Expired";
-            verifyBtn.disabled = true;
-            return;
-        }
-
-        const timer = setInterval(() => {
+        function startTimer() {
             if (timeLeft <= 0) {
-                clearInterval(timer);
                 timerSpan.textContent = "Expired";
                 verifyBtn.disabled = true;
-            } else {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timerSpan.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                timeLeft--;
+                return;
             }
-        }, 1000);
-    }
 
-    startTimer();
-
-    function validateOtp() {
-        const otp = document.getElementById("otp").value.trim();
-        const err = document.getElementById("otp-error");
-
-        if (!/^\d{6}$/.test(otp)) {
-            err.innerHTML = "OTP must be exactly 6 digits.";
-            return false;
+            const timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerSpan.textContent = "Expired";
+                    verifyBtn.disabled = true;
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerSpan.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    timeLeft--;
+                }
+            }, 1000);
         }
-        err.innerHTML = "";
-        return true;
-    }
 
-    // only allow digits
-    const otpInput = document.getElementById("otp");
-    otpInput.addEventListener("input", () => {
-        otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
-    });
+        startTimer();
 
-    // 3D tilt
-    const card = document.querySelector(".login-card");
-    card.addEventListener("mousemove", (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        function validateOtp() {
+            const otp = document.getElementById("otp").value.trim();
+            const err = document.getElementById("otp-error");
 
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+            if (!/^\d{6}$/.test(otp)) {
+                err.innerHTML = "OTP must be exactly 6 digits.";
+                return false;
+            }
+            err.innerHTML = "";
+            return true;
+        }
 
-        const rotateX = ((y - centerY) / 30) * -1;
-        const rotateY = (x - centerX) / 30;
+        // only allow digits
+        const otpInput = document.getElementById("otp");
+        otpInput.addEventListener("input", () => {
+            otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+        });
 
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-    });
+        // 3D tilt
+        const card = document.querySelector(".login-card");
+        card.addEventListener("mousemove", (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-    card.addEventListener("mouseleave", () => {
-        card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
-    });
-</script>
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / 30) * -1;
+            const rotateY = (x - centerX) / 30;
+
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+
+        card.addEventListener("mouseleave", () => {
+            card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
+        });
+    </script>
 
 </body>
+
 </html>

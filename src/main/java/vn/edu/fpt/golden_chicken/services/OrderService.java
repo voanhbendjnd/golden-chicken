@@ -401,9 +401,22 @@ public class OrderService {
         }
     }
 
+    public boolean checkOrderByCustomer(Long orderId) {
+        var user = this.userService.getUserInContext();
+        if (user.getCustomer() != null) {
+            var setOrderByUser = user.getCustomer().getOrders().stream().map(x -> x.getId())
+                    .collect(Collectors.toSet());
+            if (setOrderByUser.contains(orderId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Transactional
     public ResOrder findById(Long id) {
-        var order = this.orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
+        var order = this.orderRepository.findWithItemsById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order ID", id));
         var res = new ResOrder();
         res.setAddress(order.getShippingAddress());
         res.setCreatedAt(order.getCreatedAt());

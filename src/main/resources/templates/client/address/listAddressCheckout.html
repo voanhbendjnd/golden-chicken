@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
 </head>
 
@@ -26,15 +28,30 @@
                     <div class="name">
                         <span th:text="${a.recipientName}"></span>
 
-                        <a th:href="@{/addresses/edit(id=${a.id}, productId=${productId}, productIds=${productIds}, orderId=${orderId}, quantity=${quantity}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
-                            class="ms-2 text-primary" title="Chỉnh sửa">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
+                        <form th:action="@{/addresses/edit/init}" method="post" style="display: inline;">
+                            <input type="hidden" name="id" th:value="${a.id}" />
+                            <input type="hidden" name="productId" th:value="${productId}" />
+                            <input type="hidden" name="productIds" th:value="${productIds}" />
+                            <input type="hidden" name="orderId" th:value="${orderId}" />
+                            <input type="hidden" name="productVoucherId" th:value="${productVoucherId}" />
+                            <input type="hidden" name="shippingVoucherId" th:value="${shippingVoucherId}" />
+                            <input type="hidden" name="quantity" th:value="${quantity}" />
+                            <button type="submit" class="ms-2 text-primary" style="background: none; border: none; padding: 0;" title="Chỉnh sửa">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </form>
 
-                        <a th:href="@{/addresses/{id}/delete(id=${a.id}, productId=${productId}, productIds=${productIds}, orderId=${orderId}, quantity=${quantity}, productVoucherId=${productVoucherId}, shippingVoucherId=${shippingVoucherId})}"
-                            class="ms-2 text-danger">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
+                        <form th:action="@{/addresses/{id}/delete/init(id=${a.id})}" method="post" style="display: inline;">
+                            <input type="hidden" name="productId" th:value="${productId}" />
+                            <input type="hidden" name="productIds" th:value="${productIds}" />
+                            <input type="hidden" name="orderId" th:value="${orderId}" />
+                            <input type="hidden" name="productVoucherId" th:value="${productVoucherId}" />
+                            <input type="hidden" name="shippingVoucherId" th:value="${shippingVoucherId}" />
+                            <input type="hidden" name="quantity" th:value="${quantity}" />
+                            <button type="submit" class="ms-2 text-danger" style="background: none; border: none; padding: 0;" title="Xoá">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
                     <div>
                         <span th:text="${a.specificAddress}"></span>,
@@ -47,16 +64,17 @@
             </div>
 
             <div class="address-actions">
-                <a th:href="@{/addresses/new(
-                    productId=${productId},
-                    productIds=${productIds != null ? #strings.listJoin(productIds, ',') : null},
-                    orderId=${orderId},
-                    quantity=${quantity},
-                    productVoucherId=${productVoucherId},
-                    shippingVoucherId=${shippingVoucherId}
-                    )}" class="btn btn-success btn-add">
-                    Thêm địa chỉ mới
-                </a>
+                <form th:action="@{/addresses/new/init}" method="post" style="display: inline;">
+                    <input type="hidden" name="productId" th:value="${productId}" />
+                    <input type="hidden" name="productIds" th:value="${productIds}" />
+                    <input type="hidden" name="orderId" th:value="${orderId}" />
+                    <input type="hidden" name="productVoucherId" th:value="${productVoucherId}" />
+                    <input type="hidden" name="shippingVoucherId" th:value="${shippingVoucherId}" />
+                    <input type="hidden" name="quantity" th:value="${quantity}" />
+                    <button type="submit" class="btn btn-success btn-add">
+                        Thêm địa chỉ mới
+                    </button>
+                </form>
 
                 <button type="button" onclick="confirmAddress()" class="btn btn-confirm">
                     Xác nhận địa chỉ
@@ -73,47 +91,47 @@
                 }
 
                 const addressId = selectedRadio.value;
-                // Thymeleaf sẽ render productId là số hoặc null, productIds là chuỗi hoặc null
-                const productId = [[${ productId }]];
-                const productIds = [[${ productIds }]]; // Lúc này là String "1,2,3"
-                const productVoucherId = [[${ productVoucherId }]];
-                const shippingVoucherId = [[${ shippingVoucherId }]];
-                const orderId = [[${ orderId }]];
-                const quantity = [[${ quantity }]];
+                const productId = /*[[${productId}]]*/ null;
+                const productIds = /*[[${productIds}]]*/ null;
+                const productVoucherId = /*[[${productVoucherId}]]*/ null;
+                const shippingVoucherId = /*[[${shippingVoucherId}]]*/ null;
+                const orderId = /*[[${orderId}]]*/ null;
+                const quantity = /*[[${quantity}]]*/ 1;
 
-                let url = "";
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/checkout';
 
-                if (orderId != null && orderId !== '') {
-                    url = `/checkout?orderId=${orderId}&addressId=${addressId}`;
-                }
-                // 1. Trường hợp mua ngay (Buy Now)
-                else if (productId != null && productId !== '') {
-                    url = `/checkout?productId=${productId}&addressId=${addressId}`;
-                    if (quantity != null) {
-                        url += `&quantity=${quantity}`;
+                const addInput = (name, value) => {
+                    if (value != null && value !== '') {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = name;
+                        input.value = value;
+                        form.appendChild(input);
                     }
-                }
-                // 2. Trường hợp mua từ giỏ hàng (Cart)
-                else if (productIds != null && productIds !== '') {
-                    // Vì productIds đã là chuỗi "1,2,3", ta cần biến nó thành ?ids=1&ids=2&ids=3
-                    const idsArray = productIds.split(',');
-                    const idsQuery = idsArray.map(id => `ids=${id}`).join('&');
-                    url = `/checkout?${idsQuery}&addressId=${addressId}`;
-                }
-                // 3. Trường hợp dự phòng
-                else {
-                    url = `/checkout?addressId=${addressId}`;
+                };
+
+                addInput('addressId', addressId);
+                addInput('orderId', orderId);
+                addInput('productId', productId);
+                addInput('quantity', quantity);
+                addInput('productVoucherId', productVoucherId);
+                addInput('shippingVoucherId', shippingVoucherId);
+
+                if (productIds != null && productIds !== '') {
+                    productIds.split(',').forEach(id => {
+                        addInput('ids', id);
+                    });
                 }
 
-                if (productVoucherId != null) {
-                    url += `&productVoucherId=${productVoucherId}`;
-                }
-                if (shippingVoucherId != null) {
-                    url += `&shippingVoucherId=${shippingVoucherId}`;
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                if (csrfToken) {
+                    addInput('_csrf', csrfToken);
                 }
 
-                console.log("Redirecting to:", url); // Kiểm tra log nếu vẫn không nhảy
-                window.location.href = url;
+                document.body.appendChild(form);
+                form.submit();
             }
         </script>
     </div>

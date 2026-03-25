@@ -119,10 +119,10 @@ public class CheckoutService {
                     .filter(item -> ids.contains(item.getProductId()))
                     .toList();
 
-            if (cartItems.isEmpty()) {
-                response.setRedirect("redirect:/cart");
-                return response;
-            }
+            // if (cartItems.isEmpty()) {
+            // response.setRedirect("redirect:/cart");
+            // return response;
+            // }
 
             for (var item : cartItems) {
 
@@ -166,8 +166,13 @@ public class CheckoutService {
                     selectedAddress.getCity());
 
             orderDTO.setAddress(fullAddress);
+        } else {
+            response.setRedirect("redirect:/address/config");
+            return response;
         }
+        if (selectedAddress.getWard() == null) {
 
+        }
         BigDecimal shippingFee = this.shippingFeeService.getFeeByWard(selectedAddress.getWard());
         if (shippingFee == null) {
             response.setRedirect("redirect:/home");
@@ -194,6 +199,7 @@ public class CheckoutService {
         model.put("defaultAddress", selectedAddress);
         model.put("selectedProductVoucher", productVoucher);
         model.put("selectedShippingVoucher", shippingVoucher);
+        model.put("orderId", orderId);
         if (errorMessage != null) {
             model.put("voucherError", errorMessage);
         }
@@ -272,10 +278,16 @@ public class CheckoutService {
         return discount;
     }
 
-    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds, Integer quantity) throws PermissionException {
+    public BigDecimal calculateOrderTotal(Long productId, List<Long> productIds, Integer quantity, Long orderId)
+            throws PermissionException {
+        if (orderId != null) {
+            ResOrder order = orderService.findById(orderId);
+            return order != null ? order.getFinalAmount() : BigDecimal.ZERO;
+        }
         if (productId != null) {
             var product = productService.findById(productId);
-            return product != null ? product.getPrice().multiply(BigDecimal.valueOf(quantity != null ? quantity : 1)) : BigDecimal.ZERO;
+            return product != null ? product.getPrice().multiply(BigDecimal.valueOf(quantity != null ? quantity : 1))
+                    : BigDecimal.ZERO;
         }
         if (productIds != null && !productIds.isEmpty()) {
             var cart = cartService.getProductInCart();
