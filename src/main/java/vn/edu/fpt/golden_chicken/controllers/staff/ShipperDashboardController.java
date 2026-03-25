@@ -16,11 +16,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -88,10 +90,14 @@ public class ShipperDashboardController {
     }
 
     @PostMapping("/order/accept")
-    public String acceptOrder(@RequestParam("orderId") Long orderId) {
+    public String acceptOrder(@RequestParam("orderId") Long orderId, RedirectAttributes ra) {
         Staff shipper = getCurrentShipper();
         if (shipper == null) {
             return "redirect:/staff";
+        }
+        if (shipper.getUser() == null || !StringUtils.hasText(shipper.getUser().getPhone())) {
+            ra.addFlashAttribute("error", "Bạn cần cập nhật số điện thoại trước khi nhận đơn hàng.");
+            return "redirect:/staff/shipper/dashboard";
         }
         Order order = this.orderService.getOrderEntity(orderId);
         boolean isHandoverStatus = order.getStatus() == OrderStatus.SHIPPER_ISSUE
