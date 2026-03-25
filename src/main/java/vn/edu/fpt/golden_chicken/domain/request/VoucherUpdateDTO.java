@@ -22,6 +22,7 @@ public class VoucherUpdateDTO {
     String description;
 
     @NotNull(message = "Discount value is required")
+    @Min(value = 0, message = "Quantity must be greater than or equal to 0")
     Integer discountValue;
 
     @NotBlank(message = "Discount type is required")
@@ -46,6 +47,7 @@ public class VoucherUpdateDTO {
     String status;
 
     @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity must be greater than or equal to 0")
     Integer quantity;
 
     @NotBlank(message = "Voucher Type is required")
