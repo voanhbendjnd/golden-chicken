@@ -291,7 +291,11 @@
 
     .hero-header,
     .page-header {
-        margin-top: 97px !important;
+        margin-top: 70px !important;
+    }
+    
+    .section {
+        margin-top: 80px !important;
     }
 }
 

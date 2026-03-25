@@ -10,7 +10,7 @@
     left: 50%;
     transform: translateX(-50%) translateY(15px);
 
-    width: 1400px;
+    width: 1200px;
     background: white;
 
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -23,10 +23,53 @@
     z-index: 999;
 }
 
-.menu-dropdown:hover .mega-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
+@media (min-width: 1200px) {
+    .menu-dropdown:hover .mega-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* On mobile/tablet, mega menu shouldn't be absolute and 1400px wide */
+@media (max-width: 1199.98px) {
+    .mega-menu {
+        position: static;
+        width: 100%;
+        transform: none;
+        box-shadow: none;
+        padding: 10px 0;
+        opacity: 1;
+        visibility: visible;
+        display: none; /* Initially hidden, can be toggled or kept simple on mobile */
+    }
+
+    .menu-dropdown.show .mega-menu {
+        display: block;
+    }
+
+    .mega-container {
+        flex-direction: column;
+        gap: 15px !important;
+        align-items: flex-start;
+        padding-left: 20px;
+    }
+
+    .mega-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        text-align: left !important;
+    }
+
+    .mega-img img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .mega-item h6 {
+        margin-top: 0 !important;
+    }
 }
 
 .mega-container {
@@ -118,9 +161,34 @@
     display: block;
 }
 
+@media (max-width: 991.98px) {
+    .navbar-brand h1 {
+        font-size: 1.5rem;
+    }
+    
+    .navbar {
+        height: auto !important;
+        padding: 10px 0;
+    }
+}
+
 .logout-btn {
     border: none;
     background: transparent;
     width: 100%;
     text-align: left;
+}
+
+@media (max-width: 575.98px) {
+    .header-icons {
+        margin: 10px 0 !important;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .header-icons .btn-search,
+    .header-icons .position-relative,
+    .header-icons .nav-item {
+        margin-right: 15px !important;
+    }
 }
