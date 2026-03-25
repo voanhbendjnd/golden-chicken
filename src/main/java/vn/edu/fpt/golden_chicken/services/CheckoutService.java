@@ -1,15 +1,9 @@
 package vn.edu.fpt.golden_chicken.services;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Service;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
@@ -20,6 +14,11 @@ import vn.edu.fpt.golden_chicken.domain.response.ResProduct;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +97,7 @@ public class CheckoutService {
 
             OrderDTO.OrderDetail detail = new OrderDTO.OrderDetail();
             detail.setProductId(product.getId());
-            detail.setQuantity(quantity != null ? quantity : 1);
+            detail.setQuantity((quantity != null && quantity > 0) ? quantity : 1);
 
             details.add(detail);
 
