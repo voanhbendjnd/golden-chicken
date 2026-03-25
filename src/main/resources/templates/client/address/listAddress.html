@@ -26,7 +26,7 @@
         <main class="addr-main">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h1 class="addr-title">Address</h1>
-                <a th:href="@{/addresses/new}" class="btn btn-success">
+                <a th:href="@{/addresses/new/init}" class="btn btn-success">
                     THÊM ĐỊA CHỈ MỚI
                 </a>
             </div>
@@ -68,7 +68,7 @@
                                 </td>
 
                                 <td>
-                                    <form th:action="@{/addresses/edit}" method="get" style="display:inline;">
+                                    <form th:action="@{/addresses/edit/init}" method="get" style="display:inline;">
                                         <input type="hidden" name="id" th:value="${defaultAddress.id}" />
                                         <button class="btn btn-sm btn-warning px-3 py-2">Sửa</button>
                                     </form>
@@ -94,7 +94,7 @@
 
                                 <td>
                                     <div class="d-flex align-items-center flex-nowrap gap-2">
-                                        <form th:action="@{/addresses/edit}" method="get" class="m-0">
+                                        <form th:action="@{/addresses/edit/init}" method="get" class="m-0">
                                             <input type="hidden" name="id" th:value="${a.id}" />
                                             <button type="submit" class="btn btn-warning px-3 py-2">Sửa</button>
                                         </form>

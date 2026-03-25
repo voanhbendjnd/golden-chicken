@@ -227,8 +227,7 @@ public class AddressController {
     }
 
     @GetMapping("/{id}/delete")
-    @PostMapping("/{id}/delete/init")
-    public String confirmDelete(
+    public String confirmDeleteGet(
             @PathVariable Long id,
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
@@ -236,6 +235,31 @@ public class AddressController {
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             @RequestParam(value = "quantity", required = false) Integer quantity,
+            Model model) {
+        return handleConfirmDelete(id, productId, productIds, orderId, productVoucherId, shippingVoucherId, quantity, model);
+    }
+
+    @PostMapping("/{id}/delete/init")
+    public String confirmDeletePost(
+            @PathVariable Long id,
+            @RequestParam(value = "productId", required = false) Long productId,
+            @RequestParam(value = "productIds", required = false) String productIds,
+            @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
+            @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
+            Model model) {
+        return handleConfirmDelete(id, productId, productIds, orderId, productVoucherId, shippingVoucherId, quantity, model);
+    }
+
+    private String handleConfirmDelete(
+            Long id,
+            Long productId,
+            String productIds,
+            Long orderId,
+            Long productVoucherId,
+            Long shippingVoucherId,
+            Integer quantity,
             Model model) {
 
         if (productId == null && model.containsAttribute("productId") && model.asMap().get("productId") != null) {
@@ -268,6 +292,7 @@ public class AddressController {
         model.addAttribute("orderId", orderId);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
+        model.addAttribute("quantity", quantity);
         return "client/address/deleteAddress";
     }
 
