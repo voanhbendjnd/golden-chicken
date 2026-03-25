@@ -1,31 +1,21 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.golden_chicken.domain.entity.CustomerVoucher;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.CheckoutResponse;
-import vn.edu.fpt.golden_chicken.services.AddressServices;
-import vn.edu.fpt.golden_chicken.services.CheckoutService;
-import vn.edu.fpt.golden_chicken.services.OrderService;
-import vn.edu.fpt.golden_chicken.services.ProfileService;
-import vn.edu.fpt.golden_chicken.services.UserService;
-import vn.edu.fpt.golden_chicken.services.VoucherService;
+import vn.edu.fpt.golden_chicken.services.*;
 import vn.edu.fpt.golden_chicken.services.kafka.RevenueService;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/checkout")
@@ -56,7 +46,11 @@ public class CheckoutController {
         }
 
         System.out.println(">>> handleCheckout params: orderId=" + orderId + ", productId=" + productId + ", ids=" + ids);
-
+        if(quantity == null || quantity <= 0) {
+            quantity = 1;
+            return handleCheckout(productId, ids, orderId, productVoucherId, shippingVoucherId,
+                    addressId, quantity, model);
+        }
         CheckoutResponse response = checkoutService.buildCheckout(productId, ids, orderId, productVoucherId,
                 shippingVoucherId, addressId, quantity);
 
@@ -75,6 +69,7 @@ public class CheckoutController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -84,6 +79,7 @@ public class CheckoutController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("quantity", quantity);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
 

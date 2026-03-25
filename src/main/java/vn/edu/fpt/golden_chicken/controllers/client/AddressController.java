@@ -1,29 +1,23 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.golden_chicken.domain.request.AddressFormDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResAddress;
 import vn.edu.fpt.golden_chicken.services.AddressServices;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @PreAuthorize("hasRole('CUSTOMER')")
 public class AddressController {
 
     private final AddressServices addressServices;
-
     public AddressController(AddressServices addressServices) {
         this.addressServices = addressServices;
     }
@@ -32,6 +26,7 @@ public class AddressController {
     public String addressBook(Model model) {
         var addresses = addressServices.getAllAddresses();
         var defaultAddress = addressServices.getDefaultAddress();
+
         List<ResAddress> additionalAddresses = new ArrayList<>();
 
         for (ResAddress a : addresses) {
@@ -50,6 +45,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -60,6 +56,7 @@ public class AddressController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("quantity", quantity);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
 
@@ -73,6 +70,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -82,6 +80,7 @@ public class AddressController {
             model.addAttribute("productId", productId);
             model.addAttribute("productIds", productIds);
             model.addAttribute("orderId", orderId);
+            model.addAttribute("quantity", quantity);
             model.addAttribute("productVoucherId", productVoucherId);
             model.addAttribute("shippingVoucherId", shippingVoucherId);
             return "client/address/createAddress";
@@ -91,8 +90,12 @@ public class AddressController {
 
         if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null)
+            if (productId != null) {
                 url.append("productId=").append(productId);
+                if (quantity != null) {
+                    url.append("&quantity=").append(quantity);
+                }
+            }
             if (productIds != null && !productIds.isEmpty()) {
                 if (productId != null)
                     url.append("&");
@@ -121,6 +124,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -135,6 +139,7 @@ public class AddressController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("quantity", quantity);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
 
@@ -148,6 +153,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -157,6 +163,7 @@ public class AddressController {
             model.addAttribute("productId", productId);
             model.addAttribute("productIds", productIds);
             model.addAttribute("orderId", orderId);
+            model.addAttribute("quantity", quantity);
             model.addAttribute("productVoucherId", productVoucherId);
             model.addAttribute("shippingVoucherId", shippingVoucherId);
             return "client/address/createAddress";
@@ -166,8 +173,12 @@ public class AddressController {
 
         if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null)
+            if (productId != null) {
                 url.append("productId=").append(productId);
+                if (quantity != null) {
+                    url.append("&quantity=").append(quantity);
+                }
+            }
             if (productIds != null && !productIds.isEmpty()) {
                 if (productId != null)
                     url.append("&");
@@ -202,6 +213,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId,
             Model model) {
@@ -213,6 +225,7 @@ public class AddressController {
         model.addAttribute("productId", productId);
         model.addAttribute("productIds", productIds);
         model.addAttribute("orderId", orderId);
+        model.addAttribute("quantity", quantity);
         model.addAttribute("productVoucherId", productVoucherId);
         model.addAttribute("shippingVoucherId", shippingVoucherId);
         return "client/address/deleteAddress";
@@ -224,6 +237,7 @@ public class AddressController {
             @RequestParam(value = "productId", required = false) Long productId,
             @RequestParam(value = "productIds", required = false) String productIds,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "quantity", required = false) Integer quantity,
             @RequestParam(value = "productVoucherId", required = false) Long productVoucherId,
             @RequestParam(value = "shippingVoucherId", required = false) Long shippingVoucherId) {
 
@@ -231,8 +245,12 @@ public class AddressController {
 
         if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
             StringBuilder url = new StringBuilder("redirect:/checkout/addresses?");
-            if (productId != null)
+            if (productId != null) {
                 url.append("productId=").append(productId);
+                if (quantity != null) {
+                    url.append("&quantity=").append(quantity);
+                }
+            }
             if (productIds != null && !productIds.isEmpty()) {
                 if (productId != null)
                     url.append("&");
