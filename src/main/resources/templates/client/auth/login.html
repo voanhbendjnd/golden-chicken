@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Golden Chicken - Login</title>
+    <title>Golden Chicken - Đăng Nhập</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}" />
 
@@ -152,13 +152,13 @@
             </div>
 
             <div class="mb-3">
-                <input class="form-control" type="email" name="username" placeholder="Enter your email" required />
+                <input class="form-control" type="email" name="username" placeholder="Nhập email của bạn" required />
             </div>
 
             <div class="mb-3">
                 <div class="input-group">
                     <input class="form-control" type="password" id="loginPassword" name="password"
-                        placeholder="Enter your password" required />
+                        placeholder="Nhập mật khẩu của bạn" required />
                     <button type="button" class="btn-toggle-pw" onclick="toggleLoginPw()" tabindex="-1">
                         <i id="loginEyeIcon" class="bi bi-eye"></i>
                     </button>

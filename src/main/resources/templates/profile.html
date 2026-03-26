@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Management</title>
+    <title>Quản lý tài khoản</title>
     <link th:href="@{/css/style.djnd.css}" rel="stylesheet">
 
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
@@ -24,15 +24,14 @@
         <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <main class="main">
-            <h1 class="title">Account Management</h1>
+            <h1 class="title">Quản lý tài khoản</h1>
 
             <p class="subtitle">
-                Hi <span th:text="${profile.fullName}">User</span>. With this page, you will be able to manage all your
-                account information.
+                Chào <span th:text="${profile.fullName}">User</span>. Với trang này, bạn có thể quản lý tất cả thông tin tài khoản của mình.
             </p>
             <form th:action="@{/profile/avatar}" method="post" enctype="multipart/form-data" id="avatarForm">
                 <section class="section">
-                    <div class="section__header">AVATAR</div>
+                    <div class="section__header">ẢNH ĐẠI DIỆN</div>
 
                     <div class="section__body grid-2">
                         <div class="col avatar-col">
@@ -56,25 +55,25 @@
 
 
             <section class="section">
-                <div class="section__header">Account Information</div>
+                <div class="section__header">Thông tin tài khoản</div>
                 <div class="section__body grid-2">
                     <div class="col">
-                        <h4 class="block-title">Contact Information</h4>
+                        <h4 class="block-title">Thông tin liên hệ</h4>
                         <p><strong th:text="${profile.fullName}">User</strong></p>
                         <p th:text="${profile.email}">email@example.com</p>
                         <p th:text="${profile.phone}">0123456789</p>
                         <div class="actions">
-                            <a th:if="${!isEdit}" th:href="@{/profile(edit=true)}" class="btn btn-warning">Edit</a>
-                            <a th:href="@{change-password}" class="btn btn-warning">Change Password</a>
+                            <a th:if="${!isEdit}" th:href="@{/profile(edit=true)}" class="btn btn-warning">Chỉnh sửa</a>
+                            <a th:href="@{change-password}" class="btn btn-warning">Đổi mật khẩu</a>
                         </div>
                     </div>
 
                     <div id="updateProfileBox" th:if="${isEdit}">
-                        <h4 class="block-title">Update Profile</h4>
+                        <h4 class="block-title">Cập nhật hồ sơ</h4>
                         <form th:action="@{/profile}" th:object="${profileForm}" method="post" class="mt-2">
 
                             <div class="mb-3">
-                                <label class="form-label">Full Name</label>
+                                <label class="form-label">Họ và tên</label>
                                 <input type="text" th:field="*{fullName}" class="form-control"
                                     th:disabled="${!isEdit}" />
                                 <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fullName')}"
@@ -82,8 +81,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Phone</label>
-                                <input type="text" th:field="*{phone}" class="form-control" placeholder="10-15 digits"
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" th:field="*{phone}" class="form-control" placeholder="10-15 chữ số"
                                     th:disabled="${!isEdit}" />
                                 <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('phone')}"
                                     th:errors="*{phone}"></div>
@@ -91,8 +90,8 @@
 
                             <div class="actions d-flex gap-2">
                                 <button th:if="${isEdit}" class="btn btn-success" type="submit"
-                                    style="width: 12%; margin-right: 10px;">Save</button>
-                                <a th:if="${isEdit}" th:href="@{/profile}" class="btn btn-outline-danger">Cancel</a>
+                                    style="width: 12%; margin-right: 10px;">Lưu</button>
+                                <a th:if="${isEdit}" th:href="@{/profile}" class="btn btn-outline-danger">Hủy</a>
                             </div>
                         </form>
                     </div>
@@ -103,11 +102,11 @@
 
             <section class="section" th:if="${session.roleName == 'CUSTOMER'}">
                 <div class="section__header between">
-                    <span>Address Book</span>
-                    <a th:href="@{/addresses}">Manage Addresses</a>
+                    <span>Sổ địa chỉ</span>
+                    <a th:href="@{/addresses}">Quản lý địa chỉ</a>
                 </div>
                 <div class="section__body">
-                    <h4 class="block-title">Default Shipping Address</h4>
+                    <h4 class="block-title">Địa chỉ giao hàng mặc định</h4>
 
                     <div th:if="${defaultAddress != null}">
                         <p><strong th:text="${defaultAddress.recipientName}">Full name</strong></p>

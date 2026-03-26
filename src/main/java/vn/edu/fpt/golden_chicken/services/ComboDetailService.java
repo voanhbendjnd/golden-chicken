@@ -78,22 +78,26 @@ public class ComboDetailService {
         if (dto.getId() != null) {
             this.comboDetailRepository.deleteByComboId(lastProduct.getId());
         }
-        Map<Long, Product> productMp = this.productRepository
-                .findByIdIn(dto.getItems().stream().map(x -> x.getId()).collect(Collectors.toList()))
-                .stream().collect(Collectors.toMap(Product::getId, p -> p));
-        var details = dto.getItems().stream().map(it -> {
-            var singleProduct = productMp.get(it.getId());
-            if (singleProduct == null) {
-                throw new ResourceNotFoundException("Product ID", it.getId());
-            }
-            var detail = new ComboDetail();
-            detail.setCombo(lastProduct);
-            detail.setProduct(singleProduct);
-            detail.setQuantity(it.getQuantity());
-            return detail;
+        if (dto.getItems() != null) {
+            Map<Long, Product> productMp = this.productRepository
+                    .findByIdIn(dto.getItems().stream().map(x -> x.getId()).collect(Collectors.toList()))
+                    .stream().collect(Collectors.toMap(Product::getId, p -> p));
+            var details = dto.getItems().stream().map(it -> {
+                var singleProduct = productMp.get(it.getId());
+                if (singleProduct == null) {
+                    throw new ResourceNotFoundException("Product ID", it.getId());
+                }
+                var detail = new ComboDetail();
+                detail.setCombo(lastProduct);
+                detail.setProduct(singleProduct);
+                detail.setQuantity(it.getQuantity());
+                return detail;
 
-        }).collect(Collectors.toList());
-        this.comboDetailRepository.saveAll(details);
+            }).collect(Collectors.toList());
+            this.comboDetailRepository.saveAll(details);
+
+        }
+
     }
 
     public List<ResSingleProduct> getProductInCombo(long comboId) {

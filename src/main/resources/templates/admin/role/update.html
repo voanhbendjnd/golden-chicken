@@ -5,7 +5,7 @@
 
     <head th:replace="~{common/head}"></head>
 
-    <title>Update Role</title>
+    <title>Cập nhật vai trò</title>
     <script th:src="@{/js/role.js}"></script>
 </head>
 
@@ -13,15 +13,15 @@
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a th:href="@{/admin/role}">Roles</a></li>
-                <li class="breadcrumb-item active">Update</li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Bảng điều khiển</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/role}">Vai trò</a></li>
+                <li class="breadcrumb-item active">Cập nhật</li>
             </ol>
         </nav>
 
         <div class="card shadow-sm">
             <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">Update Role</h5>
+                <h5 class="mb-0">Cập nhật vai trò</h5>
             </div>
 
             <div class="card-body">
@@ -30,10 +30,10 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="mb-3 text-secondary">Role Information</h6>
+                            <h6 class="mb-3 text-secondary">Thông tin vai trò</h6>
 
                             <div class="mb-3">
-                                <label class="form-label">Role Name</label>
+                                <label class="form-label">Tên vai trò</label>
                                 <input th:field="*{name}" class="form-control" />
                                 <div th:if="${#fields.hasErrors('name')}" class="text-danger small" th:errors="*{name}">
                                 </div>
@@ -41,17 +41,17 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label">Mô tả</label>
                             <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
                             <div th:if="${#fields.hasErrors('description')}" class="text-danger small"
                                 th:errors="*{description}"></div>
                         </div>
                         <div class="col-md-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0 text-secondary">Permissions</h6>
+                                <h6 class="mb-0 text-secondary">Quyền hạn</h6>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="selectAll">
-                                    <label class="form-check-label fw-bold" for="selectAll">Select All</label>
+                                    <label class="form-check-label fw-bold" for="selectAll">Chọn tất cả</label>
                                 </div>
                             </div>
                             <div class="border rounded p-3" style="max-height: 260px; overflow-y: auto;">
@@ -70,17 +70,17 @@
                                 </div>
                             </div>
                             <small class="text-muted d-block mt-2">
-                                Update permissions assigned to this role
+                                Cập nhật các quyền hạn được gán cho vai trò này
                             </small>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
                         <a th:href="@{/admin/role}" class="btn btn-outline-secondary me-2">
-                            Cancel
+                            Hủy
                         </a>
                         <button type="submit" class="btn btn-warning">
-                            Update Role
+                            Cập nhật vai trò
                         </button>
                     </div>
             </div>

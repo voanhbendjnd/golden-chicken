@@ -96,7 +96,7 @@ public class ComboController {
 
     @GetMapping
     public String comboPage(Model model,
-            @PageableDefault(size = DeclareConstant.pageSize, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = DeclareConstant.pageSize, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Filter Specification<Product> spec) {
         var data = this.productService.fetchAllComboWithPaginationAndAllStats(spec, pageable);
         model.addAttribute("products", data.getResult());

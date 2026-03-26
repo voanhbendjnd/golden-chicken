@@ -5,7 +5,7 @@
 
     <head th:replace="~{common/head}"></head>
 
-    <title>Create Permission Page</title>
+    <title>Trang tạo quyền hạn</title>
 </head>
 
 <body>
@@ -14,23 +14,23 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-center">Tạo Mới</h3>
+                        <h3 class="text-center">Tạo quyền hạn</h3>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/admin/permission/create}" method="post" th:object="${permission}">
                             <div class="mb-3">
-                                <label class="form-label">Name</label>
+                                <label class="form-label">Tên</label>
                                 <input type="text" class="form-control" th:field="*{name}" required />
                                 <div th:if="${#fields.hasErrors('name')}" style="color: red;" th:errors="*{name}"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">API Path</label>
+                                <label class="form-label">Đường dẫn API</label>
                                 <input type="text" class="form-control" th:field="*{apiPath}" required />
                                 <div th:if="${#fields.hasErrors('apiPath')}" style="color: red;" th:errors="*{apiPath}">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Method</label>
+                                <label class="form-label">Phương thức</label>
                                 <input type="text" class="form-control" th:field="*{method}" required />
                                 <div th:if="${#fields.hasErrors('method')}" style="color: red;" th:errors="*{method}">
                                 </div>
@@ -43,8 +43,8 @@
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a th:href="@{/admin/permission}" class="btn btn-secondary me-md-2">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Create Permission</button>
+                                <a th:href="@{/admin/permission}" class="btn btn-secondary me-md-2">Hủy</a>
+                                <button type="submit" class="btn btn-primary">Tạo quyền hạn</button>
                             </div>
                         </form>
                     </div>

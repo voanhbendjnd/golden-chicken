@@ -4,7 +4,7 @@
 <head>
 
     <head th:replace="~{common/head}"></head>
-    <title>Create User Page</title>
+    <title>Trang tạo người dùng</title>
 </head>
 
 <body>
@@ -13,7 +13,7 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="text-center mb-0">Create New User</h3>
+                        <h3 class="text-center mb-0">Tạo người dùng mới</h3>
                     </div>
 
                     <div class="card-body">
@@ -27,7 +27,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Full Name</label>
+                                <label class="form-label">Họ và tên</label>
                                 <input type="text" class="form-control" th:field="*{fullName}" required />
                                 <div th:if="${#fields.hasErrors('fullName')}" class="text-danger small"
                                     th:errors="*{fullName}"></div>
@@ -35,7 +35,7 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Password</label>
+                                    <label class="form-label">Mật khẩu</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" th:field="*{password}" id="password" required />
                                         <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password', 'eyeIcon1')" tabindex="-1">
@@ -48,7 +48,7 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Confirm Password</label>
+                                    <label class="form-label">Xác nhận mật khẩu</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" th:field="*{confirmPassword}" id="confirmPassword" required />
                                         <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirmPassword', 'eyeIcon2')" tabindex="-1">
@@ -65,36 +65,36 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Role</label>
+                                <label class="form-label">Vai trò</label>
                                 <select id="roleSelect" name="roleId" class="form-select" required>
-                                    <option value="">Select Role</option>
+                                    <option value="">Chọn vai trò</option>
                                     <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}">
                                     </option>
                                 </select>
                             </div>
 
                             <div id="staffTypeGroup" class="mb-3" style="display: none;">
-                                <label class="form-label">Staff Type</label>
+                                <label class="form-label">Loại nhân viên</label>
                                 <select th:field="*{staffType}" class="form-select">
-                                    <option value="RECEPTIONIST">Receptionist</option>
-                                    <option value="SHIPPER">Shipper</option>
-                                    <option value="MANAGER">Manager</option>
+                                    <option value="RECEPTIONIST">Lễ tân</option>
+                                    <option value="SHIPPER">Giao hàng</option>
+                                    <option value="MANAGER">Quản lý</option>
                                 </select>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
+                                <label class="form-label">Trạng thái</label>
                                 <select th:field="*{status}" class="form-select">
-                                    <option value="true">Active</option>
-                                    <option value="false">Inactive</option>
+                                    <option value="true">Hoạt động</option>
+                                    <option value="false">Ngừng hoạt động</option>
                                 </select>
                             </div>
 
                             <hr>
 
                             <div class="d-flex justify-content-end gap-2">
-                                <a th:href="@{/admin/user}" class="btn btn-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4">Create User</button>
+                                <a th:href="@{/admin/user}" class="btn btn-secondary">Hủy</a>
+                                <button type="submit" class="btn btn-primary px-4">Tạo người dùng</button>
                             </div>
 
                         </form>
