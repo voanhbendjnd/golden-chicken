@@ -130,6 +130,9 @@ public class VoucherService {
     public void updateVoucher(VoucherUpdateDTO dto) {
         Voucher v = repo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
+        if (repo.existsByCodeAndIdNot(dto.getCode(), dto.getId())) {
+            throw new IllegalArgumentException("Voucher code already exists");
+        }
         v.setCode(dto.getCode());
         v.setName(dto.getName());
         v.setDescription(dto.getDescription());

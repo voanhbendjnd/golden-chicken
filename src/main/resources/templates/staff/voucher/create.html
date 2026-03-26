@@ -20,8 +20,8 @@
           method="post">
 
         <div class="form-group">
-            <label>Code</label>
-            <input type="text" th:field="*{code}"/>
+            <label>Code <span style="color: red"> *</label>
+            <input type="text" th:field="*{code}" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('code')}"
                  th:errors="*{code}">
@@ -29,8 +29,8 @@
         </div>
 
         <div class="form-group">
-            <label>Name</label>
-            <input type="text" th:field="*{name}"/>
+            <label>Name<span style="color: red"> *</label>
+            <input type="text" th:field="*{name}" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('name')}"
                  th:errors="*{name}">
@@ -38,8 +38,8 @@
         </div>
 
         <div class="form-group full">
-            <label>Description</label>
-            <input type="text" th:field="*{description}"/>
+            <label>Description<span style="color: red"> *</label>
+            <input type="text" th:field="*{description}" required/>
 
             <div class="field-error"
                  th:if="${#fields.hasErrors('description')}"
@@ -48,8 +48,8 @@
         </div>
 
         <div class="form-group">
-            <label>Discount Type</label>
-            <select th:field="*{discountType}">
+            <label>Discount Type<span style="color: red"> *</label>
+            <select th:field="*{discountType}" required>
                 <option value="">-- Select discount type --</option>
                 <option value="PERCENT">PERCENT</option>
                 <option value="FIXED">FIXED</option>
@@ -60,8 +60,8 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Voucher Type</label>
-            <select th:field="*{voucherType}">
+            <label>Voucher Type<span style="color: red"> *</label>
+            <select th:field="*{voucherType}" required>
                 <option value="">-- Select voucher type --</option>
                 <option value="PRODUCT">PRODUCT</option>
                 <option value="SHIPPING">SHIPPING</option>
@@ -72,14 +72,14 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Discount Value</label>
+            <label>Discount Value<span style="color: red"> *</label>
 
             <div style="display:flex; align-items:center; gap:8px;">
                 <input type="number"
                        id="discountValue"
                        th:field="*{discountValue}"
 
-                       min="0"/>
+                       min="0" required/>
                 <span id="discountUnit">%</span>
             </div>
 
@@ -94,11 +94,11 @@
         </div>
 
         <div class="form-group">
-            <label>Min Order Value</label>
+            <label>Min Order Value<span style="color: red"> *</label>
             <input type="number"
                    step="0.01"
                    th:field="*{minOrderValue}"
-                   min="0"/>
+                   min="0" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('minOrderValue')}"
                  th:errors="*{minOrderValue}">
@@ -106,33 +106,32 @@
         </div>
 
         <div class="form-group">
-            <label>Point Cost</label>
+            <label>Point Cost<span style="color: red"> *</label>
             <input type="number"
                    th:field="*{pointCost}"
-                   min="0"/>
+                   min="0" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('pointCost')}"
                  th:errors="*{pointCost}">
             </div>
         </div>
         <div class="form-group">
-            <label>Quantity</label>
+            <label>Quantity<span style="color: red"> *</label>
             <input type="number"
                    th:field="*{quantity}"
-                   min="0"/>
+                   min="0" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('quantity')}"
                  th:errors="*{quantity}">
             </div>
         </div>
         <div class="checkbox-group">
-            <label>Allow exchange by points?</label>
+            <label>Allow exchange by points?<span style="color: red">*</label>
             <input type="checkbox" th:field="*{exchangeable}"/>
         </div>
         <div class="form-group">
-            <label>Start At:</label>
-            <input type="datetime-local" th:field="*{startAt}"/>
-<!--                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"/>-->
+            <label>Start At:<span style="color: red"> *</label>
+            <input type="datetime-local" th:field="*{startAt}" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('startAt')}"
                  th:errors="*{startAt}">
@@ -140,9 +139,9 @@
         </div>
 
         <div class="form-group">
-            <label>End At:</label>
+            <label>End At:<span style="color: red"> *</label>
             <input type="datetime-local" th:field="*{endAt}"
-                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}"/>
+                   th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd''T''HH:mm')}" required/>
             <div class="field-error"
                  th:if="${#fields.hasErrors('endAt')}"
                  th:errors="*{endAt}">
