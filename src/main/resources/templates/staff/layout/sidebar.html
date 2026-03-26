@@ -56,6 +56,21 @@
                 <i class='fas fa-star'></i> Phí ship phường/xã
             </a>
         </li>
+        <li th:if="${session.roleName == 'ADMIN'}">
+            <a th:href="@{/admin/user}" class="nav-link">
+                <i class='fas fa-star'></i> Quản lý tài khoản (ADMIN)
+            </a>
+        </li>
+        <li th:if="${session.roleName == 'ADMIN'}">
+            <a th:href="@{/staff/shipper/dashboard}" class="nav-link">
+                <i class='fas fa-star'></i> Shiper nhận đơn (ADMIN)
+            </a>
+        </li>
+        <li th:if="${session.roleName == 'ADMIN'}">
+            <a th:href="@{/staff/order}" class="nav-link">
+                <i class='fas fa-star'></i> Quản lý đơn hàng (ADMIN)
+            </a>
+        </li>
     </ul>
     <div class="sidebar-footer mt-auto p-3 text-muted small border-top border-secondary border-opacity-10">
         <div class="d-flex align-items-center">

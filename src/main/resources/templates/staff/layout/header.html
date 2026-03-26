@@ -102,7 +102,7 @@
 
          <a class="navbar-brand fw-bold text-white d-flex align-items-center gap-2" th:href="@{/staff/shipper}">
             <i class="fa-solid fa-truck-fast"></i>
-            Shipper Panel
+            Nhận đơn dành cho shipper
          </a>
 
          <!-- Mobile toggle -->
@@ -138,6 +138,18 @@
                   <a class="nav-link shipper-link" th:href="@{/staff/shipper/statistics}">
                      <i class="fa-solid fa-chart-line me-1"></i>
                      Thống kê
+                  </a>
+               </li>
+               <li class="nav-item" th:if="${session.roleName == 'ADMIN'}">
+                  <a class="nav-link shipper-link" th:href="@{/admin/user}">
+                     <i class="fa-solid fa-chart-line me-1"></i>
+                     Quản lý tài khoản (ADMIN)
+                  </a>
+               </li>
+               <li class="nav-item" th:if="${session.roleName == 'ADMIN'}">
+                  <a class="nav-link shipper-link" th:href="@{/staff/dashboard}">
+                     <i class="fa-solid fa-chart-line me-1"></i>
+                     Trang dành cho quản lý (ADMIN)
                   </a>
                </li>
                <li class="nav-item">
