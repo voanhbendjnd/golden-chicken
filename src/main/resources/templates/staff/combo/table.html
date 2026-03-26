@@ -38,7 +38,7 @@
                             <div class="col-auto">
                                 <div class="input-group input-group-sm" style="width: 250px;">
                                     <input type="text" id="searchName" class="form-control"
-                                        placeholder="Search by name..." th:value="${searchName}">
+                                        placeholder="Tìm kiếm bằng tên sản phẩm..." th:value="${searchName}">
                                     <button class="btn btn-theme" type="button" onclick="handleSearch()">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -78,9 +78,9 @@
                                         </td>
                                         <td>
                                             <span th:if="${product.active}"
-                                                class="badge-status bg-success-subtle text-success">Active</span>
+                                                class="badge-status bg-success-subtle text-success">Hoạt động</span>
                                             <span th:unless="${product.active}"
-                                                class="badge-status bg-danger-subtle text-danger">Inactive</span>
+                                                class="badge-status bg-danger-subtle text-danger">Không hoạt động</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group shadow-sm border rounded">
@@ -177,13 +177,13 @@
             button.addEventListener('click', function () {
                 const form = this.nextElementSibling;
                 Swal.fire({
-                    title: 'Are you sure change status?',
+                    title: 'Bạn muốn thay đổi trạng thái?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Dừng',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -196,14 +196,14 @@
             button.addEventListener('click', function () {
                 const form = this.nextElementSibling;
                 Swal.fire({
-                    title: 'Are you sure delete?',
-                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    title: 'Bạn muốn xóa!',
+                    text: "Nếu sản phẩm có nằm trong đơn hàng nào thì không thể xóa và sẽ chuyển đổi trạng thái!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Dừng',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {

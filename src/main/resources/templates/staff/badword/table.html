@@ -20,10 +20,10 @@
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Badword Management</h1>
+                    <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Quản lý từ vi phạm</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a th:href="@{/staff/badword/create}" class="btn btn-theme shadow-sm">
-                            <i class="fas fa-plus me-1"></i> New Badword
+                            <i class="fas fa-plus me-1"></i> Tạo mới từ
                         </a>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h5 class="mb-0">Badword List</h5>
+                                <h5 class="mb-0">Danh sách</h5>
                             </div>
                             <div class="col-auto">
                                 <div class="input-group input-group-sm" style="width: 250px;">
@@ -57,9 +57,9 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 80px;">ID</th>
-                                        <th style="width: 200px;">Word</th>
-                                        <th>Status</th>
-                                        <th class="text-end" style="width: 150px;">Actions</th>
+                                        <th style="width: 200px;">Từ</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end" style="width: 150px;">Hàng động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -74,9 +74,9 @@
                                         </td>
                                         <td>
                                             <span th:if="${badword.status}"
-                                                class="badge-status bg-success-subtle text-success">Active</span>
+                                                class="badge-status bg-success-subtle text-success">Hoạt động</span>
                                             <span th:unless="${badword.status}"
-                                                class="badge-status bg-danger-subtle text-danger">Inactive</span>
+                                                class="badge-status bg-danger-subtle text-danger">Không hoạt động</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group shadow-sm border rounded">
@@ -141,7 +141,7 @@
 
                         <div th:if="${badwords == null or badwords.isEmpty()}" class="text-center py-5">
                             <div class="display-1 text-light"><i class="fas fa-folder-open"></i></div>
-                            <p class="text-muted mt-3">No badwords found.</p>
+                            <p class="text-muted mt-3">Không tìm thấy từ nào!</p>
                         </div>
                     </div>
                 </div>

@@ -68,7 +68,7 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
             display: none;
             max-height: 300px;
             overflow-y: auto;
@@ -111,7 +111,7 @@
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="fas fa-star me-2 text-theme"></i>Review Management</h1>
+                    <h1 class="h2"><i class="fas fa-star me-2 text-theme"></i>Quản lý đánh giá</h1>
                 </div>
 
                 <!-- Filter Section -->
@@ -120,16 +120,22 @@
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-theme btn-filter" data-status="">All</button>
-                                    <button type="button" class="btn btn-outline-theme btn-filter" data-status="PUBLISHED">Public</button>
-                                    <button type="button" class="btn btn-outline-theme btn-filter" data-status="HIDDEN">Hidden</button>
-                                    <button type="button" class="btn btn-outline-theme btn-filter" data-status="REJECTED">Rejected</button>
+                                    <button type="button" class="btn btn-outline-theme btn-filter" data-status="">Tất
+                                        cả</button>
+                                    <button type="button" class="btn btn-outline-theme btn-filter"
+                                        data-status="PUBLISHED">Công khai</button>
+                                    <button type="button" class="btn btn-outline-theme btn-filter"
+                                        data-status="HIDDEN">Ẩn</button>
+                                    <button type="button" class="btn btn-outline-theme btn-filter"
+                                        data-status="REJECTED">Trả về</button>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group position-relative" id="searchContainer">
-                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                    <input type="text" id="reviewSearch" class="form-control border-start-0" placeholder="Search customer or product..." autocomplete="off">
+                                    <span class="input-group-text bg-white border-end-0"><i
+                                            class="fas fa-search text-muted"></i></span>
+                                    <input type="text" id="reviewSearch" class="form-control border-start-0"
+                                        placeholder="Tìm kiếm theo tên khách hàng hoặc sản phẩm..." autocomplete="off">
                                     <ul id="suggestionsList" class="suggestions-list"></ul>
                                 </div>
                             </div>
@@ -139,7 +145,7 @@
 
                 <div class="premium-card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Customer Reviews</h5>
+                        <h5 class="mb-0">Đánh giá khách hàng</h5>
                         <span class="badge bg-theme" th:text="${meta.total + ' Reviews'}">0 Reviews</span>
                     </div>
                     <div class="card-body">
@@ -147,51 +153,60 @@
                             <table class="table table-hover table-premium">
                                 <thead>
                                     <tr>
-                                        <th>Date</th>
-                                        <th>Customer</th>
-                                        <th>Product</th>
-                                        <th>Rating</th>
-                                        <th>Comment</th>
-                                        <th>Status</th>
-                                        <th class="text-end">Actions</th>
+                                        <th>Ngày</th>
+                                        <th>Khách hàng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Sao</th>
+                                        <th>Bình luận</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="review : ${reviews}">
-                                        <td class="small text-muted" th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">14/03/2026</td>
+                                        <td class="small text-muted"
+                                            th:text="${#temporals.format(review.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                            14/03/2026</td>
                                         <td>
                                             <div class="fw-bold" th:text="${review.name}">John Doe</div>
                                         </td>
                                         <td>
-                                            <div class="small text-truncate" style="max-width: 150px;" th:text="${review.productName}">Spicy Chicken</div>
+                                            <div class="small text-truncate" style="max-width: 150px;"
+                                                th:text="${review.productName}">Spicy Chicken</div>
                                         </td>
                                         <td>
                                             <div class="rating-stars">
-                                                <i th:each="i : ${#numbers.sequence(1, 5)}" 
-                                                   th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                                                <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                                    th:class="${i <= review.rating ? 'fas fa-star' : 'far fa-star'}"></i>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="small text-muted text-truncate" style="max-width: 200px;" th:text="${review.comment}">Amazing taste...</div>
+                                            <div class="small text-muted text-truncate" style="max-width: 200px;"
+                                                th:text="${review.comment}">Amazing taste...</div>
                                         </td>
                                         <td>
-                                            <span th:if="${review.reviewStatus.name() == 'PUBLISHED'}" class="badge-status bg-success-subtle text-success">Public</span>
-                                            <span th:if="${review.reviewStatus.name() == 'HIDDEN'}" class="badge-status bg-warning-subtle text-warning">Hidden</span>
-                                            <span th:if="${review.reviewStatus.name() == 'REJECTED'}" class="badge-status bg-danger-subtle text-danger">Rejected</span>
+                                            <span th:if="${review.reviewStatus.name() == 'PUBLISHED'}"
+                                                class="badge-status bg-success-subtle text-success">Công khai</span>
+                                            <span th:if="${review.reviewStatus.name() == 'HIDDEN'}"
+                                                class="badge-status bg-warning-subtle text-warning">Ẩn</span>
+                                            <span th:if="${review.reviewStatus.name() == 'REJECTED'}"
+                                                class="badge-status bg-danger-subtle text-danger">Trả lại</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group">
-                                                <button class="btn btn-sm btn-white text-primary btn-detail" th:data-id="${review.id}" title="View Details">
+                                                <button class="btn btn-sm btn-white text-primary btn-detail"
+                                                    th:data-id="${review.id}" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
-                                                <button th:if="${review.reviewStatus.name() == 'PUBLISHED'}" 
-                                                        class="btn btn-sm btn-white text-warning btn-toggle-status" 
-                                                        th:data-id="${review.id}" data-status="HIDDEN" title="Hide Review">
+                                                <button th:if="${review.reviewStatus.name() == 'PUBLISHED'}"
+                                                    class="btn btn-sm btn-white text-warning btn-toggle-status"
+                                                    th:data-id="${review.id}" data-status="HIDDEN" title="Hide Review">
                                                     <i class="fas fa-eye-slash"></i>
                                                 </button>
-                                                <button th:if="${review.reviewStatus.name() == 'HIDDEN'}" 
-                                                        class="btn btn-sm btn-white text-success btn-toggle-status" 
-                                                        th:data-id="${review.id}" data-status="PUBLISHED" title="Publish Review">
+                                                <button th:if="${review.reviewStatus.name() == 'HIDDEN'}"
+                                                    class="btn btn-sm btn-white text-success btn-toggle-status"
+                                                    th:data-id="${review.id}" data-status="PUBLISHED"
+                                                    title="Publish Review">
                                                     <i class="fas fa-check-circle"></i>
                                                 </button>
                                             </div>
@@ -209,17 +224,19 @@
                             <nav aria-label="Page navigation">
                                 <ul class="pagination pagination-sm mb-0">
                                     <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
-                                        <a class="page-link" th:href="@{/staff/review(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
+                                        <a class="page-link"
+                                            th:href="@{/staff/review(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
                                     </li>
                                     <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                         th:class="|page-item ${meta.page == p ? 'active' : ''}|">
-                                        <a class="page-link" 
-                                           th:classappend="${meta.page == p} ? 'bg-theme border-theme text-white' : ''"
-                                           th:href="@{/staff/review(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
-                                           th:text="${p}"></a>
+                                        <a class="page-link"
+                                            th:classappend="${meta.page == p} ? 'bg-theme border-theme text-white' : ''"
+                                            th:href="@{/staff/review(page=${p}, size=${meta.pageSize}, filter=${param.filter})}"
+                                            th:text="${p}"></a>
                                     </li>
                                     <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
-                                        <a class="page-link" th:href="@{/staff/review(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
+                                        <a class="page-link"
+                                            th:href="@{/staff/review(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -240,13 +257,14 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Review Details</h5>
+                    <h5 class="modal-title fw-bold">Chi tiết đánh giá</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body modal-body-detail">
                     <div class="d-flex align-items-center mb-4">
                         <div class="avatar-box me-3">
-                            <div class="rounded-circle bg-theme text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold;" id="detailCustomerInitials">
+                            <div class="rounded-circle bg-theme text-white d-flex align-items-center justify-content-center"
+                                style="width: 50px; height: 50px; font-weight: bold;" id="detailCustomerInitials">
                                 JD
                             </div>
                         </div>
@@ -262,26 +280,26 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="small text-muted text-uppercase fw-bold mb-1">Product</label>
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Sản phẩm</label>
                         <p class="fw-bold text-dark mb-0" id="detailProductName">Spicy Chicken Bucket</p>
                     </div>
 
                     <div class="mb-4">
-                        <label class="small text-muted text-uppercase fw-bold mb-1">Comment</label>
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Đánh giá</label>
                         <div class="p-3 bg-light rounded" id="detailComment">
                             The food was absolutely delicious and delivered on time!
                         </div>
                     </div>
 
                     <div>
-                        <label class="small text-muted text-uppercase fw-bold mb-2">Media Content</label>
+                        <label class="small text-muted text-uppercase fw-bold mb-2">Ảnh/Video</label>
                         <div id="detailMediaContainer" class="media-preview-container">
                             <!-- Media items will be injected here -->
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
                     <div id="detailActionButtons">
                         <!-- Action buttons will be injected here -->
                     </div>
@@ -295,24 +313,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script th:inline="javascript">
-        $(document).ready(function() {
+        $(document).ready(function () {
             // CSRF protection for AJAX
             const token = $("meta[name='_csrf']").attr("content");
             const header = $("meta[name='_csrf_header']").attr("content");
-            
-            $(document).ajaxSend(function(e, xhr, options) {
+
+            $(document).ajaxSend(function (e, xhr, options) {
                 if (token && header) {
                     xhr.setRequestHeader(header, token);
                 }
             });
 
             // Handle filtering - FIXED highlighting
-            $(".btn-filter").each(function() {
+            $(".btn-filter").each(function () {
                 const status = $(this).data("status");
                 const currentFilter = new URLSearchParams(window.location.search).get("filter");
-                
+
                 $(this).removeClass("btn-theme").addClass("btn-outline-theme");
-                
+
                 if (!currentFilter) {
                     if (!status) { // All button
                         $(this).removeClass("btn-outline-theme").addClass("btn-theme");
@@ -322,10 +340,10 @@
                 }
             });
 
-            $(".btn-filter").click(function() {
+            $(".btn-filter").click(function () {
                 const status = $(this).data("status");
                 const urlParams = new URLSearchParams(window.location.search);
-                
+
                 if (status) {
                     urlParams.set('filter', "reviewStatus : '" + status + "'");
                 } else {
@@ -339,14 +357,14 @@
             const $search = $("#reviewSearch");
             const $suggestions = $("#suggestionsList");
 
-            $search.on("input", function() {
+            $search.on("input", function () {
                 const query = $(this).val().trim();
                 if (query.length < 1) {
                     $suggestions.hide();
                     return;
                 }
 
-                $.get("/staff/review/suggestions", { query: query }, function(data) {
+                $.get("/staff/review/suggestions", { query: query }, function (data) {
                     $suggestions.empty();
                     if (data.length > 0) {
                         data.forEach(item => {
@@ -367,20 +385,20 @@
                 });
             });
 
-            $(document).on("click", ".suggestion-item", function() {
+            $(document).on("click", ".suggestion-item", function () {
                 const value = $(this).data("value");
                 $search.val(value);
                 $suggestions.hide();
                 performSearch(value);
             });
 
-            $(document).on("click", function(e) {
+            $(document).on("click", function (e) {
                 if (!$(e.target).closest("#searchContainer").length) {
                     $suggestions.hide();
                 }
             });
 
-            $("#reviewSearch").on("keypress", function(e) {
+            $("#reviewSearch").on("keypress", function (e) {
                 if (e.which === 13) {
                     performSearch($(this).val().trim());
                 }
@@ -398,13 +416,13 @@
             }
 
             // Handle toggle status
-            $(".btn-toggle-status").click(function() {
+            $(".btn-toggle-status").click(function () {
                 const id = $(this).data("id");
                 const status = $(this).data("status");
                 const actionText = status === 'PUBLISHED' ? 'Publish' : 'Hide';
-                
+
                 Swal.fire({
-                    title: 'Confirm ' + actionText,
+                    title: 'Xác nhận ' + actionText,
                     text: "Are you sure you want to " + actionText.toLowerCase() + " this review?",
                     icon: 'question',
                     showCancelButton: true,
@@ -413,7 +431,7 @@
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $.post(`/staff/review/update/${id}?reviewStatus=${status}`, function(response) {
+                        $.post(`/staff/review/update/${id}?reviewStatus=${status}`, function (response) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Success',
@@ -423,7 +441,7 @@
                             }).then(() => {
                                 location.reload();
                             });
-                        }).fail(function(err) {
+                        }).fail(function (err) {
                             Swal.fire('Error', 'Failed to update status', 'error');
                         });
                     }
@@ -431,27 +449,27 @@
             });
 
             // Handle Detail View
-            $(".btn-detail").click(function() {
+            $(".btn-detail").click(function () {
                 const id = $(this).data("id");
-                
-                $.get(`/staff/review/${id}`, function(review) {
+
+                $.get(`/staff/review/${id}`, function (review) {
                     // Populate modal
                     $("#detailCustomerName").text(review.name);
                     $("#detailCustomerInitials").text(review.name.substring(0, 2).toUpperCase());
-                    
+
                     const date = new Date(review.createdAt);
-                    $("#detailDate").text(date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}));
-                    
+                    $("#detailDate").text(date.toLocaleDateString('en-GB') + ' ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+
                     $("#detailProductName").text(review.productName);
                     $("#detailComment").text(review.comment);
-                    
+
                     // Rating stars
                     let starsHtml = '';
                     for (let i = 1; i <= 5; i++) {
                         starsHtml += `<i class="${i <= review.rating ? 'fas' : 'far'} fa-star"></i> `;
                     }
                     $("#detailRating").html(starsHtml);
-                    
+
                     // Status badge
                     const statusBadge = $("#detailStatusBadge");
                     statusBadge.removeClass('bg-success-subtle text-success bg-warning-subtle text-warning bg-danger-subtle text-danger');
@@ -462,11 +480,11 @@
                     } else {
                         statusBadge.addClass('bg-danger-subtle text-danger').text('Rejected');
                     }
-                    
+
                     // Media content
                     const mediaContainer = $("#detailMediaContainer");
                     mediaContainer.empty();
-                    
+
                     if (review.mediaUrls && review.mediaUrls.length > 0) {
                         review.mediaUrls.forEach(url => {
                             const ext = url.split('.').pop().toLowerCase();
@@ -484,14 +502,14 @@
                     } else {
                         mediaContainer.html('<p class="text-muted italic">No photos or videos attached.</p>');
                     }
-                    
+
                     // Action buttons in modal
                     const actionButtons = $("#detailActionButtons");
                     actionButtons.empty();
                     if (review.reviewStatus === 'PUBLISHED') {
                         actionButtons.append(`
                             <button class="btn btn-warning px-4" onclick="updateReviewStatus(${review.id}, 'HIDDEN')">
-                                <i class="fas fa-eye-slash me-1"></i> Hide Review
+                                <i class="fas fa-eye-slash me-1"></i> Ẩn
                             </button>
                         `);
                     } else if (review.reviewStatus === 'HIDDEN') {
@@ -501,7 +519,7 @@
                             </button>
                         `);
                     }
-                    
+
                     $("#reviewDetailModal").modal('show');
                 });
             });
@@ -510,7 +528,7 @@
         function updateReviewStatus(id, status) {
             const actionText = status === 'PUBLISHED' ? 'Publish' : 'Hide';
             Swal.fire({
-                title: 'Confirm ' + actionText,
+                title: 'Xác nhận ' + actionText,
                 text: "Are you sure you want to " + actionText.toLowerCase() + " this review?",
                 icon: 'question',
                 showCancelButton: true,
@@ -519,7 +537,7 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.post(`/staff/review/update/${id}?reviewStatus=${status}`, function(response) {
+                    $.post(`/staff/review/update/${id}?reviewStatus=${status}`, function (response) {
                         location.reload();
                     });
                 }

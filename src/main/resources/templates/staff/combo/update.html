@@ -57,7 +57,7 @@
     <div class="container mt-5 pb-5">
         <div class="card shadow">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">Update Combo: <span th:text="${updateProduct.name}"></span></h3>
+                <h3 class="mb-0">Cập nhật sản phẩm: <span th:text="${updateProduct.name}"></span></h3>
                 <span class="badge bg-light text-primary" th:text="${updateProduct.type}">TYPE</span>
             </div>
             <div class="card-body">
@@ -70,36 +70,36 @@
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Combo Name</label>
+                            <label class="form-label fw-bold">Tên</label>
                             <input type="text" th:field="*{name}" class="form-control" placeholder="Nhập tên combo..."
                                 required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Combo Price (VNĐ)</label>
+                            <label class="form-label fw-bold">Giá (VNĐ)</label>
                             <input type="number" th:field="*{price}" class="form-control" required>
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Category</label>
+                            <label class="form-label fw-bold">Thể loại</label>
                             <select class="form-select" th:field="*{category.id}" required>
-                                <option value="">-- Choose Category --</option>
+                                <option value="">-- Chọn thể loại --</option>
                                 <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">
                                 </option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Status</label>
+                            <label class="form-label fw-bold">Trạng thái</label>
                             <select th:field="*{active}" class="form-select">
-                                <option th:value="true">Active</option>
-                                <option th:value="false">Non-active</option>
+                                <option th:value="true">Hoạt động</option>
+                                <option th:value="false">Không hoạt động</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Description</label>
+                        <label class="form-label fw-bold">Mô tả</label>
                         <textarea th:field="*{description}" class="form-control" rows="2"
                             placeholder="Input description..."></textarea>
                     </div>
@@ -107,7 +107,7 @@
                     <hr>
 
                     <div class="mb-4">
-                        <h5 class="mb-3 text-primary">Select Products for this Combo
+                        <h5 class="mb-3 text-primary">Chọn sản phẩm cho combo
                         </h5>
                         <div class="mb-3">
                             <div class="input-group">
@@ -144,7 +144,7 @@
 
                                         <div
                                             class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
-                                            <span class="small text-muted">Quantity:</span>
+                                            <span class="small text-muted">Số lượng:</span>
                                             <div class="input-group input-group-sm" style="width: 80px;">
                                                 <input type="number" th:id="'qty_' + ${product.id}"
                                                     class="form-control text-center item-qty" value="1" min="1"
@@ -167,7 +167,7 @@
 
                     <div class="row mb-4">
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">Main Picture</label>
+                            <label class="form-label fw-bold">Ảnh chính</label>
                             <div class="mb-2">
                                 <input type="hidden" th:field="*{img}">
                                 <img th:src="@{'/images/products/' + *{img}}" class="img-thumbnail w-100"
@@ -178,7 +178,7 @@
                         </div>
 
                         <div class="col-md-8">
-                            <label class="form-label fw-bold">Collection Gallery</label>
+                            <label class="form-label fw-bold">Ảnh phụ</label>
                             <div class="row" id="gallery-container">
                                 <div th:each="imgName : *{imgs}" class="col-md-3 mb-3 image-card-wrapper">
                                     <div class="card shadow-sm">
@@ -193,7 +193,7 @@
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <label class="small text-muted">Add to collection:</label>
+                                <label class="small text-muted">Thêm ảnh</label>
                                 <input type="file" name="files" multiple class="form-control form-control-sm"
                                     onchange="previewMultipleImages(this)">
                                 <div id="new-files-preview" class="row mt-2"></div>
@@ -202,8 +202,8 @@
                     </div>
 
                     <div class="mt-5 text-end border-top pt-3">
-                        <a th:href="@{/staff/combo}" class="btn btn-outline-secondary me-2 px-4">Cancel</a>
-                        <button type="submit" class="btn btn-success px-5 fw-bold">Update Combo</button>
+                        <a th:href="@{/staff/combo}" class="btn btn-outline-secondary me-2 px-4">Dừng</a>
+                        <button type="submit" class="btn btn-success px-5 fw-bold">Cập nhật</button>
                     </div>
                 </form>
             </div>
