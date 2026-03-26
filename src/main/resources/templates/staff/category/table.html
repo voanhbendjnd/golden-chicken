@@ -19,7 +19,7 @@
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Category Management</h1>
+                    <h1 class="h2"><i class="fas fa-tags me-2 text-theme"></i>Quản lý thể loại</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a th:href="@{/staff/category/create}" class="btn btn-theme shadow-sm">
                             <i class="fas fa-plus me-1"></i> Tạo Mới
@@ -76,9 +76,9 @@
                                         </td>
                                         <td>
                                             <span th:if="${category.status}"
-                                                class="badge-status bg-success-subtle text-success">Active</span>
+                                                class="badge-status bg-success-subtle text-success">Hoạt động</span>
                                             <span th:unless="${category.status}"
-                                                class="badge-status bg-danger-subtle text-danger">Inactive</span>
+                                                class="badge-status bg-danger-subtle text-danger">Ngừng hoạt động</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group shadow-sm border rounded">
@@ -154,14 +154,14 @@
                 const form = this.nextElementSibling;
 
                 Swal.fire({
-                    title: 'Are you sure delete?',
-                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    title: 'Bạn chắc chắn muốn xóa thể loại này?',
+                    text: "Nếu thể loại này có sản phẩm nào đã gán thì không thể xóa và chỉ có thể chuyển đổi trạng thái!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Dừng',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {

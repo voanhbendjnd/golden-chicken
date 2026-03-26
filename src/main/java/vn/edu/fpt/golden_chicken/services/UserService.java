@@ -117,6 +117,12 @@ public class UserService {
             var customer = new Customer();
             customer.setUser(user);
             this.customerRepository.save(customer);
+        } else if (role.getName().equals("ADMIN")) {
+            var staff = new Staff();
+            staff.setUser(user);
+            staff.setStatus(StaffStatus.AVAILABLE);
+            staff.setStaffType(StaffType.MANAGER);
+            this.staffRepository.save(staff);
         }
         var userMsg = new UserMessage();
         userMsg.setReason("Staff create new account");

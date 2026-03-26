@@ -16,17 +16,15 @@ import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductDTO {
     Long id;
-    @NotBlank(message = "Name Cannot be Empty!")
+    @NotBlank(message = "Tên không được để trống")
     String name;
-    @NotNull(message = "Price Cannot be Empty!")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0!")
-    @DecimalMax(value = "999999999.99", message = "Price is too large!")
+    @NotNull(message = "Giá không được để trống")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Giá phải lớn hơn 0")
+    @DecimalMax(value = "999999999.99", message = "Giá đạt cực đại")
     BigDecimal price;
-    @NotBlank(message = "Description Cannot be Empty!")
     String description;
     @NotNull
     boolean active;
-    @NotNull(message = "Product Type Cannot be Empty!")
     ProductType type;
     Category category = new Category();
     String img;

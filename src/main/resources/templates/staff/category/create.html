@@ -14,28 +14,28 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-center">Create New Category</h3>
+                        <h3 class="text-center">Tạo mới thể loại</h3>
                     </div>
                     <div class="card-body">
                         <form th:action="@{/staff/category/create}" method="post" th:object="${category}">
                             <div class="mb-3">
-                                <label class="form-label">Name</label>
+                                <label class="form-label">Tên thể loại</label>
                                 <input type="text" class="form-control" th:field="*{name}" required />
                                 <div th:if="${#fields.hasErrors('name')}" style="color: red;" th:errors="*{name}"></div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Description</label>
+                                <label class="form-label">Mô tả</label>
                                 <input type="text" class="form-control" th:field="*{description}" required />
                                 <div th:if="${#fields.hasErrors('description')}" style="color: red;"
                                     th:errors="*{description}"></div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
+                                <label class="form-label">Trạng thái</label>
                                 <select th:field="*{status}" class="form-select">
-                                    <option value="true">Active</option>
-                                    <option value="false">Non-active</option>
+                                    <option value="true">Hoạt động</option>
+                                    <option value="false">Không hoạt động</option>
                                 </select>
                                 <div th:if="${#fields.hasErrors('status')}" style="color: red;" th:errors="*{status}">
                                 </div>
@@ -45,8 +45,8 @@
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a th:href="@{/staff/category}" class="btn btn-secondary me-md-2">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Create Category</button>
+                                <a th:href="@{/staff/category}" class="btn btn-secondary me-md-2">Dừng</a>
+                                <button type="submit" class="btn btn-primary">Tạo mới</button>
                             </div>
                         </form>
                     </div>

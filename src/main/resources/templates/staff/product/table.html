@@ -14,10 +14,10 @@
             <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-4">
                 <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><i class="fas fa-hamburger me-2 text-theme"></i>Product Inventory</h1>
+                    <h1 class="h2"><i class="fas fa-hamburger me-2 text-theme"></i>Quản lý sản phẩm</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a th:href="@{/staff/product/create}" class="btn btn-theme shadow-sm">
-                            <i class="fas fa-plus me-1"></i> Add New Product
+                            <i class="fas fa-plus me-1"></i> Tạo mới
                         </a>
                     </div>
                 </div>
@@ -26,12 +26,12 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h5 class="mb-0">Product List</h5>
+                                <h5 class="mb-0">Danh sách sản phẩm</h5>
                             </div>
                             <div class="col-auto">
                                 <div class="input-group input-group-sm" style="width: 300px;">
                                     <input type="text" id="searchName" class="form-control"
-                                        placeholder="Search by name..." th:value="${searchName}">
+                                        placeholder="Tìm bằng tên..." th:value="${searchName}">
                                     <button class="btn btn-theme" type="button" onclick="handleSearch()">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -44,17 +44,20 @@
                             <table class="table table-hover table-premium">
                                 <thead>
                                     <tr>
-                                        <th style="width: 80px;">ID</th>
-                                        <th>Product</th>
-                                        <th>Category</th>
-                                        <th>Price</th>
-                                        <th>Status</th>
-                                        <th class="text-end">Actions</th>
+                                        <th>ID</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Thể loại</th>
+                                        <th>Giá</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="product : ${products}">
-                                        <td><span class="text-muted fw-bold" th:text="${product.id}">1</span></td>
+                                        <td>
+                                            <a th:href="@{/staff/product/{id}(id=${product.id})}"
+                                                th:text="${product.id}">ID</a>
+                                        </td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-light p-2 rounded me-3">
@@ -76,9 +79,9 @@
                                         </td>
                                         <td>
                                             <span th:if="${product.active}"
-                                                class="badge-status bg-success-subtle text-success">Active</span>
+                                                class="badge-status bg-success-subtle text-success">Hoạt động</span>
                                             <span th:unless="${product.active}"
-                                                class="badge-status bg-danger-subtle text-danger">Inactive</span>
+                                                class="badge-status bg-danger-subtle text-danger">Ngừng hoạt động</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="btn-group shadow-sm border rounded">
@@ -153,7 +156,7 @@
 
                         <div th:if="${products == null or products.isEmpty()}" class="text-center py-5">
                             <div class="display-1 text-light"><i class="fas fa-hamburger"></i></div>
-                            <p class="text-muted mt-3">No products found in the inventory.</p>
+                            <p class="text-muted mt-3">Không có sản phầm nào trong kho</p>
                         </div>
                     </div>
                 </div>
@@ -186,14 +189,14 @@
             button.addEventListener('click', function () {
                 const form = this.nextElementSibling;
                 Swal.fire({
-                    title: 'Are you sure delete?',
-                    text: "The data will be moved to the Recycle Bin and can be recovered later!",
+                    title: 'Bạn chắc chắn muốn xóa sản phẩm này',
+                    text: "Nếu sản phẩm có trong đơn hàng thì sẽ không thể xóa và tự chuyển sang trạng thái không hoạt động!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Dồng ý',
+                    cancelButtonText: 'Dừng',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -207,13 +210,13 @@
             button.addEventListener('click', function () {
 
                 const form = this.nextElementSibling; Swal.fire({
-                    title: 'Are you sure change status?',
+                    title: 'Bạn muốn thay đổi trạng thái sản phẩm?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'OK',
-                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Dừng',
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {

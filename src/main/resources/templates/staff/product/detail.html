@@ -52,8 +52,8 @@
                 <div class="card shadow product-card border-0">
                     <div
                         class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                        <h4 class="mb-0 text-primary">Product Information</h4>
-                        <a th:href="@{/staff/product}" class="btn btn-outline-secondary btn-sm">Back to List</a>
+                        <h4 class="mb-0 text-primary">Thông tin sản phẩm</h4>
+                        <a th:href="@{/staff/product}" class="btn btn-outline-secondary btn-sm">Trở lại</a>
                     </div>
 
                     <div class="card-body p-4">
@@ -70,7 +70,7 @@
                                             class="gallery-item border shadow-sm" alt="Gallery">
                                     </div>
                                     <div class="col-12" th:if="${#lists.isEmpty(product.imgs)}">
-                                        <p class="text-muted small italic">No sub-images available.</p>
+                                        <p class="text-muted small italic">Không có ảnh</p>
                                     </div>
                                 </div>
                             </div>
@@ -78,33 +78,33 @@
                             <div class="col-md-7">
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span class="info-label">Product Name:</span>
+                                        <span class="info-label">Tên sản phẩm:</span>
                                         <span class="fw-bold fs-5 text-dark" th:text="${product.name}">Chicken
                                             Combo</span>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span class="info-label">Price:</span>
+                                        <span class="info-label">Giá:</span>
                                         <span class="text-danger fw-bold"
                                             th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">50,000</span>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span class="info-label">Category:</span>
+                                        <span class="info-label">Thể loại:</span>
                                         <span class="badge bg-info text-dark" th:text="${product.category.name}">Fast
                                             Food</span>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span class="info-label">Type:</span>
+                                        <span class="info-label">Kiểu:</span>
                                         <span class="text-dark" th:text="${product.type}">SINGLE</span>
                                     </div>
                                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span class="info-label">Status:</span>
+                                        <span class="info-label">Trạng thái:</span>
                                         <span
                                             th:class="${product.active} ? 'badge bg-success badge-status' : 'badge bg-danger badge-status'"
                                             th:text="${product.active ? 'Active' : 'Non-active'}">
                                         </span>
                                     </div>
                                     <div class="list-group-item">
-                                        <span class="info-label d-block mb-2">Description:</span>
+                                        <span class="info-label d-block mb-2">Mô tả:</span>
                                         <p class="text-muted" style="text-align: justify;"
                                             th:text="${product.description}">
                                             Product description goes here...
