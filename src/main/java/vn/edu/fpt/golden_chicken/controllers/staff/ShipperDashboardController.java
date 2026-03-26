@@ -37,6 +37,7 @@ import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.utils.constants.OrderStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentMethod;
 import vn.edu.fpt.golden_chicken.utils.constants.PaymentStatus;
+import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @Controller
 @RequestMapping("/staff/shipper")
@@ -58,6 +59,18 @@ public class ShipperDashboardController {
     @GetMapping("/dashboard")
     public String dashboard(Model model,
             @RequestParam(name = "range", required = false, defaultValue = "DAY") String range) {
+        var user = this.userService.getUserInContext();
+        if (user.getStaff() != null) {
+            var staffType = user.getStaff().getStaffType();
+            if (staffType != StaffType.SHIPPER) {
+                if (staffType == StaffType.MANAGER && !user.getRole().getName().equals("ADMIN")) {
+                    return "redirect:/staff/dashboard";
+                }
+                if (staffType == StaffType.RECEPTIONIST) {
+                    return "redirect:/staff/order";
+                }
+            }
+        }
         Staff shipper = getCurrentShipper();
         if (shipper == null) {
             return "redirect:/staff";
