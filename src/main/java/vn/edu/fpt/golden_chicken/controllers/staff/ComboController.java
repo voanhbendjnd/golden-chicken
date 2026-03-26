@@ -165,6 +165,16 @@ public class ComboController {
             model.addAttribute("updateProduct", combo);
             model.addAttribute("categories", this.categoryService.fetchAll());
             return "staff/combo/update";
+        } catch (DataInvalidException ex) {
+            model.addAttribute("currentProductQuantities", currentProductQuantities);
+
+            model.addAttribute("error", ex.getMessage());
+            model.addAttribute("currentProductIds",
+                    comboDetails.stream().map(x -> x.getProduct().getId()).collect(Collectors.toList()));
+            model.addAttribute("products", this.productService.fetchAllProductSingle());
+            model.addAttribute("updateProduct", combo);
+            model.addAttribute("categories", this.categoryService.fetchAll());
+            return "staff/combo/update";
         }
         return "redirect:/staff/combo";
     }
