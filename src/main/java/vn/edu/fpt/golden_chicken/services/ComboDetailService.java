@@ -22,6 +22,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResSingleProduct;
 import vn.edu.fpt.golden_chicken.repositories.CategoryRepository;
 import vn.edu.fpt.golden_chicken.repositories.ComboDetailRepository;
 import vn.edu.fpt.golden_chicken.repositories.ProductRepository;
+import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
 @Service
@@ -78,6 +79,11 @@ public class ComboDetailService {
         if (dto.getId() != null) {
             this.comboDetailRepository.deleteByComboId(lastProduct.getId());
         }
+
+        if (dto.getItems() == null || dto.getItems().isEmpty()) {
+            throw new DataInvalidException("Combo phải có ít nhất một sản phẩm!");
+        }
+
         Map<Long, Product> productMp = this.productRepository
                 .findByIdIn(dto.getItems().stream().map(x -> x.getId()).collect(Collectors.toList()))
                 .stream().collect(Collectors.toMap(Product::getId, p -> p));

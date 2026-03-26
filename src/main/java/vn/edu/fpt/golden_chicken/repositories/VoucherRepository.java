@@ -25,5 +25,8 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     boolean existsByCode(String code);
 
     List<Voucher> findAllByStatus(String status);
+
     boolean existsByCodeAndIdNot(String code, Long id);
+
+    Page<Voucher> findByIsDeletedFalseAndCodeContainingIgnoreCase(String code, Pageable pageable);
 }

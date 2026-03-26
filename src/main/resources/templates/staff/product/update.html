@@ -54,15 +54,12 @@
                             <div class="text-danger" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
                         </div>
                     </div>
-                    <div class="row mb 4">
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Product Type</label>
-                            <input th:field="*{type}" disabled class="form-select">
-                            <!-- <select th:field="*{type}" class="form-select">
-                                <option value="">-- Choose Type --</option>
-                                <option th:value="SINGLE">SINGLE</option>
-                                <option th:value="COMBO">COMBO</option>
-                            </select> -->
+                            <input type="hidden" th:field="*{type}">
+                            <input th:value="*{type}" disabled class="form-control">
+                            <div class="text-danger" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></div>
                         </div>
 
                         <div class="col-md-6">

@@ -65,12 +65,24 @@ public class VoucherController {
 
     @GetMapping("/list")
     public String list(@RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "5") int size,
-            Model model) {
+                       @RequestParam(name = "size", defaultValue = "5") int size,
+                       @RequestParam(required = false) String searchCode,
+                       Model model) {
+
         service.refreshExpiredStatus();
-        Page<ResVoucher> voucherPage = service.getAll(page, size);
+
+        Page<ResVoucher> voucherPage; // thêm dòng này
+
+        if (searchCode != null && !searchCode.trim().isEmpty()) {
+            voucherPage = service.searchByCode(searchCode, page, size); // thêm đoạn search
+        } else {
+            voucherPage = service.getAll(page, size); // giữ code cũ
+        }
+
         model.addAttribute("vouchers", voucherPage);
         model.addAttribute("currentPage", page);
+        model.addAttribute("searchCode", searchCode);
+
         return "staff/voucher/list";
     }
 
@@ -122,7 +134,7 @@ public class VoucherController {
 
     @GetMapping("/delete/{id:[0-9]+}")
     public String deleteVoucher(@PathVariable("id") Long id,
-            RedirectAttributes redirectAttributes) {
+                                RedirectAttributes redirectAttributes) {
         try {
             service.deleteVoucher(id);
             redirectAttributes.addFlashAttribute("success", "Xóa voucher thành công");

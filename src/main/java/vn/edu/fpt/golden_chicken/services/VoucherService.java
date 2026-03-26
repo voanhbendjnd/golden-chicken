@@ -187,6 +187,24 @@ public class VoucherService {
         repo.delete(voucher);
     }
 
+    @Transactional
+    public Page<ResVoucher> searchByCode(String code, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Voucher> voucherPage = repo.findByIsDeletedFalseAndCodeContainingIgnoreCase(code, pageable);
+
+        return voucherPage.map(v -> {
+            ResVoucher res = new ResVoucher();
+            res.setId(v.getId());
+            res.setCode(v.getCode());
+            res.setName(v.getName());
+            res.setQuantity(v.getQuantity() != null ? v.getQuantity() : 0);
+            res.setStatus(v.getStatus());
+            return res;
+        });
+    }
+
     private ResVoucher toResVoucher(Voucher voucher) {
         ResVoucher res = new ResVoucher();
         res.setId(voucher.getId());
