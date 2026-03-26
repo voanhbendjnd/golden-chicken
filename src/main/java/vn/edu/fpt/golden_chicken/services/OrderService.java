@@ -137,7 +137,7 @@ public class OrderService {
 
         var voucher = customerVoucher.getVoucher();
         int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        int newQty = qty - 1;
+        int newQty = qty;
         voucher.setQuantity(newQty);
         if (newQty <= 0) {
             voucher.setStatus("DISABLED");
