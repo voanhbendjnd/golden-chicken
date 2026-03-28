@@ -107,13 +107,13 @@
                                 }
                             });
                         } else if (response.status === 403) {
-                            alert('Vui lòng đăng nhập với tài khoản khách hàng để sử dụng giỏ hàng!');
+                                    window.location.href = '/login';
                         } else {
-                            alert('Có lỗi xảy ra, vui lòng thử lại.');
+                                    window.location.href = '/login';
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Không thể kết nối đến máy chủ!');
+                                    window.location.href = '/login';
                     }
                 };
             });

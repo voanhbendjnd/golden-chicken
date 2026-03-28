@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Query(value = "select count(*) from customers c join users u on u.id = c.user_id", nativeQuery = true)
     Integer countCustomer();
+
+    boolean existsByRoleId(Long id);
 }

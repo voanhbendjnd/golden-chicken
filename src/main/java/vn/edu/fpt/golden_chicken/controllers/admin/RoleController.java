@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -58,14 +59,17 @@ public class RoleController {
     }
 
     @PostMapping("/create")
-    public String createRole(@ModelAttribute("newRole") @Valid RoleDTO request, BindingResult bindingResult) {
+    public String createRole(@ModelAttribute("newRole") @Valid RoleDTO request, BindingResult bindingResult,
+            Model model) {
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("permissions", this.permissionService.fetchAll());
             return "admin/role/create";
         }
         try {
             this.roleService.create(request);
         } catch (RuntimeException ex) {
+            model.addAttribute("permissions", this.permissionService.fetchAll());
             bindingResult.rejectValue("name", "CONFLICT", ex.getMessage());
             return "admin/role/create";
         }
@@ -98,9 +102,13 @@ public class RoleController {
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String deleteRole(@PathVariable("id") long id) {
-        this.roleService.deleteById(id);
-        return "redirect:/admin/role";
+    public String deleteRole(@PathVariable("id") long id, RedirectAttributes ra) {
+        if (this.roleService.deleteById(id))
+            return "redirect:/admin/role";
+        else {
+            ra.addFlashAttribute("msgWarning", "Không thể xóa do đã có người dùng!");
+            return "redirect:/admin/role";
+        }
     }
 
     @PostMapping("/import")

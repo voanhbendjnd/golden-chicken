@@ -46,12 +46,12 @@ public class AuthControllerV2 {
 
     @PostMapping("/forgot-password-v2")
     public String forgotPassword(@RequestParam("email") String email, RedirectAttributes re) {
-        if (this.userRepository.existsByEmailIgnoreCase(email)) {
-            return "redirect:/verify-v2?email=" + email;
+        // if (this.userRepository.existsByEmailIgnoreCase(email)) {
+        return "redirect:/verify-v2?email=" + email;
 
-        }
-        re.addFlashAttribute("error", "Email not exists!");
-        return "redirect:/forgot-password-v2";
+        // }
+        // re.addFlashAttribute("error", "Email not exists!");
+        // return "redirect:/forgot-password-v2";
     }
 
     @GetMapping("verify-v2")

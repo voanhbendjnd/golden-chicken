@@ -22,6 +22,7 @@ import vn.edu.fpt.golden_chicken.domain.request.PermissionDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResPermission;
 import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.PermissionRepository;
+import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.PermissionConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
@@ -32,6 +33,7 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @RequiredArgsConstructor
 public class PermissionService {
     PermissionRepository permissionRepository;
+    RoleRepository roleRepository;
 
     public void create(PermissionDTO dto) {
         if (this.permissionRepository.existsByNameAndApiPathAndMethodAndModule(dto.getName(), dto.getApiPath(),
@@ -62,13 +64,14 @@ public class PermissionService {
         return PermissionConvert.toResPermissinon(permission);
     }
 
-    public void deleteById(long id) {
+    public boolean deleteById(long id) {
         var permission = this.permissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission ID", id));
         if (this.permissionRepository.isPermissionInUse(id)) {
-            return;
+            return false;
         }
         this.permissionRepository.delete(permission);
+        return true;
     }
 
     public ResultPaginationDTO fecthAllWithPaginationDTO(Specification<Permission> spec, Pageable pageable) {

@@ -99,7 +99,8 @@ public class SecurityConfig {
                 "/ws-chat/**",
                 "/forgot-password-v2/**",
                 "/update-password-v2/**",
-                "/verify-v2/**"
+                "/verify-v2/**",
+                "/product/**"
 
         };
         http

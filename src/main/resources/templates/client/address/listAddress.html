@@ -30,7 +30,8 @@
                     THÊM ĐỊA CHỈ MỚI
                 </a>
             </div>
-
+            <div th:if="${msgWarning != null}" class="alert alert-warning shadow-sm border-0 mb-4" role="alert"
+                th:text="${msgWarning}"></div>
             <section class="addr-card">
                 <div class="addr-card__head">DANH SÁCH ĐỊA CHỈ</div>
                 <div class="addr-card__body">

@@ -46,7 +46,7 @@
                     </div>
                     <div class="card-body">
                         <!-- Import Section -->
-                        <div class="mb-4 p-3 bg-light rounded-3 border border-light-subtle">
+                        <!-- <div class="mb-4 p-3 bg-light rounded-3 border border-light-subtle">
                             <h6 class="fw-bold mb-3 small text-uppercase text-muted"><i
                                     class="fas fa-file-import me-2"></i>Nhập vai trò hàng loạt</h6>
                             <form th:action="@{/admin/role/import}" method="post" enctype="multipart/form-data"
@@ -63,11 +63,12 @@
                                     </button>
                                 </div>
                             </form>
-                        </div>
+                        </div> -->
 
                         <div th:if="${errorMessage != null}" class="alert alert-danger shadow-sm border-0 mb-4"
                             role="alert" th:text="${errorMessage}"></div>
-
+                        <div th:if="${msgWarning != null}" class="alert alert-warning shadow-sm border-0 mb-4"
+                            role="alert" th:text="${msgWarning}"></div>
                         <div th:if="${roles != null and !roles.isEmpty()}" class="table-responsive">
                             <table class="table table-hover table-premium">
                                 <thead>
@@ -116,13 +117,14 @@
                         <!-- Pagination -->
                         <div th:if="${roles != null and !roles.isEmpty()}"
                             class="d-flex justify-content-between align-items-center mt-4">
-                            <span class="small text-muted">Hiển thị trang <span th:text="${meta.page}"></span> trên <span
-                                    th:text="${meta.pages}"></span></span>
+                            <span class="small text-muted">Hiển thị trang <span th:text="${meta.page}"></span> trên
+                                <span th:text="${meta.pages}"></span></span>
                             <nav aria-label="Page navigation">
                                 <ul class="pagination pagination-sm mb-0">
                                     <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
                                         <a class="page-link shadow-none"
-                                            th:href="@{/admin/role(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trang trước</a>
+                                            th:href="@{/admin/role(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trang
+                                            trước</a>
                                     </li>
                                     <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                         th:class="|page-item ${meta.page == p ? 'active' : ''}|">
@@ -133,7 +135,8 @@
                                     </li>
                                     <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
                                         <a class="page-link shadow-none"
-                                            th:href="@{/admin/role(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Trang sau</a>
+                                            th:href="@{/admin/role(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Trang
+                                            sau</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -153,7 +156,6 @@
 
                 Swal.fire({
                     title: 'Bạn có chắc chắn muốn xóa?',
-                    text: 'Dữ liệu sẽ được chuyển vào Thùng rác và có thể được khôi phục sau!',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',

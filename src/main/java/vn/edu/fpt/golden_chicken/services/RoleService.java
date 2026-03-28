@@ -22,6 +22,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.domain.response.ResRole;
 import vn.edu.fpt.golden_chicken.repositories.PermissionRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
+import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.utils.converts.RoleConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
@@ -31,11 +32,12 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleService {
     RoleRepository roleRepository;
+    UserRepository userRepository;
     PermissionRepository permissionRepository;
 
     public void create(RoleDTO request) {
         if (this.roleRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Role Name " + request.getName() + " already exists!");
+            throw new RuntimeException("Vai trò là " + request.getName() + " đã tồn tại!");
         }
         var permissions = this.permissionRepository.findByIdIn(request.getPermissionIds());
         var role = new Role();
@@ -52,7 +54,7 @@ public class RoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Role ID", id));
 
         if (this.roleRepository.existsByNameAndIdNot(request.getName(), request.getId())) {
-            throw new RuntimeException("Role Name " + request.getName() + " already exists!");
+            throw new RuntimeException("Vai trò với tên là " + request.getName() + " đã tồn tại!");
         }
         var permssions = this.permissionRepository.findByIdIn(request.getPermissionIds());
         role.setPermissions(permssions);
@@ -67,9 +69,14 @@ public class RoleService {
         return RoleConvert.toRoleRes(role);
     }
 
-    public void deleteById(long id) {
+    public boolean deleteById(long id) {
         var role = this.roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role ID", id));
-        this.roleRepository.delete(role);
+        if (this.userRepository.existsByRoleId(id)) {
+            return false;
+        } else {
+            this.roleRepository.delete(role);
+            return true;
+        }
     }
 
     public ResultPaginationDTO fetchAllWithPagination(Specification<Role> spec, Pageable pageable) {
@@ -97,7 +104,7 @@ public class RoleService {
         var roles = new ArrayList<Role>();
         var set = this.roleRepository.findAll().stream().map(Role::getName).collect(Collectors.toSet());
         if (sheet == null || sheet.getPhysicalNumberOfRows() <= 1) {
-            throw new DataFormatException("File Excel Not Empty!");
+            throw new DataFormatException("File excel không tồn tại!");
         }
         for (var row : sheet) {
             var rowNum = row.getRowNum();
@@ -105,7 +112,7 @@ public class RoleService {
                 continue;
             }
             if (row.getCell(0) == null || row.getCell(1) == null) {
-                throw new DataFormatException("Data invalid at row " + (rowNum + 1) + ": Missing required cells.");
+                throw new DataFormatException("Dữ liệu bị lỗi tại hàng " + (rowNum + 1) + ": quên truyền dữ liệu");
             }
             var role = new Role();
             var name = row.getCell(0).getStringCellValue();

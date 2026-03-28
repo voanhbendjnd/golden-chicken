@@ -56,7 +56,19 @@ public class ProductService {
     public void updateStatus(Long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
-        product.setActive(!product.getActive());
+        var status = !product.getActive();
+        product.setActive(status);
+        if (this.comboDetailRepository.existsByProductId(id)
+                || this.comboDetailRepository.existsByComboId(id)) {
+
+            if (!status) {
+                var combos = this.comboDetailRepository.findByProductId(id);
+                for (var x : combos) {
+                    x.getCombo().setActive(false);
+                }
+                this.comboDetailRepository.saveAll(combos);
+            }
+        }
         this.productRepository.save(product);
     }
 
@@ -123,9 +135,9 @@ public class ProductService {
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.equal(categoryJoin.get("status"), true);
+            // var p1 = c.equal(categoryJoin.get("status"), true);
             var p2 = c.equal(r.get("type"), ProductType.SINGLE);
-            return c.and(p1, p2);
+            return c.and(p2);
         };
 
         var res = new ResultPaginationDTO();

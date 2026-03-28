@@ -18,6 +18,7 @@
             .breadcrumb-nav {
                 padding-top: 80px !important;
             }
+
             .product-price {
                 font-size: 1.5rem !important;
             }
@@ -70,12 +71,16 @@
                         <div class="ms-4 d-flex align-items-center" th:if="${product.totalReviews > 0}">
                             <div class="text-warning me-2">
                                 <th:block th:each="i : ${#numbers.sequence(1, 5)}">
-                                    <i th:if="${product.averageRating >= i}" class="fa fa-star" style="color:#ffc107"></i>
-                                    <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}" class="fa fa-star-half-alt" style="color:#ffc107"></i>
-                                    <i th:if="${product.averageRating < i - 0.5}" class="fa fa-star" style="color:#e0e0e0"></i>
+                                    <i th:if="${product.averageRating >= i}" class="fa fa-star"
+                                        style="color:#ffc107"></i>
+                                    <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}"
+                                        class="fa fa-star-half-alt" style="color:#ffc107"></i>
+                                    <i th:if="${product.averageRating < i - 0.5}" class="fa fa-star"
+                                        style="color:#e0e0e0"></i>
                                 </th:block>
                             </div>
-                            <span class="text-muted small">(<span th:text="${product.averageRating}">4.5</span>/5 - <span th:text="${product.totalReviews}">10</span> đánh giá)</span>
+                            <span class="text-muted small">(<span th:text="${product.averageRating}">4.5</span>/5 -
+                                <span th:text="${product.totalReviews}">10</span> đánh giá)</span>
                         </div>
                     </div>
 
@@ -91,8 +96,7 @@
 
                             <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
                                 <a class="btn btn-danger btn-buy-now" style="text-decoration-line: none;"
-                                    th:data-id="${product.id}"
-                                    th:href="@{/checkout?productId={id}(id=${product.id})}">
+                                    th:data-id="${product.id}" th:href="@{/checkout?productId={id}(id=${product.id})}">
                                     Mua Ngay
                                 </a>
                                 <!-- th:href="@{/checkout?productId={id}(id=${pro.id})}" -->
@@ -130,17 +134,20 @@
         <div class="review-section" id="reviewSection">
             <div class="review-section-title">ĐÁNH GIÁ SẢN PHẨM</div>
 
-            <div class="review-summary" id="reviewSummary" th:style="${product.totalReviews > 0 ? 'display:flex!important;' : 'display:none!important;'}">
+            <div class="review-summary" id="reviewSummary"
+                th:style="${product.totalReviews > 0 ? 'display:flex!important;' : 'display:none!important;'}">
                 <div class="review-avg-score">
                     <div class="review-avg-number" id="reviewAvgNumber" th:text="${product.averageRating}">0.0</div>
                     <div class="review-avg-stars" id="reviewAvgStars">
                         <th:block th:each="i : ${#numbers.sequence(1, 5)}">
                             <i th:if="${product.averageRating >= i}" class="fa fa-star" style="color:#ffc107"></i>
-                            <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}" class="fa fa-star-half-alt" style="color:#ffc107"></i>
+                            <i th:if="${product.averageRating < i and product.averageRating >= i - 0.5}"
+                                class="fa fa-star-half-alt" style="color:#ffc107"></i>
                             <i th:if="${product.averageRating < i - 0.5}" class="fa fa-star" style="color:#e0e0e0"></i>
                         </th:block>
                     </div>
-                    <div class="review-avg-count" id="reviewAvgCount" th:text="${product.totalReviews} + ' đánh giá'">0 đánh giá</div>
+                    <div class="review-avg-count" id="reviewAvgCount" th:text="${product.totalReviews} + ' đánh giá'">0
+                        đánh giá</div>
                 </div>
                 <div class="review-filter-pills" id="reviewFilterPills">
                     <span class="review-filter-pill active" data-rating="0">Tất cả</span>
@@ -269,17 +276,14 @@
                             </div>
 
                             <!-- ADD TO CART -->
-                            <div class="mt-3 d-flex gap-2 align-items-center"
-                                th:if="${product.type.name() != 'MYSTERY'}">
+                            <div class="mt-3 d-flex gap-2 align-items-center" th:if="${product.type != 'MYSTERY'}">
 
-                                <button
-                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart"
-                                    th:data-id="${product.id}">
-                                    <i class="fa fa-shopping-bag me-2"></i>Giỏ hàng
+                                <button class="btn btn-outline-warning add-to-cart" th:data-id="${product.id}"
+                                    style="color: rgb(210, 152, 4);">
+                                    <i class="fa fa-shopping-bag me-2" style="color: rgb(210, 152, 4);"></i>Giỏ hàng
                                 </button>
-
                                 <!-- QUANTITY -->
-                                <div class="input-group quantity-selector" style="width:120px;">
+                                <div class=" input-group quantity-selector" style="width:120px;">
 
                                     <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
 
@@ -291,7 +295,6 @@
                                 </div>
 
                             </div>
-
                         </div>
 
                     </div>

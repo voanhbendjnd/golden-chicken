@@ -104,19 +104,22 @@
                                         th:text="${#temporals.format(order.createdAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span th:if="${order.status.name() == 'READY_FOR_DELIVERY'}" class="badge-status badge-assigned">
+                                <span th:if="${order.status.name() == 'READY_FOR_DELIVERY'}"
+                                    class="badge-status badge-assigned">
                                     Chưa có shipper
                                 </span>
-                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status"
+                                    style="background:#fff3cd;color:#856404;">
                                     <i class="fa-solid fa-triangle-exclamation me-1"></i>Bị vấn đề
                                 </span>
-                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status"
+                                    style="background:#fff3cd;color:#856404;">
                                     <i class="fa-solid fa-rotate me-1"></i>Giao lại
                                 </span>
 
                             </div>
 
-                        
+
                             <div class="mb-1">
                                 <i class="fa-solid fa-location-dot text-danger me-1"></i>
                                 <span th:text="${order.shippingAddress}"></span>
@@ -139,7 +142,7 @@
 
                             <div class="order-footer mt-3 d-flex gap-2">
 
-                                
+
                                 <form th:action="@{/staff/shipper/order/accept}" method="post" class="flex-fill">
                                     <input type="hidden" name="orderId" th:value="${order.id}" />
                                     <button type="button" class="btn btn-warning flex-fill fw-bold"
@@ -178,13 +181,16 @@
                                         th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span th:if="${order.status.name() == 'DELIVERING'}" class="badge-status badge-delivering">
+                                <span th:if="${order.status.name() == 'DELIVERING'}"
+                                    class="badge-status badge-delivering">
                                     Đang giao
                                 </span>
-                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                <span th:if="${order.status.name() == 'SHIPPER_ISSUE'}" class="badge-status"
+                                    style="background:#fff3cd;color:#856404;">
                                     <i class="fa-solid fa-triangle-exclamation me-1"></i>Bị vấn đề
                                 </span>
-                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status" style="background:#fff3cd;color:#856404;">
+                                <span th:if="${order.status.name() == 'REASSIGNING_SHIPPER'}" class="badge-status"
+                                    style="background:#fff3cd;color:#856404;">
                                     <i class="fa-solid fa-rotate me-1"></i>Chờ giao lại
                                 </span>
 
@@ -298,7 +304,7 @@
 
                                     <span class="badge-status badge-delivered"
                                         th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERED}">
-                                        COMPLETED
+                                        THÀNH CÔNG
                                     </span>
 
                                     <span class="badge-status badge-failed"
@@ -312,7 +318,7 @@
                                     </span>
                                     <span class="badge-status badge-issue"
                                         th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).SHIPPER_ISSUE}">
-                                       Bị vấn đề
+                                        Bị vấn đề
                                     </span>
 
                                     <button class="btn btn-outline-primary btn-sm"
@@ -511,9 +517,11 @@
                             placeholder="Nhập mô tả sự cố..."></textarea>
 
                         <div class="quick-reasons mb-3">
-                            <button type="button" class="reason-btn" onclick="setIssueReason('Xe bị hỏng giữa đường')">Xe bị hỏng</button>
-                            <button type="button" class="reason-btn" onclick="setIssueReason('Tai nạn giao thông')">Tai nạn</button>
-                        
+                            <button type="button" class="reason-btn"
+                                onclick="setIssueReason('Xe bị hỏng giữa đường')">Xe bị hỏng</button>
+                            <button type="button" class="reason-btn" onclick="setIssueReason('Tai nạn giao thông')">Tai
+                                nạn</button>
+
                         </div>
 
                         <div class="d-flex justify-content-center gap-2">
@@ -697,7 +705,7 @@
 
         <script th:inline="javascript">
             (function () {
-                var deliveringOrderIds = /*[[${deliveringOrders.![id]}]]*/ [];
+                var deliveringOrderIds = /*[[${deliveringOrders.![id]}]]*/[];
                 if (!Array.isArray(deliveringOrderIds) || deliveringOrderIds.length === 0) {
                     return;
                 }

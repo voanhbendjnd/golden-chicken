@@ -422,7 +422,7 @@ public class UserService {
     }
 
     public void allowUpdatePassword(String email) {
-        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         user.setUpdatePassword(true);
         this.userRepository.save(user);
     }
@@ -436,7 +436,7 @@ public class UserService {
     }
 
     public boolean getAllowChangePassword(String email) {
-        var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+        var user = this.userRepository.findByEmailIgnoreCase(email);
         return user.getUpdatePassword() ? true : false;
     }
 

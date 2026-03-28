@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +26,10 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Review;
 import vn.edu.fpt.golden_chicken.domain.request.ReviewDTO;
+import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.ProductService;
 import vn.edu.fpt.golden_chicken.services.ReviewService;
-import vn.edu.fpt.golden_chicken.services.UserService;
+// import vn.edu.fpt.golden_chicken.services.UserService;
 
 @Controller
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -35,19 +37,27 @@ import vn.edu.fpt.golden_chicken.services.UserService;
 public class ProductDetailController {
     ProductService productService;
     ReviewService reviewService;
-    UserService userService;
+    // UserService userService;
+    UserRepository userRepository;
 
     @GetMapping("/product/{id:[0-9]+}")
     public String detailPage(Model model, @PathVariable("id") Long id) {
         model.addAttribute("product", this.productService.findById(id));
         model.addAttribute("related", this.productService.relationshipByCategory(id));
-        var user = this.userService.getUserInContext();
-        if (user != null) {
-            model.addAttribute("currentUserRole", user.getRole().getName());
-            if (user.getCustomer() != null) {
-                model.addAttribute("currentCustomerId", user.getCustomer().getId());
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email != null) {
+            var user = this.userRepository.findByEmailIgnoreCaseAndStatus(email, true);
+            if (user != null) {
+                model.addAttribute("currentUserRole", user.getRole().getName());
+                if (user.getCustomer() != null) {
+                    model.addAttribute("currentCustomerId", user.getCustomer().getId());
+                }
             }
+        } else {
+            model.addAttribute("currentUserRole", "CUSTOMER");
+            model.addAttribute("currentCustomerId", 0);
         }
+
         return "client/product-detail";
     }
 

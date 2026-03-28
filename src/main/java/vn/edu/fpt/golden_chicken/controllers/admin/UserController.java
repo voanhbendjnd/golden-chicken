@@ -82,7 +82,7 @@ public class UserController {
     public String create(Model model, @ModelAttribute("newUser") @Valid UserDTO request,
             BindingResult bindingResult, RedirectAttributes ra) {
         if (this.userRepository.existsByEmailIgnoreCase(request.getEmail())) {
-            bindingResult.rejectValue("email", "error.user", "Email already exists");
+            bindingResult.rejectValue("email", "error.user", "Email đã tồn tại!");
         }
         if (bindingResult.hasErrors()) {
             return "admin/user/create";

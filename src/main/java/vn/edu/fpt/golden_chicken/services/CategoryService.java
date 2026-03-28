@@ -47,9 +47,17 @@ public class CategoryService {
         }
         var category = this.categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Thể loại", id));
+
         category.setName(name);
         category.setStatus(dto.getStatus());
         category.setDescription(dto.getDescription());
+        if (!dto.getStatus()) {
+            var products = category.getProducts();
+            for (var x : products) {
+                x.setActive(false);
+            }
+            this.productRepository.saveAll(products);
+        }
         this.categoryRepository.save(category);
     }
 

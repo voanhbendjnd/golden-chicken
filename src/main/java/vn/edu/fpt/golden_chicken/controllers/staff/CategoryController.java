@@ -98,11 +98,11 @@ public class CategoryController {
             this.categoryService.delete(id);
 
         } catch (ResourceNotFoundException ex) {
-            ra.addFlashAttribute("errorMessage", "Xóa thất bại!");
+            ra.addFlashAttribute("errorMessage", "thao tác thất bại!");
             return "redirect:/staff/category";
 
         }
-        ra.addFlashAttribute("msg", "Xóa thành công!");
+        ra.addFlashAttribute("msg", "Thao tác thành công!");
         return "redirect:/staff/category";
     }
 }

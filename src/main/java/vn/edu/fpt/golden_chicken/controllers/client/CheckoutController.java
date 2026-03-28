@@ -71,10 +71,12 @@ public class CheckoutController {
         if (addressId == null && model.containsAttribute("addressId") && model.asMap().get("addressId") != null) {
             addressId = Long.valueOf(model.asMap().get("addressId").toString());
         }
-        if (productVoucherId == null && model.containsAttribute("productVoucherId") && model.asMap().get("productVoucherId") != null) {
+        if (productVoucherId == null && model.containsAttribute("productVoucherId")
+                && model.asMap().get("productVoucherId") != null) {
             productVoucherId = Long.valueOf(model.asMap().get("productVoucherId").toString());
         }
-        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId") && model.asMap().get("shippingVoucherId") != null) {
+        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId")
+                && model.asMap().get("shippingVoucherId") != null) {
             shippingVoucherId = Long.valueOf(model.asMap().get("shippingVoucherId").toString());
         }
 
@@ -155,10 +157,12 @@ public class CheckoutController {
         if (quantity == null && model.containsAttribute("quantity") && model.asMap().get("quantity") != null) {
             quantity = Integer.valueOf(model.asMap().get("quantity").toString());
         }
-        if (productVoucherId == null && model.containsAttribute("productVoucherId") && model.asMap().get("productVoucherId") != null) {
+        if (productVoucherId == null && model.containsAttribute("productVoucherId")
+                && model.asMap().get("productVoucherId") != null) {
             productVoucherId = Long.valueOf(model.asMap().get("productVoucherId").toString());
         }
-        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId") && model.asMap().get("shippingVoucherId") != null) {
+        if (shippingVoucherId == null && model.containsAttribute("shippingVoucherId")
+                && model.asMap().get("shippingVoucherId") != null) {
             shippingVoucherId = Long.valueOf(model.asMap().get("shippingVoucherId").toString());
         }
 
@@ -171,23 +175,24 @@ public class CheckoutController {
         model.addAttribute("shippingVoucherId", shippingVoucherId);
         model.addAttribute("quantity", quantity);
 
-        var defaultAddress = addressServices.getDefaultAddress();
-        List<ResAddress> additionalAddresses = new ArrayList<>();
-        if (addresses != null) {
-            for (ResAddress a : addresses) {
-                if (a.getIsDefault() == null || !a.getIsDefault()) {
-                    additionalAddresses.add(a);
-                }
-            }
-        }
-        model.addAttribute("additionalAddresses", additionalAddresses);
-        model.addAttribute("defaultAddress", defaultAddress);
+        // var defaultAddress = addressServices.getDefaultAddress();
+        // List<ResAddress> additionalAddresses = new ArrayList<>();
+        // if (addresses != null) {
+        // for (ResAddress a : addresses) {
+        // if (a.getIsDefault() == null || !a.getIsDefault()) {
+        // additionalAddresses.add(a);
+        // }
+        // }
+        // }
+        // model.addAttribute("additionalAddresses", additionalAddresses);
+        // model.addAttribute("defaultAddress", defaultAddress);
 
-        if (productId != null || (productIds != null && !productIds.isEmpty()) || orderId != null) {
-            return "client/address/listAddressCheckout";
-        }
+        // if (productId != null || (productIds != null && !productIds.isEmpty()) ||
+        // orderId != null) {
+        return "client/address/listAddressCheckout";
+        // }
 
-        return "client/address/listAddress";
+        // return "client/address/listAddress";
     }
 
     @PostMapping("/addresses")

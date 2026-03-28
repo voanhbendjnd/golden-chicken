@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.turkraft.springfilter.boot.Filter;
 
@@ -90,8 +91,11 @@ public class PermissionController {
     }
 
     @PostMapping("/delete/{id:[0-9]+}")
-    public String delete(@PathVariable("id") long id) {
-        this.permissionService.deleteById(id);
+    public String delete(@PathVariable("id") long id, RedirectAttributes ra) {
+        if (this.permissionService.deleteById(id)) {
+            return "redirect:/admin/permission";
+        }
+        ra.addFlashAttribute("msgWarning", "Không thể xóa permission đã nằm trong role!");
         return "redirect:/admin/permission";
     }
 
