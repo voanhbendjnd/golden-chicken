@@ -31,10 +31,6 @@ public class PaymentController {
     OrderService orderService;
     CartService cartService;
 
-    /**
-     * Tạo URL thanh toán VNPay và redirect
-     * Gọi sau khi đã tạo đơn hàng thành công (orderId từ CheckoutController)
-     */
     @GetMapping("/create")
     public RedirectView createVNPayPayment(
             @RequestParam("orderId") Long orderId,
@@ -55,9 +51,6 @@ public class PaymentController {
         return new RedirectView(paymentUrl);
     }
 
-    /**
-     * Callback URL khi VNPay redirect về sau khi thanh toán
-     */
     @GetMapping("/vnpay-return")
     public String vnpayReturn(
             HttpServletRequest request,

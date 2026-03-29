@@ -89,7 +89,6 @@ public class AiChatService {
             List<Map<String, Object>> messages = new ArrayList<>();
             messages.add(systemMessage);
 
-            // Add history context
             if (history != null) {
                 for (Map<String, String> h : history) {
                     Map<String, Object> hm = new HashMap<>();

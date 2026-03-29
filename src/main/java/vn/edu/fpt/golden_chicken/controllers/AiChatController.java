@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.fpt.golden_chicken.services.AiChatService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,7 +21,8 @@ public class AiChatController {
 
     @PostMapping("/chat")
     public ResponseEntity<Map<String, Object>> chat(@RequestBody AiChatRequest request) {
-        Map<String, Object> response = aiChatService.processChat(request.getChatMessage(), request.getCustomerId(), request.getHistory());
+        Map<String, Object> response = aiChatService.processChat(request.getChatMessage(), request.getCustomerId(),
+                request.getHistory());
         return ResponseEntity.ok(response);
     }
 
@@ -28,6 +30,6 @@ public class AiChatController {
     public static class AiChatRequest {
         private String chatMessage;
         private Long customerId;
-        private java.util.List<Map<String, String>> history;
+        private List<Map<String, String>> history;
     }
 }
