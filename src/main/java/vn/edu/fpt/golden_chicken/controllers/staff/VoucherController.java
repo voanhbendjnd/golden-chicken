@@ -36,7 +36,6 @@ public class VoucherController {
             BindingResult result,
             Model model) {
 
-        // 🔥 validate thời gian
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         // if (dto.getStartAt() != null && dto.getStartAt().isBefore(now)) {
         // result.rejectValue("startAt", "error.startAt",
@@ -46,7 +45,6 @@ public class VoucherController {
             result.rejectValue("endAt", "error.endAt",
                     "End time must be now or in the future");
         }
-        // 1. Lỗi validation DTO
         if (result.hasErrors()) {
             return "staff/voucher/create";
         }
@@ -56,7 +54,6 @@ public class VoucherController {
             return "redirect:/staff/voucher/list";
         } catch (IllegalArgumentException ex) {
 
-            // Đưa message ra view
             model.addAttribute("errorMessage", ex.getMessage());
 
             return "staff/voucher/create";
@@ -65,18 +62,18 @@ public class VoucherController {
 
     @GetMapping("/list")
     public String list(@RequestParam(name = "page", defaultValue = "0") int page,
-                       @RequestParam(name = "size", defaultValue = "5") int size,
-                       @RequestParam(required = false) String searchCode,
-                       Model model) {
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            @RequestParam(required = false) String searchCode,
+            Model model) {
 
         service.refreshExpiredStatus();
 
-        Page<ResVoucher> voucherPage; // thêm dòng này
+        Page<ResVoucher> voucherPage;
 
         if (searchCode != null && !searchCode.trim().isEmpty()) {
-            voucherPage = service.searchByCode(searchCode, page, size); // thêm đoạn search
+            voucherPage = service.searchByCode(searchCode, page, size);
         } else {
-            voucherPage = service.getAll(page, size); // giữ code cũ
+            voucherPage = service.getAll(page, size);
         }
 
         model.addAttribute("vouchers", voucherPage);
@@ -134,7 +131,7 @@ public class VoucherController {
 
     @GetMapping("/delete/{id:[0-9]+}")
     public String deleteVoucher(@PathVariable("id") Long id,
-                                RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         try {
             service.deleteVoucher(id);
             redirectAttributes.addFlashAttribute("success", "Xóa voucher thành công");
