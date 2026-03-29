@@ -314,7 +314,6 @@
 
     <script th:inline="javascript">
         $(document).ready(function () {
-            // CSRF protection for AJAX
             const token = $("meta[name='_csrf']").attr("content");
             const header = $("meta[name='_csrf_header']").attr("content");
 
@@ -324,7 +323,6 @@
                 }
             });
 
-            // Handle filtering - FIXED highlighting
             $(".btn-filter").each(function () {
                 const status = $(this).data("status");
                 const currentFilter = new URLSearchParams(window.location.search).get("filter");
@@ -353,7 +351,6 @@
                 window.location.href = window.location.pathname + "?" + urlParams.toString();
             });
 
-            // Handle Search Autocomplete
             const $search = $("#reviewSearch");
             const $suggestions = $("#suggestionsList");
 
