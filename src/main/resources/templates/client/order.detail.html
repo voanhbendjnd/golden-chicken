@@ -202,7 +202,7 @@
                                 order.status.name() == 'PREPARING' ? 'bg-preparing' :
                                 order.status.name() == 'READY_FOR_DELIVERY' ? 'bg-ready' :
                                 order.status.name() == 'DELIVERING' ? 'bg-delivering' :
-                                (order.status.name() == 'DELIVERED' or order.status.name() == 'COMPLETED') ? 'bg-success-custom' :
+                                (order.status.name() == 'DELIVERED') ? 'bg-success-custom' :
                                 order.status.name() == 'CANCELLED' ? 'bg-error-custom' : 'bg-issue'}">
 
                                 <th:block th:switch="${order.status.name()}">
@@ -221,8 +221,7 @@
                                         lại lần 2</span>
                                     <span th:case="'DELIVERED'"><i class="fa-solid fa-circle-check me-1"></i> Giao thành
                                         công</span>
-                                    <span th:case="'COMPLETED'"><i class="fa-solid fa-check-double me-1"></i> Hoàn
-                                        thành</span>
+                                 
                                     <span th:case="'CANCELLED'"><i class="fa-solid fa-ban me-1"></i> Đã hủy đơn</span>
                                     <span th:case="*" th:text="${order.status}"></span>
                                 </th:block>

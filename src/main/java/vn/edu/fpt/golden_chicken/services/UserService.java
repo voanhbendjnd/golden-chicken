@@ -43,7 +43,6 @@ import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
 import vn.edu.fpt.golden_chicken.repositories.StaffRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
-import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 import vn.edu.fpt.golden_chicken.utils.converts.UserConvert;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
@@ -110,7 +109,6 @@ public class UserService {
         if (role.getName().equals("STAFF")) {
             var staff = new Staff();
             staff.setUser(user);
-            staff.setStatus(StaffStatus.AVAILABLE);
             staff.setStaffType(request.getStaffType());
             this.staffRepository.save(staff);
         } else if (role.getName().equals("CUSTOMER")) {
@@ -120,7 +118,6 @@ public class UserService {
         } else if (role.getName().equals("ADMIN")) {
             var staff = new Staff();
             staff.setUser(user);
-            staff.setStatus(StaffStatus.AVAILABLE);
             staff.setStaffType(StaffType.MANAGER);
             this.staffRepository.save(staff);
         }
@@ -345,8 +342,6 @@ public class UserService {
                         String typeStr = row.getCell(4).getStringCellValue();
                         staff.setStaffType(StaffType.valueOf(typeStr.toUpperCase()));
 
-                        String statusStr = row.getCell(5).getStringCellValue();
-                        staff.setStatus(StaffStatus.valueOf(statusStr.toUpperCase()));
                     } catch (Exception e) {
                         throw new DataFormatException(
                                 "Lỗi tại hàng " + (rowNum + 1) + ": với loại staff không đúng!");
@@ -364,7 +359,7 @@ public class UserService {
                             "Lỗi tại hàng " + (rowNum + 1) + ": lỗi với role type '" + roleType + "'");
                 }
 
-                user.setStatus("TRUE".equalsIgnoreCase(row.getCell(6).getStringCellValue()));
+                user.setStatus("TRUE".equalsIgnoreCase(row.getCell(5).getStringCellValue()));
                 users.add(user);
             }
 

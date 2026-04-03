@@ -1,10 +1,15 @@
 package vn.edu.fpt.golden_chicken.config;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +17,13 @@ import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Permission;
 import vn.edu.fpt.golden_chicken.domain.entity.Role;
+import vn.edu.fpt.golden_chicken.domain.entity.ShippingFee;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.entity.User;
 import vn.edu.fpt.golden_chicken.repositories.PermissionRepository;
 import vn.edu.fpt.golden_chicken.repositories.RoleRepository;
+import vn.edu.fpt.golden_chicken.repositories.ShippingFeeRepository;
 import vn.edu.fpt.golden_chicken.repositories.UserRepository;
-import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @RequiredArgsConstructor
@@ -28,13 +34,32 @@ public class DatabaseIntializer implements CommandLineRunner {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     PermissionRepository permissionRepository;
+    ShippingFeeRepository shippingFeeRepository;
 
     @Override
     public void run(String... args) throws Exception {
         System.out.println(">>> START INIT DATABASE <<<");
         long roleCnt = this.roleRepository.count();
         long userCnt = this.userRepository.count();
+        long shippingFeeCnt = this.shippingFeeRepository.count();
         long permissionCnt = this.permissionRepository.count();
+        if (shippingFeeCnt == 0) {
+            // var shippingFees = new ArrayList<ShippingFee>();
+            // shippingFees.add(new ShippingFee("Xã Nhơn Mỹ", new BigDecimal(10000)));
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "https://provinces.open-api.vn/api/v2/p/92?depth=2";
+
+            JsonNode root = restTemplate.getForObject(url, JsonNode.class);
+
+            List<ShippingFee> shippingFees = new ArrayList<>();
+
+            JsonNode wards = root.get("wards");
+            for (JsonNode ward : wards) {
+                String name = ward.get("name").asText();
+                shippingFees.add(new ShippingFee(name, new BigDecimal(15000)));
+            }
+            this.shippingFeeRepository.saveAll(shippingFees);
+        }
         if (permissionCnt == 0) {
             var permissions = new ArrayList<Permission>();
             permissions.add(new Permission("VIEW_ADMIN_DASHBOARD", "/admin", "GET", "DASHBOARD ADMIN"));
@@ -141,7 +166,6 @@ public class DatabaseIntializer implements CommandLineRunner {
             if (DeclareConstant.roleNameAdmin.equals("ADMIN")) {
                 var staffAdmin = new Staff();
                 staffAdmin.setStaffType(StaffType.MANAGER);
-                staffAdmin.setStatus(StaffStatus.AVAILABLE);
                 staffAdmin.setUser(admin);
                 admin.setStaff(staffAdmin);
             }
@@ -157,7 +181,6 @@ public class DatabaseIntializer implements CommandLineRunner {
             if (DeclareConstant.roleNameStaff.equals("STAFF")) {
                 var superStaff = new Staff();
                 superStaff.setStaffType(StaffType.RECEPTIONIST);
-                superStaff.setStatus(StaffStatus.AVAILABLE);
                 superStaff.setUser(staff);
                 staff.setStaff(superStaff);
             }

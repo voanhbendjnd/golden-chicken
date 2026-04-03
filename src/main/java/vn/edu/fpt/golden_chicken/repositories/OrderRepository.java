@@ -57,27 +57,27 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
         @Query(value = "SELECT MONTH(o.updated_at) as month, SUM(o.final_amount) as revenue " +
                         "FROM orders o " +
-                        "WHERE o.status = 'COMPLETED' " +
+                        "WHERE o.status = 'DELIVERED' " +
                         "AND YEAR(o.updated_at) = YEAR(GETDATE()) " +
                         "GROUP BY MONTH(o.updated_at) " +
                         "ORDER BY MONTH(o.updated_at)", nativeQuery = true)
         List<Object[]> getMonthlyRevenueRaw();
 
-        @Query("SELECT COALESCE(SUM(o.finalAmount), 0) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.COMPLETED AND o.createdAt >= :start AND o.createdAt <= :end")
+        @Query("SELECT COALESCE(SUM(o.finalAmount), 0) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.DELIVERED AND o.createdAt >= :start AND o.createdAt <= :end")
         java.math.BigDecimal getTotalRevenueBetween(@Param("start") LocalDateTime start,
                         @Param("end") LocalDateTime end);
 
-        @Query("SELECT COUNT(o) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.COMPLETED AND o.createdAt >= :start AND o.createdAt <= :end")
+        @Query("SELECT COUNT(o) FROM Order o WHERE o.status = vn.edu.fpt.golden_chicken.utils.constants.OrderStatus.DELIVERED AND o.createdAt >= :start AND o.createdAt <= :end")
         long countSuccessfulOrdersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
         @Query(value = "SELECT TOP 1 FORMAT(o.created_at, 'yyyy-MM-dd') as date, SUM(o.final_amount) as revenue " +
-                        "FROM orders o WHERE o.status = 'COMPLETED' AND YEAR(o.created_at) = YEAR(GETDATE()) " +
+                        "FROM orders o WHERE o.status = 'DELIVERED' AND YEAR(o.created_at) = YEAR(GETDATE()) " +
                         "GROUP BY FORMAT(o.created_at, 'yyyy-MM-dd') " +
                         "ORDER BY revenue DESC", nativeQuery = true)
         List<Object[]> getHighestRevenueDay();
 
         @Query(value = "SELECT TOP 1 MONTH(o.created_at) as month, SUM(o.final_amount) as revenue " +
-                        "FROM orders o WHERE o.status = 'COMPLETED' AND YEAR(o.created_at) = YEAR(GETDATE()) " +
+                        "FROM orders o WHERE o.status = 'DELIVERED' AND YEAR(o.created_at) = YEAR(GETDATE()) " +
                         "GROUP BY MONTH(o.created_at) " +
                         "ORDER BY revenue DESC", nativeQuery = true)
         List<Object[]> getHighestRevenueMonth();
@@ -86,7 +86,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         List<Order> findTop5RecentOrders(Pageable pageable);
 
         @Query(value = "SELECT FORMAT(o.created_at, 'yyyy-MM-dd') as date, SUM(o.final_amount) as revenue " +
-                        "FROM orders o WHERE o.status = 'COMPLETED' AND o.created_at >= :start " +
+                        "FROM orders o WHERE o.status = 'DELIVERED' AND o.created_at >= :start " +
                         "GROUP BY FORMAT(o.created_at, 'yyyy-MM-dd') " +
                         "ORDER BY date ASC", nativeQuery = true)
         List<Object[]> getDailyRevenueLast7Days(@Param("start") LocalDateTime start);

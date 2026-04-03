@@ -12,15 +12,19 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Table(name = "shipping_fee")
+@Table(name = "shipping_fees")
 @Entity
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShippingFee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +33,11 @@ public class ShippingFee {
     String ward;
     BigDecimal fee;
     LocalDateTime createdAt, updatedAt;
+
+    public ShippingFee(String ward, BigDecimal fee) {
+        this.ward = ward;
+        this.fee = fee;
+    }
 
     @PrePersist
     public void handleBeforeCreateAt() {

@@ -13,7 +13,6 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import vn.edu.fpt.golden_chicken.utils.constants.StaffStatus;
 import vn.edu.fpt.golden_chicken.utils.constants.StaffType;
 
 @Entity
@@ -29,8 +28,6 @@ public class Staff implements Serializable {
     @MapsId
     @JoinColumn(name = "user_id")
     User user;
-    @Enumerated(EnumType.STRING)
-    StaffStatus status;
     @Enumerated(EnumType.STRING)
     StaffType staffType;
 

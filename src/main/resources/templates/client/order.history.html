@@ -93,7 +93,6 @@
                             <span th:case="'REASSIGNING_SHIPPER'">Đang đổi shipper</span>
                             <span th:case="'DELIVERED'">Giao thành công</span>
                             <span th:case="'CANCELLED'">Đã hủy</span>
-                            <span th:case="'COMPLETED'">Đã hoàn thành</span>
                             <span th:case="*" th:text="${order.status}"></span>
                         </th:block>
                     </span>
@@ -154,8 +153,8 @@
                                         th:onclick="'cancelOrder(' + ${order.id} + ')'">
                                         <i class="fa-solid fa-xmark"></i> Hủy đơn
                                     </button>
-                                    <form th:if="${order.status.name() == 'DELIVERED' or order.status.name() == 'COMPLETED'}"
-                                          th:action="@{/checkout}" method="post" style="display: inline;">
+                                    <form th:if="${order.status.name() == 'DELIVERED'}" th:action="@{/checkout}"
+                                        method="post" style="display: inline;">
                                         <input type="hidden" name="orderId" th:value="${order.id}" />
                                         <button type="submit" class="btn-rebuy">
                                             <i class="fa-solid fa-rotate-right"></i> Mua lại

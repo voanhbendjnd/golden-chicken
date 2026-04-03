@@ -38,18 +38,4 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     Customer customer;
-    LocalDateTime createdAt, updatedAt;
-
-    @PrePersist
-    public void handleBeforeCreateAt() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdateBy() {
-        this.updatedAt = LocalDateTime.now();
-
-    }
 }

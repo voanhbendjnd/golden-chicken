@@ -315,7 +315,7 @@ public class OrderService {
         if (nextStatus == OrderStatus.DELIVERY_FAILED || nextStatus == OrderStatus.SHIPPER_ISSUE) {
             order.setDeliveryFailedReason(normalizedReason);
         } else {
-            order.setDeliveryFailedReason(null);
+            order.setDeliveryFailedReason("Trống");
         }
 
         if (nextStatus == OrderStatus.DELIVERED || nextStatus == OrderStatus.COMPLETED) {
