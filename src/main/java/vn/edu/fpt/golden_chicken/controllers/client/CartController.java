@@ -34,13 +34,17 @@ public class CartController {
     @PostMapping("/add")
     @ResponseBody
     public ResponseEntity<?> addToCart(@RequestBody CartDTO dto, HttpSession session) throws PermissionException {
-        boolean res = this.cartService.addToCart(dto);
-        if (res) {
-            int total = this.cartService.sumCart();
-            session.setAttribute("sumCart", total);
-            return ResponseEntity.ok(total);
+        try {
+            boolean res = this.cartService.addToCart(dto);
+            if (res) {
+                int total = this.cartService.sumCart();
+                session.setAttribute("sumCart", total);
+                return ResponseEntity.ok(total);
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Fail");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Fail");
     }
 
     @PostMapping("/update")

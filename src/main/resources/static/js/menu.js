@@ -106,10 +106,11 @@
                                     window.location.href = '/cart';
                                 }
                             });
-                        } else if (response.status === 403) {
-                                    window.location.href = '/login';
+                        } else if (response.status === 400) {
+                            const errorMsg = await response.text();
+                            Swal.fire('Thông báo', errorMsg, 'warning');
                         } else {
-                                    window.location.href = '/login';
+                            window.location.href = '/login';
                         }
                     } catch (error) {
                         console.error('Error:', error);

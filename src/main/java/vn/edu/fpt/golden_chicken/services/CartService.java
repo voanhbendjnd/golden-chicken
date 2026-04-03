@@ -42,6 +42,9 @@ public class CartService {
 
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customerId, productId);
         if (cartItem == null) {
+            if (quantity > 33) {
+                throw new IllegalArgumentException("Sản phẩm trong giỏ hàng đạt số lượng tối đa 33");
+            }
             cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
@@ -51,7 +54,11 @@ public class CartService {
             int currentQty = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
             var total = currentQty + quantity;
 
-            cartItem.setQuantity(total <= 33 ? total : 33);
+            if (total > 33) {
+                throw new IllegalArgumentException("Sản phẩm trong giỏ hàng đạt số lượng tối đa 33");
+            }
+
+            cartItem.setQuantity(total);
             cartItem.setPrice(product.getPrice());
         }
         this.cartRepository.save(cartItem);
@@ -76,6 +83,9 @@ public class CartService {
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId());
 
         if (cartItem == null) {
+            if (dto.quantity() > 33) {
+                throw new IllegalArgumentException("Sản phẩm trong giỏ hàng đạt số lượng tối đa 33");
+            }
             cartItem = new CartItem();
         }
 
@@ -88,7 +98,7 @@ public class CartService {
             int currentQty = cartItem.getQuantity() != null ? cartItem.getQuantity() : 0;
             var lastQty = currentQty + dto.quantity();
             if (lastQty > 33) {
-                lastQty = 33;
+                throw new IllegalArgumentException("Sản phẩm trong giỏ hàng đạt số lượng tối đa 33");
             }
             cartItem.setQuantity(lastQty);
             cartItem.setPrice(product.getPrice());
