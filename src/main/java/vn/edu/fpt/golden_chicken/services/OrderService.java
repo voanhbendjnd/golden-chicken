@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
 import vn.edu.fpt.golden_chicken.domain.entity.OrderItem;
+import vn.edu.fpt.golden_chicken.domain.entity.OrderVoucherHistory;
 import vn.edu.fpt.golden_chicken.domain.entity.Staff;
 import vn.edu.fpt.golden_chicken.domain.request.OrderDTO;
 import vn.edu.fpt.golden_chicken.domain.response.*;
@@ -44,7 +45,7 @@ public class OrderService {
     ProductRepository productRepository;
     OrderRepository orderRepository;
     CustomerVoucherRepository customerVoucherRepository;
-    VoucherRepository voucherRepository;
+    OrderVoucherHistoryRepository orderVoucherHistoryRepository;
     CartService cartService;
     UserService userService;
     CartRepository cartRepository;
@@ -104,8 +105,8 @@ public class OrderService {
         order.setFinalAmount(calculatedFinalAmount);
         order.setOrderItems(orderItems);
         var newOrder = this.orderRepository.save(order);
-        markVoucherUsed(dto.getProductVoucherId(), newOrder);
-        markVoucherUsed(dto.getShippingVoucherId(), newOrder);
+        this.markVoucherUsed(dto.getProductVoucherId(), newOrder);
+        this.markVoucherUsed(dto.getShippingVoucherId(), newOrder);
 
         if (dto.getPaymentMethod() == PaymentMethod.COD) {
             OrderMessage message = new OrderMessage();
@@ -131,18 +132,11 @@ public class OrderService {
             return;
         }
         customerVoucher.setStatus(StatusVoucher.USED);
-        customerVoucher.setUsedAt(LocalDateTime.now());
-        customerVoucher.setOrder(newOrder);
         customerVoucherRepository.save(customerVoucher);
-
-        var voucher = customerVoucher.getVoucher();
-        int qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;
-        int newQty = qty;
-        voucher.setQuantity(newQty);
-        if (newQty <= 0) {
-            voucher.setStatus("DISABLED");
-        }
-        voucherRepository.save(voucher);
+        var orderVoucherHistory = new OrderVoucherHistory();
+        orderVoucherHistory.setCustomerVoucher(customerVoucher);
+        orderVoucherHistory.setOrder(newOrder);
+        this.orderVoucherHistoryRepository.save(orderVoucherHistory);
     }
 
     public List<OrderDTO.OrderDetail> getItemsDTOByOrderID(Long orderId) throws PermissionException {

@@ -1,9 +1,7 @@
 package vn.edu.fpt.golden_chicken.controllers.client;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import vn.edu.fpt.golden_chicken.domain.response.ResAddress;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

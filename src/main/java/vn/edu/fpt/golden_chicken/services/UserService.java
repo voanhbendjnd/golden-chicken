@@ -148,7 +148,7 @@ public class UserService {
             user.setEmail(request.getEmail().toLowerCase());
             user.setFullName(request.getName());
             user.setStatus(true);
-            // user.setPhone(user.getPhone());
+            user.setPhone(request.getPhone());
             user.setRole(roleCustomer);
             user.setPassword(request.getPassword());
             var customer = new Customer();

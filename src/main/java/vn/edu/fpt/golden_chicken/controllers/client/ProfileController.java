@@ -68,7 +68,7 @@ public class ProfileController {
 
             if (oldFileName != null
                     && !oldFileName.isBlank()
-                    && !oldFileName.equals("testavt.jpg")
+                    && !oldFileName.equals("testimonial-1.jpg")
                     && !oldFileName.equals(newFileName)) {
                 this.fileService.deleteAvatarFile(oldFileName, "img/avatar");
             }

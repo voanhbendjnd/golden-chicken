@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import vn.edu.fpt.golden_chicken.domain.request.RegisterDTO;
 import vn.edu.fpt.golden_chicken.domain.request.UserDTO;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
@@ -70,14 +71,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(HttpServletRequest request, @ModelAttribute("registerUser") UserDTO userRequest,
+    public String register(HttpServletRequest request, @ModelAttribute("registerUser") @Valid UserDTO userRequest,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "client/auth/register";
         }
         // this.userService.register(userRequest);
         if (this.userRepository.existsByEmailIgnoreCase(userRequest.getEmail())) {
-            bindingResult.rejectValue("email", "CONFLICT", "Email already exists!");
+            bindingResult.rejectValue("email", "CONFLICT", "Email đã tồn tại!");
             return "client/auth/register";
         }
         if (!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
@@ -88,6 +89,7 @@ public class AuthController {
         registerDTO.setEmail(userRequest.getEmail());
         registerDTO.setPassword(this.passwordEncoder.encode(userRequest.getPassword()));
         registerDTO.setName(userRequest.getFullName());
+        registerDTO.setPhone(userRequest.getPhone());
         this.redisUserService.savePendingUserRegister(registerDTO);
         return "redirect:/verify?email=" + userRequest.getEmail();
     }
@@ -101,7 +103,6 @@ public class AuthController {
     public String verifyPage(@RequestParam("email") String email, Model model) {
         model.addAttribute("email", email);
 
-        // Áp dụng Rate Limiting cho việc gửi OTP (1 lần/phút)
         if (this.rateLimitService.tryConsume(email)) {
             var OTP = this.userService.generateBase();
             this.redisOTPService.saveOTP(email, OTP);
@@ -114,7 +115,6 @@ public class AuthController {
             model.addAttribute("rateLimitMessage", "Vui lòng đợi 1 phút trước khi yêu cầu gửi lại OTP.");
         }
 
-        // Đồng bộ thời gian còn lại của OTP thực tế trong Redis
         long actualTtl = this.redisOTPService.getOTPTtl(email);
         model.addAttribute("otpTtlSeconds", actualTtl > 0 ? actualTtl : 0);
 

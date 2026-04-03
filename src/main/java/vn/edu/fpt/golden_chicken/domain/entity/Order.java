@@ -40,7 +40,6 @@ public class Order {
     @JoinColumn(name = "shipper_id")
     Staff shipper;
     LocalDateTime updatedAt;
-    LocalDateTime deliveredAt;
     LocalDateTime createdAt;
     BigDecimal totalProductPrice;
     BigDecimal shippingFee;
@@ -66,14 +65,15 @@ public class Order {
 
     String note;
     @Column(columnDefinition = "NVARCHAR(500)")
-    String deliveryFailedReason;
+    String deliveryFailedReason = "Trống";
     @Enumerated(EnumType.STRING)
     PaymentMethod paymentMethod;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     List<OrderItem> orderItems;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    List<CustomerVoucher> customerVouchers;
+
+    @OneToMany(mappedBy = "order")
+    List<OrderVoucherHistory> orderVoucherHistories;
 
     @PrePersist
     public void handleBeforeCreateAt() {

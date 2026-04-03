@@ -9,13 +9,10 @@ import vn.edu.fpt.golden_chicken.domain.entity.Voucher;
 import java.util.List;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
-    Page<Voucher> findByIsDeletedFalse(Pageable pageable);
 
-    // List<Voucher> findByIsDeletedFalse();
     @Query("""
             SELECT v FROM Voucher v
-            WHERE v.isDeleted = false
-            AND v.status = 'ACTIVE'
+            WHERE v.status = 'ACTIVE'
             AND v.exchangeable = true
             AND v.startAt <= CURRENT_TIMESTAMP
             AND v.endAt >= CURRENT_TIMESTAMP
@@ -28,5 +25,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
     boolean existsByCodeAndIdNot(String code, Long id);
 
-    Page<Voucher> findByIsDeletedFalseAndCodeContainingIgnoreCase(String code, Pageable pageable);
+    Page<Voucher> findByCodeContainingIgnoreCase(String code, Pageable pageable);
+
 }

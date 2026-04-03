@@ -29,9 +29,7 @@ public class Customer implements Serializable {
     @MapsId
     @JoinColumn(name = "user_id")
     User user;
-    @Column(columnDefinition = "NVARCHAR(255)")
-    String address;
-    Long point;
+    Long point = 0L;
     @OneToMany(mappedBy = "customer")
     List<Order> orders;
     @OneToMany(mappedBy = "customer")
@@ -41,10 +39,10 @@ public class Customer implements Serializable {
     @OneToMany(mappedBy = "customer")
     List<Review> reviews;
     @Column(name = "violation_count")
-    private Integer violationCount = 0;
+    Integer violationCount = 0;
 
     @Column(name = "locked_until")
-    private LocalDateTime lockedUntil;
+    LocalDateTime lockedUntil;
 
     public void addCartItem(CartItem item) {
         if (this.cartItems == null) {

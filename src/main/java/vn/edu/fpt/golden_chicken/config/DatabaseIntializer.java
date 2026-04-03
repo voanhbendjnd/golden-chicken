@@ -134,8 +134,10 @@ public class DatabaseIntializer implements CommandLineRunner {
             admin.setFullName("SUPER_ADMIN");
             admin.setEmail(DeclareConstant.email);
             admin.setStatus(true);
+            admin.setPhone("0981550653");
             admin.setPassword(this.passwordEncoder.encode(DeclareConstant.password));
             admin.setRole(this.roleRepository.findByName(DeclareConstant.roleNameAdmin));
+            admin.setUpdatedBy("anonymousUser");
             if (DeclareConstant.roleNameAdmin.equals("ADMIN")) {
                 var staffAdmin = new Staff();
                 staffAdmin.setStaffType(StaffType.MANAGER);
@@ -148,6 +150,8 @@ public class DatabaseIntializer implements CommandLineRunner {
             staff.setFullName("SUPER_STAFF");
             staff.setEmail("voanhbendjnd@gmail.com");
             staff.setStatus(true);
+            staff.setPhone("0981550653");
+            staff.setUpdatedBy("anonymousUser");
             staff.setPassword(this.passwordEncoder.encode(DeclareConstant.password));
             staff.setRole(this.roleRepository.findByName(DeclareConstant.roleNameStaff));
             if (DeclareConstant.roleNameStaff.equals("STAFF")) {

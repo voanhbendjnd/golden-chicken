@@ -39,17 +39,10 @@ public class Voucher {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endAt;
-
     @Column(nullable = false, length = 20)
     private String status;
-
-    @Column(nullable = false)
-    private Boolean isDeleted = false;
-
     private Integer quantity;
-
     private String voucherType;
-
     @Column(nullable = false)
     private boolean exchangeable = true;
     @OneToMany(mappedBy = "voucher")

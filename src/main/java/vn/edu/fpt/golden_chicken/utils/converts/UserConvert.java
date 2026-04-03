@@ -26,7 +26,6 @@ public class UserConvert {
         res.setCreatedAt(user.getCreatedAt());
         res.setCreatedBy(user.getCreatedBy());
         res.setUpdatedAt(user.getUpdatedAt());
-        res.setUpdatedBy(user.getUpdatedBy());
         res.setRoleId(user.getRole().getId());
         if (user.getStaff() != null) {
             res.setStaffType(user.getStaff().getStaffType());

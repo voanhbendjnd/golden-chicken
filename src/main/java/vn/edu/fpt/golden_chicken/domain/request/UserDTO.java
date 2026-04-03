@@ -21,7 +21,7 @@ public class UserDTO implements Serializable {
     String email;
     @NotBlank(message = "Full Name Cannot Be Empty!")
     String fullName;
-    // @Phone
+    // @Phone(message = "Số điện thoại không hợp lệ 999!")
     String phone;
     @Size(min = 6, message = "Password Must Be At Least 6 Characters")
     String password;

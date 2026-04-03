@@ -2,18 +2,21 @@ package vn.edu.fpt.golden_chicken.domain.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.utils.constants.StatusVoucher;
 
@@ -34,12 +37,11 @@ public class CustomerVoucher {
     @JoinColumn(name = "voucher_id")
     Voucher voucher;
     StatusVoucher status;
-    LocalDateTime usedAt;
     LocalDateTime redeemedAt;
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    Order order;
 
+    @OneToOne(mappedBy = "customerVoucher", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    OrderVoucherHistory orderVoucherHistory;
     // @PrePersist
     // public void handleBeforeCreateAt() {
     // this.usedAt = LocalDateTime.now();

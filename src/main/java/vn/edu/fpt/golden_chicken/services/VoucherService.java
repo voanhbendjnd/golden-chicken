@@ -49,7 +49,7 @@ public class VoucherService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Voucher> voucherPage = repo.findByIsDeletedFalse(pageable);
+        Page<Voucher> voucherPage = repo.findAll(pageable);
 
         return voucherPage.map(v -> {
             ResVoucher res = new ResVoucher();
@@ -192,7 +192,7 @@ public class VoucherService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Voucher> voucherPage = repo.findByIsDeletedFalseAndCodeContainingIgnoreCase(code, pageable);
+        Page<Voucher> voucherPage = repo.findByCodeContainingIgnoreCase(code, pageable);
 
         return voucherPage.map(v -> {
             ResVoucher res = new ResVoucher();
@@ -292,9 +292,6 @@ public class VoucherService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        if (Boolean.TRUE.equals(voucher.getIsDeleted())) {
-            throw new IllegalArgumentException("Voucher đã bị xóa.");
-        }
         if (!"ACTIVE".equalsIgnoreCase(voucher.getStatus())) {
             throw new IllegalArgumentException("Voucher không còn hoạt động.");
         }
@@ -325,13 +322,10 @@ public class VoucherService {
         actionMessage.setUserId(customer.getId());
         this.kafkaTemplatePoint.send("customer-points-topic", actionMessage);
 
-        // customer.setPoint(currentPoints - voucher.getPointCost());
-
         CustomerVoucher cv = new CustomerVoucher();
         cv.setCustomer(customer);
         cv.setVoucher(voucher);
         cv.setStatus(StatusVoucher.AVAILABLE);
-        cv.setUsedAt(null);
 
         customerVoucherRepository.save(cv);
         var qty = voucher.getQuantity() != null ? voucher.getQuantity() : 0;

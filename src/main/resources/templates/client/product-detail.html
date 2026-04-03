@@ -90,30 +90,27 @@
                     </div>
 
                     <div th:if="${product.active}">
-
-
-                        <div class="d-grid gap-2 d-md-flex">
-
-                            <div class="product-card__action mt-3 d-flex gap-2 align-items-center">
-                                <a class="btn btn-danger btn-buy-now" style="text-decoration-line: none;"
-                                    th:data-id="${product.id}" th:href="@{/checkout?productId={id}(id=${product.id})}">
-                                    Mua Ngay
-                                </a>
-                                <!-- th:href="@{/checkout?productId={id}(id=${pro.id})}" -->
-                                <button class="btn btn-warning add-to-cart" th:data-id="${product.id}"
-                                    style="color: white;">
-                                    <i class="fa fa-shopping-bag me-2" style="color: white;"></i>Giỏ hàng
-                                </button>
-
-
+                        <div class="mt-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="me-3 fw-semibold">Số lượng:</span>
+                                <div class="input-group quantity-selector shadow-sm" style="width: 130px;">
+                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                                    <input type="number" class="form-control text-center input-qty" value="1" min="1" max="33"
+                                        th:id="'qty-' + ${product.id}">
+                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                                </div>
                             </div>
-
-                        </div>
-                        <div class="input-group quantity-selector shadow-sm" style="margin-top: 20px; width: 20%;">
-                            <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
-                            <input type="number" class="form-control text-center input-qty" value="1" min="1" max="33"
-                                th:id="'qty-' + ${product.id}">
-                            <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                            
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a class="btn btn-danger btn-buy-now px-4 py-2 flex-grow-1" style="text-decoration-line: none;"
+                                    th:data-id="${product.id}" th:href="@{/checkout?productId={id}(id=${product.id})}">
+                                    MUA NGAY
+                                </a>
+                                <button class="btn btn-warning add-to-cart px-4 py-2 flex-grow-1 text-white fw-semibold" 
+                                    th:data-id="${product.id}">
+                                    <i class="fa fa-shopping-bag me-1"></i> THÊM VÀO GIỎ HÀNG
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -275,25 +272,21 @@
 
                             </div>
 
-                            <!-- ADD TO CART -->
-                            <div class="mt-3 d-flex gap-2 align-items-center" th:if="${product.type != 'MYSTERY'}">
-
-                                <button class="btn btn-outline-warning add-to-cart" th:data-id="${product.id}"
-                                    style="color: rgb(210, 152, 4);">
-                                    <i class="fa fa-shopping-bag me-2" style="color: rgb(210, 152, 4);"></i>Giỏ hàng
-                                </button>
-                                <!-- QUANTITY -->
-                                <div class=" input-group quantity-selector" style="width:120px;">
-
-                                    <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
-
-                                    <input type="number" class="form-control text-center input-qty" value="1" min="1"
-                                        max="33" th:id="'qty-' + ${product.id}">
-
-                                    <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
-
+                            <!-- ADD TO CART & QUANTITY -->
+                            <div class="mt-3 d-flex flex-column gap-2" th:if="${product.type != 'MYSTERY'}">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="small text-muted">Số lượng:</span>
+                                    <div class="input-group quantity-selector" style="width:105px;">
+                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
+                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                            value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
+                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                    </div>
                                 </div>
-
+                                <button class="btn border border-warning rounded-pill px-3 text-warning add-to-cart w-100"
+                                    th:data-id="${product.id}" style="color: #ffb224 !important; border-color: #ffb224 !important;">
+                                    <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
+                                </button>
                             </div>
                         </div>
 

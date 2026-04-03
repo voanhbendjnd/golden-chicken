@@ -18,7 +18,7 @@ public class ResUser {
     String avatar;
     Long roleId;
     StaffType staffType;
-    String createdBy, updatedBy;
+    String createdBy;
     LocalDateTime createdAt, updatedAt;
 
 }

@@ -48,9 +48,7 @@ public class User implements Serializable {
     @ToString.Exclude
     Staff staff;
     String phone;
-
-    String avatar;
-
+    String avatar = "testimonial-1.jpg";
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
@@ -64,8 +62,9 @@ public class User implements Serializable {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             this.createdBy = authentication.getName();
+            this.updatedBy = authentication.getName();
         } else {
-            this.createdBy = "Anonymous";
+            this.createdBy = "anonymousUser";
         }
     }
 
@@ -73,10 +72,6 @@ public class User implements Serializable {
     public void handleBeforeUpdateBy() {
         this.updatedAt = LocalDateTime.now();
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            this.updatedBy = authentication.getName();
-        } else {
-            this.updatedBy = "Anonymous";
-        }
+        this.updatedBy = authentication.getName();
     }
 }

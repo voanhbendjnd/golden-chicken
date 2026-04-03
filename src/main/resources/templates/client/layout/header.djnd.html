@@ -76,7 +76,8 @@
                         data-bs-toggle="modal" data-bs-target="#searchModal"
                         style="border-color: #ffb524 !important;"><i class="fas fa-search"
                             style="color: #ffb524;"></i></button>
-                    <a href="/cart" class="position-relative me-2 me-sm-4 my-auto" th:if="${session.roleName == 'CUSTOMER'}">
+                    <a href="/cart" class="position-relative me-2 me-sm-4 my-auto"
+                        th:if="${session.roleName == 'CUSTOMER'}">
                         <i class="fa fa-shopping-bag fa-2x" style="color: #ffb524;"></i>
                         <span id="cart-count"
                             class="position-absolute rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
@@ -87,7 +88,7 @@
                         <a href="/profile" class="nav-link p-0 dropdown-toggle" data-bs-toggle="dropdown">
                             <img th:src="${profile != null and profile.avatar != null}
                             ? @{/img/avatar/{file}(file=${profile.avatar})}
-                            : @{/img/testavt.jpg}" alt="Avatar"
+                            : @{/img/avatar/testimonial-1.jpg}" alt="Avatar"
                                 style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" />
                         </a>
 
