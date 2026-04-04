@@ -57,7 +57,7 @@ public class Product {
     List<ComboDetail> productDetails;
     @OneToMany(mappedBy = "product")
     List<OrderItem> orderItems;
-    Integer sold;
+    Integer sold = 0;
     @OneToMany(mappedBy = "product")
     List<CartItem> cartItems;
     @OneToMany(mappedBy = "product")

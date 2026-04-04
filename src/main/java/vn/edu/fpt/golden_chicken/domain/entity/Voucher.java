@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "voucher")
+@Table(name = "vouchers")
 public class Voucher {
 
     @Id
@@ -29,7 +29,7 @@ public class Voucher {
     private Integer discountValue;
 
     @Column(nullable = false, length = 20)
-    private String discountType; // PERCENT / FIXED
+    private String discountType;
 
     private BigDecimal minOrderValue;
 

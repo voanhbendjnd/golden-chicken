@@ -292,6 +292,17 @@ public class ProductService {
         }
     }
 
+    public ResProduct findByIdWithCombo(long id) {
+        var product = this.productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
+        if (product.getType() == ProductType.COMBO) {
+            this.reviewService.syncProductRating(id);
+            return ProductConvert.toResProduct(product);
+        } else {
+            throw new BadRequestExceptionCustomer("Sản phẩm đã ngưng hoạt động!");
+        }
+    }
+
     public void delete(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));

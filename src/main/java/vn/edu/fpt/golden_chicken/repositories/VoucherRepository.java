@@ -19,7 +19,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             """)
     List<Voucher> findAvailableForExchange();
 
-    boolean existsByCode(String code);
+    boolean existsByCodeIgnoreCase(String code);
 
     List<Voucher> findAllByStatus(String status);
 

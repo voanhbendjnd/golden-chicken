@@ -106,7 +106,7 @@ public class ComboController {
 
     @GetMapping("/update/{id:[0-9]+}")
     public String updatePage(Model model, @PathVariable("id") Long id) {
-        var combo = this.productService.findById(id);
+        var combo = this.productService.findByIdWithCombo(id);
         var comboDetails = this.comboDetailRepository.findByComboId(id);
         List<ResSingleProduct> currentItems = this.comboDetailService.getProductInCombo(id);
 
@@ -127,7 +127,7 @@ public class ComboController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "files", required = false) List<MultipartFile> files)
             throws IOException, URISyntaxException {
-        var combo = this.productService.findById(dto.getId());
+        var combo = this.productService.findByIdWithCombo(dto.getId());
         var comboDetails = this.comboDetailRepository.findByComboId(dto.getId());
         List<ResSingleProduct> currentItems = this.comboDetailService.getProductInCombo(dto.getId());
 

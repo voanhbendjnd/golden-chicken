@@ -40,18 +40,10 @@ public class VoucherService {
     CustomerVoucherRepository customerVoucherRepository;
     KafkaTemplate<String, ActionPointMessage> kafkaTemplatePoint;
 
-    // @Transactional
-    // public Page<Artist> getAllArtist(int page,int size){
-    // Pageable pageable = PageRequest.of(page,size);
-    // return artistRepository.findAll(pageable);
-    // }
     @Transactional
     public Page<ResVoucher> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Voucher> voucherPage = this.repo.findAll(pageable);
-        // Pageable pageable = PageRequest.of(page, size);
-
-        // Page<Voucher> voucherPage = repo.findAll(pageable);
 
         return voucherPage.map(v -> {
             ResVoucher res = new ResVoucher();
@@ -88,7 +80,7 @@ public class VoucherService {
     @Transactional
     public void createVoucher(VoucherCreateDTO dto) {
 
-        if (repo.existsByCode(dto.getCode())) {
+        if (repo.existsByCodeIgnoreCase(dto.getCode())) {
             throw new IllegalArgumentException("Voucher code already exists");
         }
 
@@ -116,16 +108,17 @@ public class VoucherService {
             throw new IllegalArgumentException("Percent cannot exceed 100");
         }
 
-        if (Boolean.TRUE.equals(dto.getExchangeable())
+        if (dto.getExchangeable()
                 && (dto.getPointCost() == null || dto.getPointCost() <= 0)) {
             throw new IllegalArgumentException("Point cost must be greater than 0");
         }
-        // validate business rule
         if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
             throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
         }
 
-        repo.save(v);
+        var currentVoucher = repo.save(v);
+        if (!currentVoucher.isExchangeable())
+            this.customerRepository.distributeVoucherToAllActiveCustomers(currentVoucher.getId());
     }
 
     @Transactional
