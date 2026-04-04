@@ -93,6 +93,7 @@ public class VoucherController {
     @GetMapping("/edit/{id:[0-9]+}")
     public String editForm(@PathVariable("id") Long id, Model model) {
         model.addAttribute("voucher", service.getById(id));
+        model.addAttribute("isUsed", service.isDistributed(id));
         return "staff/voucher/edit";
     }
 

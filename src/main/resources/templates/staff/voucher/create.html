@@ -81,21 +81,21 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Điểm đổi<span style="color: red"> *</label>
-                <input type="number" th:field="*{pointCost}" min="0" required />
+            <div class="form-group exchange-field" th:style="${voucher.exchangeable == null or !voucher.exchangeable} ? 'display: none' : ''">
+                <label>Điểm đổi<span style="color: red"> *</span></label>
+                <input type="number" id="pointCost" th:field="*{pointCost}" min="0" required />
                 <div class="field-error" th:if="${#fields.hasErrors('pointCost')}" th:errors="*{pointCost}">
                 </div>
             </div>
-            <div class="form-group">
-                <label>Số lượng<span style="color: red"> *</label>
-                <input type="number" th:field="*{quantity}" min="0" required />
+            <div class="form-group exchange-field" th:style="${voucher.exchangeable == null or !voucher.exchangeable} ? 'display: none' : ''">
+                <label>Số lượng<span style="color: red"> *</span></label>
+                <input type="number" id="quantity" th:field="*{quantity}" min="0" required />
                 <div class="field-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">
                 </div>
             </div>
             <div class="checkbox-group">
-                <label>Cho phép đổi điểm<span style="color: red">*</label>
-                <input type="checkbox" th:field="*{exchangeable}" />
+                <label>Cho phép đổi điểm<span style="color: red">*</span></label>
+                <input type="checkbox" id="exchangeable" th:field="*{exchangeable}" />
             </div>
             <div class="form-group">
                 <label>Ngày bắt đầu:<span style="color: red"> *</label>

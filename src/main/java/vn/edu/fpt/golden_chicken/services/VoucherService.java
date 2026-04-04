@@ -99,6 +99,11 @@ public class VoucherService {
         v.setVoucherType(dto.getVoucherType());
         v.setStatus("DISABLED");
 
+        if (Boolean.FALSE.equals(dto.getExchangeable())) {
+            v.setPointCost(0);
+            v.setQuantity(0);
+        }
+
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
             throw new IllegalArgumentException("End time must be after start time");
@@ -108,23 +113,32 @@ public class VoucherService {
             throw new IllegalArgumentException("Percent cannot exceed 100");
         }
 
-        if (dto.getExchangeable()
-                && (dto.getPointCost() == null || dto.getPointCost() <= 0)) {
+        if (Boolean.TRUE.equals(dto.getExchangeable())
+                && (v.getPointCost() == null || v.getPointCost() <= 0)) {
             throw new IllegalArgumentException("Point cost must be greater than 0");
         }
-        if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
+        if (Boolean.TRUE.equals(v.isExchangeable()) && "ACTIVE".equalsIgnoreCase(dto.getStatus())
+                && (v.getQuantity() != null ? v.getQuantity() : 0) <= 0) {
             throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
         }
 
-        var currentVoucher = repo.save(v);
-        if (!currentVoucher.isExchangeable())
-            this.customerRepository.distributeVoucherToAllActiveCustomers(currentVoucher.getId());
+        repo.save(v);
+        // if (!currentVoucher.isExchangeable())
+        // this.customerRepository.distributeVoucherToAllActiveCustomers(currentVoucher.getId());
     }
 
     @Transactional
     public void updateVoucher(VoucherUpdateDTO dto) {
         Voucher v = repo.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Voucher not found"));
+
+        boolean isUsed = customerVoucherRepository.existsByVoucher_Id(v.getId());
+        if (isUsed) {
+            v.setStatus(dto.getStatus());
+            repo.save(v);
+            return;
+        }
+
         if (repo.existsByCodeAndIdNot(dto.getCode(), dto.getId())) {
             throw new IllegalArgumentException("Voucher code already exists");
         }
@@ -134,13 +148,24 @@ public class VoucherService {
         v.setDiscountValue(dto.getDiscountValue());
         v.setDiscountType(dto.getDiscountType());
         v.setMinOrderValue(dto.getMinOrderValue());
-        v.setPointCost(dto.getPointCost());
         v.setStartAt(dto.getStartAt());
         v.setEndAt(dto.getEndAt());
-        v.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 0);
         v.setVoucherType(dto.getVoucherType());
         v.setStatus(dto.getStatus());
+
+        if (!v.isExchangeable() && Boolean.TRUE.equals(dto.getExchangeable())) {
+            throw new IllegalArgumentException("Không thể chuyển voucher từ không đổi điểm sang cho phép đổi điểm");
+        }
+
         v.setExchangeable(dto.getExchangeable());
+
+        if (Boolean.TRUE.equals(dto.getExchangeable())) {
+            v.setPointCost(dto.getPointCost());
+            v.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 0);
+        } else {
+            v.setPointCost(0);
+            v.setQuantity(0);
+        }
 
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
@@ -150,12 +175,17 @@ public class VoucherService {
                 && dto.getDiscountValue() > 100) {
             throw new IllegalArgumentException("Percent cannot exceed 100");
         }
-        // nếu exchangeable = true thì pointCost phải > 0
-        if (Boolean.TRUE.equals(dto.getExchangeable())
-                && (dto.getPointCost() == null || dto.getPointCost() <= 0))
+        if (dto.getExchangeable()
+                && (v.getPointCost() == null || v.getPointCost() <= 0))
             throw new IllegalArgumentException("Point cost must be greater than 0");
-        // validate business rule
-        if ("ACTIVE".equalsIgnoreCase(dto.getStatus()) && (dto.getQuantity() != null ? dto.getQuantity() : 0) <= 0) {
+        if (!dto.getExchangeable()) {
+            if (dto.getStatus().equalsIgnoreCase("ACTIVE")) {
+                this.customerRepository.distributeVoucherToAllActiveCustomers(v.getId());
+
+            }
+        }
+        if (v.isExchangeable() && "ACTIVE".equalsIgnoreCase(dto.getStatus())
+                && (v.getQuantity() != null ? v.getQuantity() : 0) <= 0) {
             throw new IllegalArgumentException("Không thể kích hoạt voucher khi quantity = 0");
         }
         repo.save(v);
@@ -479,5 +509,9 @@ public class VoucherService {
         order.setProductVoucherId(productVoucherId);
         order.setShippingVoucherId(shippingVoucherId);
         return order;
+    }
+
+    public boolean isDistributed(Long id) {
+        return customerVoucherRepository.existsByVoucher_Id(id);
     }
 }

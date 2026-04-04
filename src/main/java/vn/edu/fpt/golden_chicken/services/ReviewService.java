@@ -289,7 +289,6 @@ public class ReviewService {
                 var visibleReviews = c.or(p2, myRejectedReviews);
                 return c.and(p1, visibleReviews);
             } else {
-                // Anonymous user only sees published reviews
                 var p2 = c.equal(r.get("reviewStatus"), ReviewStatus.PUBLISHED);
                 return c.and(p1, p2);
             }

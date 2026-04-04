@@ -22,50 +22,80 @@ function openConfirm(type, id) {
 function closeConfirm() {
     document.getElementById('confirmModal').style.display = 'none';
 }
-const startInput = document.getElementById("startAt");
-const endInput   = document.getElementById("endAt");
-
-// Khi đổi start → giới hạn end
-startInput.addEventListener("change", () => {
-    endInput.min = startInput.value;
-
-    // nếu end < start thì reset
-    if (endInput.value < startInput.value) {
-        endInput.value = startInput.value;
-    }
-});
-// check discount value và discount type
-const type = document.getElementById("discountType");
-const value = document.getElementById("discountValue");
-const unit = document.getElementById("discountUnit");
-const hint = document.getElementById("discountHint");
-
-function updateDiscountUI(reset = false) {
-
-    if (type.value === "PERCENT") {
-        value.max = 100;
-        value.placeholder = "0 - 100";
-        unit.textContent = "%";
-        hint.textContent = "Enter percent (0 — 100)";
-    } else if (type.value === "FIXED") {
-        value.removeAttribute("max");
-        value.placeholder = "Amount";
-        unit.textContent = "VND";
-        hint.textContent = "Enter amount in VND";
-    } else {
-        value.removeAttribute("max");
-        unit.textContent = "";
-        hint.textContent = "";
-    }
-
-    if (reset) {
-        value.value = "";
-    }
-}
-type.addEventListener("change", function () {
-    updateDiscountUI(true); // chỉ reset khi user đổi
-});
-
 document.addEventListener("DOMContentLoaded", function () {
-    updateDiscountUI(false); // load page thì không reset
+    const startInput = document.getElementById("startAt");
+    const endInput = document.getElementById("endAt");
+    const type = document.getElementById("discountType");
+    const value = document.getElementById("discountValue");
+    const unit = document.getElementById("discountUnit");
+    const hint = document.getElementById("discountHint");
+    const exchangeable = document.getElementById("exchangeable");
+    const pointCost = document.getElementById("pointCost");
+    const quantity = document.getElementById("quantity");
+
+    function updateExchangeUI() {
+        if (!exchangeable) return;
+        const exchangeFields = document.querySelectorAll('.exchange-field');
+        const isChecked = exchangeable.checked;
+
+        exchangeFields.forEach(field => {
+            field.style.display = isChecked ? 'flex' : 'none';
+        });
+
+        if (pointCost) {
+            pointCost.required = isChecked;
+            if (!isChecked) pointCost.value = 0;
+        }
+        if (quantity) {
+            quantity.required = isChecked;
+            if (!isChecked) quantity.value = 0;
+        }
+    }
+
+    function updateDiscountUI(reset = false) {
+        if (!type || !value || !unit || !hint) return;
+        if (type.value === "PERCENT") {
+            value.max = 100;
+            value.placeholder = "0 - 100";
+            unit.textContent = "%";
+            hint.textContent = "Enter percent (0 — 100)";
+        } else if (type.value === "FIXED") {
+            value.removeAttribute("max");
+            value.placeholder = "Amount";
+            unit.textContent = "VND";
+            hint.textContent = "Enter amount in VND";
+        } else {
+            value.removeAttribute("max");
+            unit.textContent = "";
+            hint.textContent = "";
+        }
+        if (reset) {
+            value.value = "";
+        }
+    }
+
+    if (startInput && endInput) {
+        startInput.addEventListener("change", () => {
+            endInput.min = startInput.value;
+            if (endInput.value < startInput.value) {
+                endInput.value = startInput.value;
+            }
+        });
+    }
+
+    if (type) {
+        type.addEventListener("change", function () {
+            updateDiscountUI(true);
+        });
+    }
+
+    if (exchangeable) {
+        exchangeable.addEventListener("change", function () {
+            updateExchangeUI();
+        });
+    }
+
+    // Initialize UI states
+    updateDiscountUI(false);
+    updateExchangeUI();
 });
