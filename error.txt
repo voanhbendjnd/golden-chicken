@@ -1,3 +1,0 @@
-** Một số lỗi các bạn có thể gặp phải và cách xử lý**
-================
-Error creating bean with name 'entityManagerFactory' chưa kết nối được với database check password DB ở properties.application

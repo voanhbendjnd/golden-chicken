@@ -79,7 +79,7 @@ public class VoucherController {
         model.addAttribute("vouchers", voucherPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("searchCode", searchCode);
-
+        model.addAttribute("emptyList", voucherPage.getContent().isEmpty() ? "no" : "yes");
         return "staff/voucher/list";
     }
 

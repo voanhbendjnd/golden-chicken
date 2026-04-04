@@ -4,6 +4,8 @@ import jakarta.persistence.criteria.Join;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,6 +24,7 @@ import vn.edu.fpt.golden_chicken.domain.response.ResultPaginationDTO;
 import vn.edu.fpt.golden_chicken.repositories.*;
 import vn.edu.fpt.golden_chicken.utils.constants.ProductType;
 import vn.edu.fpt.golden_chicken.utils.converts.ProductConvert;
+import vn.edu.fpt.golden_chicken.utils.exceptions.BadRequestExceptionCustomer;
 import vn.edu.fpt.golden_chicken.utils.exceptions.DataInvalidException;
 import vn.edu.fpt.golden_chicken.utils.exceptions.ResourceNotFoundException;
 
@@ -279,8 +282,14 @@ public class ProductService {
     public ResProduct findById(long id) {
         var product = this.productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", id));
-        this.reviewService.syncProductRating(id);
-        return ProductConvert.toResProduct(product);
+        if (product.getActive()) {
+            this.reviewService.syncProductRating(id);
+
+            return ProductConvert.toResProduct(product);
+
+        } else {
+            throw new BadRequestExceptionCustomer("Sản phẩm đã ngưng hoạt động!");
+        }
     }
 
     public void delete(long id) {
@@ -310,7 +319,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllChickenHappy(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%original chicken%");
+            var p1 = c.like(categoryJoin.get("name"), "%gà giòn%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
@@ -331,7 +340,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllChickenSauce(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%sauce%");
+            var p1 = c.like(categoryJoin.get("name"), "%sốt%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);
@@ -373,7 +382,7 @@ public class ProductService {
     public ResultPaginationDTO fetchAllLowMeal(Specification<Product> spec, Pageable pageable) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            var p1 = c.like(categoryJoin.get("name"), "%dessert%");
+            var p1 = c.like(categoryJoin.get("name"), "%tráng%");
             var p2 = c.equal(r.get("active"), true);
             var p3 = c.equal(categoryJoin.get("status"), true);
             return c.and(p1, p2, p3);

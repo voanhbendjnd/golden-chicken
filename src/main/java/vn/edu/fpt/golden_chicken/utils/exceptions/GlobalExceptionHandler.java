@@ -1,5 +1,6 @@
 package vn.edu.fpt.golden_chicken.utils.exceptions;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -59,6 +60,11 @@ public class GlobalExceptionHandler {
     })
     public String handleAccountBanException(AccountBanException ae) {
         return "error/account.ban";
+    }
+
+    @ExceptionHandler(value = { BadRequestExceptionCustomer.class })
+    public String handleBadRequestExceptino() {
+        return "redirect:/home";
     }
 
 }

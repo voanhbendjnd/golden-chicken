@@ -8,7 +8,7 @@
 <body>
 
 <div class="voucher-detail">
-    <h2>Voucher Detail</h2>
+    <h2>Chi tiết voucher</h2>
 
     <div class="detail-item">
         <span class="label">ID</span>
@@ -21,53 +21,53 @@
     </div>
 
     <div class="detail-item">
-        <span class="label">Name</span>
+        <span class="label">Tên</span>
         <span class="value" th:text="${voucher.name}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">Description</span>
+        <span class="label">Mô tả</span>
         <span class="value" th:text="${voucher.description}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">Discount Value</span>
+        <span class="label">Giá trị giảm</span>
         <span class="value" th:text="${voucher.discountValue}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">Discount Type</span>
+        <span class="label">Loại giảm</span>
         <span class="value badge" th:text="${voucher.discountType}"></span>
     </div>
     <div class="detail-item">
-        <span class="label">Voucher Type</span>
+        <span class="label">Loại voucher</span>
         <span class="value badge" th:text="${voucher.voucherType}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">Min Order Value</span>
+        <span class="label">Đơn tối thiểu</span>
         <span class="value" th:text="${voucher.minOrderValue}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">Point Cost</span>
+        <span class="label">Điểm đổi</span>
         <span class="value" th:text="${voucher.pointCost}"></span>
     </div>
     <div class="detail-item">
-        <span class="label">Quantity</span>
+        <span class="label">Số lượng</span>
         <span class="value" th:text="${voucher.quantity}"></span>
     </div>
     <div class="detail-item">
-        <span class="label">Start At</span>
+        <span class="label">Ngày bắt đầu</span>
         <span class="value" th:text="${voucher.startAt}"></span>
     </div>
 
     <div class="detail-item">
-        <span class="label">End At</span>
+        <span class="label">Ngày kết thúc</span>
         <span class="value" th:text="${voucher.endAt}"></span>
     </div>
     <div class="detail-item">
-        <span class="label">Status</span>
+        <span class="label">Trạng thái</span>
         <span class="value" th:text="${voucher.status}"></span>
     </div>
 
@@ -78,7 +78,7 @@
     </div>
 
     <div class="detail-actions">
-        <a class="btn-back" th:href="@{/staff/voucher/list}">← Back to list</a>
+        <a class="btn-back" th:href="@{/staff/voucher/list}">← Trở lại</a>
     </div>
 </div>
 

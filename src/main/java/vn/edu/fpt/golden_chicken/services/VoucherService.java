@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +47,11 @@ public class VoucherService {
     // }
     @Transactional
     public Page<ResVoucher> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Voucher> voucherPage = this.repo.findAll(pageable);
+        // Pageable pageable = PageRequest.of(page, size);
 
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<Voucher> voucherPage = repo.findAll(pageable);
+        // Page<Voucher> voucherPage = repo.findAll(pageable);
 
         return voucherPage.map(v -> {
             ResVoucher res = new ResVoucher();

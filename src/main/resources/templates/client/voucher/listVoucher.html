@@ -22,7 +22,7 @@
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <main class="main">
-      <h1 class="title">REDEEM POINTS</h1>
+      <h1 class="title">Đổi điểm</h1>
       <div class="voucher-container">
         <div th:replace="~{fragments/voucher-header :: voucher-header}"></div>
 
@@ -31,8 +31,10 @@
             <h2>Danh sách voucher đổi điểm</h2>
           </div>
 
-          <div th:if="${redeemError}" class="alert alert-danger" style="margin-bottom: 12px;" th:text="${redeemError}"></div>
-          <div th:if="${redeemSuccess}" class="alert alert-success" style="margin-bottom: 12px;" th:text="${redeemSuccess}"></div>
+          <div th:if="${redeemError}" class="alert alert-danger" style="margin-bottom: 12px;" th:text="${redeemError}">
+          </div>
+          <div th:if="${redeemSuccess}" class="alert alert-success" style="margin-bottom: 12px;"
+            th:text="${redeemSuccess}"></div>
 
           <div class="list" th:if="${#lists.isEmpty(vouchers)}">
             <div class="voucher">
@@ -46,6 +48,26 @@
             <div class="voucher" th:each="v : ${vouchers}">
               <div class="v-left">
                 <div class="v-title" th:text="${v.name}">Voucher</div>
+                <div th:if="${v.discountType == 'FIXED'}" style="font-weight: bold; font-size: small;">
+                  Giảm giá cho <span th:if="${v.voucherType == 'PRODUCT'}">sản phẩm với giá trị
+                    tối đa là <span
+                      th:text="${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span></span>
+                  <span th:unless="${v.voucherType == 'PRODUCT'}">phí ship với giá trị
+                    tối đa là <span
+                      th:text="${#numbers.formatDecimal(v.discountValue, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span></span>
+                </div>
+                <div th:if="${v.discountType == 'PERCENT'}" style="font-weight: bold; font-size: small;">
+                  Giảm giá cho <span th:if="${v.voucherType == 'PRODUCT'}">sản phẩm với mức giảm
+                    là <span th:text="${v.discountValue}"></span>%</span>
+                  <span th:unless="${v.voucherType == 'PRODUCT'}">phí ship với mức giảm là <span
+                      th:text="${v.discountValue}"></span>%</span>
+                </div>
+                <div th:if="${v.minOrderValue != null}">
+                  <small>
+                    Đơn tối thiểu:
+                    [[${#numbers.formatDecimal(v.minOrderValue,0,'COMMA',0,'POINT')}]] đ
+                  </small>
+                </div>
                 <div class="v-sub" th:text="${v.description}">Mô tả</div>
               </div>
               <div class="v-right">
@@ -53,8 +75,8 @@
                 <form th:action="@{/vouchers/redeem/confirm}" method="post" style="display: inline-block;">
                   <input type="hidden" name="voucherId" th:value="${v.id}" />
                   <button type="submit" class="btn btn-primary"
-                          th:classappend="${points lt v.pointCost} ? 'disabled' : ''"
-                          th:text="${points >= v.pointCost ? 'Đổi' : 'Không đủ điểm'}">
+                    th:classappend="${points lt v.pointCost} ? 'disabled' : ''"
+                    th:text="${points >= v.pointCost ? 'Đổi' : 'Không đủ điểm'}">
                     Đổi
                   </button>
                 </form>

@@ -19,7 +19,8 @@
         <div class="mb-4">
             <form th:action="@{/checkout}" method="post" style="display: inline;">
                 <input type="hidden" name="productId" th:value="${productId}" />
-                <input type="hidden" name="ids" th:value="${productIds != null ? #strings.listJoin(productIds, ',') : ''}" />
+                <input type="hidden" name="ids"
+                    th:value="${productIds != null ? #strings.listJoin(productIds, ',') : ''}" />
                 <input type="hidden" name="orderId" th:value="${orderId}" />
                 <input type="hidden" name="quantity" th:value="${quantity}" />
                 <input type="hidden" name="addressId" th:value="${addressId}" />
@@ -53,8 +54,8 @@
 
             <div class="row">
                 <div th:each="v : ${vouchers}" class="col-md-4 mb-4">
-                    <label class="voucher-card p-3 text-center border rounded shadow-sm d-block"
-                        style="cursor: pointer;"
+                    <label class="voucher-card p-3 text-center border rounded shadow-sm d-block" style="cursor: pointer;
+                        height: 243px;"
                         th:classappend="${v.voucher != null and v.voucher.minOrderValue != null and orderTotal.compareTo(v.voucher.minOrderValue) < 0} ? ' voucher-disabled'"
                         th:attr="data-type=${v.voucher.voucherType}">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -64,11 +65,27 @@
                             <input class="form-check-input" type="checkbox" name="voucherIds" th:value="${v.id}"
                                 th:attr="data-type=${v.voucher.voucherType},data-min-disabled=${v.voucher != null and v.voucher.minOrderValue != null and orderTotal.compareTo(v.voucher.minOrderValue) < 0}"
                                 th:disabled="${v.voucher != null and v.voucher.minOrderValue != null and orderTotal.compareTo(v.voucher.minOrderValue) < 0}" />
+
                         </div>
 
                         <h3 th:text="${v.voucher.code}" style="color: #ffb524;"></h3>
                         <p class="fw-bold" th:text="${v.voucher.name}"></p>
-                        <p class="text-muted small" th:text="${v.voucher.description}"></p>
+                        <div th:if="${v.voucher.discountType == 'FIXED'}" style="font-weight: bold; font-size: small;">
+                            Giảm giá cho <span th:if="${v.voucher.voucherType == 'PRODUCT'}">sản phẩm với giá trị
+                                tối đa là <span
+                                    th:text="${#numbers.formatDecimal(v.voucher.discountValue, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span></span>
+                            <span th:unless="${v.voucher.voucherType == 'PRODUCT'}">phí ship với giá trị
+                                tối đa là <span
+                                    th:text="${#numbers.formatDecimal(v.voucher.discountValue, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span></span>
+                        </div>
+                        <div th:if="${v.voucher.discountType == 'PERCENT'}"
+                            style="font-weight: bold; font-size: small;">
+                            Giảm giá cho <span th:if="${v.voucher.voucherType == 'PRODUCT'}">sản phẩm với mức giảm
+                                là <span th:text="${v.voucher.discountValue}"></span>%</span>
+                            <span th:unless="${v.voucher.voucherType == 'PRODUCT'}">phí ship với mức giảm là <span
+                                    th:text="${v.voucher.discountValue}"></span>%</span>
+                        </div>
+                        <p class="text-muted small" style="font-style: italic;" th:text="${v.voucher.description}"></p>
 
                         <div th:if="${v.voucher.minOrderValue != null}" class="mb-2">
                             <small class="badge bg-light text-dark">
