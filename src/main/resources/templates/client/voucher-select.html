@@ -41,7 +41,7 @@
             <input type="hidden" name="addressId" th:value="${addressId}" />
             <input type="hidden" name="orderId" th:value="${orderId}" />
 
-            <div class="row mb-3 align-items-end">
+            <!-- <div class="row mb-3 align-items-end">
                 <div class="col-md-8">
                     <label class="form-label">Nhập mã voucher (chỉ áp voucher đã đổi)</label>
                     <input class="form-control voucher-code-input" type="text" name="voucherCode"
@@ -50,7 +50,7 @@
                 <div class="col-md-4 d-grid">
                     <button type="submit" class="btn btn-outline-primary">Áp dụng mã</button>
                 </div>
-            </div>
+            </div> -->
 
             <div class="row">
                 <div th:each="v : ${vouchers}" class="col-md-4 mb-4">

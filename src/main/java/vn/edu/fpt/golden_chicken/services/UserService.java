@@ -308,7 +308,7 @@ public class UserService {
                 }
 
                 if (row.getCell(1) == null || row.getCell(2) == null
-                        || row.getCell(3) == null || row.getCell(6) == null) {
+                        || row.getCell(3) == null || row.getCell(5) == null) {
                     throw new DataFormatException("Lỗi dữ liệu tại hàng " + (rowNum + 1) + ": bị bỏ sót!");
                 }
 

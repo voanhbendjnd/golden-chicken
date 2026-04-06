@@ -19,6 +19,13 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             """)
     List<Voucher> findAvailableForExchange();
 
+    @Query("""
+            SELECT v FROM Voucher v
+            WHERE v.status = 'ACTIVE'
+            AND v.exchangeable = false
+            """)
+    List<Voucher> findAvailableForIsNotExchange();
+
     boolean existsByCodeIgnoreCase(String code);
 
     List<Voucher> findAllByStatus(String status);

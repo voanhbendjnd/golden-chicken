@@ -32,7 +32,6 @@ public class MenuController {
     private final ProductService productService;
     private final CategoryService categoryService;
 
-
     @GetMapping("/draw")
     public String getMenuPage(Model model,
             @RequestParam(name = "cat", required = false) String cat,
@@ -153,7 +152,7 @@ public class MenuController {
         if (cat != null && !cat.isBlank()) {
             menuCategories = buildFullNav(categoriesName, productsByCatName);
         }
-        model.addAttribute("menuCategories", menuCategories);
+        // model.addAttribute("menuCategories", menuCategories);
         model.addAttribute("categoryAnchorMap", categoryAnchorMap);
         model.addAttribute("categoryProductList", categoryProductList);
         model.addAttribute("products", products);

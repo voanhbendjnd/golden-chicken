@@ -300,27 +300,14 @@
                                         th:text="${#temporals.format(order.updatedAt,'HH:mm dd/MM/yyyy')}"></small>
                                 </div>
 
-                                <span th:switch="${order.status}">
-
-                                    <span class="badge-status badge-delivered"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERED}">
-                                        THÀNH CÔNG
-                                    </span>
-
-                                    <span class="badge-status badge-failed"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).DELIVERY_FAILED}">
-                                        GIAO THẤT BẠI
-                                    </span>
-
-                                    <span class="badge-status badge-cancelled"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).CANCELLED}">
-                                        ĐÃ HỦY
-                                    </span>
-                                    <span class="badge-status badge-issue"
-                                        th:case="${T(vn.edu.fpt.golden_chicken.utils.constants.OrderStatus).SHIPPER_ISSUE}">
-                                        Bị vấn đề
-                                    </span>
-
+                                <span th:switch="${order.status.name()}">
+                                    <span class="badge-status badge-delivered" th:case="'DELIVERED'">THÀNH CÔNG</span>
+                                    <span class="badge-status badge-failed" th:case="'DELIVERY_FAILED'">GIAO THẤT
+                                        BẠI</span>
+                                    <span class="badge-status badge-cancelled" th:case="'CANCELLED'">ĐÃ HỦY</span>
+                                    <span class="badge-status badge-issue" th:case="'SHIPPER_ISSUE'">BỊ VẤN ĐỀ</span>
+                                    <span class="badge-status badge-issue" th:case="'REASSIGNING_SHIPPER'">CHỜ GIAO
+                                        LẠI</span>
                                     <button class="btn btn-outline-primary btn-sm"
                                         th:onclick="'showOrderDetail(' + ${order.id} + ')'">
                                         Xem chi tiết

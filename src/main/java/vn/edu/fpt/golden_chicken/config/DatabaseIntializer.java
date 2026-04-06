@@ -44,8 +44,6 @@ public class DatabaseIntializer implements CommandLineRunner {
         long shippingFeeCnt = this.shippingFeeRepository.count();
         long permissionCnt = this.permissionRepository.count();
         if (shippingFeeCnt == 0) {
-            // var shippingFees = new ArrayList<ShippingFee>();
-            // shippingFees.add(new ShippingFee("Xã Nhơn Mỹ", new BigDecimal(10000)));
             RestTemplate restTemplate = new RestTemplate();
             String url = "https://provinces.open-api.vn/api/v2/p/92?depth=2";
 

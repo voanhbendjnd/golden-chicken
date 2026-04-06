@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -138,7 +137,6 @@ public class ProductService {
     public ResultPaginationDTO fetchAllWithPagination(Pageable pageable, Specification<Product> spec) {
         Specification<Product> ps = (r, q, c) -> {
             Join<Product, Category> categoryJoin = r.join("category");
-            // var p1 = c.equal(categoryJoin.get("status"), true);
             var p2 = c.equal(r.get("type"), ProductType.SINGLE);
             return c.and(p2);
         };

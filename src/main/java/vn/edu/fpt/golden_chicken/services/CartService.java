@@ -70,16 +70,13 @@ public class CartService {
         var user = this.userRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             return false;
-            // throw new ResourceNotFoundException("User Email", email);
         }
         if (user.getCustomer() == null) {
             return false;
-            // throw new PermissionException("Only customers can perform this action!");
         }
         var customer = user.getCustomer();
         var product = this.productRepository.findById(dto.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product ID", dto.productId()));
-        // var cart = this.cartRepository.findByCustomerId(customer.getId());
         var cartItem = this.cartRepository.findByCustomerIdAndProductId(customer.getId(), product.getId());
 
         if (cartItem == null) {

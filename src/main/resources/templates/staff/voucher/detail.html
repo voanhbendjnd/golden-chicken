@@ -1,86 +1,88 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Voucher Detail</title>
     <link rel="stylesheet" href="/css/voucher.css">
 </head>
+
 <body>
 
-<div class="voucher-detail">
-    <h2>Chi tiết voucher</h2>
+    <div class="voucher-detail">
+        <h2>Chi tiết voucher</h2>
 
-    <div class="detail-item">
-        <span class="label">ID</span>
-        <span class="value" th:text="${voucher.id}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">ID</span>
+            <span class="value" th:text="${voucher.id}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Code</span>
-        <span class="value" th:text="${voucher.code}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Code</span>
+            <span class="value" th:text="${voucher.code}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Tên</span>
-        <span class="value" th:text="${voucher.name}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Tên</span>
+            <span class="value" th:text="${voucher.name}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Mô tả</span>
-        <span class="value" th:text="${voucher.description}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Mô tả</span>
+            <span class="value" th:text="${voucher.description}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Giá trị giảm</span>
-        <span class="value" th:text="${voucher.discountValue}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Giá trị giảm</span>
+            <span class="value" th:text="${voucher.discountValue}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Loại giảm</span>
-        <span class="value badge" th:text="${voucher.discountType}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="label">Loại voucher</span>
-        <span class="value badge" th:text="${voucher.voucherType}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Loại giảm</span>
+            <span class="value badge" th:text="${voucher.discountType}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Loại voucher</span>
+            <span class="value badge" th:text="${voucher.voucherType}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Đơn tối thiểu</span>
-        <span class="value" th:text="${voucher.minOrderValue}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Đơn tối thiểu</span>
+            <span class="value" th:text="${voucher.minOrderValue}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Điểm đổi</span>
-        <span class="value" th:text="${voucher.pointCost}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="label">Số lượng</span>
-        <span class="value" th:text="${voucher.quantity}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="label">Ngày bắt đầu</span>
-        <span class="value" th:text="${voucher.startAt}"></span>
-    </div>
+        <div class="detail-item" th:if="${voucher.exchangeable}">
+            <span class="label">Điểm đổi</span>
+            <span class="value" th:text="${voucher.pointCost}"></span>
+        </div>
+        <div class="detail-item" th:if="${voucher.exchangeable}">
+            <span class="label">Số lượng</span>
+            <span class="value" th:text="${voucher.quantity}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Ngày bắt đầu</span>
+            <span class="value" th:text="${voucher.startAt}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Ngày kết thúc</span>
-        <span class="value" th:text="${voucher.endAt}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="label">Trạng thái</span>
-        <span class="value" th:text="${voucher.status}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Ngày kết thúc</span>
+            <span class="value" th:text="${voucher.endAt}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Trạng thái</span>
+            <span class="value" th:text="${voucher.status}"></span>
+        </div>
 
-    <div class="detail-item">
-        <span class="label">Exchangeable</span>
-        <span class="value"
-              th:text="${voucher.exchangeable ? 'YES' : 'NO'}"></span>
-    </div>
+        <div class="detail-item">
+            <span class="label">Exchangeable</span>
+            <span class="value" th:text="${voucher.exchangeable ? 'YES' : 'NO'}"></span>
+        </div>
 
-    <div class="detail-actions">
-        <a class="btn-back" th:href="@{/staff/voucher/list}">← Trở lại</a>
+        <div class="detail-actions">
+            <a class="btn-back" th:href="@{/staff/voucher/list}">← Trở lại</a>
+        </div>
     </div>
-</div>
 
 </body>
+
 </html>

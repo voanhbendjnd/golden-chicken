@@ -113,12 +113,11 @@
 
     <div class="card">
         <div class="card-header">
-            <h3 class="mb-1">Order Notification</h3>
-            <p class="mb-0 opacity-75">Tracking your purchase</p>
+            <h3 class="mb-1">Thông báo về đơn hàng tại Golden Chicken</h3>
         </div>
         <div class="card-body text-center p-4 p-md-5">
             <p class="text-secondary">Hello, <span th:text="${cus}"></span></p>
-            <p>Your order with ID <span th:text="${id}"></span> status has been successfully updated to:</p>
+            <p>Đơn hàng với ID của bạn <span th:text="${id}"></span> vừa được thay đổi trạng thái thành</p>
 
             <div th:classappend="${'bg-' + status}" class="status-badge">
                 <span th:text="${status}">SHIPPING</span>
@@ -132,11 +131,11 @@
 
             <div class="info-container text-start">
                 <div class="mb-3">
-                    <div class="info-label text-muted">Customer Email</div>
+                    <div class="info-label text-muted">Email</div>
                     <div class="info-value" th:text="${email}">customer@example.com</div>
                 </div>
                 <div class="mb-0">
-                    <div class="info-label text-muted">Update Timestamp</div>
+                    <div class="info-label text-muted">Thời gian cập nhật</div>
                     <div class="info-value"
                         th:text="${#calendars.format(#calendars.createNow(), 'MMM dd, yyyy | HH:mm')}">Oct 12, 2023 |
                         14:30</div>
@@ -144,9 +143,7 @@
             </div>
 
 
-            <p class="footer-text">
-                This is an automated message. Please do not reply to this email.
-            </p>
+
         </div>
     </div>
 

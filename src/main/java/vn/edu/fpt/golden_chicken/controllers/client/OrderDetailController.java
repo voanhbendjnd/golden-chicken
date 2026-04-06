@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.common.DeclareConstant;
 import vn.edu.fpt.golden_chicken.domain.entity.Order;
-import vn.edu.fpt.golden_chicken.repositories.OrderRepository;
 import vn.edu.fpt.golden_chicken.services.OrderService;
 import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 
@@ -26,17 +25,6 @@ import vn.edu.fpt.golden_chicken.utils.exceptions.PermissionException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderDetailController {
     OrderService orderService;
-    OrderRepository orderRepository;
-
-    // @GetMapping("/order-history")
-    // public String viewStateOrder(Model model, @Filter Specification<Order> spec,
-    // @PageableDefault(size = DefineVariable.pageSize, sort = "updatedAt",
-    // direction = Sort.Direction.DESC) Pageable pageable)
-    // throws PermissionException {
-    // var data = this.orderService.stateOrder(spec, pageable);
-    // model.addAttribute("data", data);
-    // return "client/order-history";
-    // }
 
     @GetMapping("/order-history")
     public String getOrderHistory(@RequestParam(required = false) String status,

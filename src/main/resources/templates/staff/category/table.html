@@ -112,13 +112,13 @@
                         <!-- Pagination -->
                         <div th:if="${categories != null and !categories.isEmpty()}"
                             class="d-flex justify-content-between align-items-center mt-4">
-                            <span class="small text-muted">Showing page <span th:text="${meta.page}"></span> of <span
+                            <span class="small text-muted">Trang <span th:text="${meta.page}"></span> trên <span
                                     th:text="${meta.pages}"></span></span>
                             <nav aria-label="Page navigation">
                                 <ul class="pagination pagination-sm mb-0">
                                     <li th:class="|page-item ${meta.page == 1 ? 'disabled' : ''}|">
                                         <a class="page-link shadow-none"
-                                            th:href="@{/staff/category(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Previous</a>
+                                            th:href="@{/staff/category(page=${meta.page - 1}, size=${meta.pageSize}, filter=${param.filter})}">Trước</a>
                                     </li>
                                     <li th:each="p : ${#numbers.sequence(1, meta.pages)}"
                                         th:class="|page-item ${meta.page == p ? 'active' : ''}|">
@@ -129,7 +129,7 @@
                                     </li>
                                     <li th:class="|page-item ${meta.page == meta.pages ? 'disabled' : ''}|">
                                         <a class="page-link shadow-none"
-                                            th:href="@{/staff/category(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Next</a>
+                                            th:href="@{/staff/category(page=${meta.page + 1}, size=${meta.pageSize}, filter=${param.filter})}">Sau</a>
                                     </li>
                                 </ul>
                             </nav>

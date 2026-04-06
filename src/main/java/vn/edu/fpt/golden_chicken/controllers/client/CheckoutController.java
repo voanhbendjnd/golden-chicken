@@ -269,7 +269,6 @@ public class CheckoutController {
         List<CustomerVoucher> vouchers = voucherService.getCustomerVouchers(currentUser.getId());
 
         BigDecimal orderTotal = checkoutService.calculateOrderTotal(productId, productIds, quantity, orderId);
-        final BigDecimal orderTotalFinal = orderTotal;
 
         List<CustomerVoucher> allVouchers = vouchers;
 
@@ -281,7 +280,7 @@ public class CheckoutController {
         List<CustomerVoucher> pageVouchers = allVouchers.subList(fromIndex, toIndex);
 
         model.addAttribute("vouchers", pageVouchers);
-        model.addAttribute("orderTotal", orderTotalFinal);
+        model.addAttribute("orderTotal", orderTotal);
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("size", size);

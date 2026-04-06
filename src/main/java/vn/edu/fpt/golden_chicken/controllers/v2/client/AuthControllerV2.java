@@ -21,7 +21,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import vn.edu.fpt.golden_chicken.domain.response.VerifyAccountMessage;
-import vn.edu.fpt.golden_chicken.repositories.UserRepository;
 import vn.edu.fpt.golden_chicken.services.RateLimitService;
 import vn.edu.fpt.golden_chicken.services.UserService;
 import vn.edu.fpt.golden_chicken.services.redis.RedisUserService;
@@ -36,7 +35,6 @@ public class AuthControllerV2 {
     UserService userService;
     RedisUserService redisUserService;
     KafkaTemplate<String, VerifyAccountMessage> kafkaVerifyMessage;
-    UserRepository userRepository;
     RateLimitService rateLimitService;
 
     @GetMapping("/forgot-password-v2")

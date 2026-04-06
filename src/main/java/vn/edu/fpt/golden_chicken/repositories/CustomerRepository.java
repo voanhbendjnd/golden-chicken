@@ -18,6 +18,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "insert into customer_vouchers (customer_id, voucher_id, status) select c.user_id, :voucherId, 0 from customers c", nativeQuery = true)
-    void distributeVoucherToAllActiveCustomers(@Param("voucherId") Long id);
+    @Query(value = "insert into customer_vouchers (customer_id, voucher_id, status, redeemed_at) select c.user_id, :voucherId, 0, :redeemed_at from customers c", nativeQuery = true)
+    void distributeVoucherToAllActiveCustomers(@Param("voucherId") Long id,
+            @Param("redeemed_at") LocalDateTime redeemed_at);
 }

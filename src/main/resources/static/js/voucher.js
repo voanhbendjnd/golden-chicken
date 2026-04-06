@@ -5,13 +5,13 @@ function openConfirm(type, id) {
     const btn = document.getElementById('confirmBtn');
 
     if (type === 'disable') {
-        title.innerText = 'Disable Voucher';
-        msg.innerText = 'Are you sure you want to disable this voucher?';
+        title.innerText = 'Vô hiệu hóa voucher';
+        msg.innerText = 'Bạn chắc muốn vô hiệu hóa voucher này!';
         btn.href = `/staff/voucher/disable/${id}`;
         btn.className = 'btn btn-warning';
     } else {
-        title.innerText = 'Delete Voucher';
-        msg.innerText = 'This action cannot be undone. Continue?';
+        title.innerText = 'Xóa voucher này!';
+        msg.innerText = 'Bạn chắc chắn muốn xóa!';
         btn.href = `/staff/voucher/delete/${id}`;
         btn.className = 'btn btn-danger';
     }

@@ -132,7 +132,7 @@
                                 <span th:text="${order.paymentMethod}"></span>
                             </div>
                             <div class="footer-meta mb-0 text-danger"
-                                th:if="${!#strings.isEmpty(order.deliveryFailedReason)}">
+                                th:if="${!#strings.isEmpty(order.deliveryFailedReason) and order.deliveryFailedReason != 'Trống'}">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                                 <span th:text="${order.deliveryFailedReason}"></span>
                             </div>

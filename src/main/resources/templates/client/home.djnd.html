@@ -131,7 +131,7 @@
         <div class="container py-5">
             <div class="row g-4">
                 <div class="col-md-6 col-lg-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
+                    <div class="featurs-item text-center rounded bg-light p-4" style="height: 300px;">
                         <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                             <i class="fas fa-car-side fa-3x text-white"></i>
                         </div>
@@ -142,7 +142,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
+                    <div class="featurs-item text-center rounded bg-light p-4" style="height: 300px;">
                         <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                             <i class="fas fa-user-shield fa-3x text-white"></i>
                         </div>
@@ -153,7 +153,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
+                    <div class="featurs-item text-center rounded bg-light p-4" style="height: 300px;">
                         <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                             <i class="fas fa-exchange-alt fa-3x text-white"></i>
                         </div>
@@ -164,7 +164,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="featurs-item text-center rounded bg-light p-4">
+                    <div class="featurs-item text-center rounded bg-light p-4" style="height: 300px;">
                         <div class="featurs-icon btn-square rounded-circle bg-secondary mb-5 mx-auto">
                             <i class="fa fa-phone-alt fa-3x text-white"></i>
                         </div>
@@ -278,13 +278,17 @@
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <span class="small text-muted">Số lượng:</span>
                                                     <div class="input-group quantity-selector" style="width:105px;">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
-                                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                                            type="button">-</button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center input-qty"
                                                             value="1" min="1" max="33" th:id="'qty-' + ${pro.id}">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                                            type="button">+</button>
                                                     </div>
                                                 </div>
-                                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                                <button
+                                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                                     th:data-id="${pro.id}">
                                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                                 </button>
@@ -356,17 +360,22 @@
                                             </div>
 
                                             <!-- ADD TO CART & QUANTITY -->
-                                            <div class="mt-3 d-flex flex-column gap-2" th:if="${product.type != 'MYSTERY'}">
+                                            <div class="mt-3 d-flex flex-column gap-2"
+                                                th:if="${product.type != 'MYSTERY'}">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <span class="small text-muted">Số lượng:</span>
                                                     <div class="input-group quantity-selector" style="width:105px;">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
-                                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                                            type="button">-</button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center input-qty"
                                                             value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                                            type="button">+</button>
                                                     </div>
                                                 </div>
-                                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                                <button
+                                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                                     th:data-id="${product.id}">
                                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                                 </button>
@@ -439,17 +448,22 @@
                                             </div>
 
                                             <!-- ADD TO CART & QUANTITY -->
-                                            <div class="mt-3 d-flex flex-column gap-2" th:if="${product.type != 'MYSTERY'}">
+                                            <div class="mt-3 d-flex flex-column gap-2"
+                                                th:if="${product.type != 'MYSTERY'}">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <span class="small text-muted">Số lượng:</span>
                                                     <div class="input-group quantity-selector" style="width:105px;">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
-                                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                                            type="button">-</button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center input-qty"
                                                             value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                                            type="button">+</button>
                                                     </div>
                                                 </div>
-                                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                                <button
+                                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                                     th:data-id="${product.id}">
                                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                                 </button>
@@ -521,17 +535,22 @@
                                             </div>
 
                                             <!-- ADD TO CART & QUANTITY -->
-                                            <div class="mt-3 d-flex flex-column gap-2" th:if="${product.type != 'MYSTERY'}">
+                                            <div class="mt-3 d-flex flex-column gap-2"
+                                                th:if="${product.type != 'MYSTERY'}">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <span class="small text-muted">Số lượng:</span>
                                                     <div class="input-group quantity-selector" style="width:105px;">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
-                                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                                            type="button">-</button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center input-qty"
                                                             value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                                            type="button">+</button>
                                                     </div>
                                                 </div>
-                                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                                <button
+                                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                                     th:data-id="${product.id}">
                                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                                 </button>
@@ -603,17 +622,22 @@
                                             </div>
 
                                             <!-- ADD TO CART & QUANTITY -->
-                                            <div class="mt-3 d-flex flex-column gap-2" th:if="${product.type != 'MYSTERY'}">
+                                            <div class="mt-3 d-flex flex-column gap-2"
+                                                th:if="${product.type != 'MYSTERY'}">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <span class="small text-muted">Số lượng:</span>
                                                     <div class="input-group quantity-selector" style="width:105px;">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
-                                                        <input type="number" class="form-control form-control-sm text-center input-qty"
+                                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                                            type="button">-</button>
+                                                        <input type="number"
+                                                            class="form-control form-control-sm text-center input-qty"
                                                             value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                                            type="button">+</button>
                                                     </div>
                                                 </div>
-                                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                                <button
+                                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                                     th:data-id="${product.id}">
                                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                                 </button>
@@ -656,7 +680,8 @@
                         </div>
                         <div class="p-4 border border-secondary border-top-0 rounded-bottom">
                             <h5 th:text="${product.name}">Tên sản phẩm</h5>
-                            <p class="product-desc-fixed" th:if="${product.description}" th:text="${product.description}">Mô tả</p>
+                            <p class="product-desc-fixed" th:if="${product.description}"
+                                th:text="${product.description}">Mô tả</p>
                             <div class="d-flex justify-content-between align-items-center flex-wrap">
                                 <p class="text-dark fw-bold mb-2"
                                     th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' ₫'">
@@ -672,13 +697,16 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="small text-muted">Số lượng:</span>
                                     <div class="input-group quantity-selector" style="width:105px;">
-                                        <button class="btn btn-sm btn-outline-secondary btn-minus" type="button">-</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-minus"
+                                            type="button">-</button>
                                         <input type="number" class="form-control form-control-sm text-center input-qty"
                                             value="1" min="1" max="33" th:id="'qty-' + ${product.id}">
-                                        <button class="btn btn-sm btn-outline-secondary btn-plus" type="button">+</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-plus"
+                                            type="button">+</button>
                                     </div>
                                 </div>
-                                <button class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
+                                <button
+                                    class="btn border border-secondary rounded-pill px-3 text-secondary btn-add-to-cart w-100"
                                     th:data-id="${product.id}">
                                     <i class="fa fa-shopping-bag me-1"></i> Thêm vào giỏ hàng
                                 </button>
@@ -728,7 +756,7 @@
             <div class="row g-4">
                 <!-- LOOP PRODUCT -->
                 <div class="col-lg-6 col-xl-4" th:each="product : ${firstBestSellers}">
-                    <div class="p-4 rounded bg-light">
+                    <div class="p-4 rounded bg-light" style="height: 285px;">
                         <div class="row align-items-center">
                             <div class="col-6">
                                 <img class="img-fluid rounded-circle w-100"

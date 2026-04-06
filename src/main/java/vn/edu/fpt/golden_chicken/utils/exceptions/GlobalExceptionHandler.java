@@ -1,6 +1,5 @@
 package vn.edu.fpt.golden_chicken.utils.exceptions;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;

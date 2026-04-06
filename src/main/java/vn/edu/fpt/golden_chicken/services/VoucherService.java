@@ -3,6 +3,8 @@ package vn.edu.fpt.golden_chicken.services;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,13 +54,15 @@ public class VoucherService {
             res.setName(v.getName());
             res.setQuantity(v.getQuantity() != null ? v.getQuantity() : 0);
             res.setStatus(v.getStatus());
+            res.setVoucherType(v.getVoucherType());
+            res.setExchangeable(v.isExchangeable());
             return res;
         });
     }
 
     @Transactional
     public ResVoucher getById(Long id) {
-        Voucher v = repo.findById(id).orElseThrow();
+        Voucher v = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Voucher ID not found!"));
         ResVoucher res = new ResVoucher();
         res.setId(v.getId());
         res.setCode(v.getCode());
@@ -106,16 +110,16 @@ public class VoucherService {
 
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
-            throw new IllegalArgumentException("End time must be after start time");
+            throw new IllegalArgumentException("Thời gian kết thúc phải sau thời gian bắt đầu!");
         }
         if ("PERCENT".equals(dto.getDiscountType())
                 && dto.getDiscountValue() > 100) {
-            throw new IllegalArgumentException("Percent cannot exceed 100");
+            throw new IllegalArgumentException("Phần trăm giảm giá không vượt quá 100%");
         }
 
         if (Boolean.TRUE.equals(dto.getExchangeable())
                 && (v.getPointCost() == null || v.getPointCost() <= 0)) {
-            throw new IllegalArgumentException("Point cost must be greater than 0");
+            throw new IllegalArgumentException("Diểm đổi phải lớn hơn 0!");
         }
         if (Boolean.TRUE.equals(v.isExchangeable()) && "ACTIVE".equalsIgnoreCase(dto.getStatus())
                 && (v.getQuantity() != null ? v.getQuantity() : 0) <= 0) {
@@ -169,18 +173,18 @@ public class VoucherService {
 
         if (v.getEndAt().isBefore(v.getStartAt())
                 || v.getEndAt().isEqual(v.getStartAt())) {
-            throw new IllegalArgumentException("End time must be after start time");
+            throw new IllegalArgumentException("Thời gian kết thúc phải sau thời gian bắt đầu!");
         }
         if ("PERCENT".equals(dto.getDiscountType())
                 && dto.getDiscountValue() > 100) {
-            throw new IllegalArgumentException("Percent cannot exceed 100");
+            throw new IllegalArgumentException("Phần trăm giảm giá phải nhỏ hơn hoặc bằng 100%");
         }
         if (dto.getExchangeable()
                 && (v.getPointCost() == null || v.getPointCost() <= 0))
-            throw new IllegalArgumentException("Point cost must be greater than 0");
+            throw new IllegalArgumentException("Điểm đổi phải lớn hơn 0");
         if (!dto.getExchangeable()) {
             if (dto.getStatus().equalsIgnoreCase("ACTIVE")) {
-                this.customerRepository.distributeVoucherToAllActiveCustomers(v.getId());
+                this.customerRepository.distributeVoucherToAllActiveCustomers(v.getId(), LocalDateTime.now());
 
             }
         }
@@ -264,7 +268,14 @@ public class VoucherService {
 
     }
 
-    public List<CustomerVoucher> getMyVouchersAvailableOnly() {
+    public List<ResVoucher> getListVoucherIsNotForExchange() {
+        refreshVoucherStatuses();
+        List<Voucher> vouchers = repo.findAvailableForIsNotExchange();
+        return vouchers.stream().map(this::toResVoucher).toList();
+
+    }
+
+    public List<CustomerVoucher> getMyVouchersAvailableOnly() throws PermissionException {
         List<CustomerVoucher> result = new ArrayList<>();
 
         for (CustomerVoucher voucher : getMyVouchers()) {
@@ -276,7 +287,7 @@ public class VoucherService {
         return result;
     }
 
-    public List<CustomerVoucher> getMyVouchersExpiredOnly() {
+    public List<CustomerVoucher> getMyVouchersExpiredOnly() throws PermissionException {
         List<CustomerVoucher> result = new ArrayList<>();
 
         for (CustomerVoucher voucher : getMyVouchers()) {
@@ -366,17 +377,15 @@ public class VoucherService {
         customerRepository.save(customer);
     }
 
-    public List<CustomerVoucher> getMyVouchers() {
+    public List<CustomerVoucher> getMyVouchers() throws PermissionException {
         var currentUser = profileService.getCurrentUser();
-        if (currentUser == null)
-            return new ArrayList<>();
-
+        var customer = currentUser.getCustomer();
+        if (customer == null) {
+            throw new PermissionException("Bạn không có quyền truy cập!");
+        }
         refreshVoucherStatuses();
-        var customer = customerRepository.findById(currentUser.getId()).orElse(null);
-        if (customer == null)
-            return new ArrayList<>();
 
-        return customerVoucherRepository.findByCustomer(customer);
+        return customer.getCustomerVouchers() != null ? customer.getCustomerVouchers() : new ArrayList<>();
     }
 
     public List<CustomerVoucher> getRedeemHistory() {
@@ -388,7 +397,7 @@ public class VoucherService {
         if (customer == null)
             return new ArrayList<>();
 
-        return customerVoucherRepository.findByCustomerOrderByRedeemedAtDesc(customer);
+        return customerVoucherRepository.findAllCustomerAndIsAllow(customer.getId());
     }
 
     private void refreshVoucherStatuses() {

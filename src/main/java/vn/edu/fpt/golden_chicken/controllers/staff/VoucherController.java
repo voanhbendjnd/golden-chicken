@@ -37,10 +37,6 @@ public class VoucherController {
             Model model) {
 
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-        // if (dto.getStartAt() != null && dto.getStartAt().isBefore(now)) {
-        // result.rejectValue("startAt", "error.startAt",
-        // "Start time must be now or in the future");
-        // }
         if (dto.getEndAt() != null && dto.getEndAt().isBefore(now)) {
             result.rejectValue("endAt", "error.endAt",
                     "End time must be now or in the future");

@@ -102,7 +102,7 @@ public class ClientVoucherController {
     public String listAllVouchers(Model model) throws PermissionException {
         model.addAttribute("points", voucherService.getPoints());
         model.addAttribute("myVouchers", voucherService.getMyVouchersAvailableOnly());
-        model.addAttribute("systemVouchers", voucherService.getListVoucherForExchange());
+        model.addAttribute("systemVouchers", voucherService.getListVoucherIsNotForExchange());
         model.addAttribute("expiredVouchers", voucherService.getMyVouchersExpiredOnly());
         return "client/voucher/listAllVouchers";
     }
