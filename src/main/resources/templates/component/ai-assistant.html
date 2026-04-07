@@ -338,7 +338,7 @@
                     Xin chào! Tôi là trợ lý AI Golden Chicken của bạn. Tôi có thể giúp bạn tìm món ăn, xem thực đơn,
                     hoặc thậm chí thêm món vào giỏ
                     hàng! <br><br>
-                    Hãy thử với: <i>"Tôi có 100k, lấy cho tôi phần ăn 2 người"</i>
+                    Hãy thử với: <i>"Lấy cho mình phần ăn 3 người"</i>
                 </div>
             </div>
 
@@ -394,7 +394,7 @@
                 const history = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
                 const now = new Date().getTime();
                 const chatBody = document.getElementById('ai-chat-body');
-                
+
                 // Clear initial message if we have history
                 if (history.length > 0) {
                     chatBody.innerHTML = '';
@@ -486,18 +486,18 @@
                 const chatBody = document.getElementById('ai-chat-body');
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `ai-message ${type} ${items && items.length > 0 ? 'has-products' : ''}`;
-                
+
                 let html = `<div>${text}</div>`;
 
                 if (items && items.length > 0) {
                     const isSuggest = action === 'SUGGEST';
                     const isAdd = action === 'ADD_TO_CART';
-                    
+
                     html += `<div class="ai-products-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">`;
                     if (isSuggest) {
                         html += `<div style="font-size: 11px; font-weight: bold; color: #6366f1; text-transform: uppercase; margin-bottom: 4px;">✨ Gợi ý cho bạn</div>`;
                     }
-                    
+
                     items.forEach(item => {
                         html += `
                             <div class="ai-product-card" onclick="window.location.href='/product/${item.productId}'" 
@@ -511,7 +511,7 @@
                             </div>
                         `;
                     });
-                    
+
                     if (isSuggest && text.includes('muốn')) {
                         html += `
                             <button onclick="confirmAction(this)" class="ai-confirm-btn" 
@@ -525,13 +525,13 @@
 
                 msgDiv.innerHTML = html;
                 chatBody.appendChild(msgDiv);
-                
+
                 if (save) {
                     // Clean up any pending state buttons
                     document.querySelectorAll('.ai-confirm-btn[disabled]').forEach(btn => btn.remove());
                     saveChatHistory(text, type, action, items);
                 }
-                
+
                 scrollAiToBottom();
             }
 

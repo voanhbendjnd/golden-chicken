@@ -86,7 +86,6 @@ public class ChatService {
         for (String partner : partners) {
             ChatPartnerPreview preview = new ChatPartnerPreview();
             preview.setPartnerId(partner);
-
             var lastMsgs = chatMessageRepository.findLatestMessage(partner, "STAFF", PageRequest.of(0, 1));
             if (!lastMsgs.isEmpty()) {
                 var last = lastMsgs.get(0);
@@ -96,7 +95,6 @@ public class ChatService {
                         : null);
                 preview.setLastSenderIsStaff("STAFF".equals(last.getSenderId()));
             }
-
             long unread = chatMessageRepository.countUnread(partner, "STAFF");
             preview.setUnreadCount((int) unread);
             result.add(preview);

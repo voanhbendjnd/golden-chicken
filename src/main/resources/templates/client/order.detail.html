@@ -293,89 +293,90 @@
                 </div>
             </div>
         </div>
-        <div th:replace="~{client/layout/footer.djnd}"></div>
+    </div>
+    <div th:replace="~{client/layout/footer.djnd}"></div>
 
-        <script th:inline="javascript">
-            function cancelOrder(orderId) {
-                Swal.fire({
-                    title: 'Xác nhận hủy đơn?',
-                    text: "Bạn sẽ không thể khôi phục lại đơn hàng sau khi hủy!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e31837',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Hủy đơn ngay',
-                    cancelButtonText: 'Quay lại',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/order/cancel/' + orderId;
-                    }
-                })
+    <script th:inline="javascript">
+        function cancelOrder(orderId) {
+            Swal.fire({
+                title: 'Xác nhận hủy đơn?',
+                text: "Bạn sẽ không thể khôi phục lại đơn hàng sau khi hủy!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e31837',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Hủy đơn ngay',
+                cancelButtonText: 'Quay lại',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/order/cancel/' + orderId;
+                }
+            })
+        }
+    </script>
+
+    <script th:inline="javascript">
+        (function () {
+            var mapEl = document.getElementById('shipperMap');
+            if (!mapEl || typeof SockJS === 'undefined' || typeof Stomp === 'undefined' || typeof L === 'undefined') {
+                return;
             }
-        </script>
 
-        <script th:inline="javascript">
-            (function () {
-                var mapEl = document.getElementById('shipperMap');
-                if (!mapEl || typeof SockJS === 'undefined' || typeof Stomp === 'undefined' || typeof L === 'undefined') {
-                    return;
+            var orderId = /*[[${order.id}]]*/ 0;
+            var locationStatus = document.getElementById('locationStatus');
+            var map = L.map('shipperMap').setView([10.762622, 106.660172], 13);
+            var marker = null;
+            var firstFix = true;
+            var stompClient = null;
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            var socket = new SockJS('/ws-chat');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+
+            stompClient.connect({}, function () {
+                if (locationStatus) {
+                    locationStatus.innerHTML = '<i class="fa-solid fa-wifi me-1"></i> Đã kết nối theo dõi vị trí shipper';
                 }
 
-                var orderId = /*[[${order.id}]]*/ 0;
-                var locationStatus = document.getElementById('locationStatus');
-                var map = L.map('shipperMap').setView([10.762622, 106.660172], 13);
-                var marker = null;
-                var firstFix = true;
-                var stompClient = null;
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-
-                var socket = new SockJS('/ws-chat');
-                stompClient = Stomp.over(socket);
-                stompClient.debug = null;
-
-                stompClient.connect({}, function () {
-                    if (locationStatus) {
-                        locationStatus.innerHTML = '<i class="fa-solid fa-wifi me-1"></i> Đã kết nối theo dõi vị trí shipper';
-                    }
-
-                    stompClient.subscribe('/topic/location/' + orderId, function (message) {
-                        try {
-                            var data = JSON.parse(message.body || '{}');
-                            if (typeof data.lat !== 'number' || typeof data.lng !== 'number') {
-                                return;
-                            }
-
-                            var latlng = [data.lat, data.lng];
-                            if (!marker) {
-                                marker = L.marker(latlng).addTo(map).bindPopup('Vị trí shipper hiện tại');
-                            } else {
-                                marker.setLatLng(latlng);
-                            }
-
-                            if (firstFix) {
-                                map.setView(latlng, 16);
-                                firstFix = false;
-                            }
-
-                            if (locationStatus) {
-                                locationStatus.innerHTML = '<i class="fa-solid fa-location-dot me-1 text-danger"></i> Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
-                            }
-                        } catch (e) {
-                            console.error('Invalid location payload', e);
+                stompClient.subscribe('/topic/location/' + orderId, function (message) {
+                    try {
+                        var data = JSON.parse(message.body || '{}');
+                        if (typeof data.lat !== 'number' || typeof data.lng !== 'number') {
+                            return;
                         }
-                    });
-                }, function () {
-                    if (locationStatus) {
-                        locationStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1 text-danger"></i> Mất kết nối realtime với shipper';
+
+                        var latlng = [data.lat, data.lng];
+                        if (!marker) {
+                            marker = L.marker(latlng).addTo(map).bindPopup('Vị trí shipper hiện tại');
+                        } else {
+                            marker.setLatLng(latlng);
+                        }
+
+                        if (firstFix) {
+                            map.setView(latlng, 16);
+                            firstFix = false;
+                        }
+
+                        if (locationStatus) {
+                            locationStatus.innerHTML = '<i class="fa-solid fa-location-dot me-1 text-danger"></i> Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
+                        }
+                    } catch (e) {
+                        console.error('Invalid location payload', e);
                     }
                 });
-            })();
-        </script>
+            }, function () {
+                if (locationStatus) {
+                    locationStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1 text-danger"></i> Mất kết nối realtime với shipper';
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
